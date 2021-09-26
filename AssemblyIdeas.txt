@@ -1,0 +1,70 @@
+
+Annotations:
+    [r/m] = register or memory address (subset of gio)
+    [gio] = generic immediate operand
+    [dt] = datatype
+    [name] = alphanumeric string (Cannot start with a numeric)
+    [*...] = optional
+
+Datatypes:
+    i[8/16/32/64] = signed integer
+    u[8/16/32/64] = unsigned integer
+    f[32/64] = floating point value
+    b = boolean
+
+Generic immediate operands:
+    @[u64Exp]                               Dereference u64Exp (C: *u64Exp)
+
+
+Registers:
+    $sp                                     Stack pointer
+    $fp                                     Frame pointer
+    $lc                                     Loop counter
+    $ac                                     General purpose register (accumulator)
+    $cp                                     Code pointer
+    $ec                                     Exit/Error code
+
+
+Instructionset:
+    mov.[dt] : [r/m] : [gio]                Store value of gio at r/m
+    add.[dt] : [r/m] : [gio]                Add value of gio to r/m
+    sub.[dt] : [r/m] : [gio]                Subtract value of gio from r/m
+    mul.[dt] : [r/m] : [gio]                Multiply value at r/m with value of gio
+    div.[dt] : [r/m] : [gio]                Divide value at r/m by value of gio
+
+    cpy : [r/m] : [r/m]                     Copy nBytes (value stored in the accumulator) from src to dest
+
+    push.[dt] : [*gio]                      Push a value onto the stack
+    pop.[dt]                                Pop a value from the stack
+    pushf                                   Push a new stack frame
+    popf                                    Pop a stack frame
+
+    return
+
+Other:
+    #label : [name]                         Create a label with name name holding the current stack pointer
+    #static : [name] : [size]               Shortcut for: label : [name] \ add.u64 $sp : [size]
+    #string : [name] : "[text]"             Store text on the stack
+
+
+
+Example:
+    #static : var1 : 4                      / Reserve 4 bytes on the static stack
+    #static : arr1 : 64                     / Reserve 4 * 16 bytes on the static stack
+    mov.i32 : var1 : -53                    / Store i32 value -53 at address of var1
+    add.i32 : var1 : @var1                  / Add value stored at address of var1 to var1
+
+    #static : add1 : 8                      / Reserve 8 bytes on the static stack
+    mov.i64 : add1 : 36                     / Add i64 value 36 to var1
+
+    add.i64 : $ac : @$ac                    / Multiply the content of register $ac by 2
+
+    mov.i32 : [arr1+36] : -12               / Store i32 value -12 at address of arr1 with an offset of 36 bytes
+    mov.i32 : [arr1+8] : @[arr1+12]         / Store i32 value stored at address of arr1 with an offset of 12 bytes at address of arr1 with an offset of 8 bytes
+
+
+Storage locations:
+    Static stack: Modifiable, determined at compile time or allocated during interpretation, storage for global vars, can be stored on disk
+    Dynamic stack: Modifiable, storage for local vars
+    Dynamic memory: Modifiable, storage for dynamically allocated data
+    Code memory: Non-modifiable, storage for executable code
