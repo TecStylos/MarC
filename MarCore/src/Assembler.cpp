@@ -100,7 +100,7 @@ namespace MarC
 					return false;
 
 				bci.codeMemory->push(ocx);
-				bci.codeMemory->push(&args[0].cell, BC_DatatypeSize(args[0].datatype));
+				bci.codeMemory->push(&args[0].cell, BC_DatatypeSize(BC_DT_U_64));
 				bci.codeMemory->push(&args[1].cell, BC_DatatypeSize(args[1].datatype));
 
 				break;
@@ -273,6 +273,7 @@ namespace MarC
 		case BC_DT_F_32:
 			if (!literalToF64(tokens[0], aai.pArg->cell.as_F_64))
 				RETURN_WITH_ERROR(AssemblerError::Code::NumericLiteralBroken, "Cannot convert literal '" + tokens[0] + "' to type F32!")
+				aai.pArg->cell.as_F_32 = aai.pArg->cell.as_F_64;
 			if (isNegative)
 				aai.pArg->cell.as_F_32 *= -1.0f;
 			break;

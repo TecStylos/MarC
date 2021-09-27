@@ -16,7 +16,7 @@ namespace MarC
 			if (!execNext())
 				break;
 
-		return !nInstructions;
+		return nInstructions == RunTillEOC;
 	}
 
 	void* Interpreter::hostAddress(BC_MemAddress clientAddr, bool deref)
