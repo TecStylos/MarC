@@ -7,6 +7,11 @@ namespace MarC
 		return nLinesParsed + 1;
 	}
 
+	BC_MemAddress::BC_MemAddress(BC_MemBase base, uint64_t addr)
+		: base(base), address(addr)
+	{
+	}
+
 	BC_OpCode BC_OpCodeFromString(const std::string& ocStr)
 	{
 		static constexpr struct
@@ -49,7 +54,7 @@ namespace MarC
 			{ "i16",  BC_DT_I_16 },
 			{ "i32",  BC_DT_I_32 },
 			{ "i64",  BC_DT_I_64 },
-			{ "u8",   BC_DT_U_8 },
+			{ "u8",   BC_DT_U_8  },
 			{ "u16",  BC_DT_U_16 },
 			{ "u32",  BC_DT_U_32 },
 			{ "u64",  BC_DT_U_64 },

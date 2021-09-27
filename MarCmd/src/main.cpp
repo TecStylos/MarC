@@ -3,8 +3,6 @@
 #include <iostream>
 #include <fstream>
 
-#include <Windows.h>
-
 std::string readFile(const std::string& filepath)
 {
 	std::ifstream f(filepath);
@@ -28,6 +26,8 @@ int main()
 	std::string code = readFile("testcode.mcas"); // Load the MarC Assembly file
 
 	MarC::BytecodeInfo bci;
+	bci.staticStack = std::make_shared<MarC::Memory>();
+	bci.codeMemory = std::make_shared<MarC::Memory>();
 
 	MarC::AssemblerInfo asmInfo;
 	asmInfo.nextCharToAssemble = 0;
@@ -40,6 +40,15 @@ int main()
 		<< "    " << asmErr.getMessage() << std::endl;
 	else
 		std::cout << "Successfully assembled the code!" << std::endl;
+
+	MarC::Interpreter ip(bci.staticStack, bci.codeMemory);
+
+	if (!ip.interpret(5))
+		std::cout << "An error occured while interpreting the code!" << std::endl;
+	else
+		std::cout << "Successfully interpreted the code!" << std::endl;
+
+	std::cout << "Exit code: " << ip.getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_U_64 << std::endl;
 
 	return 0;
 }

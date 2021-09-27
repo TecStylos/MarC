@@ -56,14 +56,9 @@ namespace MarC
 		BC_MEM_BASE_UNKNOWN,
 		BC_MEM_BASE_STATIC_STACK,
 		BC_MEM_BASE_DYNAMIC_STACK,
-		BC_MEM_BASE_DYNAMIC_MEM,
-		BC_MEM_BASE_CODE_MEM,
+		BC_MEM_BASE_CODE_MEMORY,
 		BC_MEM_BASE_REGISTER,
-	};
-	enum BC_MemOffsetDirection
-	{
-		BC_MEM_OFFDIR_POSITIVE = 0,
-		BC_MEM_OFFDIR_NEGATIVE = 1,
+		BC_MEM_BASE_EXTERN,
 	};
 	enum BC_MemRegister
 	{
@@ -75,6 +70,7 @@ namespace MarC
 		BC_MEM_REG_ACCUMULATOR,
 		BC_MEM_REG_CODE_POINTER,
 		BC_MEM_REG_EXIT_CODE,
+		BC_MEM_REG_NUM_OF_REGS,
 	};
 
 	#pragma pack(push, 1)
@@ -90,8 +86,10 @@ namespace MarC
 	struct BC_MemAddress
 	{
 		uint64_t base : 3;
-		uint64_t offsetDir : 1;
-		uint64_t address : 60;
+		uint64_t address : 61;
+	public:
+		BC_MemAddress() = default;
+		BC_MemAddress(BC_MemBase base, uint64_t addr);
 	};
 
 	#pragma pack(pop)
@@ -102,8 +100,8 @@ namespace MarC
 		std::vector<std::pair<std::string, uint64_t>> unresolvedRefs;
 		std::vector<std::pair<std::string, uint64_t>> unresolvedRefsStaged;
 		std::vector<uint64_t> resolvedRefAddresses;
-		Memory staticStack;
-		Memory codeMemory;
+		MemoryRef staticStack;
+		MemoryRef codeMemory;
 		uint64_t nLinesParsed = 0;
 	public:
 		uint64_t getErrLine() const;
@@ -122,7 +120,7 @@ namespace MarC
 		float as_F_32;
 		double as_F_64;
 		bool as_BOOL;
-		BC_MemAddress as_Addr;
+		BC_MemAddress as_ADDR;
 	};
 
 	struct BC_TypeCell
@@ -130,6 +128,11 @@ namespace MarC
 		BC_MemCell cell;
 		BC_Datatype datatype;
 	};
+
+	inline constexpr uint64_t BC_MemRegisterID(BC_MemRegister memReg)
+	{
+		return memReg - 2;
+	}
 
 	BC_OpCode BC_OpCodeFromString(const std::string& ocStr);
 

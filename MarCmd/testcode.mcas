@@ -1,6 +1,5 @@
-mov.i64 : $ac : +100
-add.i64 : $ac : -23
-sub.i64 : $ac : +1
-mul.i64 : $ac : +3
-div.i64 : $ac : -4
-mov.bool : $ac : +0
+mov.i64 : $ec : +123
+add.i64 : $ec : -23
+sub.i64 : $ec : +1
+mul.i64 : $ec : +3
+div.i64 : $ec : -4

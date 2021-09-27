@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <stdint.h>
+#include <memory>
 
 namespace MarC
 {
@@ -33,6 +34,8 @@ namespace MarC
 		std::vector<char> m_data;
 		bool m_resizable;
 	};
+
+	typedef std::shared_ptr<Memory> MemoryRef;
 
 	template <typename T>
 	bool Memory::read(T& data, uint64_t offset)

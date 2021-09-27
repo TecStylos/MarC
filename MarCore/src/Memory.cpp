@@ -7,8 +7,10 @@ namespace MarC
 	{}
 
 	Memory::Memory(uint64_t initSize, bool resizable)
-		: m_data(initSize), m_resizable(resizable)
-	{}
+	{
+		resize(initSize);
+		Memory::resizable(resizable);
+	}
 
 	bool Memory::read(void* data, uint64_t size, uint64_t offset)
 	{
@@ -45,6 +47,8 @@ namespace MarC
 		if (!m_resizable)
 			return false;
 
+		uint64_t newSizePadded = (newSize + 7) / 8 * 8;
+		m_data.reserve(newSizePadded);
 		m_data.resize(newSize);
 		return true;
 	}

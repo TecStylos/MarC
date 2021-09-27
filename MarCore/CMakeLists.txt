@@ -11,7 +11,8 @@ add_library(
 	"src/Memory.cpp"
 	"src/Assembler.cpp"
 	"src/AssemblerOutput.cpp"
- )
+	"src/Interpreter.cpp"
+)
 
 target_include_directories(
 	MarCore PUBLIC

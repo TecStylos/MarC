@@ -23,14 +23,14 @@ namespace MarC
 
 	bool Assembler::assemble(BytecodeInfo& bci, AssemblerInfo& asmInfo, AssemblerError& err)
 	{
-		uint64_t prevBytecodeSize = bci.codeMemory.size();
+		uint64_t prevBytecodeSize = bci.codeMemory->size();
 
 		while (parseLine(bci, asmInfo, err) && asmInfo.nextCharToAssemble < asmInfo.pAssemblyCode->size())
 			++bci.nLinesParsed;
 
 		if (err)
 		{
-			bci.codeMemory.resize(prevBytecodeSize);
+			bci.codeMemory->resize(prevBytecodeSize);
 			bci.unresolvedRefsStaged.clear();
 
 			return false;
@@ -99,9 +99,9 @@ namespace MarC
 				if (!parseNumericArgument(bci, aai, err))
 					return false;
 
-				bci.codeMemory.push(ocx);
-				bci.codeMemory.push(&args[0].cell, BC_DatatypeSize(args[0].datatype));
-				bci.codeMemory.push(&args[1].cell, BC_DatatypeSize(args[1].datatype));
+				bci.codeMemory->push(ocx);
+				bci.codeMemory->push(&args[0].cell, BC_DatatypeSize(args[0].datatype));
+				bci.codeMemory->push(&args[1].cell, BC_DatatypeSize(args[1].datatype));
 
 				break;
 			}
@@ -168,7 +168,7 @@ namespace MarC
 		{
 			memArg.base = BC_MEM_BASE_REGISTER;
 
-			uint64_t regID = BC_RegisterFromString(tokens[0]);
+			uint64_t regID = BC_MemRegisterID(BC_RegisterFromString(tokens[0]));
 			memArg.address = regID;
 
 			return true;
@@ -186,7 +186,7 @@ namespace MarC
 			if (aai.pOcx->datatype != BC_DT_U_64)
 				RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Labels without a dereference operator can only be used as U64 values.");
 
-			bci.unresolvedRefsStaged.push_back(std::make_pair(tokens[0], bci.codeMemory.size() + aai.offsetInInstruction));
+			bci.unresolvedRefsStaged.push_back(std::make_pair(tokens[0], bci.codeMemory->size() + aai.offsetInInstruction));
 
 			return true;
 		}
@@ -211,10 +211,6 @@ namespace MarC
 
 		if (deref)
 		{
-			memArg.offsetDir = isNegative
-				? BC_MEM_OFFDIR_NEGATIVE
-				: BC_MEM_OFFDIR_POSITIVE;
-
 			uint64_t val;
 			if (!literalToU64(tokens[0], val))
 				RETURN_WITH_ERROR(AsmErrCode::NumericLiteralBroken, "Cannot convert literal '" + tokens[0] + "' to type U64!")
@@ -305,7 +301,7 @@ namespace MarC
 			if (res == bci.labels.end())
 				continue;
 
-			bci.codeMemory.write(res->second, ref.second);
+			bci.codeMemory->write(res->second, ref.second);
 
 			bci.unresolvedRefsStaged.erase(bci.unresolvedRefsStaged.begin() + i);
 			--i;
@@ -318,7 +314,7 @@ namespace MarC
 			if (res == bci.labels.end())
 				continue;
 
-			bci.codeMemory.write(res->second, ref.second);
+			bci.codeMemory->write(res->second, ref.second);
 
 			bci.unresolvedRefs.erase(bci.unresolvedRefs.begin() + i);
 			--i;
