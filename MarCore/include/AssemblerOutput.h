@@ -109,22 +109,25 @@ namespace MarC
 		uint64_t getErrLine() const;
 	};
 
+	union BC_MemCell
+	{
+		int8_t as_I_8;
+		int16_t as_I_16;
+		int32_t as_I_32;
+		int64_t as_I_64;
+		uint8_t as_U_8;
+		uint16_t as_U_16;
+		uint32_t as_U_32;
+		uint64_t as_U_64;
+		float as_F_32;
+		double as_F_64;
+		bool as_BOOL;
+		BC_MemAddress as_Addr;
+	};
+
 	struct BC_TypeCell
 	{
-		union
-		{
-			int8_t as_I_8;
-			int16_t as_I_16;
-			int32_t as_I_32;
-			int64_t as_I_64;
-			uint8_t as_U_8;
-			uint16_t as_U_16;
-			uint32_t as_U_32;
-			uint64_t as_U_64;
-			float as_F_32;
-			double as_F_64;
-			bool as_BOOL;
-		} data;
+		BC_MemCell cell;
 		BC_Datatype datatype;
 	};
 

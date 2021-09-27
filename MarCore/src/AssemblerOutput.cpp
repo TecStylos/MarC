@@ -14,6 +14,7 @@ namespace MarC
 			const char* asStr;
 			BC_OpCode asOpCode;
 		} codes[] = {
+			{ "",       BC_OC_NONE },
 			{ "mov",    BC_OC_MOVE },
 			{ "add",    BC_OC_ADD },
 			{ "sub",    BC_OC_SUBTRACT },
@@ -43,6 +44,7 @@ namespace MarC
 			const char* asStr;
 			BC_Datatype asDatatype;
 		} datatypes[] = {
+			{ "",     BC_DT_NONE },
 			{ "i8",   BC_DT_I_8 },
 			{ "i16",  BC_DT_I_16 },
 			{ "i32",  BC_DT_I_32 },
@@ -72,6 +74,7 @@ namespace MarC
 			const char* asStr;
 			BC_MemRegister asRegister;
 		} registers[] = {
+			{ "$",   BC_MEM_REG_NONE },
 			{ "$sp", BC_MEM_REG_STACK_POINTER },
 			{ "$fp", BC_MEM_REG_FRAME_POINTER },
 			{ "$lc", BC_MEM_REG_LOOP_COUNTER },

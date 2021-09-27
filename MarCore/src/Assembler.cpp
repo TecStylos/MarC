@@ -100,8 +100,8 @@ namespace MarC
 					return false;
 
 				bci.codeMemory.push(ocx);
-				bci.codeMemory.push(&args[0].data, BC_DatatypeSize(args[0].datatype));
-				bci.codeMemory.push(&args[1].data, BC_DatatypeSize(args[1].datatype));
+				bci.codeMemory.push(&args[0].cell, BC_DatatypeSize(args[0].datatype));
+				bci.codeMemory.push(&args[1].cell, BC_DatatypeSize(args[1].datatype));
 
 				break;
 			}
@@ -227,69 +227,69 @@ namespace MarC
 		switch (aai.pOcx->datatype)
 		{
 		case BC_DT_I_8:
-			if (!literalToU64(tokens[0], aai.pArg->data.as_U_64))
+			if (!literalToU64(tokens[0], aai.pArg->cell.as_U_64))
 				RETURN_WITH_ERROR(AssemblerError::Code::NumericLiteralBroken, "Cannot convert literal '" + tokens[0] + "' to type I8!")
 			if (isNegative)
-				aai.pArg->data.as_I_8 *= -1;
+				aai.pArg->cell.as_I_8 *= -1;
 			break;
 		case BC_DT_I_16:
-			if (!literalToU64(tokens[0], aai.pArg->data.as_U_64))
+			if (!literalToU64(tokens[0], aai.pArg->cell.as_U_64))
 				RETURN_WITH_ERROR(AssemblerError::Code::NumericLiteralBroken, "Cannot convert literal '" + tokens[0] + "' to type I16!")
 			if (isNegative)
-				aai.pArg->data.as_I_16 *= -1;
+				aai.pArg->cell.as_I_16 *= -1;
 			break;
 		case BC_DT_I_32:
-			if (!literalToU64(tokens[0], aai.pArg->data.as_U_64))
+			if (!literalToU64(tokens[0], aai.pArg->cell.as_U_64))
 				RETURN_WITH_ERROR(AssemblerError::Code::NumericLiteralBroken, "Cannot convert literal '" + tokens[0] + "' to type I32!")
 			if (isNegative)
-				aai.pArg->data.as_I_32 *= -1;
+				aai.pArg->cell.as_I_32 *= -1;
 			break;
 		case BC_DT_I_64:
-			if (!literalToU64(tokens[0], aai.pArg->data.as_U_64))
+			if (!literalToU64(tokens[0], aai.pArg->cell.as_U_64))
 				RETURN_WITH_ERROR(AssemblerError::Code::NumericLiteralBroken, "Cannot convert literal '" + tokens[0] + "' to type I64!")
 			if (isNegative)
-				aai.pArg->data.as_I_64 *= -1;
+				aai.pArg->cell.as_I_64 *= -1;
 			break;
 		case BC_DT_U_8:
-			if (!literalToU64(tokens[0], aai.pArg->data.as_U_64))
+			if (!literalToU64(tokens[0], aai.pArg->cell.as_U_64))
 				RETURN_WITH_ERROR(AssemblerError::Code::NumericLiteralBroken, "Cannot convert literal '" + tokens[0] + "' to type U8!")
 			if (isNegative)
-				aai.pArg->data.as_U_8 *= -1;
+				aai.pArg->cell.as_U_8 *= -1;
 			break;
 		case BC_DT_U_16:
-			if (!literalToU64(tokens[0], aai.pArg->data.as_U_64))
+			if (!literalToU64(tokens[0], aai.pArg->cell.as_U_64))
 				RETURN_WITH_ERROR(AssemblerError::Code::NumericLiteralBroken, "Cannot convert literal '" + tokens[0] + "' to type U16!")
 			if (isNegative)
-				aai.pArg->data.as_U_16 *= -1;
+				aai.pArg->cell.as_U_16 *= -1;
 			break;
 		case BC_DT_U_32:
-			if (!literalToU64(tokens[0], aai.pArg->data.as_U_64))
+			if (!literalToU64(tokens[0], aai.pArg->cell.as_U_64))
 				RETURN_WITH_ERROR(AssemblerError::Code::NumericLiteralBroken, "Cannot convert literal '" + tokens[0] + "' to type U32!")
 			if (isNegative)
-				aai.pArg->data.as_U_32 *= -1;
+				aai.pArg->cell.as_U_32 *= -1;
 			break;
 		case BC_DT_U_64:
-			if (!literalToU64(tokens[0], aai.pArg->data.as_U_64))
+			if (!literalToU64(tokens[0], aai.pArg->cell.as_U_64))
 				RETURN_WITH_ERROR(AssemblerError::Code::NumericLiteralBroken, "Cannot convert literal '" + tokens[0] + "' to type U64!")
 			if (isNegative)
-				aai.pArg->data.as_U_64 *= -1;
+				aai.pArg->cell.as_U_64 *= -1;
 			break;
 		case BC_DT_F_32:
-			if (!literalToF64(tokens[0], aai.pArg->data.as_F_64))
+			if (!literalToF64(tokens[0], aai.pArg->cell.as_F_64))
 				RETURN_WITH_ERROR(AssemblerError::Code::NumericLiteralBroken, "Cannot convert literal '" + tokens[0] + "' to type F32!")
 			if (isNegative)
-				aai.pArg->data.as_F_32 *= -1.0f;
+				aai.pArg->cell.as_F_32 *= -1.0f;
 			break;
 		case BC_DT_F_64:
-			if (!literalToF64(tokens[0], aai.pArg->data.as_F_64))
+			if (!literalToF64(tokens[0], aai.pArg->cell.as_F_64))
 				RETURN_WITH_ERROR(AssemblerError::Code::NumericLiteralBroken, "Cannot convert literal '" + tokens[0] + "' to type F64!")
 			if (isNegative)
-				aai.pArg->data.as_F_64 *= -1.0f;
+				aai.pArg->cell.as_F_64 *= -1.0f;
 			break;
 		case BC_DT_BOOL:
-			if (!literalToU64(tokens[0], aai.pArg->data.as_U_64))
+			if (!literalToU64(tokens[0], aai.pArg->cell.as_U_64))
 				RETURN_WITH_ERROR(AssemblerError::Code::NumericLiteralBroken, "Cannot convert literal '" + tokens[0] + "' to type BOOL!");
-			aai.pArg->data.as_BOOL = aai.pArg->data.as_U_64;
+			aai.pArg->cell.as_BOOL = aai.pArg->cell.as_U_64;
 			break;
 		}
 
