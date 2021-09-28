@@ -91,6 +91,7 @@ namespace MarC
 				aai.offsetInInstruction = sizeof(BC_OpCodeEx);
 				if (!parseNumericArgument(bci, aai, err))
 					return false;
+				if (aai.pArg->datatype != BC_DT_U_64) RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Invalid datatype for destination argument!");
 
 				aai.nthArg = 1;
 				aai.pString = &tokens[2];
@@ -98,9 +99,10 @@ namespace MarC
 				aai.offsetInInstruction += BC_DatatypeSize(args[0].datatype);
 				if (!parseNumericArgument(bci, aai, err))
 					return false;
+				if (aai.pArg->datatype != aai.datatype) RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Datatype mismatch between opCode and instruction!");
 
 				bci.codeMemory->push(ocx);
-				bci.codeMemory->push(&args[0].cell, BC_DatatypeSize(BC_DT_U_64));
+				bci.codeMemory->push(&args[0].cell, BC_DatatypeSize(args[0].datatype));
 				bci.codeMemory->push(&args[1].cell, BC_DatatypeSize(args[1].datatype));
 
 				break;
@@ -166,10 +168,11 @@ namespace MarC
 
 		if (tokens[0][0] == '$')
 		{
-			memArg.base = BC_MEM_BASE_REGISTER;
+			aai.pArg->datatype = BC_DT_U_64;
 
 			uint64_t regID = BC_MemRegisterID(BC_RegisterFromString(tokens[0]));
-			memArg.address = regID;
+
+			memArg = BC_MemAddress(BC_MEM_BASE_REGISTER, regID);
 
 			return true;
 		}
@@ -370,7 +373,7 @@ namespace MarC
 					state = State::ParseComment;
 					break;
 				default:
-					if (!std::isalpha(c) && c != '$' && c != '+' && c != '-')
+					if (!std::isalpha(c) && c != '@' && c != '$' && c != '+' && c != '-')
 						RETURN_WITH_ERROR(AsmErrCode::CharInvalid, std::string("Character '") + c + "' is not allowed in this context!");
 					currentToken.push_back(c);
 					state = State::ParseLiteral;
@@ -379,7 +382,7 @@ namespace MarC
 			case State::ParseComment:
 				break;
 			case State::ParseLiteral:
-				if (std::isalnum(c) || c == '.')
+				if (std::isalnum(c) || c == '.' || c == '$')
 					currentToken.push_back(c);
 				else
 				{

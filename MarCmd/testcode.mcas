@@ -1,5 +1,4 @@
-mov.f32 : $ec : +12.3
-add.f32 : $ec : -23
-sub.f32 : $ec : +1
-mul.f32 : $ec : +3.5
-div.f32 : $ec : -4
+mov.u64 : $ec : +1234
+mov.u64 : $ac : $ec
+mov.u64 : @$ac : +4321
+mov.u64 : $ac : $fp
