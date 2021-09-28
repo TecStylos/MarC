@@ -32,6 +32,8 @@ Instructionset:
     mul.[dt] : [r/m] : [gio]                Multiply value at r/m with value of gio
     div.[dt] : [r/m] : [gio]                Divide value at r/m by value of gio
 
+    conv.[dt] : [newDT] : [r/m]
+
     cpy : [r/m] : [r/m]                     Copy nBytes (value stored in the accumulator) from src to dest
 
     push.[dt] : [*gio]                      Push a value onto the stack
@@ -40,6 +42,7 @@ Instructionset:
     popf                                    Pop a stack frame
 
     return
+    exit
 
 Other:
     #label : [name]                         Create a label with name name holding the current stack pointer

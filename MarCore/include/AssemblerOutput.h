@@ -38,6 +38,8 @@ namespace MarC
 		BC_OC_MULTIPLY,
 		BC_OC_DIVIDE,
 
+		BC_OC_CONVERT,
+
 		BC_OC_COPY,
 
 		BC_OC_PUSH,
@@ -48,6 +50,9 @@ namespace MarC
 
 		BC_OC_CALL,
 		BC_OC_RETURN,
+		BC_OC_EXIT,
+
+		BC_OC_NUM_OF_OP_CODES,
 	};
 
 	enum BC_MemBase

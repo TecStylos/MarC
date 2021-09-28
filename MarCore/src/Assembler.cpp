@@ -75,61 +75,49 @@ namespace MarC
 			case BC_OC_SUBTRACT:
 			case BC_OC_MULTIPLY:
 			case BC_OC_DIVIDE:
-			{
-				if (tokens.size() != 3) RETURN_WITH_ERROR(AsmErrCode::TokenUnexpectedNum, "Unexpected number of tokens! (Expected: 3; Provided: " + std::to_string(tokens.size()));
-				if (ocx.datatype == BC_OC_NONE) RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
-
-				BC_TypeCell args[2] = { 0 };
-
-				AsmArgInfo aai;
-				aai.pOcx = &ocx;
-				aai.datatype = (BC_Datatype)ocx.datatype;
-
-				aai.nthArg = 0;
-				aai.pString = &tokens[1];
-				aai.pArg = &args[0];
-				aai.offsetInInstruction = sizeof(BC_OpCodeEx);
-				if (!parseNumericArgument(bci, aai, err))
+				if (!parseInstructionAlgebraicBinary(bci, tokens, ocx, err))
 					return false;
-				if (aai.pArg->datatype != BC_DT_U_64) RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Invalid datatype for destination argument!");
-
-				aai.nthArg = 1;
-				aai.pString = &tokens[2];
-				aai.pArg = &args[1];
-				aai.offsetInInstruction += BC_DatatypeSize(args[0].datatype);
-				if (!parseNumericArgument(bci, aai, err))
-					return false;
-				if (aai.pArg->datatype != aai.datatype) RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Datatype mismatch between opCode and instruction!");
-
-				bci.codeMemory->push(ocx);
-				bci.codeMemory->push(&args[0].cell, BC_DatatypeSize(args[0].datatype));
-				bci.codeMemory->push(&args[1].cell, BC_DatatypeSize(args[1].datatype));
-
 				break;
-			}
+
+			case BC_OC_CONVERT:
+				if (!parseInstructionConvert(bci, tokens, ocx, err))
+					return false;
+				break;
+			
 			case BC_OC_COPY:
-				if (tokens.size() != 4) RETURN_WITH_ERROR(AsmErrCode::TokenUnexpectedNum, "Unexpected number of tokens! (Expected: 4; Provided: " + std::to_string(tokens.size()) + ")");
-
+				if (!isCorrectTokenNum(4, tokens.size(), bci, err))
+					return false;
 				break;
+			
 			case BC_OC_PUSH:
-				if (tokens.size() > 2) RETURN_WITH_ERROR(AsmErrCode::TokenUnexpectedNum, "Unexpected number of tokens! (Expected: 2+; Provided: " + std::to_string(tokens.size()) + ")");
+				if (!isCorrectTokenNum(2, tokens.size(), bci, err))
+					return false;
 				if (ocx.datatype == BC_OC_NONE) RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
-				
 				break;
 			case BC_OC_POP:
-				if (tokens.size() != 1) RETURN_WITH_ERROR(AsmErrCode::TokenUnexpectedNum, "Unexpected number of tokens! (Expected: 1; Provided: " + std::to_string(tokens.size()) + ")");
+				if (!isCorrectTokenNum(1, tokens.size(), bci, err))
+					return false;
 				if (ocx.datatype == BC_OC_NONE) RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
-				
 				break;
+			
 			case BC_OC_PUSH_FRAME:
 			case BC_OC_POP_FRAME:
-				if (tokens.size() != 1) RETURN_WITH_ERROR(AsmErrCode::TokenUnexpectedNum, "Unexpected number of tokens! (Expected: 1; Provided: " + std::to_string(tokens.size()) + ")");
-				
+				if (!isCorrectTokenNum(1, tokens.size(), bci, err))
+					return false;
+				break;
+			
+			case BC_OC_CALL:
 				break;
 			case BC_OC_RETURN:
-				if (tokens.size() != 1) RETURN_WITH_ERROR(AsmErrCode::TokenUnexpectedNum, "Unexpected number of tokens! (Expected: 1; Provided: " + std::to_string(tokens.size()) + ")");
-				
+				if (!isCorrectTokenNum(1, tokens.size(), bci, err))
+					return false;
 				break;
+			
+			case BC_OC_EXIT:
+				if (!isCorrectTokenNum(1, tokens.size(), bci, err))
+					return false;
+				break;
+			
 			default:
 				RETURN_WITH_ERROR(AsmErrCode::OpCodeUnknown, "Function 'parseLine' cannot handle opCode '" + std::to_string(ocx.opCode) + "'!");
 			}
@@ -292,6 +280,77 @@ namespace MarC
 			aai.pArg->cell.as_BOOL = aai.pArg->cell.as_U_64;
 			break;
 		}
+
+		return true;
+	}
+
+	bool Assembler::parseInstructionAlgebraicBinary(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	{
+		if (!isCorrectTokenNum(3, tokens.size(), bci, err))
+			return false;
+		if (ocx.datatype == BC_OC_NONE)
+			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
+
+		BC_TypeCell args[2] = { 0 };
+
+		AsmArgInfo aai;
+		aai.pOcx = &ocx;
+		aai.datatype = (BC_Datatype)ocx.datatype;
+
+		aai.nthArg = 0;
+		aai.pString = &tokens[1];
+		aai.pArg = &args[0];
+		aai.offsetInInstruction = sizeof(BC_OpCodeEx);
+		if (!parseNumericArgument(bci, aai, err))
+			return false;
+		if (aai.pArg->datatype != BC_DT_U_64) RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Invalid datatype for destination argument!");
+
+		aai.nthArg = 1;
+		aai.pString = &tokens[2];
+		aai.pArg = &args[1];
+		aai.offsetInInstruction += BC_DatatypeSize(args[0].datatype);
+		if (!parseNumericArgument(bci, aai, err))
+			return false;
+		if (aai.pArg->datatype != aai.datatype) RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Datatype mismatch between opCode and instruction!");
+
+		bci.codeMemory->push(ocx);
+		bci.codeMemory->push(&args[0].cell, BC_DatatypeSize(args[0].datatype));
+		bci.codeMemory->push(&args[1].cell, BC_DatatypeSize(args[1].datatype));
+
+		return true;
+	}
+
+	bool Assembler::parseInstructionConvert(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	{
+		if (!isCorrectTokenNum(3, tokens.size(), bci, err))
+			return false;
+
+		if (ocx.datatype == BC_OC_NONE)
+			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
+
+		AsmArgInfo aai;
+		BC_TypeCell arg;
+		aai.pOcx = &ocx;
+		aai.datatype = (BC_Datatype)ocx.datatype;
+
+		aai.nthArg = 0;
+		aai.pString = &tokens[1];
+		aai.pArg = &arg;
+		aai.offsetInInstruction = sizeof(BC_OpCodeEx);
+		if (!parseNumericArgument(bci, aai, err))
+			return false;
+		if (aai.pArg->datatype != BC_DT_U_64) RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Invalid datatype for destination argument!");
+
+		BC_Datatype newDT = BC_DatatypeFromString(tokens[2]);
+
+		if (newDT == BC_DT_NONE)
+			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
+		if (newDT == BC_DT_UNKNOWN)
+			RETURN_WITH_ERROR(AsmErrCode::DatatypeUnknown, "Unknown datatype!");
+
+		bci.codeMemory->push(ocx);
+		bci.codeMemory->push(&arg.cell, BC_DatatypeSize(arg.datatype));
+		bci.codeMemory->push(newDT);
 
 		return true;
 	}
@@ -532,6 +591,16 @@ namespace MarC
 		{
 			return false;
 		}
+		return true;
+	}
+
+	bool Assembler::isCorrectTokenNum(uint64_t expected, uint64_t provided, const BytecodeInfo& bci, AssemblerError& err)
+	{
+		if (expected != provided)
+			RETURN_WITH_ERROR(
+				AsmErrCode::TokenUnexpectedNum,
+				"Unexpected number of tokens! (Expected: " + std::to_string(expected) + "; Provided: " + std::to_string(provided)
+			);
 		return true;
 	}
 }

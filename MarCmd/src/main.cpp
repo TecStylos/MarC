@@ -43,7 +43,7 @@ int main()
 
 	MarC::Interpreter ip(bci.staticStack, bci.codeMemory);
 
-	if (!ip.interpret(4))
+	if (!ip.interpret(6))
 		std::cout << "An error occured while interpreting the code!" << std::endl;
 	else
 		std::cout << "Successfully interpreted the code!" << std::endl;

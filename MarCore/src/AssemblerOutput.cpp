@@ -20,18 +20,30 @@ namespace MarC
 			BC_OpCode asOpCode;
 		} codes[] = {
 			{ "",       BC_OC_NONE },
+			{ "unknown", BC_OC_UNKNOWN },
+
 			{ "mov",    BC_OC_MOVE },
+
 			{ "add",    BC_OC_ADD },
 			{ "sub",    BC_OC_SUBTRACT },
 			{ "mul",    BC_OC_MULTIPLY },
 			{ "div",    BC_OC_DIVIDE },
+
+			{ "conv",   BC_OC_CONVERT },
+
 			{ "cpy",    BC_OC_COPY },
+
 			{ "push",   BC_OC_PUSH },
 			{ "pop",    BC_OC_POP },
+
 			{ "pushf",  BC_OC_PUSH_FRAME },
 			{ "popf",   BC_OC_POP_FRAME },
+
+			{ "call",   BC_OC_CALL },
 			{ "return", BC_OC_RETURN },
+			{ "exit",   BC_OC_EXIT },
 		};
+		static_assert(sizeof(codes) / sizeof(*codes) == BC_OC_NUM_OF_OP_CODES);
 
 		for (auto code : codes)
 		{
@@ -50,7 +62,7 @@ namespace MarC
 			BC_Datatype asDatatype;
 		} datatypes[] = {
 			{ "",     BC_DT_NONE },
-			{ "i8",   BC_DT_I_8 },
+			{ "i8",   BC_DT_I_8  },
 			{ "i16",  BC_DT_I_16 },
 			{ "i32",  BC_DT_I_32 },
 			{ "i64",  BC_DT_I_64 },

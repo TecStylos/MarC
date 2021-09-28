@@ -26,6 +26,7 @@ namespace MarC
 		bool exec_insSubtract(BC_OpCodeEx ocx);
 		bool exec_insMultiply(BC_OpCodeEx ocx);
 		bool exec_insDivide(BC_OpCodeEx ocx);
+		bool exec_insConvert(BC_OpCodeEx ocx);
 	private:
 		InterpreterMemory m_mem;
 	};

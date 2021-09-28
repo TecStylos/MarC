@@ -66,6 +66,8 @@ namespace MarC
 		static bool parseNumericArgument(BytecodeInfo& bci, AsmArgInfo& aai, AssemblerError& err);
 		static bool isLiteral(const std::vector<std::string>& tokens);
 		static bool parseLiteral(const BytecodeInfo& bci, std::vector<std::string>& tokens, bool deref, AsmArgInfo& aai, AssemblerError& err);
+		static bool parseInstructionAlgebraicBinary(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
+		static bool parseInstructionConvert(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
 		static void resolveUnresolvedRefs(BytecodeInfo& bci);
 		static bool tokenizeLine(const BytecodeInfo& bci, AssemblerInfo& asmInfo, std::vector<std::string>& tokensOut, AssemblerError& err);
 		static bool tokenizeNumericArgument(const BytecodeInfo& bci, const std::string& argument, std::vector<std::string>& tokensOut, AssemblerError& err);
@@ -74,5 +76,7 @@ namespace MarC
 		
 		static bool literalToU64(const std::string& literalStr, uint64_t& output);
 		static bool literalToF64(const std::string& literalStr, double& output);
+	
+		static bool isCorrectTokenNum(uint64_t expected, uint64_t provided, const BytecodeInfo& bci, AssemblerError& err);
 	};
 }
