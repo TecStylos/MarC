@@ -357,31 +357,24 @@ namespace MarC
 
 	void Assembler::resolveUnresolvedRefs(BytecodeInfo& bci)
 	{
-		for (uint64_t i = 0; i < bci.unresolvedRefsStaged.size(); ++i)
+		auto resolve = [&bci](std::vector<std::pair<std::string, uint64_t>> refs)
 		{
-			auto& ref = bci.unresolvedRefsStaged[i];
-			auto res = bci.labels.find(ref.first);
-			if (res == bci.labels.end())
-				continue;
+			for (uint64_t i = 0; i < refs.size(); ++i)
+			{
+				auto& ref = refs[i];
+				auto res = bci.labels.find(ref.first);
+				if (res == bci.labels.end())
+					continue;
 
-			bci.codeMemory->write(res->second, ref.second);
+				bci.codeMemory->write(res->second, ref.second);
 
-			bci.unresolvedRefsStaged.erase(bci.unresolvedRefsStaged.begin() + i);
-			--i;
-		}
+				refs.erase(refs.begin() + i);
+				--i;
+			}
+		};
 
-		for (uint64_t i = 0; i < bci.unresolvedRefs.size(); ++i)
-		{
-			auto& ref = bci.unresolvedRefs[i];
-			auto res = bci.labels.find(ref.first);
-			if (res == bci.labels.end())
-				continue;
-
-			bci.codeMemory->write(res->second, ref.second);
-
-			bci.unresolvedRefs.erase(bci.unresolvedRefs.begin() + i);
-			--i;
-		}
+		resolve(bci.unresolvedRefs);
+		resolve(bci.unresolvedRefsStaged);
 	}
 
 	bool Assembler::tokenizeLine(const BytecodeInfo& bci, AssemblerInfo& asmInfo, std::vector<std::string>& tokensOut, AssemblerError& err)

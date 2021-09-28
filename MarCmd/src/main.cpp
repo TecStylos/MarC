@@ -17,6 +17,8 @@ std::string readFile(const std::string& filepath)
 		result.append(line);
 		result.push_back('\n');
 	}
+	if (!result.empty())
+		result.pop_back();
 
 	return result;
 }
