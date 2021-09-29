@@ -43,9 +43,9 @@ int main()
 	else
 		std::cout << "Successfully assembled the code!" << std::endl;
 
-	MarC::Interpreter ip(bci.staticStack, bci.codeMemory);
+	MarC::Interpreter ip(bci.staticStack, bci.codeMemory, 4096);
 
-	if (!ip.interpret(6))
+	if (!ip.interpret(12))
 		std::cout << "An error occured while interpreting the code!" << std::endl;
 	else
 		std::cout << "Successfully interpreted the code!" << std::endl;

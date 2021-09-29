@@ -8,7 +8,7 @@ namespace MarC
 	{
 		static constexpr uint64_t RunTillEOC = -1; // Run until the interpreter reaches the end of code.
 	public:
-		Interpreter(MemoryRef staticStack, MemoryRef codeMemory);
+		Interpreter(MemoryRef staticStack, MemoryRef codeMemory, uint64_t dynStackSize);
 	public:
 		bool interpret(uint64_t nInstructinos = RunTillEOC);
 	public:
@@ -16,10 +16,10 @@ namespace MarC
 		BC_MemAddress clientAddress(void* hostAddr, BC_MemBase base);
 		BC_MemCell& getRegister(BC_MemRegister reg);
 	private:
-		void initMemory(MemoryRef staticStack, MemoryRef codeMemory);
+		void initMemory(MemoryRef staticStack, MemoryRef codeMemory, uint64_t dynStackSize);
 		template <typename T> T& readCodeAndMove();
 		template <typename T> T& readCodeAndMove(uint64_t shift);
-		BC_MemCell readMemCellAndMove(BC_Datatype dt, bool deref);
+		BC_MemCell& readMemCellAndMove(BC_Datatype dt, bool deref);
 		bool execNext();
 		bool exec_insMove(BC_OpCodeEx ocx);
 		bool exec_insAdd(BC_OpCodeEx ocx);
@@ -27,6 +27,8 @@ namespace MarC
 		bool exec_insMultiply(BC_OpCodeEx ocx);
 		bool exec_insDivide(BC_OpCodeEx ocx);
 		bool exec_insConvert(BC_OpCodeEx ocx);
+		bool exec_insPush(BC_OpCodeEx ocx);
+		bool exec_insPop(BC_OpCodeEx ocx);
 	private:
 		InterpreterMemory m_mem;
 	};

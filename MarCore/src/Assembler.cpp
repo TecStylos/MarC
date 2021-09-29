@@ -85,37 +85,35 @@ namespace MarC
 				break;
 			
 			case BC_OC_COPY:
-				if (!isCorrectTokenNum(4, tokens.size(), bci, err))
-					return false;
+				//if (!isCorrectTokenNum(4, tokens.size(), bci, err))
+				//	return false;
 				break;
 			
 			case BC_OC_PUSH:
-				if (!isCorrectTokenNum(2, tokens.size(), bci, err))
+				if (!parseInstructionPush(bci, tokens, ocx, err))
 					return false;
-				if (ocx.datatype == BC_OC_NONE) RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
 				break;
 			case BC_OC_POP:
-				if (!isCorrectTokenNum(1, tokens.size(), bci, err))
+				if (!parseInstructionPop(bci, tokens, ocx, err))
 					return false;
-				if (ocx.datatype == BC_OC_NONE) RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
 				break;
 			
 			case BC_OC_PUSH_FRAME:
 			case BC_OC_POP_FRAME:
-				if (!isCorrectTokenNum(1, tokens.size(), bci, err))
-					return false;
+				//if (!isCorrectTokenNum(1, tokens.size(), bci, err))
+				//	return false;
 				break;
 			
 			case BC_OC_CALL:
 				break;
 			case BC_OC_RETURN:
-				if (!isCorrectTokenNum(1, tokens.size(), bci, err))
-					return false;
+				//if (!isCorrectTokenNum(1, tokens.size(), bci, err))
+				//	return false;
 				break;
 			
 			case BC_OC_EXIT:
-				if (!isCorrectTokenNum(1, tokens.size(), bci, err))
-					return false;
+				//if (!isCorrectTokenNum(1, tokens.size(), bci, err))
+				//	return false;
 				break;
 			
 			default:
@@ -163,6 +161,10 @@ namespace MarC
 			memArg = BC_MemAddress(BC_MEM_BASE_REGISTER, regID);
 
 			return true;
+		}
+		else if (tokens[0][0] == '~')
+		{
+			RETURN_WITH_ERROR(AsmErrCode::CharInvalid, "Relative to frame pointer is not implemented yet");
 		}
 
 		if (isLiteral(tokens))
@@ -303,7 +305,8 @@ namespace MarC
 		aai.offsetInInstruction = sizeof(BC_OpCodeEx);
 		if (!parseNumericArgument(bci, aai, err))
 			return false;
-		if (aai.pArg->datatype != BC_DT_U_64) RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Invalid datatype for destination argument!");
+		if (aai.pArg->datatype != BC_DT_U_64)
+			RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Invalid datatype for destination argument!");
 
 		aai.nthArg = 1;
 		aai.pString = &tokens[2];
@@ -311,7 +314,6 @@ namespace MarC
 		aai.offsetInInstruction += BC_DatatypeSize(args[0].datatype);
 		if (!parseNumericArgument(bci, aai, err))
 			return false;
-		if (aai.pArg->datatype != aai.datatype) RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Datatype mismatch between opCode and instruction!");
 
 		bci.codeMemory->push(ocx);
 		bci.codeMemory->push(&args[0].cell, BC_DatatypeSize(args[0].datatype));
@@ -339,7 +341,8 @@ namespace MarC
 		aai.offsetInInstruction = sizeof(BC_OpCodeEx);
 		if (!parseNumericArgument(bci, aai, err))
 			return false;
-		if (aai.pArg->datatype != BC_DT_U_64) RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Invalid datatype for destination argument!");
+		if (aai.pArg->datatype != BC_DT_U_64)\
+			RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Invalid datatype for destination argument!");
 
 		BC_Datatype newDT = BC_DatatypeFromString(tokens[2]);
 
@@ -351,6 +354,43 @@ namespace MarC
 		bci.codeMemory->push(ocx);
 		bci.codeMemory->push(&arg.cell, BC_DatatypeSize(arg.datatype));
 		bci.codeMemory->push(newDT);
+
+		return true;
+	}
+
+	bool Assembler::parseInstructionPush(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	{
+		if (!isCorrectTokenNum(2, tokens.size(), bci, err))
+			return false;
+		if (ocx.datatype == BC_OC_NONE)
+			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
+
+		AsmArgInfo aai;
+		BC_TypeCell arg;
+		aai.pOcx = &ocx;
+		aai.datatype = (BC_Datatype)ocx.datatype;
+
+		aai.nthArg = 0;
+		aai.pString = &tokens[1];
+		aai.pArg = &arg;
+		aai.offsetInInstruction = sizeof(BC_OpCodeEx);
+		if (!parseNumericArgument(bci, aai, err))
+			return false;
+
+		bci.codeMemory->push(ocx);
+		bci.codeMemory->push(&arg.cell, BC_DatatypeSize(arg.datatype));
+
+		return true;
+	}
+
+	bool Assembler::parseInstructionPop(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	{
+		if (!isCorrectTokenNum(1, tokens.size(), bci, err))
+			return false;
+		if (ocx.datatype == BC_OC_NONE)
+			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
+
+		bci.codeMemory->push(ocx);
 
 		return true;
 	}

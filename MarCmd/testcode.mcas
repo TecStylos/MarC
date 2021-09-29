@@ -5,3 +5,11 @@ mul.f32 : $ec : +3.5
 div.f32 : $ec : -4
 
 conv.f32 : $ec : i64
+
+push.i32 : -135
+push.u64 : $ec
+push.i64 : @$ec
+
+pop.i64
+pop.u64
+pop.i32

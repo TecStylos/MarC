@@ -2,9 +2,9 @@
 
 namespace MarC
 {
-	Interpreter::Interpreter(MemoryRef staticStack, MemoryRef codeMemory)
+	Interpreter::Interpreter(MemoryRef staticStack, MemoryRef codeMemory, uint64_t dynStackSize)
 	{
-		initMemory(staticStack, codeMemory);
+		initMemory(staticStack, codeMemory, dynStackSize);
 	}
 
 	bool Interpreter::interpret(uint64_t nInstructions)
@@ -33,6 +33,9 @@ namespace MarC
 			break;
 		case BC_MEM_BASE_DYNAMIC_STACK:
 			hostAddr = (char*)m_mem.dynamicStack->getBaseAddress() + clientAddr.address;
+			break;
+		case BC_MEM_BASE_DYN_STACK_FRAME:
+			hostAddr = nullptr; // TODO: Implement Frame pointer dereferencing (+/-)
 			break;
 		case BC_MEM_BASE_CODE_MEMORY:
 			hostAddr = (char*)m_mem.codeMemory->getBaseAddress() + clientAddr.address;
@@ -67,14 +70,14 @@ namespace MarC
 		return m_mem.registers[BC_MemRegisterID(reg)];
 	}
 
-	void Interpreter::initMemory(MemoryRef staticStack, MemoryRef codeMemory)
+	void Interpreter::initMemory(MemoryRef staticStack, MemoryRef codeMemory, uint64_t dynStackSize)
 	{
 		if (staticStack)
 			m_mem.staticStack = staticStack;
 		if (codeMemory)
 			m_mem.codeMemory = codeMemory;
 
-		m_mem.dynamicStack.reset(new Memory);
+		m_mem.dynamicStack = std::make_shared<Memory>(dynStackSize);
 
 		getRegister(BC_MEM_REG_STACK_POINTER).as_ADDR = BC_MemAddress(BC_MEM_BASE_DYNAMIC_STACK, 0);
 		getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR = BC_MemAddress(BC_MEM_BASE_DYNAMIC_STACK, 0);
@@ -84,7 +87,7 @@ namespace MarC
 		getRegister(BC_MEM_REG_EXIT_CODE).as_U_64 = 0;
 	}
 
-	BC_MemCell Interpreter::readMemCellAndMove(BC_Datatype dt, bool deref)
+	BC_MemCell& Interpreter::readMemCellAndMove(BC_Datatype dt, bool deref)
 	{
 		return deref
 			? *(BC_MemCell*)hostAddress(readCodeAndMove<BC_MemAddress>(), false)
@@ -120,9 +123,9 @@ namespace MarC
 			return false;
 
 		case BC_OC_PUSH:
-			return false;
+			return exec_insPush(ocx);
 		case BC_OC_POP:
-			return false;
+			return exec_insPop(ocx);
 
 		case BC_OC_PUSH_FRAME:
 			return false;
@@ -317,6 +320,27 @@ namespace MarC
 		case COMB_DT(BC_DT_BOOL, BC_DT_F_64): dest.as_F_64 = dest.as_BOOL; break;
 		case COMB_DT(BC_DT_BOOL, BC_DT_BOOL): dest.as_BOOL = dest.as_BOOL; break;
 		}
+
+		return true;
+	}
+	bool Interpreter::exec_insPush(BC_OpCodeEx ocx)
+	{
+		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
+
+		auto dest = hostAddress(regSP.as_ADDR, false);
+		auto src = &readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg0);
+
+		memcpy(dest, src, BC_DatatypeSize((BC_Datatype)ocx.datatype));
+
+		regSP.as_ADDR.address += BC_DatatypeSize((BC_Datatype)ocx.datatype);
+
+		return true;
+	}
+	bool Interpreter::exec_insPop(BC_OpCodeEx ocx)
+	{
+		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
+
+		regSP.as_ADDR.address -= BC_DatatypeSize((BC_Datatype)ocx.datatype);
 
 		return true;
 	}
