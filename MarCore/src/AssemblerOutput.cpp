@@ -35,6 +35,8 @@ namespace MarC
 
 			{ "push",   BC_OC_PUSH },
 			{ "pop",    BC_OC_POP },
+			{ "pushc",  BC_OC_PUSHC },
+			{ "popc",   BC_OC_POPC },
 
 			{ "pushf",  BC_OC_PUSH_FRAME },
 			{ "popf",   BC_OC_POP_FRAME },

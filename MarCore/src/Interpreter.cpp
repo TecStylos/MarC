@@ -96,7 +96,7 @@ namespace MarC
 
 	bool Interpreter::execNext()
 	{
-		static_assert(BC_OC_NUM_OF_OP_CODES == 16);
+		static_assert(BC_OC_NUM_OF_OP_CODES == 18);
 
 		auto ocx = readCodeAndMove<BC_OpCodeEx>();
 
@@ -126,6 +126,10 @@ namespace MarC
 			return exec_insPush(ocx);
 		case BC_OC_POP:
 			return exec_insPop(ocx);
+		case BC_OC_PUSHC:
+			return exec_insPushCopy(ocx);
+		case BC_OC_POPC:
+			return exec_insPopCopy(ocx);
 
 		case BC_OC_PUSH_FRAME:
 			return false;
@@ -327,11 +331,6 @@ namespace MarC
 	{
 		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
 
-		auto dest = hostAddress(regSP.as_ADDR, false);
-		auto src = &readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg0);
-
-		memcpy(dest, src, BC_DatatypeSize((BC_Datatype)ocx.datatype));
-
 		regSP.as_ADDR.address += BC_DatatypeSize((BC_Datatype)ocx.datatype);
 
 		return true;
@@ -341,6 +340,32 @@ namespace MarC
 		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
 
 		regSP.as_ADDR.address -= BC_DatatypeSize((BC_Datatype)ocx.datatype);
+
+		return true;
+	}
+	bool Interpreter::exec_insPushCopy(BC_OpCodeEx ocx)
+	{
+		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
+
+		auto dest = hostAddress(regSP.as_ADDR, false);
+		auto src = &readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg0);
+
+		memcpy(dest, src, BC_DatatypeSize((BC_Datatype)ocx.datatype));
+
+		regSP.as_ADDR.address += BC_DatatypeSize((BC_Datatype)ocx.datatype);
+
+		return true;
+	}
+	bool Interpreter::exec_insPopCopy(BC_OpCodeEx ocx)
+	{
+		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
+
+		regSP.as_ADDR.address -= BC_DatatypeSize((BC_Datatype)ocx.datatype);
+
+		auto src = hostAddress(regSP.as_ADDR, false);
+		auto dest = hostAddress(readCodeAndMove<BC_MemAddress>(), ocx.derefArg0);
+
+		memcpy(dest, src, BC_DatatypeSize((BC_Datatype)ocx.datatype));
 
 		return true;
 	}

@@ -44,6 +44,8 @@ namespace MarC
 
 		BC_OC_PUSH,
 		BC_OC_POP,
+		BC_OC_PUSHC,
+		BC_OC_POPC,
 
 		BC_OC_PUSH_FRAME,
 		BC_OC_POP_FRAME,

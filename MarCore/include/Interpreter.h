@@ -29,6 +29,8 @@ namespace MarC
 		bool exec_insConvert(BC_OpCodeEx ocx);
 		bool exec_insPush(BC_OpCodeEx ocx);
 		bool exec_insPop(BC_OpCodeEx ocx);
+		bool exec_insPushCopy(BC_OpCodeEx ocx);
+		bool exec_insPopCopy(BC_OpCodeEx ocx);
 	private:
 		InterpreterMemory m_mem;
 	};

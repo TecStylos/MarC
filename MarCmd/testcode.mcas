@@ -6,10 +6,12 @@ div.f32 : $ec : -4
 
 conv.f32 : $ec : i64
 
-push.i32 : -135
-push.u64 : $ec
-push.i64 : @$ec
+pushc.i32 : -135
+pushc.u64 : $ec
+pushc.i64 : @$ec
 
-pop.i64
+add.i64 : $ec : +123
+
+popc.i64 : $ec
 pop.u64
 pop.i32
