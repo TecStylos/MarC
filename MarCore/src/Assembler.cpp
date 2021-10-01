@@ -18,7 +18,8 @@ namespace MarC
 
 	std::string AssemblerError::getMessage() const
 	{
-		return "Error on line " + std::to_string(m_errLine) + ": " + getText();
+		return "Error on line " + std::to_string(m_errLine) + ": " + getText() + "\n"
+			+ "SYSFILE: " + m_sysErrFile + "  SYSLINE: " + std::to_string(m_sysErrLine);
 	}
 
 	bool Assembler::assemble(BytecodeInfo& bci, AssemblerInfo& asmInfo, AssemblerError& err)
@@ -170,9 +171,31 @@ namespace MarC
 
 			return true;
 		}
-		else if (tokens[0][0] == '~')
+		else if (tokens[0] == "~")
 		{
-			RETURN_WITH_ERROR(AsmErrCode::CharInvalid, "Relative to frame pointer is not implemented yet");
+			tokens.erase(tokens.begin());
+			if (tokens.empty())
+				RETURN_WITH_ERROR(AsmErrCode::NumericArgumentBroken, "Missing literal after frame-relative operator!");
+
+			bool isNegative = (tokens[0] == "-");
+			if (isNegative || tokens[0] == "+")
+				tokens.erase(tokens.begin());
+
+			if (tokens.empty())
+				RETURN_WITH_ERROR(AsmErrCode::NumericLiteralBroken, "Missing digits after sign!");
+
+			uint64_t offset;
+			if (!literalToU64(tokens[0], offset))
+				RETURN_WITH_ERROR(AsmErrCode::NumericLiteralBroken, "Cannot convert literal '" + tokens[0] + "' to type U64!");
+
+			aai.pArg->datatype = BC_DT_U_64;
+
+			memArg = BC_MemAddress(
+				isNegative ? BC_MEM_BASE_DYN_FRAME_SUB : BC_MEM_BASE_DYN_FRAME_ADD,
+				offset
+			);
+
+			return true;
 		}
 
 		if (isLiteral(tokens))
@@ -197,16 +220,17 @@ namespace MarC
 
 	bool Assembler::isLiteral(const std::vector<std::string>& tokens)
 	{
-		return tokens[0].size() == 1 && (tokens[0][0] == '+' || tokens[0][0] == '-');
+		return tokens[0].size() == 1 && (tokens[0][0] == '+' || tokens[0][0] == '-' || ('0' <= tokens[0][0] && tokens[0][0] <= '9'));
 	}
 
 	bool Assembler::parseLiteral(const BytecodeInfo& bci, std::vector<std::string>& tokens, bool deref, AsmArgInfo& aai, AssemblerError& err)
 	{
 		auto& memArg = *(BC_MemAddress*)(aai.pArg);
 
-		bool isNegative = tokens[0][0] == '-';
+		bool isNegative = (tokens[0] == "-");
+		if (isNegative || tokens[0] == "+")
+			tokens.erase(tokens.begin());
 
-		tokens.erase(tokens.begin());
 		if (tokens.empty())
 			RETURN_WITH_ERROR(AsmErrCode::NumericLiteralBroken, "Missing digits after sign!");
 
@@ -296,7 +320,7 @@ namespace MarC
 
 	bool Assembler::parseInstructionAlgebraicBinary(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
 	{
-		if (!isCorrectTokenNum(3, tokens.size(), bci, err))
+		if (!isCorrectTokenNum(3, 4, tokens.size(), bci, err))
 			return false;
 		if (ocx.datatype == BC_OC_NONE)
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
@@ -512,7 +536,7 @@ namespace MarC
 					state = State::ParseComment;
 					break;
 				default:
-					if (!std::isalpha(c) && c != '@' && c != '$' && c != '+' && c != '-')
+					if (!std::isalpha(c) && c != '@' && c != '$' && c != '~' && c != '+' && c != '-')
 						RETURN_WITH_ERROR(AsmErrCode::CharInvalid, std::string("Character '") + c + "' is not allowed in this context!");
 					currentToken.push_back(c);
 					state = State::ParseLiteral;
@@ -521,7 +545,7 @@ namespace MarC
 			case State::ParseComment:
 				break;
 			case State::ParseLiteral:
-				if (std::isalnum(c) || c == '.' || c == '$')
+				if (std::isalnum(c) || c == '.' || c == '$' || c == '~' || c == '+' || c == '-')
 					currentToken.push_back(c);
 				else
 				{
@@ -566,6 +590,7 @@ namespace MarC
 			case STATE_BEGIN_TOKEN:
 				switch (c)
 				{
+				case '~':
 				case '+':
 				case '-':
 				case '@':
@@ -676,10 +701,14 @@ namespace MarC
 
 	bool Assembler::isCorrectTokenNum(uint64_t expected, uint64_t provided, const BytecodeInfo& bci, AssemblerError& err)
 	{
-		if (expected != provided)
+		return isCorrectTokenNum(expected, expected, provided, bci, err);
+	}
+	bool Assembler::isCorrectTokenNum(uint64_t expectedMin, uint64_t expectedMax, uint64_t provided, const BytecodeInfo& bci, AssemblerError& err)
+	{
+		if (!(expectedMin <= provided && provided <= expectedMax))
 			RETURN_WITH_ERROR(
 				AsmErrCode::TokenUnexpectedNum,
-				"Unexpected number of tokens! (Expected: " + std::to_string(expected) + "; Provided: " + std::to_string(provided) + ")"
+				"Unexpected number of tokens! (Range: " + std::to_string(expectedMin) + "-" + std::to_string(expectedMax) + "; Provided: " + std::to_string(provided) + ")"
 			);
 		return true;
 	}

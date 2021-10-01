@@ -30,8 +30,8 @@ namespace MarC
 		};
 	public:
 		AssemblerError() = default;
-		AssemblerError(Code code, uint64_t errLine, const std::string& errText)
-			: m_code(code), m_errLine(errLine), m_errText(errText)
+		AssemblerError(Code code, uint64_t errLine, const std::string& errText, uint64_t sysErrLine, const std::string& sysErrFile)
+			: m_code(code), m_errLine(errLine), m_errText(errText), m_sysErrLine(sysErrLine), m_sysErrFile(sysErrFile)
 		{}
 	public:
 		operator bool() const;
@@ -41,11 +41,13 @@ namespace MarC
 		Code m_code = Code::Success;
 		uint64_t m_errLine = 0;
 		std::string m_errText = "Success!";
+		uint64_t m_sysErrLine = 0;
+		std::string m_sysErrFile = "";
 	};
 
 	typedef AssemblerError::Code AsmErrCode;
 
-	#define RETURN_WITH_ERROR(errCode, errText) { err = AssemblerError(errCode, bci.getErrLine(), errText); return false; }
+	#define RETURN_WITH_ERROR(errCode, errText) { err = AssemblerError(errCode, bci.getErrLine(), errText, __LINE__, __FILE__); return false; }
 
 	struct AsmArgInfo
 	{
@@ -82,5 +84,6 @@ namespace MarC
 		static bool literalToF64(const std::string& literalStr, double& output);
 	
 		static bool isCorrectTokenNum(uint64_t expected, uint64_t provided, const BytecodeInfo& bci, AssemblerError& err);
+		static bool isCorrectTokenNum(uint64_t expectedMin, uint64_t expectedMax, uint64_t provided, const BytecodeInfo& bci, AssemblerError& err);
 	};
 }

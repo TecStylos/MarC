@@ -26,7 +26,6 @@ namespace MarC
 		switch (clientAddr.base)
 		{
 		case BC_MEM_BASE_NONE:
-		case BC_MEM_BASE_UNKNOWN:
 			break;
 		case BC_MEM_BASE_STATIC_STACK:
 			hostAddr = (char*)m_mem.staticStack->getBaseAddress() + clientAddr.address;
@@ -34,8 +33,11 @@ namespace MarC
 		case BC_MEM_BASE_DYNAMIC_STACK:
 			hostAddr = (char*)m_mem.dynamicStack->getBaseAddress() + clientAddr.address;
 			break;
-		case BC_MEM_BASE_DYN_STACK_FRAME:
-			hostAddr = nullptr; // TODO: Implement Frame pointer dereferencing (+/-)
+		case BC_MEM_BASE_DYN_FRAME_ADD:
+			hostAddr = (char*)hostAddress(getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR) + clientAddr.address;
+			break;
+		case BC_MEM_BASE_DYN_FRAME_SUB:
+			hostAddr = (char*)hostAddress(getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR) - clientAddr.address;
 			break;
 		case BC_MEM_BASE_CODE_MEMORY:
 			hostAddr = (char*)m_mem.codeMemory->getBaseAddress() + clientAddr.address;
