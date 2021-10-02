@@ -11,7 +11,7 @@ namespace MarC
 		uint64_t nextCharToAssemble;
 	};
 
-	struct AssemblerError
+	class AssemblerError
 	{
 	public:
 		enum class Code

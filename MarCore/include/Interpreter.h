@@ -4,6 +4,32 @@
 
 namespace MarC
 {
+	class InterpreterError
+	{
+	public:
+		enum class Code
+		{
+			Success = 0,
+			OpCodeUnknown,
+			OpCodeNotExecutable,
+			OpCodeNotImplemented,
+		};
+	public:
+		InterpreterError() = default;
+		InterpreterError(Code code, const std::string& errText)
+			: m_code(code), m_errText(errText)
+		{}
+	public:
+		operator bool() const;
+		const std::string& getText() const;
+		std::string getMessage() const;
+	private:
+		Code m_code = Code::Success;
+		std::string m_errText = "Success!";
+	};
+
+	typedef InterpreterError::Code IntErrCode;
+
 	class Interpreter
 	{
 		static constexpr uint64_t RunTillEOC = -1; // Run until the interpreter reaches the end of code.
@@ -20,19 +46,23 @@ namespace MarC
 		template <typename T> T& readCodeAndMove();
 		template <typename T> T& readCodeAndMove(uint64_t shift);
 		BC_MemCell& readMemCellAndMove(BC_Datatype dt, bool deref);
-		bool execNext();
-		bool exec_insMove(BC_OpCodeEx ocx);
-		bool exec_insAdd(BC_OpCodeEx ocx);
-		bool exec_insSubtract(BC_OpCodeEx ocx);
-		bool exec_insMultiply(BC_OpCodeEx ocx);
-		bool exec_insDivide(BC_OpCodeEx ocx);
-		bool exec_insConvert(BC_OpCodeEx ocx);
-		bool exec_insPush(BC_OpCodeEx ocx);
-		bool exec_insPop(BC_OpCodeEx ocx);
-		bool exec_insPushCopy(BC_OpCodeEx ocx);
-		bool exec_insPopCopy(BC_OpCodeEx ocx);
+	private:
+		void execNext();
+		void exec_insMove(BC_OpCodeEx ocx);
+		void exec_insAdd(BC_OpCodeEx ocx);
+		void exec_insSubtract(BC_OpCodeEx ocx);
+		void exec_insMultiply(BC_OpCodeEx ocx);
+		void exec_insDivide(BC_OpCodeEx ocx);
+		void exec_insConvert(BC_OpCodeEx ocx);
+		void exec_insPush(BC_OpCodeEx ocx);
+		void exec_insPop(BC_OpCodeEx ocx);
+		void exec_insPushCopy(BC_OpCodeEx ocx);
+		void exec_insPopCopy(BC_OpCodeEx ocx);
+	public:
+		const InterpreterError& lastError() const;
 	private:
 		InterpreterMemory m_mem;
+		InterpreterError m_lastErr;
 	};
 
 	template <typename T> T& Interpreter::readCodeAndMove()

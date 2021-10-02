@@ -2,6 +2,19 @@
 
 namespace MarC
 {
+	InterpreterError::operator bool() const
+	{
+		return m_code != Code::Success;
+	}
+	const std::string& InterpreterError::getText() const
+	{
+		return m_errText;
+	}
+	std::string InterpreterError::getMessage() const
+	{
+		return "Error with code " + std::to_string((uint64_t)m_code) + ": " + getText();
+	}
+
 	Interpreter::Interpreter(MemoryRef staticStack, MemoryRef codeMemory, uint64_t dynStackSize)
 	{
 		initMemory(staticStack, codeMemory, dynStackSize);
@@ -9,14 +22,25 @@ namespace MarC
 
 	bool Interpreter::interpret(uint64_t nInstructions)
 	{
+		m_lastErr = InterpreterError();
+
 		if (!nInstructions)
 			return true;
 
 		while (nInstructions--)
-			if (!execNext())
+		{
+			try
+			{
+				execNext();
+			}
+			catch (const InterpreterError& ie)
+			{
+				m_lastErr = ie;
 				break;
+			}
+		}
 
-		return nInstructions == RunTillEOC;
+		return !lastError();
 	}
 
 	void* Interpreter::hostAddress(BC_MemAddress clientAddr, bool deref)
@@ -96,7 +120,7 @@ namespace MarC
 			: readCodeAndMove<BC_MemCell>(BC_DatatypeSize(dt));
 	}
 
-	bool Interpreter::execNext()
+	void Interpreter::execNext()
 	{
 		static_assert(BC_OC_NUM_OF_OP_CODES == 18);
 
@@ -106,91 +130,88 @@ namespace MarC
 		{
 		case BC_OC_NONE:
 		case BC_OC_UNKNOWN:
-			return false;
+			throw InterpreterError(IntErrCode::OpCodeNotExecutable, "Unable to execute opCode '" + std::to_string(ocx.opCode) + "'!");
 		case BC_OC_MOVE:
-			return exec_insMove(ocx);
+			exec_insMove(ocx); break;
 		case BC_OC_ADD:
-			return exec_insAdd(ocx);
+			exec_insAdd(ocx); break;
 		case BC_OC_SUBTRACT:
-			return exec_insSubtract(ocx);
+			exec_insSubtract(ocx); break;
 		case BC_OC_MULTIPLY:
-			return exec_insMultiply(ocx);
+			exec_insMultiply(ocx); break;
 		case BC_OC_DIVIDE:
-			return exec_insDivide(ocx);
+			exec_insDivide(ocx); break;
 
 		case BC_OC_CONVERT:
-			return exec_insConvert(ocx);
+			exec_insConvert(ocx); break;
 
 		case BC_OC_COPY:
-			return false;
+			throw InterpreterError(IntErrCode::OpCodeNotImplemented, "The opCode '" + std::to_string(ocx.opCode) + "' has not been implemented yet!");
 
 		case BC_OC_PUSH:
-			return exec_insPush(ocx);
+			exec_insPush(ocx); break;
 		case BC_OC_POP:
-			return exec_insPop(ocx);
+			exec_insPop(ocx); break;
 		case BC_OC_PUSHC:
-			return exec_insPushCopy(ocx);
+			exec_insPushCopy(ocx); break;
 		case BC_OC_POPC:
-			return exec_insPopCopy(ocx);
+			exec_insPopCopy(ocx); break;
 
 		case BC_OC_PUSH_FRAME:
-			return false;
+			throw InterpreterError(IntErrCode::OpCodeNotImplemented, "The opCode '" + std::to_string(ocx.opCode) + "' has not been implemented yet!");
 		case BC_OC_POP_FRAME:
-			return false;
+			throw InterpreterError(IntErrCode::OpCodeNotImplemented, "The opCode '" + std::to_string(ocx.opCode) + "' has not been implemented yet!");
 
 		case BC_OC_CALL:
-			return false;
+			throw InterpreterError(IntErrCode::OpCodeNotImplemented, "The opCode '" + std::to_string(ocx.opCode) + "' has not been implemented yet!");
 		case BC_OC_RETURN:
-			return false;
+			throw InterpreterError(IntErrCode::OpCodeNotImplemented, "The opCode '" + std::to_string(ocx.opCode) + "' has not been implemented yet!");
 
 		case BC_OC_EXIT:
-			return false;
+			throw InterpreterError(IntErrCode::OpCodeNotImplemented, "The opCode '" + std::to_string(ocx.opCode) + "' has not been implemented yet!");
+		default:
+			throw InterpreterError(IntErrCode::OpCodeNotExecutable, "Unknown opCode '" + std::to_string(ocx.opCode) + "'!");
 		}
 
-		return false;
 	}
 
-	bool Interpreter::exec_insMove(BC_OpCodeEx ocx)
+	void Interpreter::exec_insMove(BC_OpCodeEx ocx)
 	{
 		void* dest = hostAddress(readCodeAndMove<BC_MemAddress>(), ocx.derefArg0);
 		BC_MemCell src = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg1);
 		memcpy(dest, &src, BC_DatatypeSize((BC_Datatype)ocx.datatype));
-		return true;
 	}
-	bool Interpreter::exec_insAdd(BC_OpCodeEx ocx)
+	void Interpreter::exec_insAdd(BC_OpCodeEx ocx)
 	{
 		auto& dest = *(BC_MemCell*)hostAddress(readCodeAndMove<BC_MemAddress>(), ocx.derefArg0);
 		BC_MemCell src = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg1);
 		MARC_INTERPRETER_BINARY_OP(dest, +=, src, ocx.datatype);
-		return true;
 	}
-	bool Interpreter::exec_insSubtract(BC_OpCodeEx ocx)
+	void Interpreter::exec_insSubtract(BC_OpCodeEx ocx)
 	{
 		auto& dest = *(BC_MemCell*)hostAddress(readCodeAndMove<BC_MemAddress>(), ocx.derefArg0);
 		BC_MemCell src = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg1);
 		MARC_INTERPRETER_BINARY_OP(dest, -=, src, ocx.datatype);
-		return true;
 	}
-	bool Interpreter::exec_insMultiply(BC_OpCodeEx ocx)
+	void Interpreter::exec_insMultiply(BC_OpCodeEx ocx)
 	{
 		auto& dest = *(BC_MemCell*)hostAddress(readCodeAndMove<BC_MemAddress>(), ocx.derefArg0);
 		BC_MemCell src = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg1);
 		MARC_INTERPRETER_BINARY_OP(dest, *=, src, ocx.datatype);
-		return true;
 	}
-	bool Interpreter::exec_insDivide(BC_OpCodeEx ocx)
+	void Interpreter::exec_insDivide(BC_OpCodeEx ocx)
 	{
 		auto& dest = *(BC_MemCell*)hostAddress(readCodeAndMove<BC_MemAddress>(), ocx.derefArg0);
 		BC_MemCell src = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg1);
 		MARC_INTERPRETER_BINARY_OP(dest, /=, src, ocx.datatype);
-		return true;
 	}
-	bool Interpreter::exec_insConvert(BC_OpCodeEx ocx)
+	void Interpreter::exec_insConvert(BC_OpCodeEx ocx)
 	{
 		auto& dest = *(BC_MemCell*)hostAddress(readCodeAndMove<BC_MemAddress>(), ocx.derefArg0);
 		BC_Datatype newDT = readCodeAndMove<BC_Datatype>();
 
 		// TODO: More compact
+		#pragma warning(disable: 4244)
 		#define COMB_DT(left, right) (((uint32_t)left << 16) | (uint32_t)right)
 		switch (COMB_DT(ocx.datatype, newDT))
 		{
@@ -326,26 +347,22 @@ namespace MarC
 		case COMB_DT(BC_DT_BOOL, BC_DT_F_64): dest.as_F_64 = dest.as_BOOL; break;
 		case COMB_DT(BC_DT_BOOL, BC_DT_BOOL): dest.as_BOOL = dest.as_BOOL; break;
 		}
-
-		return true;
+		#undef COMB_DT
+		#pragma warning(default: 4244)
 	}
-	bool Interpreter::exec_insPush(BC_OpCodeEx ocx)
+	void Interpreter::exec_insPush(BC_OpCodeEx ocx)
 	{
 		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
 
 		regSP.as_ADDR.address += BC_DatatypeSize((BC_Datatype)ocx.datatype);
-
-		return true;
 	}
-	bool Interpreter::exec_insPop(BC_OpCodeEx ocx)
+	void Interpreter::exec_insPop(BC_OpCodeEx ocx)
 	{
 		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
 
 		regSP.as_ADDR.address -= BC_DatatypeSize((BC_Datatype)ocx.datatype);
-
-		return true;
 	}
-	bool Interpreter::exec_insPushCopy(BC_OpCodeEx ocx)
+	void Interpreter::exec_insPushCopy(BC_OpCodeEx ocx)
 	{
 		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
 
@@ -355,10 +372,8 @@ namespace MarC
 		memcpy(dest, src, BC_DatatypeSize((BC_Datatype)ocx.datatype));
 
 		regSP.as_ADDR.address += BC_DatatypeSize((BC_Datatype)ocx.datatype);
-
-		return true;
 	}
-	bool Interpreter::exec_insPopCopy(BC_OpCodeEx ocx)
+	void Interpreter::exec_insPopCopy(BC_OpCodeEx ocx)
 	{
 		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
 
@@ -368,7 +383,10 @@ namespace MarC
 		auto dest = hostAddress(readCodeAndMove<BC_MemAddress>(), ocx.derefArg0);
 
 		memcpy(dest, src, BC_DatatypeSize((BC_Datatype)ocx.datatype));
+	}
 
-		return true;
+	const InterpreterError& Interpreter::lastError() const
+	{
+		return m_lastErr;
 	}
 }

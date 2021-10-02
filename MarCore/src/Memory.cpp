@@ -7,6 +7,7 @@ namespace MarC
 	{}
 
 	Memory::Memory(uint64_t initSize, bool resizable)
+		: Memory()
 	{
 		resize(initSize);
 		Memory::resizable(resizable);
