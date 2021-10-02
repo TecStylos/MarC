@@ -77,6 +77,7 @@ namespace MarC
 		static bool parse_insPopCopy(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
 		static bool parse_insPushFrame(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
 		static bool parse_insPopFrame(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
+		static bool parse_insExit(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
 	private:
 		static void resolveUnresolvedRefs(BytecodeInfo& bci);
 		static bool tokenizeLine(const BytecodeInfo& bci, AssemblerInfo& asmInfo, std::vector<std::string>& tokensOut, AssemblerError& err);

@@ -48,6 +48,7 @@ Other:
     #label : [name]                         Create a label with name name holding the current stack pointer
     #static : [name] : [size]               Shortcut for: label : [name] \ add.u64 $sp : [size]
     #string : [name] : "[text]"             Store text on the stack
+    #permission : [single/group] : [name]   Request permission for an external function
 
 
 

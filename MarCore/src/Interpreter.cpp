@@ -14,6 +14,10 @@ namespace MarC
 	{
 		return "Error with code " + std::to_string((uint64_t)m_code) + ": " + getText();
 	}
+	InterpreterError::Code InterpreterError::getCode() const
+	{
+		return m_code;
+	}
 
 	Interpreter::Interpreter(MemoryRef staticStack, MemoryRef codeMemory, uint64_t dynStackSize)
 	{
@@ -168,7 +172,7 @@ namespace MarC
 			throw InterpreterError(IntErrCode::OpCodeNotImplemented, "The opCode '" + std::to_string(ocx.opCode) + "' has not been implemented yet!");
 
 		case BC_OC_EXIT:
-			throw InterpreterError(IntErrCode::OpCodeNotImplemented, "The opCode '" + std::to_string(ocx.opCode) + "' has not been implemented yet!");
+			throw InterpreterError(IntErrCode::AbortViaExit, "The program has been aborted with a call to exit!");
 		default:
 			throw InterpreterError(IntErrCode::OpCodeNotExecutable, "Unknown opCode '" + std::to_string(ocx.opCode) + "'!");
 		}

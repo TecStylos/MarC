@@ -124,8 +124,8 @@ namespace MarC
 				break;
 			
 			case BC_OC_EXIT:
-				//if (!isCorrectTokenNum(1, tokens.size(), bci, err))
-				//	return false;
+				if (!parse_insExit(bci, tokens, ocx, err))
+					return false;
 				break;
 			
 			default:
@@ -492,6 +492,19 @@ namespace MarC
 
 		return true;
 	}
+
+	bool Assembler::parse_insExit(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	{
+		if (!isCorrectTokenNum(1, tokens.size(), bci, err))
+			return false;
+		if (ocx.datatype != BC_OC_NONE)
+			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Instruction 'exit' doesn't take any datatype!");
+
+		bci.codeMemory->push(ocx);
+
+		return true;
+	}
+
 
 	void Assembler::resolveUnresolvedRefs(BytecodeInfo& bci)
 	{

@@ -13,6 +13,7 @@ namespace MarC
 			OpCodeUnknown,
 			OpCodeNotExecutable,
 			OpCodeNotImplemented,
+			AbortViaExit,
 		};
 	public:
 		InterpreterError() = default;
@@ -23,6 +24,7 @@ namespace MarC
 		operator bool() const;
 		const std::string& getText() const;
 		std::string getMessage() const;
+		Code getCode() const;
 	private:
 		Code m_code = Code::Success;
 		std::string m_errText = "Success!";

@@ -25,3 +25,5 @@ pop.u64
 pop.i32
 
 mov.i64 : $ec : @$ac
+
+exit

@@ -45,13 +45,17 @@ int main()
 
 	MarC::Interpreter ip(bci.staticStack, bci.codeMemory, 4096);
 
-	if (!ip.interpret())
+	if (!ip.interpret() && ip.lastError().getCode() != MarC::IntErrCode::AbortViaExit)
 		std::cout << "An error occured while interpreting the code!" << std::endl
 		<< "    " << ip.lastError().getMessage() << std::endl;
 	else
 		std::cout << "Successfully interpreted the code!" << std::endl;
 
 	std::cout << "Exit code: " << ip.getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_U_64 << std::endl;
+
+	MarC::BC_MemAddress addr;
+	addr = *(MarC::BC_MemAddress*)ip.hostAddress(MarC::BC_MemAddress(MarC::BC_MEM_BASE_DYNAMIC_STACK, 0));
+	std::cout << "Extern pointer base: " << addr.base << std::endl;
 
 	return 0;
 }
