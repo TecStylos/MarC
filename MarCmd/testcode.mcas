@@ -12,6 +12,12 @@ pushc.i64 : @$ec
 
 add.i64 : $ec : +123
 
+pushf
+
+push.i64
+
+popf
+
 mov.i64 : $ac : @~4
 
 popc.i64 : $ec

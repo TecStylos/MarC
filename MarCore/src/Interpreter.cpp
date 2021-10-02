@@ -158,9 +158,9 @@ namespace MarC
 			exec_insPopCopy(ocx); break;
 
 		case BC_OC_PUSH_FRAME:
-			throw InterpreterError(IntErrCode::OpCodeNotImplemented, "The opCode '" + std::to_string(ocx.opCode) + "' has not been implemented yet!");
+			exec_insPushFrame(ocx); break;
 		case BC_OC_POP_FRAME:
-			throw InterpreterError(IntErrCode::OpCodeNotImplemented, "The opCode '" + std::to_string(ocx.opCode) + "' has not been implemented yet!");
+			exec_insPopFrame(ocx); break;
 
 		case BC_OC_CALL:
 			throw InterpreterError(IntErrCode::OpCodeNotImplemented, "The opCode '" + std::to_string(ocx.opCode) + "' has not been implemented yet!");
@@ -383,6 +383,26 @@ namespace MarC
 		auto dest = hostAddress(readCodeAndMove<BC_MemAddress>(), ocx.derefArg0);
 
 		memcpy(dest, src, BC_DatatypeSize((BC_Datatype)ocx.datatype));
+	}
+	void Interpreter::exec_insPushFrame(BC_OpCodeEx ocx)
+	{
+		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
+		auto& regFP = getRegister(BC_MEM_REG_FRAME_POINTER);
+		auto& oldFP = *(BC_MemCell*)hostAddress(regSP.as_ADDR, false);
+
+		oldFP.as_ADDR = regFP.as_ADDR;
+		regSP.as_ADDR.address += BC_DatatypeSize(BC_DT_U_64);
+		regFP.as_ADDR = regSP.as_ADDR;
+	}
+	void Interpreter::exec_insPopFrame(BC_OpCodeEx ocx)
+	{
+		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
+		auto& regFP = getRegister(BC_MEM_REG_FRAME_POINTER);
+
+		regSP.as_ADDR = regFP.as_ADDR;
+		regSP.as_ADDR.address -= BC_DatatypeSize(BC_DT_U_64);
+		auto oldFP = *(BC_MemCell*)hostAddress(regSP.as_ADDR, false);
+		regFP.as_ADDR = oldFP.as_ADDR;
 	}
 
 	const InterpreterError& Interpreter::lastError() const

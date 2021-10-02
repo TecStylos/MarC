@@ -108,9 +108,12 @@ namespace MarC
 				break;
 			
 			case BC_OC_PUSH_FRAME:
+				if (!parse_insPushFrame(bci, tokens, ocx, err))
+					return false;
+				break;
 			case BC_OC_POP_FRAME:
-				//if (!isCorrectTokenNum(1, tokens.size(), bci, err))
-				//	return false;
+				if (!parse_insPopFrame(bci, tokens, ocx, err))
+					return false;
 				break;
 			
 			case BC_OC_CALL:
@@ -462,6 +465,30 @@ namespace MarC
 		
 		bci.codeMemory->push(ocx);
 		bci.codeMemory->push(&arg.cell, BC_DatatypeSize(arg.datatype));
+
+		return true;
+	}
+
+	bool Assembler::parse_insPushFrame(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	{
+		if (!isCorrectTokenNum(1, tokens.size(), bci, err))
+			return false;
+		if (ocx.datatype != BC_OC_NONE)
+			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Instruction 'pushf' doesn't take any datatype!");
+
+		bci.codeMemory->push(ocx);
+
+		return true;
+	}
+
+	bool Assembler::parse_insPopFrame(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	{
+		if (!isCorrectTokenNum(1, tokens.size(), bci, err))
+			return false;
+		if (ocx.datatype != BC_OC_NONE)
+			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Instruction 'popf' doesn't take any datatype!");
+
+		bci.codeMemory->push(ocx);
 
 		return true;
 	}
