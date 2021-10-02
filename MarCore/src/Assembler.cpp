@@ -76,12 +76,12 @@ namespace MarC
 			case BC_OC_SUBTRACT:
 			case BC_OC_MULTIPLY:
 			case BC_OC_DIVIDE:
-				if (!parseInstructionAlgebraicBinary(bci, tokens, ocx, err))
+				if (!parse_insAlgebraicBinary(bci, tokens, ocx, err))
 					return false;
 				break;
 
 			case BC_OC_CONVERT:
-				if (!parseInstructionConvert(bci, tokens, ocx, err))
+				if (!parse_insConvert(bci, tokens, ocx, err))
 					return false;
 				break;
 			
@@ -91,19 +91,19 @@ namespace MarC
 				break;
 			
 			case BC_OC_PUSH:
-				if (!parseInstructionPush(bci, tokens, ocx, err))
+				if (!parse_insPush(bci, tokens, ocx, err))
 					return false;
 				break;
 			case BC_OC_POP:
-				if (!parseInstructionPop(bci, tokens, ocx, err))
+				if (!parse_insPop(bci, tokens, ocx, err))
 					return false;
 				break;
 			case BC_OC_PUSHC:
-				if (!parseInstructionPushCopy(bci, tokens, ocx, err))
+				if (!parse_insPushCopy(bci, tokens, ocx, err))
 					return false;
 				break;
 			case BC_OC_POPC:
-				if (!parseInstructionPopCopy(bci, tokens, ocx, err))
+				if (!parse_insPopCopy(bci, tokens, ocx, err))
 					return false;
 				break;
 			
@@ -318,7 +318,7 @@ namespace MarC
 		return true;
 	}
 
-	bool Assembler::parseInstructionAlgebraicBinary(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	bool Assembler::parse_insAlgebraicBinary(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
 	{
 		if (!isCorrectTokenNum(3, 4, tokens.size(), bci, err))
 			return false;
@@ -354,7 +354,7 @@ namespace MarC
 		return true;
 	}
 
-	bool Assembler::parseInstructionConvert(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	bool Assembler::parse_insConvert(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
 	{
 		if (!isCorrectTokenNum(3, tokens.size(), bci, err))
 			return false;
@@ -390,7 +390,7 @@ namespace MarC
 		return true;
 	}
 
-	bool Assembler::parseInstructionPush(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	bool Assembler::parse_insPush(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
 	{
 		if (!isCorrectTokenNum(1, tokens.size(), bci, err))
 			return false;
@@ -402,7 +402,7 @@ namespace MarC
 		return true;
 	}
 
-	bool Assembler::parseInstructionPop(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	bool Assembler::parse_insPop(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
 	{
 		if (!isCorrectTokenNum(1, tokens.size(), bci, err))
 			return false;
@@ -414,7 +414,7 @@ namespace MarC
 		return true;
 	}
 
-	bool Assembler::parseInstructionPushCopy(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	bool Assembler::parse_insPushCopy(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
 	{
 		if (!isCorrectTokenNum(2, tokens.size(), bci, err))
 			return false;
@@ -439,7 +439,7 @@ namespace MarC
 		return true;
 	}
 
-	bool Assembler::parseInstructionPopCopy(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	bool Assembler::parse_insPopCopy(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
 	{
 		if (!isCorrectTokenNum(2, tokens.size(), bci, err))
 			return false;
