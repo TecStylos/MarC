@@ -27,6 +27,7 @@ namespace MarC
 			NumericArgumentBroken,
 			NumericLiteralBroken,
 			CharInvalid,
+			NotImplemented,
 		};
 	public:
 		AssemblerError() = default;
@@ -69,6 +70,7 @@ namespace MarC
 		static bool isLiteral(const std::vector<std::string>& tokens);
 		static bool parseLiteral(const BytecodeInfo& bci, std::vector<std::string>& tokens, bool deref, AsmArgInfo& aai, AssemblerError& err);
 	private:
+		static bool parseInstruction(BytecodeInfo& bci, std::vector<std::string>& tokens, AssemblerError& err);
 		static bool parse_insAlgebraicBinary(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
 		static bool parse_insConvert(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
 		static bool parse_insPush(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
@@ -79,10 +81,13 @@ namespace MarC
 		static bool parse_insPopFrame(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
 		static bool parse_insExit(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
 	private:
+		static bool parseDirective(BytecodeInfo& bci, std::vector<std::string>& tokens, AssemblerError& err);
+	private:
 		static void resolveUnresolvedRefs(BytecodeInfo& bci);
 		static bool tokenizeLine(const BytecodeInfo& bci, AssemblerInfo& asmInfo, std::vector<std::string>& tokensOut, AssemblerError& err);
 		static bool tokenizeNumericArgument(const BytecodeInfo& bci, const std::string& argument, std::vector<std::string>& tokensOut, AssemblerError& err);
 		static bool isInstruction(const std::string& token);
+		static bool isDirective(const std::string& token);
 		static std::pair<std::string, std::string> getOpCodePartsFromToken(const std::string& token);
 		
 		static bool literalToU64(const std::string& literalStr, uint64_t& output);

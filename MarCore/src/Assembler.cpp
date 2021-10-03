@@ -56,82 +56,10 @@ namespace MarC
 			return true;
 
 		if (isInstruction(tokens[0]))
-		{
-			auto opCodeParts = getOpCodePartsFromToken(tokens[0]);
-			BC_OpCodeEx ocx = { 0 };
-			ocx.opCode = BC_OpCodeFromString(opCodeParts.first);
-			ocx.datatype = BC_DatatypeFromString(opCodeParts.second);
+			return parseInstruction(bci, tokens, err);
 
-			if (ocx.opCode == BC_OC_UNKNOWN)
-				RETURN_WITH_ERROR(AsmErrCode::OpCodeUnknown, "Unknown opCode '" + opCodeParts.first + "'!");
-			if (ocx.opCode == BC_OC_NONE)
-				RETURN_WITH_ERROR(AsmErrCode::OpCodeMissing, "Missing opCode!");
-			if (ocx.datatype == BC_DT_UNKNOWN)
-				RETURN_WITH_ERROR(AsmErrCode::DatatypeUnknown, "Unknown datatype '" + opCodeParts.second + "'!");
-
-			switch (ocx.opCode)
-			{
-			case BC_OC_MOVE:
-			case BC_OC_ADD:
-			case BC_OC_SUBTRACT:
-			case BC_OC_MULTIPLY:
-			case BC_OC_DIVIDE:
-				if (!parse_insAlgebraicBinary(bci, tokens, ocx, err))
-					return false;
-				break;
-
-			case BC_OC_CONVERT:
-				if (!parse_insConvert(bci, tokens, ocx, err))
-					return false;
-				break;
-			
-			case BC_OC_COPY:
-				//if (!isCorrectTokenNum(4, tokens.size(), bci, err))
-				//	return false;
-				break;
-			
-			case BC_OC_PUSH:
-				if (!parse_insPush(bci, tokens, ocx, err))
-					return false;
-				break;
-			case BC_OC_POP:
-				if (!parse_insPop(bci, tokens, ocx, err))
-					return false;
-				break;
-			case BC_OC_PUSHC:
-				if (!parse_insPushCopy(bci, tokens, ocx, err))
-					return false;
-				break;
-			case BC_OC_POPC:
-				if (!parse_insPopCopy(bci, tokens, ocx, err))
-					return false;
-				break;
-			
-			case BC_OC_PUSH_FRAME:
-				if (!parse_insPushFrame(bci, tokens, ocx, err))
-					return false;
-				break;
-			case BC_OC_POP_FRAME:
-				if (!parse_insPopFrame(bci, tokens, ocx, err))
-					return false;
-				break;
-			
-			case BC_OC_CALL:
-				break;
-			case BC_OC_RETURN:
-				//if (!isCorrectTokenNum(1, tokens.size(), bci, err))
-				//	return false;
-				break;
-			
-			case BC_OC_EXIT:
-				if (!parse_insExit(bci, tokens, ocx, err))
-					return false;
-				break;
-			
-			default:
-				RETURN_WITH_ERROR(AsmErrCode::OpCodeUnknown, "Function 'parseLine' cannot handle opCode '" + std::to_string(ocx.opCode) + "'!");
-			}
-		}
+		if (isDirective(tokens[0]))
+			return parseDirective(bci, tokens, err);
 
 		return true;
 	}
@@ -321,6 +249,84 @@ namespace MarC
 		return true;
 	}
 
+	bool Assembler::parseInstruction(BytecodeInfo& bci, std::vector<std::string>& tokens, AssemblerError& err)
+	{
+		auto opCodeParts = getOpCodePartsFromToken(tokens[0]);
+		BC_OpCodeEx ocx = { 0 };
+		ocx.opCode = BC_OpCodeFromString(opCodeParts.first);
+		ocx.datatype = BC_DatatypeFromString(opCodeParts.second);
+
+		if (ocx.opCode == BC_OC_UNKNOWN)
+			RETURN_WITH_ERROR(AsmErrCode::OpCodeUnknown, "Unknown opCode '" + opCodeParts.first + "'!");
+		if (ocx.opCode == BC_OC_NONE)
+			RETURN_WITH_ERROR(AsmErrCode::OpCodeMissing, "Missing opCode!");
+		if (ocx.datatype == BC_DT_UNKNOWN)
+			RETURN_WITH_ERROR(AsmErrCode::DatatypeUnknown, "Unknown datatype '" + opCodeParts.second + "'!");
+
+		switch (ocx.opCode)
+		{
+		case BC_OC_MOVE:
+		case BC_OC_ADD:
+		case BC_OC_SUBTRACT:
+		case BC_OC_MULTIPLY:
+		case BC_OC_DIVIDE:
+			if (!parse_insAlgebraicBinary(bci, tokens, ocx, err))
+				return false;
+			break;
+
+		case BC_OC_CONVERT:
+			if (!parse_insConvert(bci, tokens, ocx, err))
+				return false;
+			break;
+
+		case BC_OC_COPY:
+			//if (!isCorrectTokenNum(4, tokens.size(), bci, err))
+			//	return false;
+			break;
+
+		case BC_OC_PUSH:
+			if (!parse_insPush(bci, tokens, ocx, err))
+				return false;
+			break;
+		case BC_OC_POP:
+			if (!parse_insPop(bci, tokens, ocx, err))
+				return false;
+			break;
+		case BC_OC_PUSHC:
+			if (!parse_insPushCopy(bci, tokens, ocx, err))
+				return false;
+			break;
+		case BC_OC_POPC:
+			if (!parse_insPopCopy(bci, tokens, ocx, err))
+				return false;
+			break;
+
+		case BC_OC_PUSH_FRAME:
+			if (!parse_insPushFrame(bci, tokens, ocx, err))
+				return false;
+			break;
+		case BC_OC_POP_FRAME:
+			if (!parse_insPopFrame(bci, tokens, ocx, err))
+				return false;
+			break;
+
+		case BC_OC_CALL:
+			break;
+		case BC_OC_RETURN:
+			//if (!isCorrectTokenNum(1, tokens.size(), bci, err))
+			//	return false;
+			break;
+
+		case BC_OC_EXIT:
+			if (!parse_insExit(bci, tokens, ocx, err))
+				return false;
+			break;
+
+		default:
+			RETURN_WITH_ERROR(AsmErrCode::OpCodeUnknown, "Function 'parseLine' cannot handle opCode '" + std::to_string(ocx.opCode) + "'!");
+		}
+	}
+
 	bool Assembler::parse_insAlgebraicBinary(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
 	{
 		if (!isCorrectTokenNum(3, 4, tokens.size(), bci, err))
@@ -505,6 +511,10 @@ namespace MarC
 		return true;
 	}
 
+	bool Assembler::parseDirective(BytecodeInfo& bci, std::vector<std::string>& tokens, AssemblerError& err)
+	{
+		RETURN_WITH_ERROR(AsmErrCode::NotImplemented, "The function 'parseDirective' has not been implemented yet!");
+	}
 
 	void Assembler::resolveUnresolvedRefs(BytecodeInfo& bci)
 	{
@@ -576,7 +586,7 @@ namespace MarC
 					state = State::ParseComment;
 					break;
 				default:
-					if (!std::isalpha(c) && c != '@' && c != '$' && c != '~' && c != '+' && c != '-')
+					if (!std::isalpha(c) && c != '@' && c != '$' && c != '~' && c != '+' && c != '-' && c != '#')
 						RETURN_WITH_ERROR(AsmErrCode::CharInvalid, std::string("Character '") + c + "' is not allowed in this context!");
 					currentToken.push_back(c);
 					state = State::ParseLiteral;
@@ -585,7 +595,7 @@ namespace MarC
 			case State::ParseComment:
 				break;
 			case State::ParseLiteral:
-				if (std::isalnum(c) || c == '.' || c == '$' || c == '~' || c == '+' || c == '-')
+				if (std::isalnum(c) || c == '.' || c == '$' || c == '~' || c == '+' || c == '-' || c == '#')
 					currentToken.push_back(c);
 				else
 				{
@@ -703,6 +713,11 @@ namespace MarC
 		return token.size() > 0 && token[0] != '#';
 	}
 
+	bool Assembler::isDirective(const std::string& token)
+	{
+		return !isInstruction(token);
+	}
+
 	std::pair<std::string, std::string> Assembler::getOpCodePartsFromToken(const std::string& token)
 	{
 		uint64_t dot = token.find_first_of('.');
@@ -719,7 +734,7 @@ namespace MarC
 		{
 			output = std::stoull(literalStr.c_str());
 		}
-		catch (const std::invalid_argument& err)
+		catch (const std::invalid_argument&)
 		{
 			return false;
 		}
@@ -732,7 +747,7 @@ namespace MarC
 		{
 			output = std::stod(literalStr.c_str());
 		}
-		catch (const std::invalid_argument& err)
+		catch (const std::invalid_argument&)
 		{
 			return false;
 		}
