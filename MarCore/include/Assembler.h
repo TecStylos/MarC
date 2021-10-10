@@ -28,6 +28,8 @@ namespace MarC
 			NumericLiteralBroken,
 			CharInvalid,
 			NotImplemented,
+			DirectiveUnknown,
+			LabelAlreadyDefined,
 		};
 	public:
 		AssemblerError() = default;
@@ -82,6 +84,7 @@ namespace MarC
 		static bool parse_insExit(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
 	private:
 		static bool parseDirective(BytecodeInfo& bci, std::vector<std::string>& tokens, AssemblerError& err);
+		static bool parse_dirLabel(BytecodeInfo& bci, std::vector<std::string>& tokens, AssemblerError& err);
 	private:
 		static void resolveUnresolvedRefs(BytecodeInfo& bci);
 		static bool tokenizeLine(const BytecodeInfo& bci, AssemblerInfo& asmInfo, std::vector<std::string>& tokensOut, AssemblerError& err);
@@ -95,5 +98,7 @@ namespace MarC
 	
 		static bool isCorrectTokenNum(uint64_t expected, uint64_t provided, const BytecodeInfo& bci, AssemblerError& err);
 		static bool isCorrectTokenNum(uint64_t expectedMin, uint64_t expectedMax, uint64_t provided, const BytecodeInfo& bci, AssemblerError& err);
+	private:
+		static BC_MemAddress currCodeAddr(BytecodeInfo& bci);
 	};
 }

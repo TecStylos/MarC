@@ -93,11 +93,24 @@ namespace MarC
 
 	struct BC_MemAddress
 	{
-		uint64_t base : 3;
-		uint64_t address : 61;
+		union
+		{
+			struct
+			{
+				uint64_t base : 3;
+				uint64_t addr : 61;
+			};
+			struct
+			{
+				uint64_t base : 3;
+				uint64_t page : 5;
+				uint64_t addr : 56;
+			} asCode;
+		};
 	public:
 		BC_MemAddress() = default;
 		BC_MemAddress(BC_MemBase base, uint64_t addr);
+		BC_MemAddress(BC_MemBase base, uint64_t page, uint64_t addr);
 	};
 
 	#pragma pack(pop)

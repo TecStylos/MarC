@@ -171,7 +171,7 @@ namespace MarC
 			if (!literalToU64(tokens[0], val))
 				RETURN_WITH_ERROR(AsmErrCode::NumericLiteralBroken, "Cannot convert literal '" + tokens[0] + "' to type U64!")
 
-			memArg.address = val;
+			memArg.addr = val;
 
 			return true;
 		}
@@ -513,7 +513,27 @@ namespace MarC
 
 	bool Assembler::parseDirective(BytecodeInfo& bci, std::vector<std::string>& tokens, AssemblerError& err)
 	{
-		RETURN_WITH_ERROR(AsmErrCode::NotImplemented, "The function 'parseDirective' has not been implemented yet!");
+		if (tokens[0] == "#label")
+			return parse_dirLabel(bci, tokens, err);
+		if (tokens[0] == "#static")
+			RETURN_WITH_ERROR(AsmErrCode::NotImplemented, "The directive '" + tokens[0] + "' has not been implemented yet!");
+		if (tokens[0] == "#string")
+			RETURN_WITH_ERROR(AsmErrCode::NotImplemented, "The directive '" + tokens[0] + "' has not been implemented yet!");
+		if (tokens[0] == "#permission")
+			RETURN_WITH_ERROR(AsmErrCode::NotImplemented, "The directive '" + tokens[0] + "' has not been implemented yet!");
+
+		RETURN_WITH_ERROR(AsmErrCode::DirectiveUnknown, "Unknown directive '" + tokens[0] + "'!");
+	}
+
+	bool Assembler::parse_dirLabel(BytecodeInfo& bci, std::vector<std::string>& tokens, AssemblerError& err)
+	{
+		if (!isCorrectTokenNum(2, tokens.size(), bci, err))
+			return false;
+		if (bci.labels.find(tokens[1]) != bci.labels.end())
+			RETURN_WITH_ERROR(AsmErrCode::LabelAlreadyDefined, "A label with name '" + tokens[1] + "' has already been defined!");
+		bci.labels.insert(std::make_pair(tokens[1], currCodeAddr(bci)));
+
+		return true;
 	}
 
 	void Assembler::resolveUnresolvedRefs(BytecodeInfo& bci)
@@ -766,5 +786,10 @@ namespace MarC
 				"Unexpected number of tokens! (Range: " + std::to_string(expectedMin) + "-" + std::to_string(expectedMax) + "; Provided: " + std::to_string(provided) + ")"
 			);
 		return true;
+	}
+
+	BC_MemAddress Assembler::currCodeAddr(BytecodeInfo& bci)
+	{
+		return BC_MemAddress(BC_MEM_BASE_CODE_MEMORY, bci.codeMemory->size());
 	}
 }

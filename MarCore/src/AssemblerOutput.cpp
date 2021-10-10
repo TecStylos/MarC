@@ -8,8 +8,15 @@ namespace MarC
 	}
 
 	BC_MemAddress::BC_MemAddress(BC_MemBase base, uint64_t addr)
-		: base(base), address(addr)
+		: base(base), addr(addr)
 	{
+	}
+
+	BC_MemAddress::BC_MemAddress(BC_MemBase base, uint64_t page, uint64_t addr)
+	{
+		asCode.base = base;
+		asCode.page = page;
+		asCode.addr = addr;
 	}
 
 	BC_OpCode BC_OpCodeFromString(const std::string& ocStr)

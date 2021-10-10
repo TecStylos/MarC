@@ -56,25 +56,25 @@ namespace MarC
 		case BC_MEM_BASE_NONE:
 			break;
 		case BC_MEM_BASE_STATIC_STACK:
-			hostAddr = (char*)m_mem.staticStack->getBaseAddress() + clientAddr.address;
+			hostAddr = (char*)m_mem.staticStack->getBaseAddress() + clientAddr.addr;
 			break;
 		case BC_MEM_BASE_DYNAMIC_STACK:
-			hostAddr = (char*)m_mem.dynamicStack->getBaseAddress() + clientAddr.address;
+			hostAddr = (char*)m_mem.dynamicStack->getBaseAddress() + clientAddr.addr;
 			break;
 		case BC_MEM_BASE_DYN_FRAME_ADD:
-			hostAddr = (char*)hostAddress(getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR) + clientAddr.address;
+			hostAddr = (char*)hostAddress(getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR) + clientAddr.addr;
 			break;
 		case BC_MEM_BASE_DYN_FRAME_SUB:
-			hostAddr = (char*)hostAddress(getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR) - clientAddr.address;
+			hostAddr = (char*)hostAddress(getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR) - clientAddr.addr;
 			break;
 		case BC_MEM_BASE_CODE_MEMORY:
-			hostAddr = (char*)m_mem.codeMemory->getBaseAddress() + clientAddr.address;
+			hostAddr = (char*)m_mem.codeMemory->getBaseAddress() + clientAddr.addr;
 			break;
 		case BC_MEM_BASE_REGISTER:
-			hostAddr = &m_mem.registers[clientAddr.address];
+			hostAddr = &m_mem.registers[clientAddr.addr];
 			break;
 		case BC_MEM_BASE_EXTERN:
-			hostAddr = (char*)0 + clientAddr.address;
+			hostAddr = (char*)0 + clientAddr.addr;
 			break;
 		}
 
@@ -358,13 +358,13 @@ namespace MarC
 	{
 		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
 
-		regSP.as_ADDR.address += BC_DatatypeSize((BC_Datatype)ocx.datatype);
+		regSP.as_ADDR.addr += BC_DatatypeSize((BC_Datatype)ocx.datatype);
 	}
 	void Interpreter::exec_insPop(BC_OpCodeEx ocx)
 	{
 		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
 
-		regSP.as_ADDR.address -= BC_DatatypeSize((BC_Datatype)ocx.datatype);
+		regSP.as_ADDR.addr -= BC_DatatypeSize((BC_Datatype)ocx.datatype);
 	}
 	void Interpreter::exec_insPushCopy(BC_OpCodeEx ocx)
 	{
@@ -375,13 +375,13 @@ namespace MarC
 
 		memcpy(dest, src, BC_DatatypeSize((BC_Datatype)ocx.datatype));
 
-		regSP.as_ADDR.address += BC_DatatypeSize((BC_Datatype)ocx.datatype);
+		regSP.as_ADDR.addr += BC_DatatypeSize((BC_Datatype)ocx.datatype);
 	}
 	void Interpreter::exec_insPopCopy(BC_OpCodeEx ocx)
 	{
 		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
 
-		regSP.as_ADDR.address -= BC_DatatypeSize((BC_Datatype)ocx.datatype);
+		regSP.as_ADDR.addr -= BC_DatatypeSize((BC_Datatype)ocx.datatype);
 
 		auto src = hostAddress(regSP.as_ADDR, false);
 		auto dest = hostAddress(readCodeAndMove<BC_MemAddress>(), ocx.derefArg0);
@@ -395,7 +395,7 @@ namespace MarC
 		auto& oldFP = *(BC_MemCell*)hostAddress(regSP.as_ADDR, false);
 
 		oldFP.as_ADDR = regFP.as_ADDR;
-		regSP.as_ADDR.address += BC_DatatypeSize(BC_DT_U_64);
+		regSP.as_ADDR.addr += BC_DatatypeSize(BC_DT_U_64);
 		regFP.as_ADDR = regSP.as_ADDR;
 	}
 	void Interpreter::exec_insPopFrame(BC_OpCodeEx ocx)
@@ -404,7 +404,7 @@ namespace MarC
 		auto& regFP = getRegister(BC_MEM_REG_FRAME_POINTER);
 
 		regSP.as_ADDR = regFP.as_ADDR;
-		regSP.as_ADDR.address -= BC_DatatypeSize(BC_DT_U_64);
+		regSP.as_ADDR.addr -= BC_DatatypeSize(BC_DT_U_64);
 		auto oldFP = *(BC_MemCell*)hostAddress(regSP.as_ADDR, false);
 		regFP.as_ADDR = oldFP.as_ADDR;
 	}
