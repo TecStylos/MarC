@@ -6,6 +6,8 @@ namespace MarC
 {
 	struct ExecutableInfo
 	{
+		ExecutableInfo();
+	public:
 		MemoryRef staticStack;
 		std::vector<ModuleInfoRef> modules;
 	};

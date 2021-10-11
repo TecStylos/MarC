@@ -18,6 +18,12 @@ namespace MarC
 	{
 		return m_code;
 	}
+	bool InterpreterError::isOK() const
+	{
+		return
+			m_code == Code::Success ||
+			m_code == Code::AbortViaExit;
+	}
 
 	Interpreter::Interpreter(ExecutableInfoRef pExeInfo, uint64_t dynStackSize)
 		: m_pExeInfo(pExeInfo)
@@ -128,9 +134,9 @@ namespace MarC
 
 		switch (ocx.opCode)
 		{
-		case BC_OC_NONE:
-		case BC_OC_UNKNOWN:
-			throw InterpreterError(IntErrCode::OpCodeNotExecutable, "Unable to execute opCode '" + std::to_string(ocx.opCode) + "'!");
+		//case BC_OC_NONE:
+		//case BC_OC_UNKNOWN:
+		//	throw InterpreterError(IntErrCode::OpCodeNotExecutable, "Unable to execute opCode '" + std::to_string(ocx.opCode) + "'!");
 		case BC_OC_MOVE:
 			exec_insMove(ocx); break;
 		case BC_OC_ADD:

@@ -25,8 +25,8 @@ std::string readFile(const std::string& filepath)
 
 int main()
 {
-	MarC::Assembler assembler(readFile("testcode.mcas"));
 	MarC::Linker linker;
+	MarC::Assembler assembler(readFile("testcode.mcas"), linker.getExeInfo()->staticStack);
 	MarC::Interpreter interpreter(linker.getExeInfo(), 4096);
 
 	if (assembler.assemble())
@@ -48,7 +48,7 @@ int main()
 		return -1;
 	}
 
-	if (interpreter.interpret() || interpreter.lastError().getCode() == MarC::IntErrCode::AbortViaExit)
+	if (interpreter.interpret() || interpreter.lastError().isOK())
 		std::cout << "Successfully interpreted the code!" << std::endl;
 	else
 	{

@@ -26,6 +26,7 @@ namespace MarC
 		const std::string& getText() const;
 		std::string getMessage() const;
 		Code getCode() const;
+		bool isOK() const;
 	private:
 		Code m_code = Code::Success;
 		std::string m_errText = "Success!";

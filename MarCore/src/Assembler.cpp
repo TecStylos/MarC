@@ -22,28 +22,25 @@ namespace MarC
 			+ "SYSFILE: " + m_sysErrFile + "  SYSLINE: " + std::to_string(m_sysErrLine);
 	}
 
-	Assembler::Assembler(const std::string& asmCode)
-		: m_asmCode(asmCode)
+	Assembler::Assembler(const std::string& asmCode, MemoryRef staticStack)
+		: m_asmCode(asmCode), m_staticStack(staticStack)
 	{
 		m_pModInfo = std::make_shared<ModuleInfo>();
 	}
 
 	bool Assembler::assemble()
 	{
-		uint64_t prevBytecodeSize = m_pModInfo->codeMemory->size();
+		m_pModInfo->backup();
 
 		while (parseLine(*m_pModInfo, m_lastErr) && m_nextCharToAssemble < m_asmCode.size())
 			++m_pModInfo->nLinesParsed;
 
 		if (m_lastErr)
 		{
-			m_pModInfo->codeMemory->resize(prevBytecodeSize);
-			m_pModInfo->unresolvedRefs.clear();
+			m_pModInfo->recover();
 
 			return false;
 		}
-
-		resolveUnresolvedRefs(*m_pModInfo);
 
 		return true;
 	}
@@ -79,7 +76,7 @@ namespace MarC
 
 	bool Assembler::parseNumericArgument(ModuleInfo& mi, AsmArgInfo& aai, AssemblerError& err)
 	{
-		auto& memArg = *(BC_MemAddress*)(aai.pArg);
+		//auto& memArg = *(BC_MemAddress*)(aai.pArg);
 
 		std::vector<std::string> tokens;
 		if (!tokenizeNumericArgument(mi ,*aai.pString, tokens, err))
@@ -111,7 +108,7 @@ namespace MarC
 
 			uint64_t regID = BC_MemRegisterID(BC_RegisterFromString(tokens[0]));
 
-			memArg = BC_MemAddress(BC_MEM_BASE_REGISTER, regID);
+			aai.pArg->cell.as_ADDR = BC_MemAddress(BC_MEM_BASE_REGISTER, regID);
 
 			return true;
 		}
@@ -134,7 +131,7 @@ namespace MarC
 
 			aai.pArg->datatype = BC_DT_U_64;
 
-			memArg = BC_MemAddress(
+			aai.pArg->cell.as_ADDR = BC_MemAddress(
 				isNegative ? BC_MEM_BASE_DYN_FRAME_SUB : BC_MEM_BASE_DYN_FRAME_ADD,
 				offset
 			);
@@ -154,7 +151,8 @@ namespace MarC
 			if (aai.pOcx->datatype != BC_DT_U_64)
 				RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Labels without a dereference operator can only be used as U64 values.");
 
-			mi.unresolvedRefs.push_back(std::make_pair(tokens[0], mi.codeMemory->size() + aai.offsetInInstruction));
+			//mi.unresolvedRefs.push_back(std::make_pair(tokens[0], mi.codeMemory->size() + aai.offsetInInstruction));
+			mi.unresolvedRefs.push_back({ tokens[0], mi.codeMemory->size() + aai.offsetInInstruction });
 
 			return true;
 		}
@@ -348,7 +346,7 @@ namespace MarC
 		if (ocx.datatype == BC_OC_NONE)
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
 
-		BC_TypeCell args[2] = { 0 };
+		BC_TypeCell args[2] = {};
 
 		AsmArgInfo aai;
 		aai.pOcx = &ocx;
@@ -552,27 +550,6 @@ namespace MarC
 		mi.labels.insert(std::make_pair(tokens[1], currCodeAddr(mi)));
 
 		return true;
-	}
-
-	void Assembler::resolveUnresolvedRefs(ModuleInfo& mi)
-	{
-		auto resolve = [&mi](std::vector<std::pair<std::string, uint64_t>> refs)
-		{
-			for (uint64_t i = 0; i < refs.size(); ++i)
-			{
-				auto& ref = refs[i];
-				auto res = mi.labels.find(ref.first);
-				if (res == mi.labels.end())
-					continue;
-
-				mi.codeMemory->write(res->second, ref.second);
-
-				refs.erase(refs.begin() + i);
-				--i;
-			}
-		};
-
-		resolve(mi.unresolvedRefs);
 	}
 
 	bool Assembler::tokenizeLine(const ModuleInfo& mi, std::vector<std::string>& tokensOut, AssemblerError& err)
@@ -807,6 +784,6 @@ namespace MarC
 
 	BC_MemAddress Assembler::currCodeAddr(ModuleInfo& mi)
 	{
-		return BC_MemAddress(BC_MEM_BASE_CODE_MEMORY, mi.codeMemory->size());
+		return BC_MemAddress(BC_MEM_BASE_CODE_MEMORY, 0, mi.codeMemory->size());
 	}
 }

@@ -14,6 +14,9 @@ namespace MarC
 	public:
 		ExecutableInfoRef getExeInfo();
 	private:
+		bool hasModule(const std::string& name);
+	private:
 		ExecutableInfoRef m_pExeInfo;
+		LabelMap m_labels;
 	};
 }

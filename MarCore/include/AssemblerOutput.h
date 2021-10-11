@@ -115,11 +115,57 @@ namespace MarC
 
 	#pragma pack(pop)
 
-	typedef std::string LabelName;
-	typedef uint64_t Address;
-	typedef std::pair<LabelName, Address> LabelRef;
+	union BC_MemCell
+	{
+		int8_t as_I_8;
+		int16_t as_I_16;
+		int32_t as_I_32;
+		int64_t as_I_64;
+		uint8_t as_U_8;
+		uint16_t as_U_16;
+		uint32_t as_U_32;
+		uint64_t as_U_64;
+		float as_F_32;
+		double as_F_64;
+		bool as_BOOL;
+		BC_MemAddress as_ADDR;
+	public:
+		BC_MemCell() = default;
+		BC_MemCell(int64_t val) : as_I_64(val) {}
+		BC_MemCell(uint64_t val) : as_U_64(val) {}
+		BC_MemCell(float val) : as_F_32(val) {}
+		BC_MemCell(double val) : as_F_64(val) {}
+		BC_MemCell(bool val) : as_BOOL(val) {}
+		BC_MemCell(BC_MemAddress val) : as_ADDR(val) {}
+	};
+
+	struct BC_TypeCell
+	{
+		BC_TypeCell() = default;
+		BC_TypeCell(BC_Datatype dt, BC_MemCell mc) : datatype(dt), cell(mc) {}
+	public:
+		BC_Datatype datatype;
+		BC_MemCell cell;
+	};
+
+	struct Label
+	{
+		Label(const std::string& name, BC_MemAddress addr);
+	public:
+		std::string name;
+		BC_MemAddress addr;
+	};
+	struct LabelRef
+	{
+		LabelRef(const std::string& name, uint64_t offset)
+			: name(name), offset(offset)
+		{}\
+	public:
+		std::string name;
+		uint64_t offset;
+	};
 	typedef std::vector<LabelRef> LabelRefList;
-	typedef std::map<LabelName, BC_MemAddress> LabelMap;
+	typedef std::map<std::string, BC_MemAddress> LabelMap;
 
 	class ModuleInfo
 	{
@@ -147,28 +193,6 @@ namespace MarC
 	};
 
 	typedef std::shared_ptr<ModuleInfo> ModuleInfoRef;
-
-	union BC_MemCell
-	{
-		int8_t as_I_8;
-		int16_t as_I_16;
-		int32_t as_I_32;
-		int64_t as_I_64;
-		uint8_t as_U_8;
-		uint16_t as_U_16;
-		uint32_t as_U_32;
-		uint64_t as_U_64;
-		float as_F_32;
-		double as_F_64;
-		bool as_BOOL;
-		BC_MemAddress as_ADDR;
-	};
-
-	struct BC_TypeCell
-	{
-		BC_MemCell cell;
-		BC_Datatype datatype;
-	};
 
 	inline constexpr uint64_t BC_MemRegisterID(BC_MemRegister memReg)
 	{

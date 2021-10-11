@@ -7,6 +7,20 @@ namespace MarC
 		return nLinesParsed + 1;
 	}
 
+	void ModuleInfo::backup()
+	{
+		bud.requiredModulesSize = requiredModules.size();
+		bud.codeMemorySize = codeMemory->size();
+		bud.nLinesParsed = nLinesParsed;
+	}
+
+	void ModuleInfo::recover()
+	{
+		requiredModules.resize(bud.requiredModulesSize);
+		codeMemory->resize(bud.codeMemorySize);
+		nLinesParsed = bud.nLinesParsed;
+	}
+
 	BC_MemAddress::BC_MemAddress(BC_MemBase base, uint64_t addr)
 		: base(base), addr(addr)
 	{
@@ -17,6 +31,11 @@ namespace MarC
 		asCode.base = base;
 		asCode.page = page;
 		asCode.addr = addr;
+	}
+
+	Label::Label(const std::string& name, BC_MemAddress addr)
+		: name(name), addr(addr)
+	{
 	}
 
 	ModuleInfo::ModuleInfo()
