@@ -115,15 +115,24 @@ namespace MarC
 
 	#pragma pack(pop)
 
-	struct BytecodeInfo
+	typedef std::string LabelName;
+	typedef uint64_t Address;
+	typedef std::pair<LabelName, Address> LabelRef;
+
+	struct ModuleInfo
 	{
-		std::map<std::string, BC_MemAddress> labels;
-		std::vector<std::pair<std::string, uint64_t>> unresolvedRefs;
-		std::vector<std::pair<std::string, uint64_t>> unresolvedRefsStaged;
-		std::vector<uint64_t> resolvedRefAddresses;
+		std::string moduleName;
+		std::string requiredModules;
 		MemoryRef staticStack;
 		MemoryRef codeMemory;
 		uint64_t nLinesParsed = 0;
+		std::map<LabelName, BC_MemAddress> labels;
+		struct
+		{
+			std::vector<LabelRef> unresolved;
+			std::vector<LabelRef> staged;
+			std::vector<Address> resolvedOffsets;
+		} refs;
 	public:
 		uint64_t getErrLine() const;
 	};

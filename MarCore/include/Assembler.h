@@ -50,7 +50,7 @@ namespace MarC
 
 	typedef AssemblerError::Code AsmErrCode;
 
-	#define RETURN_WITH_ERROR(errCode, errText) { err = AssemblerError(errCode, bci.getErrLine(), errText, __LINE__, __FILE__); return false; }
+	#define RETURN_WITH_ERROR(errCode, errText) { err = AssemblerError(errCode, mi.getErrLine(), errText, __LINE__, __FILE__); return false; }
 
 	struct AsmArgInfo
 	{
@@ -65,30 +65,30 @@ namespace MarC
 	class Assembler
 	{
 	public:
-		static bool assemble(BytecodeInfo& bci, AssemblerInfo& asmInfo, AssemblerError& err);
+		static bool assemble(ModuleInfo& bci, AssemblerInfo& asmInfo, AssemblerError& err);
 	private:
-		static bool parseLine(BytecodeInfo& bci, AssemblerInfo& asmInfo, AssemblerError& err);
-		static bool parseNumericArgument(BytecodeInfo& bci, AsmArgInfo& aai, AssemblerError& err);
+		static bool parseLine(ModuleInfo& bci, AssemblerInfo& asmInfo, AssemblerError& err);
+		static bool parseNumericArgument(ModuleInfo& bci, AsmArgInfo& aai, AssemblerError& err);
 		static bool isLiteral(const std::vector<std::string>& tokens);
-		static bool parseLiteral(const BytecodeInfo& bci, std::vector<std::string>& tokens, bool deref, AsmArgInfo& aai, AssemblerError& err);
+		static bool parseLiteral(const ModuleInfo& bci, std::vector<std::string>& tokens, bool deref, AsmArgInfo& aai, AssemblerError& err);
 	private:
-		static bool parseInstruction(BytecodeInfo& bci, std::vector<std::string>& tokens, AssemblerError& err);
-		static bool parse_insAlgebraicBinary(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
-		static bool parse_insConvert(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
-		static bool parse_insPush(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
-		static bool parse_insPop(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
-		static bool parse_insPushCopy(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
-		static bool parse_insPopCopy(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
-		static bool parse_insPushFrame(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
-		static bool parse_insPopFrame(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
-		static bool parse_insExit(BytecodeInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
+		static bool parseInstruction(ModuleInfo& bci, std::vector<std::string>& tokens, AssemblerError& err);
+		static bool parse_insAlgebraicBinary(ModuleInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
+		static bool parse_insConvert(ModuleInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
+		static bool parse_insPush(ModuleInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
+		static bool parse_insPop(ModuleInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
+		static bool parse_insPushCopy(ModuleInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
+		static bool parse_insPopCopy(ModuleInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
+		static bool parse_insPushFrame(ModuleInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
+		static bool parse_insPopFrame(ModuleInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
+		static bool parse_insExit(ModuleInfo& bci, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
 	private:
-		static bool parseDirective(BytecodeInfo& bci, std::vector<std::string>& tokens, AssemblerError& err);
-		static bool parse_dirLabel(BytecodeInfo& bci, std::vector<std::string>& tokens, AssemblerError& err);
+		static bool parseDirective(ModuleInfo& bci, std::vector<std::string>& tokens, AssemblerError& err);
+		static bool parse_dirLabel(ModuleInfo& bci, std::vector<std::string>& tokens, AssemblerError& err);
 	private:
-		static void resolveUnresolvedRefs(BytecodeInfo& bci);
-		static bool tokenizeLine(const BytecodeInfo& bci, AssemblerInfo& asmInfo, std::vector<std::string>& tokensOut, AssemblerError& err);
-		static bool tokenizeNumericArgument(const BytecodeInfo& bci, const std::string& argument, std::vector<std::string>& tokensOut, AssemblerError& err);
+		static void resolveUnresolvedRefs(ModuleInfo& bci);
+		static bool tokenizeLine(const ModuleInfo& bci, AssemblerInfo& asmInfo, std::vector<std::string>& tokensOut, AssemblerError& err);
+		static bool tokenizeNumericArgument(const ModuleInfo& bci, const std::string& argument, std::vector<std::string>& tokensOut, AssemblerError& err);
 		static bool isInstruction(const std::string& token);
 		static bool isDirective(const std::string& token);
 		static std::pair<std::string, std::string> getOpCodePartsFromToken(const std::string& token);
@@ -96,9 +96,9 @@ namespace MarC
 		static bool literalToU64(const std::string& literalStr, uint64_t& output);
 		static bool literalToF64(const std::string& literalStr, double& output);
 	
-		static bool isCorrectTokenNum(uint64_t expected, uint64_t provided, const BytecodeInfo& bci, AssemblerError& err);
-		static bool isCorrectTokenNum(uint64_t expectedMin, uint64_t expectedMax, uint64_t provided, const BytecodeInfo& bci, AssemblerError& err);
+		static bool isCorrectTokenNum(uint64_t expected, uint64_t provided, const ModuleInfo& bci, AssemblerError& err);
+		static bool isCorrectTokenNum(uint64_t expectedMin, uint64_t expectedMax, uint64_t provided, const ModuleInfo& bci, AssemblerError& err);
 	private:
-		static BC_MemAddress currCodeAddr(BytecodeInfo& bci);
+		static BC_MemAddress currCodeAddr(ModuleInfo& bci);
 	};
 }

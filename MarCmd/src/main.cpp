@@ -27,9 +27,9 @@ int main()
 {
 	std::string code = readFile("testcode.mcas"); // Load the MarC Assembly file
 
-	MarC::BytecodeInfo bci;
-	bci.staticStack = std::make_shared<MarC::Memory>();
-	bci.codeMemory = std::make_shared<MarC::Memory>();
+	MarC::ModuleInfo modInfo;
+	modInfo.staticStack = std::make_shared<MarC::Memory>();
+	modInfo.codeMemory = std::make_shared<MarC::Memory>();
 
 	MarC::AssemblerInfo asmInfo;
 	asmInfo.nextCharToAssemble = 0;
@@ -37,13 +37,13 @@ int main()
 
 	MarC::AssemblerError asmErr;
 
-	if (!MarC::Assembler::assemble(bci, asmInfo, asmErr))
+	if (!MarC::Assembler::assemble(modInfo, asmInfo, asmErr))
 		std::cout << "An error occured while running the assembler!" << std::endl
 		<< "    " << asmErr.getMessage() << std::endl;
 	else
 		std::cout << "Successfully assembled the code!" << std::endl;
 
-	MarC::Interpreter ip(bci.staticStack, bci.codeMemory, 4096);
+	MarC::Interpreter ip(modInfo.staticStack, modInfo.codeMemory, 4096);
 
 	if (!ip.interpret() && ip.lastError().getCode() != MarC::IntErrCode::AbortViaExit)
 		std::cout << "An error occured while interpreting the code!" << std::endl

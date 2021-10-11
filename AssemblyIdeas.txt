@@ -45,6 +45,8 @@ Instructionset:
     exit
 
 Other:
+    #module : [modName]                       Links the current file to the given module name
+    #insmod : [modName]                        Module to insert at this location
     #label : [name]                         Create a label with name name holding the current code pointer
     #static : [name] : [size]               Shortcut for: label : [name] \ add.u64 $sp : [size]
     #string : [name] : "[text]"             Store text on the stack

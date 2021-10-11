@@ -2,7 +2,7 @@
 
 namespace MarC
 {
-	uint64_t BytecodeInfo::getErrLine() const
+	uint64_t ModuleInfo::getErrLine() const
 	{
 		return nLinesParsed + 1;
 	}
