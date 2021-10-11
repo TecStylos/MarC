@@ -19,9 +19,10 @@ namespace MarC
 		return m_code;
 	}
 
-	Interpreter::Interpreter(MemoryRef staticStack, MemoryRef codeMemory, uint64_t dynStackSize)
+	Interpreter::Interpreter(ExecutableInfoRef pExeInfo, uint64_t dynStackSize)
+		: m_pExeInfo(pExeInfo)
 	{
-		initMemory(staticStack, codeMemory, dynStackSize);
+		initMemory(dynStackSize);
 	}
 
 	bool Interpreter::interpret(uint64_t nInstructions)
@@ -56,7 +57,7 @@ namespace MarC
 		case BC_MEM_BASE_NONE:
 			break;
 		case BC_MEM_BASE_STATIC_STACK:
-			hostAddr = (char*)m_mem.staticStack->getBaseAddress() + clientAddr.addr;
+			hostAddr = (char*)m_pExeInfo->staticStack->getBaseAddress() + clientAddr.addr;
 			break;
 		case BC_MEM_BASE_DYNAMIC_STACK:
 			hostAddr = (char*)m_mem.dynamicStack->getBaseAddress() + clientAddr.addr;
@@ -68,7 +69,7 @@ namespace MarC
 			hostAddr = (char*)hostAddress(getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR) - clientAddr.addr;
 			break;
 		case BC_MEM_BASE_CODE_MEMORY:
-			hostAddr = (char*)m_mem.codeMemory->getBaseAddress() + clientAddr.addr;
+			hostAddr = (char*)m_pExeInfo->modules[clientAddr.asCode.page]->codeMemory->getBaseAddress() + clientAddr.asCode.addr;
 			break;
 		case BC_MEM_BASE_REGISTER:
 			hostAddr = &m_mem.registers[clientAddr.addr];
@@ -100,13 +101,8 @@ namespace MarC
 		return m_mem.registers[BC_MemRegisterID(reg)];
 	}
 
-	void Interpreter::initMemory(MemoryRef staticStack, MemoryRef codeMemory, uint64_t dynStackSize)
+	void Interpreter::initMemory(uint64_t dynStackSize)
 	{
-		if (staticStack)
-			m_mem.staticStack = staticStack;
-		if (codeMemory)
-			m_mem.codeMemory = codeMemory;
-
 		m_mem.dynamicStack = std::make_shared<Memory>(dynStackSize);
 
 		getRegister(BC_MEM_REG_STACK_POINTER).as_ADDR = BC_MemAddress(BC_MEM_BASE_DYNAMIC_STACK, 0);

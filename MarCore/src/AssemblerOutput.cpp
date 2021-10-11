@@ -19,6 +19,13 @@ namespace MarC
 		asCode.addr = addr;
 	}
 
+	ModuleInfo::ModuleInfo()
+	{
+		moduleName = "<unnamed>";
+		codeMemory = std::make_shared<Memory>();
+		nLinesParsed = 0;
+	}
+
 	BC_OpCode BC_OpCodeFromString(const std::string& ocStr)
 	{
 		static constexpr struct

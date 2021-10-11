@@ -22,32 +22,48 @@ namespace MarC
 			+ "SYSFILE: " + m_sysErrFile + "  SYSLINE: " + std::to_string(m_sysErrLine);
 	}
 
-	bool Assembler::assemble(ModuleInfo& mi, AssemblerInfo& asmInfo, AssemblerError& err)
+	Assembler::Assembler(const std::string& asmCode)
+		: m_asmCode(asmCode)
 	{
-		uint64_t prevBytecodeSize = mi.codeMemory->size();
+		m_pModInfo = std::make_shared<ModuleInfo>();
+	}
 
-		while (parseLine(mi, asmInfo, err) && asmInfo.nextCharToAssemble < asmInfo.pAssemblyCode->size())
-			++mi.nLinesParsed;
+	bool Assembler::assemble()
+	{
+		uint64_t prevBytecodeSize = m_pModInfo->codeMemory->size();
 
-		if (err)
+		while (parseLine(*m_pModInfo, m_lastErr) && m_nextCharToAssemble < m_asmCode.size())
+			++m_pModInfo->nLinesParsed;
+
+		if (m_lastErr)
 		{
-			mi.codeMemory->resize(prevBytecodeSize);
-			mi.refs.staged.clear();
+			m_pModInfo->codeMemory->resize(prevBytecodeSize);
+			m_pModInfo->unresolvedRefs.clear();
 
 			return false;
 		}
 
-		resolveUnresolvedRefs(mi);
+		resolveUnresolvedRefs(*m_pModInfo);
 
 		return true;
 	}
 
-	bool Assembler::parseLine(ModuleInfo& mi, AssemblerInfo& asmInfo, AssemblerError& err)
+	ModuleInfoRef Assembler::getModuleInfo()
+	{
+		return m_pModInfo;
+	}
+
+	const AssemblerError& Assembler::lastError() const
+	{
+		return m_lastErr;
+	}
+
+	bool Assembler::parseLine(ModuleInfo& mi, AssemblerError& err)
 	{
 		std::vector<std::string> tokens;
-		if (!tokenizeLine(mi, asmInfo, tokens, err))
+		if (!tokenizeLine(mi, tokens, err))
 			return false;
-		++asmInfo.nextCharToAssemble;
+		++m_nextCharToAssemble;
 
 		if (tokens.size() == 0)
 			return true;
@@ -138,7 +154,7 @@ namespace MarC
 			if (aai.pOcx->datatype != BC_DT_U_64)
 				RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Labels without a dereference operator can only be used as U64 values.");
 
-			mi.refs.staged.push_back(std::make_pair(tokens[0], mi.codeMemory->size() + aai.offsetInInstruction));
+			mi.unresolvedRefs.push_back(std::make_pair(tokens[0], mi.codeMemory->size() + aai.offsetInInstruction));
 
 			return true;
 		}
@@ -318,10 +334,11 @@ namespace MarC
 			if (!parse_insExit(mi, tokens, ocx, err))
 				return false;
 			break;
-
 		default:
 			RETURN_WITH_ERROR(AsmErrCode::OpCodeUnknown, "Function 'parseLine' cannot handle opCode '" + std::to_string(ocx.opCode) + "'!");
 		}
+
+		return true;
 	}
 
 	bool Assembler::parse_insAlgebraicBinary(ModuleInfo& mi, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
@@ -555,19 +572,14 @@ namespace MarC
 			}
 		};
 
-		resolve(mi.refs.unresolved);
-		resolve(mi.refs.staged);
-
-		for (auto& elem : mi.refs.staged)
-			mi.refs.unresolved.push_back(elem);
-		mi.refs.staged.clear();
+		resolve(mi.unresolvedRefs);
 	}
 
-	bool Assembler::tokenizeLine(const ModuleInfo& mi, AssemblerInfo& asmInfo, std::vector<std::string>& tokensOut, AssemblerError& err)
+	bool Assembler::tokenizeLine(const ModuleInfo& mi, std::vector<std::string>& tokensOut, AssemblerError& err)
 	{
-		uint64_t lineEnd = asmInfo.pAssemblyCode->find_first_of('\n', asmInfo.nextCharToAssemble);
+		uint64_t lineEnd = m_asmCode.find_first_of('\n', m_nextCharToAssemble);
 		if (lineEnd == std::string::npos)
-			lineEnd = asmInfo.pAssemblyCode->size();
+			lineEnd = m_asmCode.size();
 		
 		enum class State
 		{
@@ -580,9 +592,9 @@ namespace MarC
 
 		std::string currentToken;
 
-		while (asmInfo.nextCharToAssemble < lineEnd)
+		while (m_nextCharToAssemble < lineEnd)
 		{
-			char c = (*asmInfo.pAssemblyCode)[asmInfo.nextCharToAssemble];
+			char c = (m_asmCode)[m_nextCharToAssemble];
 
 			switch (state)
 			{
@@ -625,11 +637,11 @@ namespace MarC
 				else
 				{
 					state = State::EndToken;
-					asmInfo.nextCharToAssemble -= 1;
+					m_nextCharToAssemble -= 1;
 				}
 			}
 
-			if (state == State::EndToken || asmInfo.nextCharToAssemble == lineEnd - 1)
+			if (state == State::EndToken || m_nextCharToAssemble == lineEnd - 1)
 			{
 				if (!currentToken.empty())
 					tokensOut.push_back(currentToken);
@@ -637,7 +649,7 @@ namespace MarC
 				state = State::BeginToken;
 			}
 
-			++asmInfo.nextCharToAssemble;
+			++m_nextCharToAssemble;
 		}
 
 		return true;

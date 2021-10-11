@@ -1,6 +1,7 @@
 #pragma once
 
 #include "InterpreterMemory.h"
+#include "LinkerOutput.h"
 
 namespace MarC
 {
@@ -36,7 +37,7 @@ namespace MarC
 	{
 		static constexpr uint64_t RunTillEOC = -1; // Run until the interpreter reaches the end of code.
 	public:
-		Interpreter(MemoryRef staticStack, MemoryRef codeMemory, uint64_t dynStackSize);
+		Interpreter(ExecutableInfoRef pExeInfo, uint64_t dynStackSize);
 	public:
 		bool interpret(uint64_t nInstructinos = RunTillEOC);
 	public:
@@ -44,7 +45,7 @@ namespace MarC
 		BC_MemAddress clientAddress(void* hostAddr, BC_MemBase base);
 		BC_MemCell& getRegister(BC_MemRegister reg);
 	private:
-		void initMemory(MemoryRef staticStack, MemoryRef codeMemory, uint64_t dynStackSize);
+		void initMemory(uint64_t dynStackSize);
 		template <typename T> T& readCodeAndMove();
 		template <typename T> T& readCodeAndMove(uint64_t shift);
 		BC_MemCell& readMemCellAndMove(BC_Datatype dt, bool deref);
@@ -65,6 +66,7 @@ namespace MarC
 	public:
 		const InterpreterError& lastError() const;
 	private:
+		ExecutableInfoRef m_pExeInfo;
 		InterpreterMemory m_mem;
 		InterpreterError m_lastErr;
 	};
@@ -77,7 +79,7 @@ namespace MarC
 	template <typename T> T& Interpreter::readCodeAndMove(uint64_t shift)
 	{
 		auto& val = *(T*)hostAddress(getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR, false);
-		getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR.addr += shift;
+		getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR.asCode.addr += shift;
 		return val;
 	}
 }

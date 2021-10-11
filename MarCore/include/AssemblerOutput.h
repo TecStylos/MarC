@@ -118,24 +118,35 @@ namespace MarC
 	typedef std::string LabelName;
 	typedef uint64_t Address;
 	typedef std::pair<LabelName, Address> LabelRef;
+	typedef std::vector<LabelRef> LabelRefList;
+	typedef std::map<LabelName, BC_MemAddress> LabelMap;
 
-	struct ModuleInfo
+	class ModuleInfo
 	{
+	public:
 		std::string moduleName;
-		std::string requiredModules;
-		MemoryRef staticStack;
+		std::vector<std::string> requiredModules;
 		MemoryRef codeMemory;
-		uint64_t nLinesParsed = 0;
-		std::map<LabelName, BC_MemAddress> labels;
-		struct
-		{
-			std::vector<LabelRef> unresolved;
-			std::vector<LabelRef> staged;
-			std::vector<Address> resolvedOffsets;
-		} refs;
+		LabelMap labels;
+		LabelRefList unresolvedRefs;
+		uint64_t nLinesParsed;
+	public:
+		ModuleInfo();
 	public:
 		uint64_t getErrLine() const;
+	public:
+		void backup();
+		void recover();
+	private:
+		struct BackupData
+		{
+			uint64_t requiredModulesSize = 0;
+			uint64_t codeMemorySize = 0;
+			uint64_t nLinesParsed = 0;
+		} bud;
 	};
+
+	typedef std::shared_ptr<ModuleInfo> ModuleInfoRef;
 
 	union BC_MemCell
 	{

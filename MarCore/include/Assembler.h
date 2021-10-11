@@ -5,11 +5,6 @@
 
 namespace MarC
 {
-	struct AssemblerInfo
-	{
-		std::string* pAssemblyCode;
-		uint64_t nextCharToAssemble;
-	};
 
 	class AssemblerError
 	{
@@ -65,9 +60,15 @@ namespace MarC
 	class Assembler
 	{
 	public:
-		static bool assemble(ModuleInfo& bci, AssemblerInfo& asmInfo, AssemblerError& err);
+		Assembler(const std::string& asmCode);
+	public:
+		bool assemble();
+	public:
+		ModuleInfoRef getModuleInfo();
+	public:
+		const AssemblerError& lastError() const;
 	private:
-		static bool parseLine(ModuleInfo& bci, AssemblerInfo& asmInfo, AssemblerError& err);
+		bool parseLine(ModuleInfo& bci, AssemblerError& err);
 		static bool parseNumericArgument(ModuleInfo& bci, AsmArgInfo& aai, AssemblerError& err);
 		static bool isLiteral(const std::vector<std::string>& tokens);
 		static bool parseLiteral(const ModuleInfo& bci, std::vector<std::string>& tokens, bool deref, AsmArgInfo& aai, AssemblerError& err);
@@ -87,7 +88,7 @@ namespace MarC
 		static bool parse_dirLabel(ModuleInfo& bci, std::vector<std::string>& tokens, AssemblerError& err);
 	private:
 		static void resolveUnresolvedRefs(ModuleInfo& bci);
-		static bool tokenizeLine(const ModuleInfo& bci, AssemblerInfo& asmInfo, std::vector<std::string>& tokensOut, AssemblerError& err);
+		bool tokenizeLine(const ModuleInfo& bci, std::vector<std::string>& tokensOut, AssemblerError& err);
 		static bool tokenizeNumericArgument(const ModuleInfo& bci, const std::string& argument, std::vector<std::string>& tokensOut, AssemblerError& err);
 		static bool isInstruction(const std::string& token);
 		static bool isDirective(const std::string& token);
@@ -100,5 +101,10 @@ namespace MarC
 		static bool isCorrectTokenNum(uint64_t expectedMin, uint64_t expectedMax, uint64_t provided, const ModuleInfo& bci, AssemblerError& err);
 	private:
 		static BC_MemAddress currCodeAddr(ModuleInfo& bci);
+	private:
+		AssemblerError m_lastErr;
+		ModuleInfoRef m_pModInfo;
+		std::string m_asmCode;
+		uint64_t m_nextCharToAssemble = 0;
 	};
 }

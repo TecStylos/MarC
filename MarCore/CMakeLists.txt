@@ -12,7 +12,7 @@ add_library(
 	"src/Assembler.cpp"
 	"src/AssemblerOutput.cpp"
 	"src/Interpreter.cpp"
-)
+ "include/Linker.h" "include/LinkerOutput.h" "src/Linker.cpp")
 
 target_include_directories(
 	MarCore PUBLIC
