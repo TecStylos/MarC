@@ -38,7 +38,13 @@ int main()
 		return -1;
 	}
 
-	linker.addModule(assembler.getModuleInfo());
+	if (linker.addModule(assembler.getModuleInfo()))
+		std::cout << "Successfully added the module to the linker!" << std::endl;
+	else
+	{
+		std::cout << "An error occured while adding the module to the linker!" << std::endl;
+		return -1;
+	}
 
 	if (linker.link())
 		std::cout << "Successfully linked the code!" << std::endl;
@@ -48,6 +54,7 @@ int main()
 		return -1;
 	}
 
+	std::cout << "Running the interpreter..." << std::endl;
 	if (interpreter.interpret() || interpreter.lastError().isOK())
 		std::cout << "Successfully interpreted the code!" << std::endl;
 	else
