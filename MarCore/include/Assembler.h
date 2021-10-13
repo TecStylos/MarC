@@ -82,6 +82,7 @@ namespace MarC
 		static bool parse_insPopCopy(ModuleInfo& mi, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
 		static bool parse_insPushFrame(ModuleInfo& mi, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
 		static bool parse_insPopFrame(ModuleInfo& mi, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
+		static bool parse_insJump(ModuleInfo& mi, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
 		static bool parse_insExit(ModuleInfo& mi, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err);
 	private:
 		static bool parseDirective(ModuleInfo& mi, std::vector<std::string>& tokens, AssemblerError& err);

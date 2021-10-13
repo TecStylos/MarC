@@ -74,6 +74,8 @@ namespace MarC
 			{ "pushf",  BC_OC_PUSH_FRAME },
 			{ "popf",   BC_OC_POP_FRAME },
 
+			{ "jmp", BC_OC_JUMP },
+
 			{ "call",   BC_OC_CALL },
 			{ "return", BC_OC_RETURN },
 			{ "exit",   BC_OC_EXIT },

@@ -321,6 +321,11 @@ namespace MarC
 				return false;
 			break;
 
+		case BC_OC_JUMP:
+			if (!parse_insJump(mi, tokens, ocx, err))
+				return false;
+			break;
+
 		case BC_OC_CALL:
 			break;
 		case BC_OC_RETURN:
@@ -507,6 +512,35 @@ namespace MarC
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Instruction 'popf' doesn't take any datatype!");
 
 		mi.codeMemory->push(ocx);
+
+		return true;
+	}
+
+	bool Assembler::parse_insJump(ModuleInfo& mi, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	{
+		if (!isCorrectTokenNum(2, tokens.size(), mi, err))
+			return false;
+		if (ocx.datatype != BC_OC_NONE)
+			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Instruction 'jmp' doesn't take any datatype!");
+		ocx.datatype = BC_DT_U_64;
+
+		AsmArgInfo aai;
+		BC_TypeCell arg;
+		aai.pOcx = &ocx;
+		aai.datatype = BC_DT_U_64;
+		arg.datatype = BC_DT_U_64;
+
+		aai.nthArg = 0;
+		aai.pString = &tokens[1];
+		aai.pArg = &arg;
+		aai.offsetInInstruction = sizeof(BC_OpCodeEx);
+		if (!parseNumericArgument(mi, aai, err))
+			return false;
+		if (aai.pArg->datatype != BC_DT_U_64)
+			RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Invalid datatype for destination argument!");
+
+		mi.codeMemory->push(ocx);
+		mi.codeMemory->push(&arg.cell, BC_DatatypeSize(arg.datatype));
 
 		return true;
 	}

@@ -47,8 +47,8 @@ namespace MarC
 		BC_MemCell& getRegister(BC_MemRegister reg);
 	private:
 		void initMemory(uint64_t dynStackSize);
-		template <typename T> T& readCodeAndMove();
-		template <typename T> T& readCodeAndMove(uint64_t shift);
+		template <typename T> T& readDataAndMove();
+		template <typename T> T& readDataAndMove(uint64_t shift);
 		BC_MemCell& readMemCellAndMove(BC_Datatype dt, bool deref);
 	private:
 		void execNext();
@@ -64,6 +64,7 @@ namespace MarC
 		void exec_insPopCopy(BC_OpCodeEx ocx);
 		void exec_insPushFrame(BC_OpCodeEx ocx);
 		void exec_insPopFrame(BC_OpCodeEx ocx);
+		void exec_insJump(BC_OpCodeEx ocx);
 	public:
 		const InterpreterError& lastError() const;
 	private:
@@ -72,12 +73,12 @@ namespace MarC
 		InterpreterError m_lastErr;
 	};
 
-	template <typename T> T& Interpreter::readCodeAndMove()
+	template <typename T> T& Interpreter::readDataAndMove()
 	{
-		return readCodeAndMove<T>(sizeof(T));
+		return readDataAndMove<T>(sizeof(T));
 	}
 
-	template <typename T> T& Interpreter::readCodeAndMove(uint64_t shift)
+	template <typename T> T& Interpreter::readDataAndMove(uint64_t shift)
 	{
 		auto& val = *(T*)hostAddress(getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR, false);
 		getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR.asCode.addr += shift;

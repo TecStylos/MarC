@@ -50,6 +50,8 @@ namespace MarC
 		BC_OC_PUSH_FRAME,
 		BC_OC_POP_FRAME,
 
+		BC_OC_JUMP,
+
 		BC_OC_CALL,
 		BC_OC_RETURN,
 		BC_OC_EXIT,

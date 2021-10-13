@@ -122,15 +122,15 @@ namespace MarC
 	BC_MemCell& Interpreter::readMemCellAndMove(BC_Datatype dt, bool deref)
 	{
 		return deref
-			? *(BC_MemCell*)hostAddress(readCodeAndMove<BC_MemAddress>(), false)
-			: readCodeAndMove<BC_MemCell>(BC_DatatypeSize(dt));
+			? *(BC_MemCell*)hostAddress(readDataAndMove<BC_MemAddress>(), false)
+			: readDataAndMove<BC_MemCell>(BC_DatatypeSize(dt));
 	}
 
 	void Interpreter::execNext()
 	{
-		static_assert(BC_OC_NUM_OF_OP_CODES == 18);
+		static_assert(BC_OC_NUM_OF_OP_CODES == 19);
 
-		auto ocx = readCodeAndMove<BC_OpCodeEx>();
+		auto ocx = readDataAndMove<BC_OpCodeEx>();
 
 		switch (ocx.opCode)
 		{
@@ -168,6 +168,9 @@ namespace MarC
 		case BC_OC_POP_FRAME:
 			exec_insPopFrame(ocx); break;
 
+		case BC_OC_JUMP:
+			exec_insJump(ocx); break;
+
 		case BC_OC_CALL:
 			throw InterpreterError(IntErrCode::OpCodeNotImplemented, "The opCode '" + std::to_string(ocx.opCode) + "' has not been implemented yet!");
 		case BC_OC_RETURN:
@@ -183,38 +186,38 @@ namespace MarC
 
 	void Interpreter::exec_insMove(BC_OpCodeEx ocx)
 	{
-		void* dest = hostAddress(readCodeAndMove<BC_MemAddress>(), ocx.derefArg0);
+		void* dest = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
 		BC_MemCell src = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg1);
 		memcpy(dest, &src, BC_DatatypeSize((BC_Datatype)ocx.datatype));
 	}
 	void Interpreter::exec_insAdd(BC_OpCodeEx ocx)
 	{
-		auto& dest = *(BC_MemCell*)hostAddress(readCodeAndMove<BC_MemAddress>(), ocx.derefArg0);
+		auto& dest = *(BC_MemCell*)hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
 		BC_MemCell src = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg1);
 		MARC_INTERPRETER_BINARY_OP(dest, +=, src, ocx.datatype);
 	}
 	void Interpreter::exec_insSubtract(BC_OpCodeEx ocx)
 	{
-		auto& dest = *(BC_MemCell*)hostAddress(readCodeAndMove<BC_MemAddress>(), ocx.derefArg0);
+		auto& dest = *(BC_MemCell*)hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
 		BC_MemCell src = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg1);
 		MARC_INTERPRETER_BINARY_OP(dest, -=, src, ocx.datatype);
 	}
 	void Interpreter::exec_insMultiply(BC_OpCodeEx ocx)
 	{
-		auto& dest = *(BC_MemCell*)hostAddress(readCodeAndMove<BC_MemAddress>(), ocx.derefArg0);
+		auto& dest = *(BC_MemCell*)hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
 		BC_MemCell src = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg1);
 		MARC_INTERPRETER_BINARY_OP(dest, *=, src, ocx.datatype);
 	}
 	void Interpreter::exec_insDivide(BC_OpCodeEx ocx)
 	{
-		auto& dest = *(BC_MemCell*)hostAddress(readCodeAndMove<BC_MemAddress>(), ocx.derefArg0);
+		auto& dest = *(BC_MemCell*)hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
 		BC_MemCell src = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg1);
 		MARC_INTERPRETER_BINARY_OP(dest, /=, src, ocx.datatype);
 	}
 	void Interpreter::exec_insConvert(BC_OpCodeEx ocx)
 	{
-		auto& dest = *(BC_MemCell*)hostAddress(readCodeAndMove<BC_MemAddress>(), ocx.derefArg0);
-		BC_Datatype newDT = readCodeAndMove<BC_Datatype>();
+		auto& dest = *(BC_MemCell*)hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
+		BC_Datatype newDT = readDataAndMove<BC_Datatype>();
 
 		// TODO: More compact
 		#pragma warning(disable: 4244)
@@ -386,7 +389,7 @@ namespace MarC
 		regSP.as_ADDR.addr -= BC_DatatypeSize((BC_Datatype)ocx.datatype);
 
 		auto src = hostAddress(regSP.as_ADDR, false);
-		auto dest = hostAddress(readCodeAndMove<BC_MemAddress>(), ocx.derefArg0);
+		auto dest = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
 
 		memcpy(dest, src, BC_DatatypeSize((BC_Datatype)ocx.datatype));
 	}
@@ -409,6 +412,14 @@ namespace MarC
 		regSP.as_ADDR.addr -= BC_DatatypeSize(BC_DT_U_64);
 		auto oldFP = *(BC_MemCell*)hostAddress(regSP.as_ADDR, false);
 		regFP.as_ADDR = oldFP.as_ADDR;
+	}
+	void Interpreter::exec_insJump(BC_OpCodeEx ocx)
+	{
+		auto& regCP = getRegister(BC_MEM_REG_CODE_POINTER);
+
+		auto& destAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg0);
+
+		regCP = destAddr;
 	}
 
 	const InterpreterError& Interpreter::lastError() const
