@@ -65,6 +65,7 @@ namespace MarC
 		void exec_insPushFrame(BC_OpCodeEx ocx);
 		void exec_insPopFrame(BC_OpCodeEx ocx);
 		void exec_insJump(BC_OpCodeEx ocx);
+		void exec_insExit(BC_OpCodeEx ocx);
 	public:
 		const InterpreterError& lastError() const;
 	private:

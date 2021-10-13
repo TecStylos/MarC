@@ -290,11 +290,6 @@ namespace MarC
 				return false;
 			break;
 
-		case BC_OC_COPY:
-			//if (!isCorrectTokenNum(4, tokens.size(), mi, err))
-			//	return false;
-			break;
-
 		case BC_OC_PUSH:
 			if (!parse_insPush(tokens, ocx))
 				return false;
@@ -303,11 +298,11 @@ namespace MarC
 			if (!parse_insPop(tokens, ocx))
 				return false;
 			break;
-		case BC_OC_PUSHC:
+		case BC_OC_PUSH_COPY:
 			if (!parse_insPushCopy(tokens, ocx))
 				return false;
 			break;
-		case BC_OC_POPC:
+		case BC_OC_POP_COPY:
 			if (!parse_insPopCopy(tokens, ocx))
 				return false;
 			break;
@@ -324,13 +319,6 @@ namespace MarC
 		case BC_OC_JUMP:
 			if (!parse_insJump(tokens, ocx))
 				return false;
-			break;
-
-		case BC_OC_CALL:
-			break;
-		case BC_OC_RETURN:
-			//if (!isCorrectTokenNum(1, tokens.size(), mi, err))
-			//	return false;
 			break;
 
 		case BC_OC_EXIT:

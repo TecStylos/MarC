@@ -64,20 +64,16 @@ namespace MarC
 
 			{ "conv",   BC_OC_CONVERT },
 
-			{ "cpy",    BC_OC_COPY },
-
 			{ "push",   BC_OC_PUSH },
 			{ "pop",    BC_OC_POP },
-			{ "pushc",  BC_OC_PUSHC },
-			{ "popc",   BC_OC_POPC },
+			{ "pushc",  BC_OC_PUSH_COPY },
+			{ "popc",   BC_OC_POP_COPY },
 
 			{ "pushf",  BC_OC_PUSH_FRAME },
 			{ "popf",   BC_OC_POP_FRAME },
 
 			{ "jmp", BC_OC_JUMP },
 
-			{ "call",   BC_OC_CALL },
-			{ "return", BC_OC_RETURN },
 			{ "exit",   BC_OC_EXIT },
 		};
 		static_assert(sizeof(codes) / sizeof(*codes) == BC_OC_NUM_OF_OP_CODES);
