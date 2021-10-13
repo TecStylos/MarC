@@ -43,7 +43,9 @@ namespace MarC
 		bool interpret(uint64_t nInstructinos = RunTillEOC);
 	public:
 		void* hostAddress(BC_MemAddress clientAddr, bool deref = false);
-		BC_MemAddress clientAddress(void* hostAddr, BC_MemBase base);
+		template <typename T> T& hostObject(BC_MemAddress clientAddr, bool deref = false);
+		BC_MemCell& hostMemCell(BC_MemAddress clientAddr, bool deref = false);
+	public:
 		BC_MemCell& getRegister(BC_MemRegister reg);
 	private:
 		void initMemory(uint64_t dynStackSize);
@@ -76,6 +78,11 @@ namespace MarC
 		InterpreterMemory m_mem;
 		InterpreterError m_lastErr;
 	};
+
+	template <typename T> T& Interpreter::hostObject(BC_MemAddress clientAddr, bool deref)
+	{
+		return *(T*)hostAddress(clientAddr, deref);
+	}
 
 	template <typename T> T& Interpreter::readDataAndMove()
 	{

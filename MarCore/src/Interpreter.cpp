@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <unordered_map>
+#include "ConvertInPlace.h"
 
 namespace MarC
 {
@@ -91,18 +92,11 @@ namespace MarC
 		if (deref && hostAddr) // TODO: Error handling if hostAddr == nullptr
 			hostAddr = hostAddress(*(BC_MemAddress*)hostAddr);
 		return hostAddr;
-
 	}
 
-	BC_MemAddress Interpreter::clientAddress(void* hostAddr, BC_MemBase base)
+	BC_MemCell& Interpreter::hostMemCell(BC_MemAddress clientAddr, bool deref)
 	{
-		return BC_MemAddress(
-			base,
-			(uint64_t)hostAddr - (uint64_t)hostAddress(
-				BC_MemAddress(base, 0),
-				false
-			)
-		);
+		return hostObject<BC_MemCell>(clientAddr, deref);
 	}
 
 	BC_MemCell& Interpreter::getRegister(BC_MemRegister reg)
@@ -125,7 +119,7 @@ namespace MarC
 	BC_MemCell& Interpreter::readMemCellAndMove(BC_Datatype dt, bool deref)
 	{
 		return deref
-			? *(BC_MemCell*)hostAddress(readDataAndMove<BC_MemAddress>(), false)
+			? hostMemCell(readDataAndMove<BC_MemAddress>(), false)
 			: readDataAndMove<BC_MemCell>(BC_DatatypeSize(dt));
 	}
 
@@ -180,172 +174,33 @@ namespace MarC
 	}
 	void Interpreter::exec_insAdd(BC_OpCodeEx ocx)
 	{
-		auto& dest = *(BC_MemCell*)hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
+		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
 		BC_MemCell src = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg1);
 		MARC_INTERPRETER_BINARY_OP(dest, +=, src, ocx.datatype);
 	}
 	void Interpreter::exec_insSubtract(BC_OpCodeEx ocx)
 	{
-		auto& dest = *(BC_MemCell*)hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
+		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
 		BC_MemCell src = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg1);
 		MARC_INTERPRETER_BINARY_OP(dest, -=, src, ocx.datatype);
 	}
 	void Interpreter::exec_insMultiply(BC_OpCodeEx ocx)
 	{
-		auto& dest = *(BC_MemCell*)hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
+		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
 		BC_MemCell src = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg1);
 		MARC_INTERPRETER_BINARY_OP(dest, *=, src, ocx.datatype);
 	}
 	void Interpreter::exec_insDivide(BC_OpCodeEx ocx)
 	{
-		auto& dest = *(BC_MemCell*)hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
+		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
 		BC_MemCell src = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg1);
 		MARC_INTERPRETER_BINARY_OP(dest, /=, src, ocx.datatype);
 	}
 	void Interpreter::exec_insConvert(BC_OpCodeEx ocx)
 	{
-		auto& dest = *(BC_MemCell*)hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
-		BC_Datatype newDT = readDataAndMove<BC_Datatype>();
-
-		// TODO: More compact
-		#pragma warning(disable: 4244)
-		#define COMB_DT(left, right) (((uint32_t)left << 16) | (uint32_t)right)
-		switch (COMB_DT(ocx.datatype, newDT))
-		{
-		case COMB_DT(BC_DT_I_8,	 BC_DT_I_8):  dest.as_I_8  = dest.as_I_8;  break;
-		case COMB_DT(BC_DT_I_8,	 BC_DT_I_16): dest.as_I_16 = dest.as_I_8;  break;
-		case COMB_DT(BC_DT_I_8,	 BC_DT_I_32): dest.as_I_32 = dest.as_I_8;  break;
-		case COMB_DT(BC_DT_I_8,	 BC_DT_I_64): dest.as_I_64 = dest.as_I_8;  break;
-		case COMB_DT(BC_DT_I_8,	 BC_DT_U_8):  dest.as_U_8  = dest.as_I_8;  break;
-		case COMB_DT(BC_DT_I_8,	 BC_DT_U_16): dest.as_U_16 = dest.as_I_8;  break;
-		case COMB_DT(BC_DT_I_8,	 BC_DT_U_32): dest.as_U_32 = dest.as_I_8;  break;
-		case COMB_DT(BC_DT_I_8,	 BC_DT_U_64): dest.as_U_64 = dest.as_I_8;  break;
-		case COMB_DT(BC_DT_I_8,	 BC_DT_F_32): dest.as_F_32 = dest.as_I_8;  break;
-		case COMB_DT(BC_DT_I_8,	 BC_DT_F_64): dest.as_F_64 = dest.as_I_8;  break;
-		case COMB_DT(BC_DT_I_8,	 BC_DT_BOOL): dest.as_BOOL = dest.as_I_8;  break;
-
-		case COMB_DT(BC_DT_I_16, BC_DT_I_8):  dest.as_I_8  = dest.as_I_16; break;
-		case COMB_DT(BC_DT_I_16, BC_DT_I_16): dest.as_I_16 = dest.as_I_16; break;
-		case COMB_DT(BC_DT_I_16, BC_DT_I_32): dest.as_I_32 = dest.as_I_16; break;
-		case COMB_DT(BC_DT_I_16, BC_DT_I_64): dest.as_I_64 = dest.as_I_16; break;
-		case COMB_DT(BC_DT_I_16, BC_DT_U_8):  dest.as_U_8  = dest.as_I_16; break;
-		case COMB_DT(BC_DT_I_16, BC_DT_U_16): dest.as_U_16 = dest.as_I_16; break;
-		case COMB_DT(BC_DT_I_16, BC_DT_U_32): dest.as_U_32 = dest.as_I_16; break;
-		case COMB_DT(BC_DT_I_16, BC_DT_U_64): dest.as_U_64 = dest.as_I_16; break;
-		case COMB_DT(BC_DT_I_16, BC_DT_F_32): dest.as_F_32 = dest.as_I_16; break;
-		case COMB_DT(BC_DT_I_16, BC_DT_F_64): dest.as_F_64 = dest.as_I_16; break;
-		case COMB_DT(BC_DT_I_16, BC_DT_BOOL): dest.as_BOOL = dest.as_I_16; break;
-
-		case COMB_DT(BC_DT_I_32, BC_DT_I_8):  dest.as_I_8 =  dest.as_I_32; break;
-		case COMB_DT(BC_DT_I_32, BC_DT_I_16): dest.as_I_16 = dest.as_I_32; break;
-		case COMB_DT(BC_DT_I_32, BC_DT_I_32): dest.as_I_32 = dest.as_I_32; break;
-		case COMB_DT(BC_DT_I_32, BC_DT_I_64): dest.as_I_64 = dest.as_I_32; break;
-		case COMB_DT(BC_DT_I_32, BC_DT_U_8):  dest.as_U_8 =  dest.as_I_32; break;
-		case COMB_DT(BC_DT_I_32, BC_DT_U_16): dest.as_U_16 = dest.as_I_32; break;
-		case COMB_DT(BC_DT_I_32, BC_DT_U_32): dest.as_U_32 = dest.as_I_32; break;
-		case COMB_DT(BC_DT_I_32, BC_DT_U_64): dest.as_U_64 = dest.as_I_32; break;
-		case COMB_DT(BC_DT_I_32, BC_DT_F_32): dest.as_F_32 = dest.as_I_32; break;
-		case COMB_DT(BC_DT_I_32, BC_DT_F_64): dest.as_F_64 = dest.as_I_32; break;
-		case COMB_DT(BC_DT_I_32, BC_DT_BOOL): dest.as_BOOL = dest.as_I_32; break;
-
-		case COMB_DT(BC_DT_I_64, BC_DT_I_8):  dest.as_I_8 =  dest.as_I_64; break;
-		case COMB_DT(BC_DT_I_64, BC_DT_I_16): dest.as_I_16 = dest.as_I_64; break;
-		case COMB_DT(BC_DT_I_64, BC_DT_I_32): dest.as_I_32 = dest.as_I_64; break;
-		case COMB_DT(BC_DT_I_64, BC_DT_I_64): dest.as_I_64 = dest.as_I_64; break;
-		case COMB_DT(BC_DT_I_64, BC_DT_U_8):  dest.as_U_8 =  dest.as_I_64; break;
-		case COMB_DT(BC_DT_I_64, BC_DT_U_16): dest.as_U_16 = dest.as_I_64; break;
-		case COMB_DT(BC_DT_I_64, BC_DT_U_32): dest.as_U_32 = dest.as_I_64; break;
-		case COMB_DT(BC_DT_I_64, BC_DT_U_64): dest.as_U_64 = dest.as_I_64; break;
-		case COMB_DT(BC_DT_I_64, BC_DT_F_32): dest.as_F_32 = dest.as_I_64; break;
-		case COMB_DT(BC_DT_I_64, BC_DT_F_64): dest.as_F_64 = dest.as_I_64; break;
-		case COMB_DT(BC_DT_I_64, BC_DT_BOOL): dest.as_BOOL = dest.as_I_64; break;
-
-		case COMB_DT(BC_DT_U_8,  BC_DT_I_8):  dest.as_I_8 =  dest.as_U_8;  break;
-		case COMB_DT(BC_DT_U_8,  BC_DT_I_16): dest.as_I_16 = dest.as_U_8;  break;
-		case COMB_DT(BC_DT_U_8,  BC_DT_I_32): dest.as_I_32 = dest.as_U_8;  break;
-		case COMB_DT(BC_DT_U_8,  BC_DT_I_64): dest.as_I_64 = dest.as_U_8;  break;
-		case COMB_DT(BC_DT_U_8,  BC_DT_U_8):  dest.as_U_8 =  dest.as_U_8;  break;
-		case COMB_DT(BC_DT_U_8,  BC_DT_U_16): dest.as_U_16 = dest.as_U_8;  break;
-		case COMB_DT(BC_DT_U_8,  BC_DT_U_32): dest.as_U_32 = dest.as_U_8;  break;
-		case COMB_DT(BC_DT_U_8,  BC_DT_U_64): dest.as_U_64 = dest.as_U_8;  break;
-		case COMB_DT(BC_DT_U_8,  BC_DT_F_32): dest.as_F_32 = dest.as_U_8;  break;
-		case COMB_DT(BC_DT_U_8,  BC_DT_F_64): dest.as_F_64 = dest.as_U_8;  break;
-		case COMB_DT(BC_DT_U_8,  BC_DT_BOOL): dest.as_BOOL = dest.as_U_8;  break;
-
-		case COMB_DT(BC_DT_U_16, BC_DT_I_8):  dest.as_I_8 =  dest.as_U_16; break;
-		case COMB_DT(BC_DT_U_16, BC_DT_I_16): dest.as_I_16 = dest.as_U_16; break;
-		case COMB_DT(BC_DT_U_16, BC_DT_I_32): dest.as_I_32 = dest.as_U_16; break;
-		case COMB_DT(BC_DT_U_16, BC_DT_I_64): dest.as_I_64 = dest.as_U_16; break;
-		case COMB_DT(BC_DT_U_16, BC_DT_U_8):  dest.as_U_8 =  dest.as_U_16; break;
-		case COMB_DT(BC_DT_U_16, BC_DT_U_16): dest.as_U_16 = dest.as_U_16; break;
-		case COMB_DT(BC_DT_U_16, BC_DT_U_32): dest.as_U_32 = dest.as_U_16; break;
-		case COMB_DT(BC_DT_U_16, BC_DT_U_64): dest.as_U_64 = dest.as_U_16; break;
-		case COMB_DT(BC_DT_U_16, BC_DT_F_32): dest.as_F_32 = dest.as_U_16; break;
-		case COMB_DT(BC_DT_U_16, BC_DT_F_64): dest.as_F_64 = dest.as_U_16; break;
-		case COMB_DT(BC_DT_U_16, BC_DT_BOOL): dest.as_BOOL = dest.as_U_16; break;
-
-		case COMB_DT(BC_DT_U_32, BC_DT_I_8):  dest.as_I_8 =  dest.as_U_32; break;
-		case COMB_DT(BC_DT_U_32, BC_DT_I_16): dest.as_I_16 = dest.as_U_32; break;
-		case COMB_DT(BC_DT_U_32, BC_DT_I_32): dest.as_I_32 = dest.as_U_32; break;
-		case COMB_DT(BC_DT_U_32, BC_DT_I_64): dest.as_I_64 = dest.as_U_32; break;
-		case COMB_DT(BC_DT_U_32, BC_DT_U_8):  dest.as_U_8 =  dest.as_U_32; break;
-		case COMB_DT(BC_DT_U_32, BC_DT_U_16): dest.as_U_16 = dest.as_U_32; break;
-		case COMB_DT(BC_DT_U_32, BC_DT_U_32): dest.as_U_32 = dest.as_U_32; break;
-		case COMB_DT(BC_DT_U_32, BC_DT_U_64): dest.as_U_64 = dest.as_U_32; break;
-		case COMB_DT(BC_DT_U_32, BC_DT_F_32): dest.as_F_32 = dest.as_U_32; break;
-		case COMB_DT(BC_DT_U_32, BC_DT_F_64): dest.as_F_64 = dest.as_U_32; break;
-		case COMB_DT(BC_DT_U_32, BC_DT_BOOL): dest.as_BOOL = dest.as_U_32; break;
-
-		case COMB_DT(BC_DT_U_64, BC_DT_I_8):  dest.as_I_8 =  dest.as_U_64; break;
-		case COMB_DT(BC_DT_U_64, BC_DT_I_16): dest.as_I_16 = dest.as_U_64; break;
-		case COMB_DT(BC_DT_U_64, BC_DT_I_32): dest.as_I_32 = dest.as_U_64; break;
-		case COMB_DT(BC_DT_U_64, BC_DT_I_64): dest.as_I_64 = dest.as_U_64; break;
-		case COMB_DT(BC_DT_U_64, BC_DT_U_8):  dest.as_U_8 =  dest.as_U_64; break;
-		case COMB_DT(BC_DT_U_64, BC_DT_U_16): dest.as_U_16 = dest.as_U_64; break;
-		case COMB_DT(BC_DT_U_64, BC_DT_U_32): dest.as_U_32 = dest.as_U_64; break;
-		case COMB_DT(BC_DT_U_64, BC_DT_U_64): dest.as_U_64 = dest.as_U_64; break;
-		case COMB_DT(BC_DT_U_64, BC_DT_F_32): dest.as_F_32 = dest.as_U_64; break;
-		case COMB_DT(BC_DT_U_64, BC_DT_F_64): dest.as_F_64 = dest.as_U_64; break;
-		case COMB_DT(BC_DT_U_64, BC_DT_BOOL): dest.as_BOOL = dest.as_U_64; break;
-
-		case COMB_DT(BC_DT_F_32, BC_DT_I_8):  dest.as_I_8 =  dest.as_F_32; break;
-		case COMB_DT(BC_DT_F_32, BC_DT_I_16): dest.as_I_16 = dest.as_F_32; break;
-		case COMB_DT(BC_DT_F_32, BC_DT_I_32): dest.as_I_32 = dest.as_F_32; break;
-		case COMB_DT(BC_DT_F_32, BC_DT_I_64): dest.as_I_64 = dest.as_F_32; break;
-		case COMB_DT(BC_DT_F_32, BC_DT_U_8):  dest.as_U_8 =  dest.as_F_32; break;
-		case COMB_DT(BC_DT_F_32, BC_DT_U_16): dest.as_U_16 = dest.as_F_32; break;
-		case COMB_DT(BC_DT_F_32, BC_DT_U_32): dest.as_U_32 = dest.as_F_32; break;
-		case COMB_DT(BC_DT_F_32, BC_DT_U_64): dest.as_U_64 = dest.as_F_32; break;
-		case COMB_DT(BC_DT_F_32, BC_DT_F_32): dest.as_F_32 = dest.as_F_32; break;
-		case COMB_DT(BC_DT_F_32, BC_DT_F_64): dest.as_F_64 = dest.as_F_32; break;
-		case COMB_DT(BC_DT_F_32, BC_DT_BOOL): dest.as_BOOL = dest.as_F_32; break;
-
-		case COMB_DT(BC_DT_F_64, BC_DT_I_8):  dest.as_I_8 =  dest.as_F_64; break;
-		case COMB_DT(BC_DT_F_64, BC_DT_I_16): dest.as_I_16 = dest.as_F_64; break;
-		case COMB_DT(BC_DT_F_64, BC_DT_I_32): dest.as_I_32 = dest.as_F_64; break;
-		case COMB_DT(BC_DT_F_64, BC_DT_I_64): dest.as_I_64 = dest.as_F_64; break;
-		case COMB_DT(BC_DT_F_64, BC_DT_U_8):  dest.as_U_8 =  dest.as_F_64; break;
-		case COMB_DT(BC_DT_F_64, BC_DT_U_16): dest.as_U_16 = dest.as_F_64; break;
-		case COMB_DT(BC_DT_F_64, BC_DT_U_32): dest.as_U_32 = dest.as_F_64; break;
-		case COMB_DT(BC_DT_F_64, BC_DT_U_64): dest.as_U_64 = dest.as_F_64; break;
-		case COMB_DT(BC_DT_F_64, BC_DT_F_32): dest.as_F_32 = dest.as_F_64; break;
-		case COMB_DT(BC_DT_F_64, BC_DT_F_64): dest.as_F_64 = dest.as_F_64; break;
-		case COMB_DT(BC_DT_F_64, BC_DT_BOOL): dest.as_BOOL = dest.as_F_64; break;
-
-		case COMB_DT(BC_DT_BOOL, BC_DT_I_8):  dest.as_I_8 =  dest.as_BOOL; break;
-		case COMB_DT(BC_DT_BOOL, BC_DT_I_16): dest.as_I_16 = dest.as_BOOL; break;
-		case COMB_DT(BC_DT_BOOL, BC_DT_I_32): dest.as_I_32 = dest.as_BOOL; break;
-		case COMB_DT(BC_DT_BOOL, BC_DT_I_64): dest.as_I_64 = dest.as_BOOL; break;
-		case COMB_DT(BC_DT_BOOL, BC_DT_U_8):  dest.as_U_8 =  dest.as_BOOL; break;
-		case COMB_DT(BC_DT_BOOL, BC_DT_U_16): dest.as_U_16 = dest.as_BOOL; break;
-		case COMB_DT(BC_DT_BOOL, BC_DT_U_32): dest.as_U_32 = dest.as_BOOL; break;
-		case COMB_DT(BC_DT_BOOL, BC_DT_U_64): dest.as_U_64 = dest.as_BOOL; break;
-		case COMB_DT(BC_DT_BOOL, BC_DT_F_32): dest.as_F_32 = dest.as_BOOL; break;
-		case COMB_DT(BC_DT_BOOL, BC_DT_F_64): dest.as_F_64 = dest.as_BOOL; break;
-		case COMB_DT(BC_DT_BOOL, BC_DT_BOOL): dest.as_BOOL = dest.as_BOOL; break;
-		}
-		#undef COMB_DT
-		#pragma warning(default: 4244)
+		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
+		BC_Datatype dtNew = readDataAndMove<BC_Datatype>();
+		ConvertInPlace(dest, (BC_Datatype)ocx.datatype, dtNew);
 	}
 	void Interpreter::exec_insPush(BC_OpCodeEx ocx)
 	{
@@ -364,7 +219,7 @@ namespace MarC
 	}
 	void Interpreter::exec_insPopCopy(BC_OpCodeEx ocx)
 	{
-		BC_MemCell mc = *(BC_MemCell*)hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
+		BC_MemCell mc = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
 		virt_popStack(mc, BC_DatatypeSize((BC_Datatype)ocx.datatype));
 	}
 	void Interpreter::exec_insPushFrame(BC_OpCodeEx ocx)
