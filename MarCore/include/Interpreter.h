@@ -66,6 +66,9 @@ namespace MarC
 		void exec_insPopFrame(BC_OpCodeEx ocx);
 		void exec_insJump(BC_OpCodeEx ocx);
 		void exec_insExit(BC_OpCodeEx ocx);
+	private:
+		void virt_pushStack(const BC_MemCell& mc, uint64_t nBytes);
+		void virt_popStack(BC_MemCell& mc, uint64_t nBytes);
 	public:
 		const InterpreterError& lastError() const;
 	private:
