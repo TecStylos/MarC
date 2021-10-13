@@ -32,7 +32,7 @@ namespace MarC
 	{
 		m_pModInfo->backup();
 
-		while (parseLine(*m_pModInfo, m_lastErr) && m_nextCharToAssemble < m_asmCode.size())
+		while (parseLine() && m_nextCharToAssemble < m_asmCode.size())
 			++m_pModInfo->nLinesParsed;
 
 		if (m_lastErr)
@@ -55,10 +55,10 @@ namespace MarC
 		return m_lastErr;
 	}
 
-	bool Assembler::parseLine(ModuleInfo& mi, AssemblerError& err)
+	bool Assembler::parseLine()
 	{
 		std::vector<std::string> tokens;
-		if (!tokenizeLine(mi, tokens, err))
+		if (!tokenizeLine(tokens))
 			return false;
 		++m_nextCharToAssemble;
 
@@ -66,20 +66,20 @@ namespace MarC
 			return true;
 
 		if (isInstruction(tokens[0]))
-			return parseInstruction(mi, tokens, err);
+			return parseInstruction(tokens);
 
 		if (isDirective(tokens[0]))
-			return parseDirective(mi, tokens, err);
+			return parseDirective(tokens);
 
 		return true;
 	}
 
-	bool Assembler::parseNumericArgument(ModuleInfo& mi, AsmArgInfo& aai, AssemblerError& err)
+	bool Assembler::parseNumericArgument(AsmArgInfo& aai)
 	{
 		//auto& memArg = *(BC_MemAddress*)(aai.pArg);
 
 		std::vector<std::string> tokens;
-		if (!tokenizeNumericArgument(mi ,*aai.pString, tokens, err))
+		if (!tokenizeNumericArgument(*aai.pString, tokens))
 			return false;
 
 		aai.pArg->datatype = aai.datatype;
@@ -141,7 +141,7 @@ namespace MarC
 
 		if (isLiteral(tokens))
 		{
-			if (!parseLiteral(mi, tokens, derefThisArg, aai, err))
+			if (!parseLiteral(tokens, derefThisArg, aai))
 				return false;
 			return true;
 		}
@@ -152,7 +152,7 @@ namespace MarC
 				RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Labels without a dereference operator can only be used as U64 values.");
 
 			//mi.unresolvedRefs.push_back(std::make_pair(tokens[0], mi.codeMemory->size() + aai.offsetInInstruction));
-			mi.unresolvedRefs.push_back({ tokens[0], mi.codeMemory->size() + aai.offsetInInstruction });
+			m_pModInfo->unresolvedRefs.push_back({ tokens[0], m_pModInfo->codeMemory->size() + aai.offsetInInstruction });
 
 			return true;
 		}
@@ -165,7 +165,7 @@ namespace MarC
 		return tokens[0].size() == 1 && (tokens[0][0] == '+' || tokens[0][0] == '-' || ('0' <= tokens[0][0] && tokens[0][0] <= '9'));
 	}
 
-	bool Assembler::parseLiteral(const ModuleInfo& mi, std::vector<std::string>& tokens, bool deref, AsmArgInfo& aai, AssemblerError& err)
+	bool Assembler::parseLiteral(std::vector<std::string>& tokens, bool deref, AsmArgInfo& aai)
 	{
 		auto& memArg = *(BC_MemAddress*)(aai.pArg);
 
@@ -260,7 +260,7 @@ namespace MarC
 		return true;
 	}
 
-	bool Assembler::parseInstruction(ModuleInfo& mi, std::vector<std::string>& tokens, AssemblerError& err)
+	bool Assembler::parseInstruction(std::vector<std::string>& tokens)
 	{
 		auto opCodeParts = getOpCodePartsFromToken(tokens[0]);
 		BC_OpCodeEx ocx = { 0 };
@@ -281,12 +281,12 @@ namespace MarC
 		case BC_OC_SUBTRACT:
 		case BC_OC_MULTIPLY:
 		case BC_OC_DIVIDE:
-			if (!parse_insAlgebraicBinary(mi, tokens, ocx, err))
+			if (!parse_insAlgebraicBinary(tokens, ocx))
 				return false;
 			break;
 
 		case BC_OC_CONVERT:
-			if (!parse_insConvert(mi, tokens, ocx, err))
+			if (!parse_insConvert(tokens, ocx))
 				return false;
 			break;
 
@@ -296,33 +296,33 @@ namespace MarC
 			break;
 
 		case BC_OC_PUSH:
-			if (!parse_insPush(mi, tokens, ocx, err))
+			if (!parse_insPush(tokens, ocx))
 				return false;
 			break;
 		case BC_OC_POP:
-			if (!parse_insPop(mi, tokens, ocx, err))
+			if (!parse_insPop(tokens, ocx))
 				return false;
 			break;
 		case BC_OC_PUSHC:
-			if (!parse_insPushCopy(mi, tokens, ocx, err))
+			if (!parse_insPushCopy(tokens, ocx))
 				return false;
 			break;
 		case BC_OC_POPC:
-			if (!parse_insPopCopy(mi, tokens, ocx, err))
+			if (!parse_insPopCopy(tokens, ocx))
 				return false;
 			break;
 
 		case BC_OC_PUSH_FRAME:
-			if (!parse_insPushFrame(mi, tokens, ocx, err))
+			if (!parse_insPushFrame(tokens, ocx))
 				return false;
 			break;
 		case BC_OC_POP_FRAME:
-			if (!parse_insPopFrame(mi, tokens, ocx, err))
+			if (!parse_insPopFrame(tokens, ocx))
 				return false;
 			break;
 
 		case BC_OC_JUMP:
-			if (!parse_insJump(mi, tokens, ocx, err))
+			if (!parse_insJump(tokens, ocx))
 				return false;
 			break;
 
@@ -334,7 +334,7 @@ namespace MarC
 			break;
 
 		case BC_OC_EXIT:
-			if (!parse_insExit(mi, tokens, ocx, err))
+			if (!parse_insExit(tokens, ocx))
 				return false;
 			break;
 		default:
@@ -344,9 +344,9 @@ namespace MarC
 		return true;
 	}
 
-	bool Assembler::parse_insAlgebraicBinary(ModuleInfo& mi, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	bool Assembler::parse_insAlgebraicBinary(std::vector<std::string>& tokens, BC_OpCodeEx& ocx)
 	{
-		if (!isCorrectTokenNum(3, 4, tokens.size(), mi, err))
+		if (!isCorrectTokenNum(3, 4, tokens.size()))
 			return false;
 		if (ocx.datatype == BC_OC_NONE)
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
@@ -361,7 +361,7 @@ namespace MarC
 		aai.pString = &tokens[1];
 		aai.pArg = &args[0];
 		aai.offsetInInstruction = sizeof(BC_OpCodeEx);
-		if (!parseNumericArgument(mi, aai, err))
+		if (!parseNumericArgument(aai))
 			return false;
 		if (aai.pArg->datatype != BC_DT_U_64)
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Invalid datatype for destination argument!");
@@ -370,19 +370,19 @@ namespace MarC
 		aai.pString = &tokens[2];
 		aai.pArg = &args[1];
 		aai.offsetInInstruction += BC_DatatypeSize(args[0].datatype);
-		if (!parseNumericArgument(mi, aai, err))
+		if (!parseNumericArgument(aai))
 			return false;
 
-		mi.codeMemory->push(ocx);
-		mi.codeMemory->push(&args[0].cell, BC_DatatypeSize(args[0].datatype));
-		mi.codeMemory->push(&args[1].cell, BC_DatatypeSize(args[1].datatype));
+		m_pModInfo->codeMemory->push(ocx);
+		m_pModInfo->codeMemory->push(&args[0].cell, BC_DatatypeSize(args[0].datatype));
+		m_pModInfo->codeMemory->push(&args[1].cell, BC_DatatypeSize(args[1].datatype));
 
 		return true;
 	}
 
-	bool Assembler::parse_insConvert(ModuleInfo& mi, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	bool Assembler::parse_insConvert(std::vector<std::string>& tokens, BC_OpCodeEx& ocx)
 	{
-		if (!isCorrectTokenNum(3, tokens.size(), mi, err))
+		if (!isCorrectTokenNum(3, tokens.size()))
 			return false;
 
 		if (ocx.datatype == BC_OC_NONE)
@@ -397,7 +397,7 @@ namespace MarC
 		aai.pString = &tokens[1];
 		aai.pArg = &arg;
 		aai.offsetInInstruction = sizeof(BC_OpCodeEx);
-		if (!parseNumericArgument(mi, aai, err))
+		if (!parseNumericArgument(aai))
 			return false;
 		if (aai.pArg->datatype != BC_DT_U_64)
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Invalid datatype for destination argument!");
@@ -409,65 +409,40 @@ namespace MarC
 		if (newDT == BC_DT_UNKNOWN)
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeUnknown, "Unknown datatype!");
 
-		mi.codeMemory->push(ocx);
-		mi.codeMemory->push(&arg.cell, BC_DatatypeSize(arg.datatype));
-		mi.codeMemory->push(newDT);
+		m_pModInfo->codeMemory->push(ocx);
+		m_pModInfo->codeMemory->push(&arg.cell, BC_DatatypeSize(arg.datatype));
+		m_pModInfo->codeMemory->push(newDT);
 
 		return true;
 	}
 
-	bool Assembler::parse_insPush(ModuleInfo& mi, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	bool Assembler::parse_insPush(std::vector<std::string>& tokens, BC_OpCodeEx& ocx)
 	{
-		if (!isCorrectTokenNum(1, tokens.size(), mi, err))
+		if (!isCorrectTokenNum(1, tokens.size()))
 			return false;
 		if (ocx.datatype == BC_OC_NONE)
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
 
-		mi.codeMemory->push(ocx);
+		m_pModInfo->codeMemory->push(ocx);
 
 		return true;
 	}
 
-	bool Assembler::parse_insPop(ModuleInfo& mi, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	bool Assembler::parse_insPop(std::vector<std::string>& tokens, BC_OpCodeEx& ocx)
 	{
-		if (!isCorrectTokenNum(1, tokens.size(), mi, err))
+		if (!isCorrectTokenNum(1, tokens.size()))
 			return false;
 		if (ocx.datatype == BC_OC_NONE)
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
 
-		mi.codeMemory->push(ocx);
+		m_pModInfo->codeMemory->push(ocx);
 
 		return true;
 	}
 
-	bool Assembler::parse_insPushCopy(ModuleInfo& mi, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	bool Assembler::parse_insPushCopy(std::vector<std::string>& tokens, BC_OpCodeEx& ocx)
 	{
-		if (!isCorrectTokenNum(2, tokens.size(), mi, err))
-			return false;
-		if (ocx.datatype == BC_OC_NONE)
-			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
-
-		AsmArgInfo aai;
-		BC_TypeCell arg;
-		aai.pOcx = &ocx;
-		aai.datatype = (BC_Datatype)ocx.datatype;
-
-		aai.nthArg = 0;
-		aai.pString = &tokens[1];
-		aai.pArg = &arg;
-		aai.offsetInInstruction = sizeof(BC_OpCodeEx);
-		if (!parseNumericArgument(mi, aai, err))
-			return false;
-
-		mi.codeMemory->push(ocx);
-		mi.codeMemory->push(&arg.cell, BC_DatatypeSize(arg.datatype));
-
-		return true;
-	}
-
-	bool Assembler::parse_insPopCopy(ModuleInfo& mi, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
-	{
-		if (!isCorrectTokenNum(2, tokens.size(), mi, err))
+		if (!isCorrectTokenNum(2, tokens.size()))
 			return false;
 		if (ocx.datatype == BC_OC_NONE)
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
@@ -481,44 +456,69 @@ namespace MarC
 		aai.pString = &tokens[1];
 		aai.pArg = &arg;
 		aai.offsetInInstruction = sizeof(BC_OpCodeEx);
-		if (!parseNumericArgument(mi, aai, err))
+		if (!parseNumericArgument(aai))
+			return false;
+
+		m_pModInfo->codeMemory->push(ocx);
+		m_pModInfo->codeMemory->push(&arg.cell, BC_DatatypeSize(arg.datatype));
+
+		return true;
+	}
+
+	bool Assembler::parse_insPopCopy(std::vector<std::string>& tokens, BC_OpCodeEx& ocx)
+	{
+		if (!isCorrectTokenNum(2, tokens.size()))
+			return false;
+		if (ocx.datatype == BC_OC_NONE)
+			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
+
+		AsmArgInfo aai;
+		BC_TypeCell arg;
+		aai.pOcx = &ocx;
+		aai.datatype = (BC_Datatype)ocx.datatype;
+
+		aai.nthArg = 0;
+		aai.pString = &tokens[1];
+		aai.pArg = &arg;
+		aai.offsetInInstruction = sizeof(BC_OpCodeEx);
+		if (!parseNumericArgument(aai))
 			return false;
 		if (aai.pArg->datatype != BC_DT_U_64)
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Invalid datatype for destination argument!");
 		
-		mi.codeMemory->push(ocx);
-		mi.codeMemory->push(&arg.cell, BC_DatatypeSize(arg.datatype));
+		m_pModInfo->codeMemory->push(ocx);
+		m_pModInfo->codeMemory->push(&arg.cell, BC_DatatypeSize(arg.datatype));
 
 		return true;
 	}
 
-	bool Assembler::parse_insPushFrame(ModuleInfo& mi, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	bool Assembler::parse_insPushFrame(std::vector<std::string>& tokens, BC_OpCodeEx& ocx)
 	{
-		if (!isCorrectTokenNum(1, tokens.size(), mi, err))
+		if (!isCorrectTokenNum(1, tokens.size()))
 			return false;
 		if (ocx.datatype != BC_OC_NONE)
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Instruction 'pushf' doesn't take any datatype!");
 
-		mi.codeMemory->push(ocx);
+		m_pModInfo->codeMemory->push(ocx);
 
 		return true;
 	}
 
-	bool Assembler::parse_insPopFrame(ModuleInfo& mi, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	bool Assembler::parse_insPopFrame(std::vector<std::string>& tokens, BC_OpCodeEx& ocx)
 	{
-		if (!isCorrectTokenNum(1, tokens.size(), mi, err))
+		if (!isCorrectTokenNum(1, tokens.size()))
 			return false;
 		if (ocx.datatype != BC_OC_NONE)
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Instruction 'popf' doesn't take any datatype!");
 
-		mi.codeMemory->push(ocx);
+		m_pModInfo->codeMemory->push(ocx);
 
 		return true;
 	}
 
-	bool Assembler::parse_insJump(ModuleInfo& mi, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	bool Assembler::parse_insJump(std::vector<std::string>& tokens, BC_OpCodeEx& ocx)
 	{
-		if (!isCorrectTokenNum(2, tokens.size(), mi, err))
+		if (!isCorrectTokenNum(2, tokens.size()))
 			return false;
 		if (ocx.datatype != BC_OC_NONE)
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Instruction 'jmp' doesn't take any datatype!");
@@ -534,37 +534,37 @@ namespace MarC
 		aai.pString = &tokens[1];
 		aai.pArg = &arg;
 		aai.offsetInInstruction = sizeof(BC_OpCodeEx);
-		if (!parseNumericArgument(mi, aai, err))
+		if (!parseNumericArgument(aai))
 			return false;
 		if (aai.pArg->datatype != BC_DT_U_64)
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Invalid datatype for destination argument!");
 
-		mi.codeMemory->push(ocx);
-		mi.codeMemory->push(&arg.cell, BC_DatatypeSize(arg.datatype));
+		m_pModInfo->codeMemory->push(ocx);
+		m_pModInfo->codeMemory->push(&arg.cell, BC_DatatypeSize(arg.datatype));
 
 		return true;
 	}
 
-	bool Assembler::parse_insExit(ModuleInfo& mi, std::vector<std::string>& tokens, BC_OpCodeEx& ocx, AssemblerError& err)
+	bool Assembler::parse_insExit(std::vector<std::string>& tokens, BC_OpCodeEx& ocx)
 	{
-		if (!isCorrectTokenNum(1, tokens.size(), mi, err))
+		if (!isCorrectTokenNum(1, tokens.size()))
 			return false;
 		if (ocx.datatype != BC_OC_NONE)
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Instruction 'exit' doesn't take any datatype!");
 
-		mi.codeMemory->push(ocx);
+		m_pModInfo->codeMemory->push(ocx);
 
 		return true;
 	}
 
-	bool Assembler::parseDirective(ModuleInfo& mi, std::vector<std::string>& tokens, AssemblerError& err)
+	bool Assembler::parseDirective(std::vector<std::string>& tokens)
 	{
 		if (tokens[0] == "#module")
 			RETURN_WITH_ERROR(AsmErrCode::NotImplemented, "The directive '" + tokens[0] + "' has not been implemented yet!");
 		if (tokens[0] == "#insmod")
 			RETURN_WITH_ERROR(AsmErrCode::NotImplemented, "The directive '" + tokens[0] + "' has not been implemented yet!");
 		if (tokens[0] == "#label")
-			return parse_dirLabel(mi, tokens, err);
+			return parse_dirLabel(tokens);
 		if (tokens[0] == "#static")
 			RETURN_WITH_ERROR(AsmErrCode::NotImplemented, "The directive '" + tokens[0] + "' has not been implemented yet!");
 		if (tokens[0] == "#string")
@@ -575,18 +575,18 @@ namespace MarC
 		RETURN_WITH_ERROR(AsmErrCode::DirectiveUnknown, "Unknown directive '" + tokens[0] + "'!");
 	}
 
-	bool Assembler::parse_dirLabel(ModuleInfo& mi, std::vector<std::string>& tokens, AssemblerError& err)
+	bool Assembler::parse_dirLabel(std::vector<std::string>& tokens)
 	{
-		if (!isCorrectTokenNum(2, tokens.size(), mi, err))
+		if (!isCorrectTokenNum(2, tokens.size()))
 			return false;
-		if (mi.labels.find(tokens[1]) != mi.labels.end())
+		if (m_pModInfo->labels.find(tokens[1]) != m_pModInfo->labels.end())
 			RETURN_WITH_ERROR(AsmErrCode::LabelAlreadyDefined, "A label with name '" + tokens[1] + "' has already been defined!");
-		mi.labels.insert(std::make_pair(tokens[1], currCodeAddr(mi)));
+		m_pModInfo->labels.insert(std::make_pair(tokens[1], currCodeAddr()));
 
 		return true;
 	}
 
-	bool Assembler::tokenizeLine(const ModuleInfo& mi, std::vector<std::string>& tokensOut, AssemblerError& err)
+	bool Assembler::tokenizeLine(std::vector<std::string>& tokensOut)
 	{
 		uint64_t lineEnd = m_asmCode.find_first_of('\n', m_nextCharToAssemble);
 		if (lineEnd == std::string::npos)
@@ -666,7 +666,7 @@ namespace MarC
 		return true;
 	}
 
-	bool Assembler::tokenizeNumericArgument(const ModuleInfo& mi, const std::string& argument, std::vector<std::string>& tokensOut, AssemblerError& err)
+	bool Assembler::tokenizeNumericArgument(const std::string& argument, std::vector<std::string>& tokensOut)
 	{
 		enum State
 		{
@@ -802,11 +802,11 @@ namespace MarC
 		return true;
 	}
 
-	bool Assembler::isCorrectTokenNum(uint64_t expected, uint64_t provided, const ModuleInfo& mi, AssemblerError& err)
+	bool Assembler::isCorrectTokenNum(uint64_t expected, uint64_t provided)
 	{
-		return isCorrectTokenNum(expected, expected, provided, mi, err);
+		return isCorrectTokenNum(expected, expected, provided);
 	}
-	bool Assembler::isCorrectTokenNum(uint64_t expectedMin, uint64_t expectedMax, uint64_t provided, const ModuleInfo& mi, AssemblerError& err)
+	bool Assembler::isCorrectTokenNum(uint64_t expectedMin, uint64_t expectedMax, uint64_t provided)
 	{
 		if (!(expectedMin <= provided && provided <= expectedMax))
 			RETURN_WITH_ERROR(
@@ -816,8 +816,8 @@ namespace MarC
 		return true;
 	}
 
-	BC_MemAddress Assembler::currCodeAddr(ModuleInfo& mi)
+	BC_MemAddress Assembler::currCodeAddr()
 	{
-		return BC_MemAddress(BC_MEM_BASE_CODE_MEMORY, 0, mi.codeMemory->size());
+		return BC_MemAddress(BC_MEM_BASE_CODE_MEMORY, 0, m_pModInfo->codeMemory->size());
 	}
 }
