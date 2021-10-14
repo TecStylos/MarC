@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AssemblerOutput.h"
+#include "BytecodeTypes.h"
 
 namespace MarC
 {

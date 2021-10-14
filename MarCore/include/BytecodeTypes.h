@@ -1,11 +1,7 @@
 #pragma once
 
-#include <map>
-#include <vector>
-#include <stdint.h>
+#include <cstdint>
 #include <string>
-
-#include "Memory.h"
 
 namespace MarC
 {
@@ -111,8 +107,6 @@ namespace MarC
 		BC_MemAddress(BC_MemBase base, uint64_t page, uint64_t addr);
 	};
 
-	#pragma pack(pop)
-
 	union BC_MemCell
 	{
 		int8_t as_I_8;
@@ -137,65 +131,7 @@ namespace MarC
 		BC_MemCell(BC_MemAddress val) : as_ADDR(val) {}
 	};
 
-	struct BC_TypeCell
-	{
-		BC_TypeCell() = default;
-		BC_TypeCell(BC_Datatype dt, BC_MemCell mc) : datatype(dt), cell(mc) {}
-	public:
-		BC_Datatype datatype;
-		BC_MemCell cell;
-	};
-
-	enum LabelUsage
-	{
-		LABEL_USAGE_DEFAULT,
-		LABEL_USAGE_ADDRESS,
-	};
-	struct Label
-	{
-		LabelUsage usage;
-		BC_MemCell value;
-		Label(LabelUsage usage, BC_MemCell value) : usage(usage), value(value) {}
-	};
-	struct LabelRef
-	{
-		LabelRef(const std::string& name, uint64_t offset, BC_Datatype datatype)
-			: name(name), offset(offset), datatype(datatype)
-		{}
-	public:
-		std::string name;
-		uint64_t offset;
-		BC_Datatype datatype;
-	};
-	typedef std::vector<LabelRef> LabelRefList;
-	typedef std::map<std::string, Label> LabelMap;
-
-	class ModuleInfo
-	{
-	public:
-		std::string moduleName;
-		std::vector<std::string> requiredModules;
-		MemoryRef codeMemory;
-		LabelMap labels;
-		LabelRefList unresolvedRefs;
-		uint64_t nLinesParsed;
-	public:
-		ModuleInfo();
-	public:
-		uint64_t getErrLine() const;
-	public:
-		void backup();
-		void recover();
-	private:
-		struct BackupData
-		{
-			uint64_t requiredModulesSize = 0;
-			uint64_t codeMemorySize = 0;
-			uint64_t nLinesParsed = 0;
-		} bud;
-	};
-
-	typedef std::shared_ptr<ModuleInfo> ModuleInfoRef;
+	#pragma pack(pop)
 
 	inline constexpr uint64_t BC_MemRegisterID(BC_MemRegister memReg)
 	{

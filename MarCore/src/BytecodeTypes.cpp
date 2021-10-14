@@ -1,26 +1,7 @@
-#include "AssemblerOutput.h"
+#include "BytecodeTypes.h"
 
 namespace MarC
 {
-	uint64_t ModuleInfo::getErrLine() const
-	{
-		return nLinesParsed + 1;
-	}
-
-	void ModuleInfo::backup()
-	{
-		bud.requiredModulesSize = requiredModules.size();
-		bud.codeMemorySize = codeMemory->size();
-		bud.nLinesParsed = nLinesParsed;
-	}
-
-	void ModuleInfo::recover()
-	{
-		requiredModules.resize(bud.requiredModulesSize);
-		codeMemory->resize(bud.codeMemorySize);
-		nLinesParsed = bud.nLinesParsed;
-	}
-
 	BC_MemAddress::BC_MemAddress(BC_MemBase base, uint64_t addr)
 		: base(base), addr(addr)
 	{
@@ -31,13 +12,6 @@ namespace MarC
 		asCode.base = base;
 		asCode.page = page;
 		asCode.addr = addr;
-	}
-
-	ModuleInfo::ModuleInfo()
-	{
-		moduleName = "<unnamed>";
-		codeMemory = std::make_shared<Memory>();
-		nLinesParsed = 0;
 	}
 
 	BC_OpCode BC_OpCodeFromString(const std::string& ocStr)
@@ -101,6 +75,7 @@ namespace MarC
 			{ "f32",  BC_DT_F_32 },
 			{ "f64",  BC_DT_F_64 },
 			{ "bool", BC_DT_BOOL },
+			{ "addr", BC_DT_U_64 },
 		};
 
 		for (auto dt : datatypes)

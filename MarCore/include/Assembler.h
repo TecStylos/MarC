@@ -1,11 +1,10 @@
 #pragma once
 
 #include <string>
-#include "AssemblerOutput.h"
+#include <CompilerTypes.h>
 
 namespace MarC
 {
-
 	class AssemblerError
 	{
 	public:
@@ -51,7 +50,7 @@ namespace MarC
 	{
 		std::string* pString;
 		BC_OpCodeEx* pOcx;
-		BC_TypeCell* pArg;
+		TypeCell* pArg;
 		uint64_t nthArg;
 		BC_Datatype datatype;
 		uint64_t offsetInInstruction;

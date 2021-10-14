@@ -49,7 +49,7 @@ Other:
     #reqmod : [filename] : [modName]        Mark a file as a requested module
     #label : [name]                         Create a label with name name holding the current code pointer
     #static : [name] : [size]               Shortcut for: label : [name] \ add.u64 $sp : [size]
-    #string : [name] : "[text]"             Store text on the stack
+    #alias : [name] : "[text]"              Store any literal under a specific name
     #permission : [single/group] : [name]   Request permission for an external function
 
 

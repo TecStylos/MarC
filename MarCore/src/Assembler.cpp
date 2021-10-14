@@ -76,8 +76,6 @@ namespace MarC
 
 	bool Assembler::parseNumericArgument(AsmArgInfo& aai)
 	{
-		//auto& memArg = *(BC_MemAddress*)(aai.pArg);
-
 		std::vector<std::string> tokens;
 		if (!tokenizeNumericArgument(*aai.pString, tokens))
 			return false;
@@ -151,7 +149,6 @@ namespace MarC
 			if (aai.pArg->datatype != BC_DT_U_64)
 				RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Labels without a dereference operator can only be used as U64 values.");
 
-			//mi.unresolvedRefs.push_back(std::make_pair(tokens[0], mi.codeMemory->size() + aai.offsetInInstruction));
 			m_pModInfo->unresolvedRefs.push_back({ tokens[0], m_pModInfo->codeMemory->size() + aai.offsetInInstruction, (BC_Datatype)aai.pArg->datatype });
 
 			return true;
@@ -174,13 +171,13 @@ namespace MarC
 			tokens.erase(tokens.begin());
 
 		if (tokens.empty())
-			RETURN_WITH_ERROR(AsmErrCode::NumericLiteralBroken, "Missing digits after sign!");
+			RETURN_WITH_ERROR(AsmErrCode::NumericLiteralBroken, "Missing digits after +/- sign!");
 
 		if (deref)
 		{
 			uint64_t val;
 			if (!literalToU64(tokens[0], val))
-				RETURN_WITH_ERROR(AsmErrCode::NumericLiteralBroken, "Cannot convert literal '" + tokens[0] + "' to type U64!")
+				RETURN_WITH_ERROR(AsmErrCode::NumericLiteralBroken, "Cannot use literal '" + tokens[0] + "' as address!")
 
 			memArg.addr = val;
 
@@ -240,7 +237,7 @@ namespace MarC
 		case BC_DT_F_32:
 			if (!literalToF64(tokens[0], aai.pArg->cell.as_F_64))
 				RETURN_WITH_ERROR(AssemblerError::Code::NumericLiteralBroken, "Cannot convert literal '" + tokens[0] + "' to type F32!")
-				aai.pArg->cell.as_F_32 = aai.pArg->cell.as_F_64;
+				aai.pArg->cell.as_F_32 = (float)aai.pArg->cell.as_F_64;
 			if (isNegative)
 				aai.pArg->cell.as_F_32 *= -1.0f;
 			break;
@@ -339,7 +336,7 @@ namespace MarC
 		if (ocx.datatype == BC_OC_NONE)
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
 
-		BC_TypeCell args[2] = {};
+		TypeCell args[2] = {};
 
 		AsmArgInfo aai;
 		aai.pOcx = &ocx;
@@ -377,7 +374,7 @@ namespace MarC
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
 
 		AsmArgInfo aai;
-		BC_TypeCell arg;
+		TypeCell arg;
 		aai.pOcx = &ocx;
 		aai.datatype = (BC_Datatype)ocx.datatype;
 
@@ -436,7 +433,7 @@ namespace MarC
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
 
 		AsmArgInfo aai;
-		BC_TypeCell arg;
+		TypeCell arg;
 		aai.pOcx = &ocx;
 		aai.datatype = (BC_Datatype)ocx.datatype;
 
@@ -461,7 +458,7 @@ namespace MarC
 			RETURN_WITH_ERROR(AsmErrCode::DatatypeMissing, "Missing datatype!");
 
 		AsmArgInfo aai;
-		BC_TypeCell arg;
+		TypeCell arg;
 		aai.pOcx = &ocx;
 		aai.datatype = (BC_Datatype)ocx.datatype;
 
@@ -513,7 +510,7 @@ namespace MarC
 		ocx.datatype = BC_DT_U_64;
 
 		AsmArgInfo aai;
-		BC_TypeCell arg;
+		TypeCell arg;
 		aai.pOcx = &ocx;
 		aai.datatype = BC_DT_U_64;
 		arg.datatype = BC_DT_U_64;

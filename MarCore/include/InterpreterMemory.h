@@ -1,7 +1,7 @@
 #pragma once
 
-#include "AssemblerOutput.h"
 #include "Memory.h"
+#include "BytecodeTypes.h"
 
 namespace MarC
 {
