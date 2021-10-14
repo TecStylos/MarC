@@ -24,8 +24,9 @@ namespace MarC
 
 			for (auto label : mod.labels)
 			{
-				if (label.second.base == BC_MEM_BASE_CODE_MEMORY)
-					label.second.asCode.page = i;
+				if (label.second.usage == LABEL_USAGE_ADDRESS && label.second.value.as_ADDR.base == BC_MEM_BASE_CODE_MEMORY)
+				//if (label.second.base == BC_MEM_BASE_CODE_MEMORY)
+					label.second.value.as_ADDR.asCode.page = i;
 				m_labels.insert(label);
 			}
 			mod.labels.clear();
@@ -44,7 +45,7 @@ namespace MarC
 				if (result == m_labels.end())
 					continue;
 
-				mod.codeMemory->write(result->second, ref.offset);
+				mod.codeMemory->write(&result->second.value, BC_DatatypeSize(ref.datatype), ref.offset);
 
 				mod.unresolvedRefs.erase(mod.unresolvedRefs.begin() + i);
 				--i;

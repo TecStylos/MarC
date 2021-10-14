@@ -89,7 +89,7 @@ namespace MarC
 		bool parse_dirLabel(std::vector<std::string>& tokens);
 	private:
 		bool tokenizeLine(std::vector<std::string>& tokensOut);
-		bool tokenizeNumericArgument(const const std::string& argument, std::vector<std::string>& tokensOut);
+		bool tokenizeNumericArgument(const std::string& argument, std::vector<std::string>& tokensOut);
 		static bool isInstruction(const std::string& token);
 		static bool isDirective(const std::string& token);
 		static std::pair<std::string, std::string> getOpCodePartsFromToken(const std::string& token);

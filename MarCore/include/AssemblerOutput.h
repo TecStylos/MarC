@@ -146,24 +146,29 @@ namespace MarC
 		BC_MemCell cell;
 	};
 
+	enum LabelUsage
+	{
+		LABEL_USAGE_DEFAULT,
+		LABEL_USAGE_ADDRESS,
+	};
 	struct Label
 	{
-		Label(const std::string& name, BC_MemAddress addr);
-	public:
-		std::string name;
-		BC_MemAddress addr;
+		LabelUsage usage;
+		BC_MemCell value;
+		Label(LabelUsage usage, BC_MemCell value) : usage(usage), value(value) {}
 	};
 	struct LabelRef
 	{
-		LabelRef(const std::string& name, uint64_t offset)
-			: name(name), offset(offset)
-		{}\
+		LabelRef(const std::string& name, uint64_t offset, BC_Datatype datatype)
+			: name(name), offset(offset), datatype(datatype)
+		{}
 	public:
 		std::string name;
 		uint64_t offset;
+		BC_Datatype datatype;
 	};
 	typedef std::vector<LabelRef> LabelRefList;
-	typedef std::map<std::string, BC_MemAddress> LabelMap;
+	typedef std::map<std::string, Label> LabelMap;
 
 	class ModuleInfo
 	{

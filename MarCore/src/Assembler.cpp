@@ -148,11 +148,11 @@ namespace MarC
 
 		if (std::isalpha(tokens[0][0]))
 		{
-			if (aai.pOcx->datatype != BC_DT_U_64)
+			if (aai.pArg->datatype != BC_DT_U_64)
 				RETURN_WITH_ERROR(AsmErrCode::DatatypeMismatch, "Labels without a dereference operator can only be used as U64 values.");
 
 			//mi.unresolvedRefs.push_back(std::make_pair(tokens[0], mi.codeMemory->size() + aai.offsetInInstruction));
-			m_pModInfo->unresolvedRefs.push_back({ tokens[0], m_pModInfo->codeMemory->size() + aai.offsetInInstruction });
+			m_pModInfo->unresolvedRefs.push_back({ tokens[0], m_pModInfo->codeMemory->size() + aai.offsetInInstruction, (BC_Datatype)aai.pArg->datatype });
 
 			return true;
 		}
@@ -569,7 +569,7 @@ namespace MarC
 			return false;
 		if (m_pModInfo->labels.find(tokens[1]) != m_pModInfo->labels.end())
 			RETURN_WITH_ERROR(AsmErrCode::LabelAlreadyDefined, "A label with name '" + tokens[1] + "' has already been defined!");
-		m_pModInfo->labels.insert(std::make_pair(tokens[1], currCodeAddr()));
+		m_pModInfo->labels.insert(std::make_pair(tokens[1], Label(LABEL_USAGE_ADDRESS, currCodeAddr())));
 
 		return true;
 	}

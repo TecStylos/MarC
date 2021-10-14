@@ -33,11 +33,6 @@ namespace MarC
 		asCode.addr = addr;
 	}
 
-	Label::Label(const std::string& name, BC_MemAddress addr)
-		: name(name), addr(addr)
-	{
-	}
-
 	ModuleInfo::ModuleInfo()
 	{
 		moduleName = "<unnamed>";
