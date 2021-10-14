@@ -24,7 +24,8 @@ namespace MarC
 
 			for (auto label : mod.labels)
 			{
-				label.second.asCode.page = i;
+				if (label.second.base == BC_MEM_BASE_CODE_MEMORY)
+					label.second.asCode.page = i;
 				m_labels.insert(label);
 			}
 			mod.labels.clear();
