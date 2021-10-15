@@ -168,59 +168,59 @@ namespace MarC
 
 	void Interpreter::exec_insMove(BC_OpCodeEx ocx)
 	{
-		void* dest = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
-		BC_MemCell src = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg1);
-		memcpy(dest, &src, BC_DatatypeSize((BC_Datatype)ocx.datatype));
+		void* dest = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		BC_MemCell src = readMemCellAndMove(ocx.datatype, ocx.derefArg[0]);
+		memcpy(dest, &src, BC_DatatypeSize(ocx.datatype));
 	}
 	void Interpreter::exec_insAdd(BC_OpCodeEx ocx)
 	{
-		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
-		BC_MemCell src = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg1);
+		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		BC_MemCell src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
 		MARC_INTERPRETER_BINARY_OP(dest, +=, src, ocx.datatype);
 	}
 	void Interpreter::exec_insSubtract(BC_OpCodeEx ocx)
 	{
-		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
-		BC_MemCell src = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg1);
+		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		BC_MemCell src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
 		MARC_INTERPRETER_BINARY_OP(dest, -=, src, ocx.datatype);
 	}
 	void Interpreter::exec_insMultiply(BC_OpCodeEx ocx)
 	{
-		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
-		BC_MemCell src = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg1);
+		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		BC_MemCell src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
 		MARC_INTERPRETER_BINARY_OP(dest, *=, src, ocx.datatype);
 	}
 	void Interpreter::exec_insDivide(BC_OpCodeEx ocx)
 	{
-		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
-		BC_MemCell src = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg1);
+		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		BC_MemCell src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
 		MARC_INTERPRETER_BINARY_OP(dest, /=, src, ocx.datatype);
 	}
 	void Interpreter::exec_insConvert(BC_OpCodeEx ocx)
 	{
-		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
+		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
 		BC_Datatype dtNew = readDataAndMove<BC_Datatype>();
-		ConvertInPlace(dest, (BC_Datatype)ocx.datatype, dtNew);
+		ConvertInPlace(dest, ocx.datatype, dtNew);
 	}
 	void Interpreter::exec_insPush(BC_OpCodeEx ocx)
 	{
 		BC_MemCell mc;
-		virt_pushStack(mc, BC_DatatypeSize((BC_Datatype)ocx.datatype));
+		virt_pushStack(mc, BC_DatatypeSize(ocx.datatype));
 	}
 	void Interpreter::exec_insPop(BC_OpCodeEx ocx)
 	{
 		BC_MemCell mc;
-		virt_popStack(mc, BC_DatatypeSize((BC_Datatype)ocx.datatype));
+		virt_popStack(mc, BC_DatatypeSize(ocx.datatype));
 	}
 	void Interpreter::exec_insPushCopy(BC_OpCodeEx ocx)
 	{
-		BC_MemCell mc = readMemCellAndMove((BC_Datatype)ocx.datatype, ocx.derefArg0);
-		virt_pushStack(mc, BC_DatatypeSize((BC_Datatype)ocx.datatype));
+		BC_MemCell mc = readMemCellAndMove(ocx.datatype, ocx.derefArg[0]);
+		virt_pushStack(mc, BC_DatatypeSize(ocx.datatype));
 	}
 	void Interpreter::exec_insPopCopy(BC_OpCodeEx ocx)
 	{
-		BC_MemCell mc = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg0);
-		virt_popStack(mc, BC_DatatypeSize((BC_Datatype)ocx.datatype));
+		BC_MemCell mc = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		virt_popStack(mc, BC_DatatypeSize(ocx.datatype));
 	}
 	void Interpreter::exec_insPushFrame(BC_OpCodeEx ocx)
 	{
@@ -238,7 +238,7 @@ namespace MarC
 	{
 		auto& regCP = getRegister(BC_MEM_REG_CODE_POINTER);
 
-		auto& destAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg0);
+		auto& destAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[0]);
 
 		regCP = destAddr;
 	}

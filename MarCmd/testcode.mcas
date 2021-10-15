@@ -1,8 +1,8 @@
 mov.f32 : $ec : +12.3           / Set the exit code to 12.3
-add.f32 : $ec : -23             / Subtract 23 from the exit code
-sub.f32 : $ec : +1              / Subtract 1 from the exit code
+add.f32 : $ec : -23.0           / Subtract 23 from the exit code
+sub.f32 : $ec : +1.0            / Subtract 1 from the exit code
 mul.f32 : $ec : +3.5            / Multiply the exit code with 3.5
-div.f32 : $ec : -4              / Divide the exit code by -4
+div.f32 : $ec : -4.0            / Divide the exit code by -4
 
 conv.f32 : $ec : i64            / Convert the exit code from f32 to i64
 

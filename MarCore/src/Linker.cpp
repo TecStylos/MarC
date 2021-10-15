@@ -24,7 +24,7 @@ namespace MarC
 
 			for (auto label : mod.labels)
 			{
-				if (label.second.usage == LABEL_USAGE_ADDRESS && label.second.value.as_ADDR.base == BC_MEM_BASE_CODE_MEMORY)
+				if (label.second.usage == SYMBOL_USAGE_ADDRESS && label.second.value.as_ADDR.base == BC_MEM_BASE_CODE_MEMORY)
 				//if (label.second.base == BC_MEM_BASE_CODE_MEMORY)
 					label.second.value.as_ADDR.asCode.page = i;
 				m_labels.insert(label);

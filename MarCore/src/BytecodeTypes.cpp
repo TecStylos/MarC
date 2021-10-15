@@ -2,6 +2,26 @@
 
 namespace MarC
 {
+	bool BC_OpCodeEx::ArgDerefs::operator[](uint64_t index) const
+	{
+		return get(index);
+	}
+
+	bool BC_OpCodeEx::ArgDerefs::get(uint64_t index) const
+	{
+		return (data >> index) & 1;
+	}
+
+	void BC_OpCodeEx::ArgDerefs::set(uint64_t index)
+	{
+		data |= (1 << index);
+	}
+
+	void BC_OpCodeEx::ArgDerefs::clear(uint64_t index)
+	{
+		data &= ~(1 << index);
+	}
+
 	BC_MemAddress::BC_MemAddress(BC_MemBase base, uint64_t addr)
 		: base(base), addr(addr)
 	{
@@ -94,13 +114,13 @@ namespace MarC
 			const char* asStr;
 			BC_MemRegister asRegister;
 		} registers[] = {
-			{ "$",   BC_MEM_REG_NONE },
-			{ "$sp", BC_MEM_REG_STACK_POINTER },
-			{ "$fp", BC_MEM_REG_FRAME_POINTER },
-			{ "$lc", BC_MEM_REG_LOOP_COUNTER },
-			{ "$ac", BC_MEM_REG_ACCUMULATOR },
-			{ "$cp", BC_MEM_REG_CODE_POINTER },
-			{ "$ec", BC_MEM_REG_EXIT_CODE },
+			{ "",   BC_MEM_REG_NONE },
+			{ "sp", BC_MEM_REG_STACK_POINTER },
+			{ "fp", BC_MEM_REG_FRAME_POINTER },
+			{ "lc", BC_MEM_REG_LOOP_COUNTER },
+			{ "ac", BC_MEM_REG_ACCUMULATOR },
+			{ "cp", BC_MEM_REG_CODE_POINTER },
+			{ "ec", BC_MEM_REG_EXIT_CODE },
 		};
 
 		for (auto r : registers)

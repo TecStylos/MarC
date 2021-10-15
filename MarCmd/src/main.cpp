@@ -26,19 +26,29 @@ std::string readFile(const std::string& filepath)
 int main()
 {
 	MarC::Linker linker;
-	MarC::Assembler assembler(readFile("testcode.mcas"), linker.getExeInfo()->staticStack);
+	MarC::AsmTokenizer tokenizer(readFile("testcode.mcas"));
+	MarC::Compiler compiler(tokenizer.getTokenList(), linker.getExeInfo()->staticStack);
 	MarC::Interpreter interpreter(linker.getExeInfo(), 4096);
 
-	if (assembler.assemble())
-		std::cout << "Successfully assembled the code!" << std::endl;
+	if (tokenizer.tokenize())
+		std::cout << "Successfully tokenized the code!" << std::endl;
 	else
 	{
-		std::cout << "An error occured while running the assembler!" << std::endl
-		<< "    " << assembler.lastError().getMessage() << std::endl;
+		std::cout << "An error occured while running the tokenizer!" << std::endl
+			<< "    " << tokenizer.lastError().getMessage() << std::endl;
 		return -1;
 	}
 
-	if (linker.addModule(assembler.getModuleInfo()))
+	if (compiler.compile())
+		std::cout << "Successfully compiled the code!" << std::endl;
+	else
+	{
+		std::cout << "An error occured while running the compiler!" << std::endl
+		<< "    " << compiler.lastError().getMessage() << std::endl;
+		return -1;
+	}
+
+	if (linker.addModule(compiler.getModuleInfo()))
 		std::cout << "Successfully added the module to the linker!" << std::endl;
 	else
 	{

@@ -5,7 +5,7 @@
 
 namespace MarC
 {
-	enum BC_Datatype : uint16_t
+	enum BC_Datatype : uint8_t
 	{
 		BC_DT_NONE = 0,
 		BC_DT_UNKNOWN,
@@ -22,7 +22,7 @@ namespace MarC
 		BC_DT_F_64,
 		BC_DT_BOOL
 	};
-	enum BC_OpCode : uint16_t
+	enum BC_OpCode : uint8_t
 	{
 		BC_OC_NONE = 0,
 		BC_OC_UNKNOWN,
@@ -51,7 +51,7 @@ namespace MarC
 		BC_OC_NUM_OF_OP_CODES,
 	};
 
-	enum BC_MemBase
+	enum BC_MemBase : uint8_t
 	{
 		BC_MEM_BASE_NONE = 0,
 		BC_MEM_BASE_STATIC_STACK,
@@ -62,7 +62,7 @@ namespace MarC
 		BC_MEM_BASE_REGISTER,
 		BC_MEM_BASE_EXTERN,
 	};
-	enum BC_MemRegister
+	enum BC_MemRegister : uint8_t
 	{
 		BC_MEM_REG_NONE,
 		BC_MEM_REG_UNKNOWN,
@@ -79,10 +79,16 @@ namespace MarC
 
 	struct BC_OpCodeEx
 	{
-		uint16_t opCode : 10;
-		uint16_t datatype : 4;
-		uint16_t derefArg0 : 1;
-		uint16_t derefArg1 : 1;
+		BC_OpCode opCode = BC_OC_NONE;
+		BC_Datatype datatype = BC_DT_NONE;
+		struct ArgDerefs
+		{
+			uint8_t data = 0;
+			bool operator[](uint64_t index) const;
+			bool get(uint64_t index) const;
+			void set(uint64_t index);
+			void clear(uint64_t index);
+		} derefArg;
 	};
 
 	struct BC_MemAddress

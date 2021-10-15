@@ -1,5 +1,6 @@
 #pragma once
 
-#include "Assembler.h"
+#include "AsmTokenizer.h"
+#include "Compiler.h"
 #include "Linker.h"
 #include "Interpreter.h"

@@ -2,29 +2,29 @@
 
 namespace MarC
 {
-	uint64_t ModuleInfo::getErrLine() const
+	DirectiveID DirectiveIDFromString(const std::string& value)
 	{
-		return nLinesParsed + 1;
-	}
+		if (value == "") return DirectiveID::None;
+		if (value == "label") return DirectiveID::Label;
 
-	void ModuleInfo::backup()
-	{
-		bud.requiredModulesSize = requiredModules.size();
-		bud.codeMemorySize = codeMemory->size();
-		bud.nLinesParsed = nLinesParsed;
-	}
-
-	void ModuleInfo::recover()
-	{
-		requiredModules.resize(bud.requiredModulesSize);
-		codeMemory->resize(bud.codeMemorySize);
-		nLinesParsed = bud.nLinesParsed;
+		return DirectiveID::Unknown;
 	}
 
 	ModuleInfo::ModuleInfo()
 	{
 		moduleName = "<unnamed>";
 		codeMemory = std::make_shared<Memory>();
-		nLinesParsed = 0;
+	}
+
+	void ModuleInfo::backup()
+	{
+		bud.requiredModulesSize = requiredModules.size();
+		bud.codeMemorySize = codeMemory->size();
+	}
+
+	void ModuleInfo::recover()
+	{
+		requiredModules.resize(bud.requiredModulesSize);
+		codeMemory->resize(bud.codeMemorySize);
 	}
 }
