@@ -57,7 +57,7 @@ namespace MarC
 		std::string moduleName;
 		std::vector<std::string> requiredModules;
 		MemoryRef codeMemory;
-		SymbolMap labels;
+		SymbolMap symbols;
 		SymbolRefList unresolvedRefs;
 	public:
 		ModuleInfo();

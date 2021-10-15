@@ -146,6 +146,8 @@ namespace MarC
 			{ BC_OC_POP_FRAME, &Interpreter::exec_insPopFrame },
 
 			{ BC_OC_JUMP, &Interpreter::exec_insJump },
+			{ BC_OC_JUMP_EQUAL, &Interpreter::exec_insJumpEqual },
+			{ BC_OC_JUMP_NOT_EQUAL, &Interpreter::exec_insJumpNotEqual },
 
 			{ BC_OC_EXIT, &Interpreter::exec_insExit },
 		};
@@ -241,6 +243,32 @@ namespace MarC
 		auto& destAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[0]);
 
 		regCP = destAddr;
+	}
+	void Interpreter::exec_insJumpEqual(BC_OpCodeEx ocx)
+	{
+		auto& destAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[0]);
+		auto& leftOperand = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
+		auto& rightOperand = readMemCellAndMove(ocx.datatype, ocx.derefArg[2]);
+
+		bool result = false;
+
+		MARC_INTERPRETER_BINARY_OP_BOOLEAN_RESULT(result, leftOperand, == , rightOperand, ocx.datatype);
+
+		if (result)
+			getRegister(BC_MEM_REG_CODE_POINTER) = destAddr;
+	}
+	void Interpreter::exec_insJumpNotEqual(BC_OpCodeEx ocx)
+	{
+		auto& destAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[0]);
+		auto& leftOperand = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
+		auto& rightOperand = readMemCellAndMove(ocx.datatype, ocx.derefArg[2]);
+
+		bool result = false;
+
+		MARC_INTERPRETER_BINARY_OP_BOOLEAN_RESULT(result, leftOperand, != , rightOperand, ocx.datatype);
+
+		if (result)
+			getRegister(BC_MEM_REG_CODE_POINTER) = destAddr;
 	}
 	void Interpreter::exec_insExit(BC_OpCodeEx ocx)
 	{

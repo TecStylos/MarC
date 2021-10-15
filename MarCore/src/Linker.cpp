@@ -22,14 +22,13 @@ namespace MarC
 		{
 			auto& mod = *m_pExeInfo->modules[i];
 
-			for (auto label : mod.labels)
+			for (auto symbol : mod.symbols)
 			{
-				if (label.second.usage == SYMBOL_USAGE_ADDRESS && label.second.value.as_ADDR.base == BC_MEM_BASE_CODE_MEMORY)
-				//if (label.second.base == BC_MEM_BASE_CODE_MEMORY)
-					label.second.value.as_ADDR.asCode.page = i;
-				m_labels.insert(label);
+				if (symbol.second.usage == SYMBOL_USAGE_ADDRESS && symbol.second.value.as_ADDR.base == BC_MEM_BASE_CODE_MEMORY)
+					symbol.second.value.as_ADDR.asCode.page = i;
+				m_symbols.insert(symbol);
 			}
-			mod.labels.clear();
+			mod.symbols.clear();
 		}
 
 		bool resolvedAll = true;
@@ -41,8 +40,8 @@ namespace MarC
 			for (uint64_t i = 0; i < mod.unresolvedRefs.size(); ++i)
 			{
 				auto& ref = mod.unresolvedRefs[i];
-				auto result = m_labels.find(ref.name);
-				if (result == m_labels.end())
+				auto result = m_symbols.find(ref.name);
+				if (result == m_symbols.end())
 					continue;
 
 				mod.codeMemory->write(&result->second.value, BC_DatatypeSize(ref.datatype), ref.offset);

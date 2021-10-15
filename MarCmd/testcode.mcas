@@ -24,10 +24,12 @@ pop.i32                         / Pop a value with type i32 from the stack
 
 mov.i64 : $ec : @$ac            / Set the exit code to the value of accumulator
 
-jmp : optionalExit
+jne.i64 : optionalExit : @$ec : @$ec
 
-#label : testLabel              / Create a label storing the current code pointer
-mov.u64 : $cp : testLabel       / Infinite loop
+mov.u64 : $lc : 10000
+#label : loopLabel              / Create a label storing the current code pointer
+sub.u64 : $lc : 1
+jne.u64 : loopLabel : @$lc : 0  / Counted loop
 
 exit                            / Stop the execution
 

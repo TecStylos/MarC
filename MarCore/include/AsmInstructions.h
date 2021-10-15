@@ -56,6 +56,8 @@ namespace MarC
 		{ BC_OC_POP_FRAME, false, {} },
 
 		{ BC_OC_JUMP, false, { { InsArgType::Address } } },
+		{ BC_OC_JUMP_EQUAL, true, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
+		{ BC_OC_JUMP_NOT_EQUAL, true, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
 
 		{ BC_OC_EXIT, false, {} }
 	};

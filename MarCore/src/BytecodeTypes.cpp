@@ -62,6 +62,8 @@ namespace MarC
 			{ "popf",   BC_OC_POP_FRAME },
 
 			{ "jmp", BC_OC_JUMP },
+			{ "jeq", BC_OC_JUMP_EQUAL },
+			{ "jne", BC_OC_JUMP_NOT_EQUAL },
 
 			{ "exit",   BC_OC_EXIT },
 		};

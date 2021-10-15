@@ -45,6 +45,8 @@ namespace MarC
 		BC_OC_POP_FRAME,
 
 		BC_OC_JUMP,
+		BC_OC_JUMP_EQUAL,
+		BC_OC_JUMP_NOT_EQUAL,
 
 		BC_OC_EXIT,
 

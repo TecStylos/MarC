@@ -67,6 +67,8 @@ namespace MarC
 		void exec_insPushFrame(BC_OpCodeEx ocx);
 		void exec_insPopFrame(BC_OpCodeEx ocx);
 		void exec_insJump(BC_OpCodeEx ocx);
+		void exec_insJumpEqual(BC_OpCodeEx ocx);
+		void exec_insJumpNotEqual(BC_OpCodeEx ocx);
 		void exec_insExit(BC_OpCodeEx ocx);
 	private:
 		void virt_pushStack(const BC_MemCell& mc, uint64_t nBytes);
@@ -113,4 +115,22 @@ case MarC::BC_DT_F_32: __left.as_F_32 __operator __right.as_F_32; break; \
 case MarC::BC_DT_F_64: __left.as_F_64 __operator __right.as_F_64; break; \
 \
 case MarC::BC_DT_BOOL: __left.as_BOOL __operator __right.as_BOOL; break; \
+}
+
+#define MARC_INTERPRETER_BINARY_OP_BOOLEAN_RESULT(__result, __left, __operator, __right, __datatype) \
+switch (__datatype) { \
+case MarC::BC_DT_I_8:  __result = __left.as_I_8 __operator  __right.as_I_8;  break; \
+case MarC::BC_DT_I_16: __result = __left.as_I_16 __operator __right.as_I_16; break; \
+case MarC::BC_DT_I_32: __result = __left.as_I_32 __operator __right.as_I_32; break; \
+case MarC::BC_DT_I_64: __result = __left.as_I_64 __operator __right.as_I_64; break; \
+\
+case MarC::BC_DT_U_8:  __result = __left.as_U_8  __operator __right.as_U_8;  break; \
+case MarC::BC_DT_U_16: __result = __left.as_U_16 __operator __right.as_U_16; break; \
+case MarC::BC_DT_U_32: __result = __left.as_U_32 __operator __right.as_U_32; break; \
+case MarC::BC_DT_U_64: __result = __left.as_U_64 __operator __right.as_U_64; break; \
+\
+case MarC::BC_DT_F_32: __result = __left.as_F_32 __operator __right.as_F_32; break; \
+case MarC::BC_DT_F_64: __result = __left.as_F_64 __operator __right.as_F_64; break; \
+\
+case MarC::BC_DT_BOOL: __result = __left.as_BOOL __operator __right.as_BOOL; break; \
 }

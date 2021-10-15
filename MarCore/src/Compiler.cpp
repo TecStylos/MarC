@@ -282,9 +282,9 @@ namespace MarC
 
 	bool Compiler::addSymbol(const std::string& name, const Symbol& symbol)
 	{
-		if (m_pModInfo->labels.find(name) != m_pModInfo->labels.end())
+		if (m_pModInfo->symbols.find(name) != m_pModInfo->symbols.end())
 			COMPILER_RETURN_WITH_ERROR(CompErrCode::SymbolAlreadyDefined, "A symbol with name '" + name + "' has already been defined!");
-		m_pModInfo->labels.insert({ name, symbol });
+		m_pModInfo->symbols.insert({ name, symbol });
 
 		return true;
 	}
