@@ -1,0 +1,25 @@
+{
+    "name": "marcembly-lang",
+    "displayName": "MarCembly Lang",
+    "description": "Syntax hightlighting for marcembly lang",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.61.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "marcembly",
+            "aliases": ["MarCembly", "marcembly"],
+            "extensions": [".mca"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "marcembly",
+            "scopeName": "source.mca",
+            "path": "./syntaxes/marcembly.tmLanguage.json"
+        }]
+    }
+}

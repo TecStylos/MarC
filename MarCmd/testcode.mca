@@ -48,5 +48,6 @@ add.i8 : @$ac : 1
 #alias : exitCodeSuccess : 1234
 
 mov.u64 : regExitCode : exitCodeSuccess
+add.u64 : regExitCode : @regExitCode
 
 exit
