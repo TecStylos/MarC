@@ -7,6 +7,7 @@ namespace MarC
 		if (value == "") return DirectiveID::None;
 		if (value == "label") return DirectiveID::Label;
 		if (value == "alias") return DirectiveID::Alias;
+		if (value == "static") return DirectiveID::Static;
 
 		return DirectiveID::Unknown;
 	}

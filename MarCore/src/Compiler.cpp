@@ -194,7 +194,7 @@ namespace MarC
 		auto reg = BC_RegisterFromString(nextToken().value);
 		if (reg == BC_MEM_REG_NONE || reg == BC_MEM_REG_UNKNOWN)
 			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnknownRegisterName, "Unknown register name '" + currToken().value + "'!");
-		tc.cell.as_ADDR = BC_MemAddress(BC_MEM_BASE_REGISTER, BC_MemRegisterID(reg));
+		tc.cell.as_ADDR = BC_MemAddress(BC_MEM_BASE_REGISTER, reg);
 		return true;
 	}
 
@@ -308,6 +308,8 @@ namespace MarC
 			return compileDirLabel();
 		case DirectiveID::Alias:
 			return compileDirAlias();
+		case DirectiveID::Static:
+			return compileDirStatic();
 		}
 
 		COMPILER_RETURN_WITH_ERROR(CompErrCode::UnknownDirectiveID, "Unknown directive '" + currToken().value + "'!");
@@ -370,7 +372,8 @@ namespace MarC
 		}
 
 		bool getsDereferenced;
-		generateTypeCell(tc, getsDereferenced);
+		if (!generateTypeCell(tc, getsDereferenced))
+			return false;
 
 		if (getsDereferenced)
 			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Usage of the deref operator is not allowed in the alias directive!");
@@ -378,6 +381,41 @@ namespace MarC
 		symbol.value = tc.cell;
 
 		if (!addSymbol(name, symbol))
+			return false;
+
+		return true;
+	}
+
+	bool Compiler::compileDirStatic()
+	{
+		if (!removeNecessaryColon())
+			return false;
+
+		if (nextToken().type != AsmToken::Type::Name)
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'name' for static name!");
+
+		std::string name = currToken().value;
+
+		if (!removeNecessaryColon())
+			return false;
+
+		TypeCell tc;
+		tc.datatype = BC_DT_U_64;
+
+		nextToken();
+
+		bool getsDereferenced;
+		if (!generateTypeCell(tc, getsDereferenced))
+			return false;
+
+		if (getsDereferenced)
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Usage of the deref operator is not allowed in the static directive!");
+
+		BC_MemCell mc;
+		mc.as_ADDR = BC_MemAddress(BC_MEM_BASE_STATIC_STACK, m_staticStack->size());
+		m_staticStack->resize(m_staticStack->size() + tc.cell.as_U_64);
+
+		if (!addSymbol(name, Symbol(SymbolUsage::Address, mc)))
 			return false;
 
 		return true;

@@ -15,6 +15,7 @@ namespace MarC
 		Unknown,
 		Label,
 		Alias,
+		Static,
 	};
 
 	DirectiveID DirectiveIDFromString(const std::string& value);

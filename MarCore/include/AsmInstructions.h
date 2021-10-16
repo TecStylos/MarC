@@ -45,6 +45,8 @@ namespace MarC
 		{ BC_OC_MULTIPLY, true, { { InsArgType::Address }, { InsArgType::Value } } },
 		{ BC_OC_DIVIDE, true, { { InsArgType::Address }, { InsArgType::Value } } },
 
+		{ BC_OC_DEREFERENCE, false, { { InsArgType::Address }, { InsArgType::Address } } },
+
 		{ BC_OC_CONVERT, true, { { InsArgType::Address }, { InsArgType::Datatype } } },
 
 		{ BC_OC_PUSH, true, {} },

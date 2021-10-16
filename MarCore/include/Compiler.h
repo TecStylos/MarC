@@ -71,6 +71,7 @@ namespace MarC
 		bool compileDirective();
 		bool compileDirLabel();
 		bool compileDirAlias();
+		bool compileDirStatic();
 	private:
 		bool removeNecessaryColon();
 	private:

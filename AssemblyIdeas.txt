@@ -52,9 +52,10 @@ Instructionset:
 Other:
     #label : [name]                         Create a label with name name holding the current code pointer
     #alias : [name] : [literal]             Store any literal under a specific name
-    #module : [modName]                     Links the current file to the given module name
-    #reqmod : [filename] : [modName]        Mark a file as a requested module
     #static : [name] : [size]               Shortcut for: label : [name] \ add.u64 : $sp : [size]
+
+    #reqmod : [filename]                    Mark a file as a requested module
+    #insmod : [modName]                     Execute the code of a specific module
     #manperm : [single/group] : [name]      Request a mandatory permission for an external function
     #optperm : [single/group] : [name]      Request a optional permission for an external function
 

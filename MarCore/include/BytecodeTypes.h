@@ -33,6 +33,8 @@ namespace MarC
 		BC_OC_MULTIPLY,
 		BC_OC_DIVIDE,
 
+		BC_OC_DEREFERENCE,
+
 		BC_OC_CONVERT,
 
 		BC_OC_PUSH,
@@ -98,14 +100,14 @@ namespace MarC
 		{
 			struct
 			{
-				uint64_t base : 3;
 				uint64_t addr : 61;
+				uint64_t base : 3;
 			};
 			struct
 			{
-				uint64_t base : 3;
-				uint64_t page : 5;
 				uint64_t addr : 56;
+				uint64_t page : 5;
+				uint64_t base : 3;
 			} asCode;
 		};
 	public:
@@ -139,11 +141,6 @@ namespace MarC
 	};
 
 	#pragma pack(pop)
-
-	inline constexpr uint64_t BC_MemRegisterID(BC_MemRegister memReg)
-	{
-		return memReg - 2;
-	}
 
 	BC_OpCode BC_OpCodeFromString(const std::string& ocStr);
 

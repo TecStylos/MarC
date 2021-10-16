@@ -26,9 +26,9 @@ mov.i64 : $ec : @$ac            / Set the exit code to the value of accumulator
 
 jne.i64 : optionalExit : @$ec : @$ec
 
-mov.u64 : $lc : 10000
+mov.u64 : $lc : 1000
 #label : loopLabel              / Create a label storing the current code pointer
-sub.u64 : $lc : 1
+  sub.u64 : $lc : 1
 jne.u64 : loopLabel : @$lc : 0  / Counted loop
 
 jmp : optionalExit
@@ -38,11 +38,6 @@ exit                            / Stop the execution
 #label : optionalExit
 
 mov.i64 : $ec : 456
-
-/calx : print : 0 : "Hello world!"
-mov.u64 : $ac : "Hello world!"
-mov.u64 : $ac : "Goodbye!"
-add.i8 : @$ac : 1
 
 #alias : regExitCode : $ec
 #alias : exitCodeSuccess : 1234

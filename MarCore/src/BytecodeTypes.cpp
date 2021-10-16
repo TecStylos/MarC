@@ -51,6 +51,8 @@ namespace MarC
 			{ "mul",    BC_OC_MULTIPLY },
 			{ "div",    BC_OC_DIVIDE },
 
+			{ "drf",    BC_OC_DEREFERENCE },
+
 			{ "conv",   BC_OC_CONVERT },
 
 			{ "push",   BC_OC_PUSH },

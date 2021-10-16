@@ -102,7 +102,7 @@ namespace MarC
 
 	BC_MemCell& Interpreter::getRegister(BC_MemRegister reg)
 	{
-		return m_mem.registers[BC_MemRegisterID(reg)];
+		return m_mem.registers[reg];
 	}
 
 	uint64_t Interpreter::nInsExecuted() const
@@ -132,14 +132,16 @@ namespace MarC
 	void Interpreter::execNext()
 	{
 		static const std::unordered_map<BC_OpCode, void (Interpreter::*)(BC_OpCodeEx)> opCodeFuns = {
-			{ BC_OC_NONE, &Interpreter::exec_insMove },
-			{ BC_OC_UNKNOWN, &Interpreter::exec_insMove },
+			{ BC_OC_NONE, &Interpreter::exec_insUndefined },
+			{ BC_OC_UNKNOWN, &Interpreter::exec_insUndefined },
 
 			{ BC_OC_MOVE, &Interpreter::exec_insMove },
 			{ BC_OC_ADD, &Interpreter::exec_insAdd },
 			{ BC_OC_SUBTRACT, &Interpreter::exec_insSubtract },
 			{ BC_OC_MULTIPLY, &Interpreter::exec_insMultiply },
 			{ BC_OC_DIVIDE, &Interpreter::exec_insDivide },
+
+			{ BC_OC_DEREFERENCE, &Interpreter::exec_insDereference },
 
 			{ BC_OC_CONVERT, &Interpreter::exec_insConvert },
 
@@ -174,10 +176,15 @@ namespace MarC
 		(*this.*(it->second))(ocx);
 	}
 
+	void Interpreter::exec_insUndefined(BC_OpCodeEx ocx)
+	{
+		throw InterpreterError(IntErrCode::OpCodeUnknown, "Read undefined opCode '" + std::to_string(ocx.opCode) + "'!");
+	}
+
 	void Interpreter::exec_insMove(BC_OpCodeEx ocx)
 	{
 		void* dest = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
-		BC_MemCell src = readMemCellAndMove(ocx.datatype, ocx.derefArg[0]);
+		BC_MemCell src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
 		memcpy(dest, &src, BC_DatatypeSize(ocx.datatype));
 	}
 	void Interpreter::exec_insAdd(BC_OpCodeEx ocx)
@@ -203,6 +210,12 @@ namespace MarC
 		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
 		BC_MemCell src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
 		MARC_INTERPRETER_BINARY_OP(dest, /=, src, ocx.datatype);
+	}
+	void Interpreter::exec_insDereference(BC_OpCodeEx ocx)
+	{
+		void* dest = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		void* src = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[1]);
+		memcpy(dest, src, BC_DatatypeSize(BC_DT_U_64));
 	}
 	void Interpreter::exec_insConvert(BC_OpCodeEx ocx)
 	{

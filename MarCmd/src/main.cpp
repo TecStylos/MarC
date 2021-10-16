@@ -40,7 +40,7 @@ int main()
 	Timer timer;
 
 	MarC::Linker linker;
-	MarC::AsmTokenizer tokenizer(readFile("testcode.mca"));
+	MarC::AsmTokenizer tokenizer(readFile("copyHelloWorld.mca"));
 	MarC::Compiler compiler(tokenizer.getTokenList(), linker.getExeInfo()->staticStack);
 	MarC::Interpreter interpreter(linker.getExeInfo(), 4096);
 
