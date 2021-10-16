@@ -1,7 +1,7 @@
 
 Annotations:
-    [r/m] = register or memory address (subset of gio)
-    [gio] = generic immediate operand
+    [addr] = register or memory address (subset of gio)
+    [val] = generic immediate operand
     [dt] = datatype
     [name] = alphanumeric string (Cannot start with a numeric)
     [*...] = optional
@@ -10,7 +10,8 @@ Datatypes:
     i[8/16/32/64] = signed integer
     u[8/16/32/64] = unsigned integer
     f[32/64] = floating point value
-    b = boolean
+    bool = boolean
+    addr = [u64]
 
 Generic immediate operands:
     @[u64Exp]                               Dereference u64Exp (C: *u64Exp)
@@ -26,32 +27,37 @@ Registers:
 
 
 Instructionset:
-    mov.[dt] : [r/m] : [gio]                Store value of gio at r/m
-    add.[dt] : [r/m] : [gio]                Add value of gio to r/m
-    sub.[dt] : [r/m] : [gio]                Subtract value of gio from r/m
-    mul.[dt] : [r/m] : [gio]                Multiply value at r/m with value of gio
-    div.[dt] : [r/m] : [gio]                Divide value at r/m by value of gio
+    mov.[dt] : [addr] : [val]                Store value of gio at r/m
 
-    conv.[dt] : [r/m] : [newDT]
+    add.[dt] : [addr] : [val]                Add value of gio to r/m
+    sub.[dt] : [addr] : [val]                Subtract value of gio from r/m
+    mul.[dt] : [addr] : [val]                Multiply value at r/m with value of gio
+    div.[dt] : [addr] : [val]                Divide value at r/m by value of gio
 
-    cpy : [r/m] : [r/m]                     Copy nBytes (value stored in the accumulator) from src to dest
+    conv.[dt] : [r/m] : [dt]
 
-    pushc.[dt] : [gio]                      Push a value onto the stack
+    push.[dt]
+    pop.[dt]
+    pushc.[dt] : [val]                      Push a value onto the stack
     pop.[dt]                                Pop a value from the stack
+
     pushf                                   Push a new stack frame
     popf                                    Pop a stack frame
 
-    return
+    jmp : [addr]
+    jeq.[dt] : [addr] : [val] : [val]
+    jne.[dt] : [addr] : [val] : [val]
+
     exit
 
 Other:
+    #label : [name]                         Create a label with name name holding the current code pointer
     #module : [modName]                     Links the current file to the given module name
     #reqmod : [filename] : [modName]        Mark a file as a requested module
-    #label : [name]                         Create a label with name name holding the current code pointer
-    #static : [name] : [size]               Shortcut for: label : [name] \ add.u64 $sp : [size]
-    #alias : [name] : "[text]"              Store any literal under a specific name
-    #permission : [single/group] : [name]   Request permission for an external function
-
+    #static : [name] : [size]               Shortcut for: label : [name] \ add.u64 : $sp : [size]
+    #alias : [name] : [literal]             Store any literal under a specific name
+    #manperm : [single/group] : [name]      Request a mandatory permission for an external function
+    #optperm : [single/group] : [name]      Request a optional permission for an external function
 
 
 Example:

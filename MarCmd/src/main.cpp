@@ -44,54 +44,54 @@ int main()
 	MarC::Compiler compiler(tokenizer.getTokenList(), linker.getExeInfo()->staticStack);
 	MarC::Interpreter interpreter(linker.getExeInfo(), 4096);
 
-	std::cout << "Running tokenizer..." << std::endl;
-	if (tokenizer.tokenize())
-		std::cout << "  Successfully tokenized the code!" << std::endl;
+	std::cout << "Adding module...";
+	if (linker.addModule(compiler.getModuleInfo()))
+		std::cout << " DONE" << std::endl;
 	else
 	{
-		std::cout << "  An error occured while running the tokenizer!" << std::endl
+		std::cout << std::endl << "  An error occured while adding the module to the linker!" << std::endl;
+		return -1;
+	}
+
+	std::cout << "Running tokenizer...";
+	if (tokenizer.tokenize())
+		std::cout << " DONE" << std::endl;
+	else
+	{
+		std::cout << std::endl << "  An error occured while running the tokenizer!" << std::endl
 			<< "    " << tokenizer.lastError().getMessage() << std::endl;
 		return -1;
 	}
 
-	std::cout << "Running compiler..." << std::endl;
+	std::cout << "Running compiler...";
 	if (compiler.compile())
-		std::cout << "  Successfully compiled the code!" << std::endl;
+		std::cout << " DONE" << std::endl;
 	else
 	{
-		std::cout << "  An error occured while running the compiler!" << std::endl
+		std::cout << std::endl << "  An error occured while running the compiler!" << std::endl
 		<< "    " << compiler.lastError().getMessage() << std::endl;
 		return -1;
 	}
 
-	std::cout << "Adding module..." << std::endl;
-	if (linker.addModule(compiler.getModuleInfo()))
-		std::cout << "  Successfully added the module to the linker!" << std::endl;
-	else
-	{
-		std::cout << "  An error occured while adding the module to the linker!" << std::endl;
-		return -1;
-	}
-
-	std::cout << "Running linker..." << std::endl;
+	std::cout << "Running linker...";
 	if (linker.link())
-		std::cout << "  Successfully linked the code!" << std::endl;
+		std::cout << " DONE" << std::endl;
 	else
 	{
-		std::cout << "  An error occured while running the linker!" << std::endl;
+		std::cout << std::endl << "  An error occured while running the linker!" << std::endl;
 		return -1;
 	}
 
-	std::cout << "Running the interpreter..." << std::endl;
+	std::cout << "Running the interpreter...";
 
 	timer.start();
 	bool intResult = interpreter.interpret();
 	timer.stop();
 	if (intResult || interpreter.lastError().isOK())
-		std::cout << "  Successfully interpreted the code!" << std::endl;
+		std::cout << " DONE" << std::endl;
 	else
 	{
-		std::cout << "  An error occured while interpreting the code!" << std::endl
+		std::cout << std::endl << "  An error occured while interpreting the code!" << std::endl
 		<< "    " << interpreter.lastError().getMessage() << std::endl;
 		return -1;
 	}

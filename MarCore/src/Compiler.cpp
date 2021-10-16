@@ -148,87 +148,128 @@ namespace MarC
 		switch (currToken().type)
 		{
 		case AsmToken::Type::Op_Register:
-		{
-			auto reg = BC_RegisterFromString(nextToken().value);
-			if (reg == BC_MEM_REG_NONE || reg == BC_MEM_REG_UNKNOWN)
-				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnknownRegisterName, "Unknown register name '" + currToken().value + "'!");
-			argData.cell.as_ADDR = BC_MemAddress(BC_MEM_BASE_REGISTER, BC_MemRegisterID(reg));
-		}
+			if (!generateArgDataRegister(argData))
+				return false;
 			break;
 		case AsmToken::Type::Op_FP_Relative:
-		{
-			if (nextToken().type != AsmToken::Type::Integer)
-				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type integer, got type '" + std::to_string((uint64_t)currToken().type) + "' with value '" + currToken().value + "'!");
-
-			uint64_t offset = std::stoull(positiveString(currToken().value));
-
-			bool isNegative = isNegativeString(currToken().value);
-			auto base = isNegative ? BC_MEM_BASE_DYN_FRAME_SUB : BC_MEM_BASE_DYN_FRAME_ADD;
-
-			argData.cell.as_ADDR = BC_MemAddress(base, offset);
-		}
+			if (!generateArgDataFPRelative(argData))
+				return false;
 			break;
 		case AsmToken::Type::Name:
-		{
-			m_pModInfo->unresolvedRefs.push_back(
-				{
-					currToken().value,
-					currCodeOffset(),
-					argData.datatype
-				}
-			);
-		}
+			if (!generateArgDataName(argData))
+				return false;
 			break;
 		case AsmToken::Type::String:
-		{
-			// TODO
-		}
+			if (!generateArgDataString(argData))
+				return false;
 			break;
 		case AsmToken::Type::Float:
-			if (ocx.derefArg[arg.index])
-				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Cannot dereference argument of type 'float'!");
-			switch (argData.datatype)
-			{
-			case BC_DT_F_32:
-				argData.cell.as_F_32 = std::stof(currToken().value); break;
-			case BC_DT_F_64:
-				argData.cell.as_F_64 = std::stod(currToken().value); break;
-			default:
-				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Cannot use floating-point literal '" + currToken().value + "' in instruction with datatype '" + std::to_string((uint64_t)argData.datatype) + "'!");
-			}
+			if (!generateArgDataFloat(argData, ocx, arg))
+				return false;
 			break;
 		case AsmToken::Type::Integer:
-		{
-			if (!ocx.derefArg[arg.index] && (argData.datatype == BC_DT_F_32 || argData.datatype == BC_DT_F_64))
-				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Cannot use integer '" + currToken().value + "' in instruction with datatype '" + std::to_string((uint64_t)argData.datatype) + "'!");
-
-			argData.cell.as_U_64 = std::stoull(positiveString(currToken().value));
-			if (isNegativeString(currToken().value))
-			{
-				if (ocx.derefArg[arg.index])
-					COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Cannot dereference literal with negative value!");
-
-				switch (argData.datatype)
-				{
-				case BC_DT_I_8:
-				case BC_DT_U_8:
-					argData.cell.as_I_8 *= -1; break;
-				case BC_DT_I_16:
-				case BC_DT_U_16:
-					argData.cell.as_I_16 *= -1; break;
-				case BC_DT_I_32:
-				case BC_DT_U_32:
-					argData.cell.as_I_32 *= -1; break;
-				case BC_DT_I_64:
-				case BC_DT_U_64:
-					argData.cell.as_I_64 *= -1; break;
-				}
-			}
-		}
+			if (!generateArgDataInteger(argData, ocx, arg))
+				return false;
 			break;
 		}
 
 		pushCode(&argData.cell, BC_DatatypeSize(argData.datatype));
+
+		return true;
+	}
+
+	bool Compiler::generateArgDataRegister(TypeCell& argData)
+	{
+		auto reg = BC_RegisterFromString(nextToken().value);
+		if (reg == BC_MEM_REG_NONE || reg == BC_MEM_REG_UNKNOWN)
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnknownRegisterName, "Unknown register name '" + currToken().value + "'!");
+		argData.cell.as_ADDR = BC_MemAddress(BC_MEM_BASE_REGISTER, BC_MemRegisterID(reg));
+		return true;
+	}
+
+	bool Compiler::generateArgDataFPRelative(TypeCell& argData)
+	{
+		if (nextToken().type != AsmToken::Type::Integer)
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type integer, got type '" + std::to_string((uint64_t)currToken().type) + "' with value '" + currToken().value + "'!");
+
+		uint64_t offset = std::stoull(positiveString(currToken().value));
+
+		bool isNegative = isNegativeString(currToken().value);
+		auto base = isNegative ? BC_MEM_BASE_DYN_FRAME_SUB : BC_MEM_BASE_DYN_FRAME_ADD;
+
+		argData.cell.as_ADDR = BC_MemAddress(base, offset);
+
+		return true;
+	}
+
+	bool Compiler::generateArgDataName(TypeCell& argData)
+	{
+		m_pModInfo->unresolvedRefs.push_back(
+			{
+				currToken().value,
+				currCodeOffset(),
+				argData.datatype
+			}
+		);
+
+		return true;
+	}
+
+	bool Compiler::generateArgDataString(TypeCell& argData)
+	{
+		if (argData.datatype != BC_DT_U_64)
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::DatatypeMismatch, "Cannot use string in instruction with datatype '" + std::to_string((uint64_t)argData.datatype) + "'!");
+
+		argData.cell.as_ADDR = BC_MemAddress(BC_MEM_BASE_STATIC_STACK, m_staticStack->size());
+		m_staticStack->push(currToken().value.c_str(), currToken().value.size() + 1);
+
+		return true;
+	}
+
+	bool Compiler::generateArgDataFloat(TypeCell& argData, const BC_OpCodeEx& ocx, const InsArgument& arg)
+	{
+		if (ocx.derefArg[arg.index])
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Cannot dereference argument of type 'float'!");
+		switch (argData.datatype)
+		{
+		case BC_DT_F_32:
+			argData.cell.as_F_32 = std::stof(currToken().value); break;
+		case BC_DT_F_64:
+			argData.cell.as_F_64 = std::stod(currToken().value); break;
+		default:
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Cannot use floating-point literal '" + currToken().value + "' in instruction with datatype '" + std::to_string((uint64_t)argData.datatype) + "'!");
+		}
+
+		return true;
+	}
+
+	bool Compiler::generateArgDataInteger(TypeCell& argData, const BC_OpCodeEx& ocx, const InsArgument& arg)
+	{
+		if (!ocx.derefArg[arg.index] && (argData.datatype == BC_DT_F_32 || argData.datatype == BC_DT_F_64))
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Cannot use integer '" + currToken().value + "' in instruction with datatype '" + std::to_string((uint64_t)argData.datatype) + "'!");
+
+		argData.cell.as_U_64 = std::stoull(positiveString(currToken().value));
+		if (isNegativeString(currToken().value))
+		{
+			if (ocx.derefArg[arg.index])
+				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Cannot dereference literal with negative value!");
+
+			switch (argData.datatype)
+			{
+			case BC_DT_I_8:
+			case BC_DT_U_8:
+				argData.cell.as_I_8 *= -1; break;
+			case BC_DT_I_16:
+			case BC_DT_U_16:
+				argData.cell.as_I_16 *= -1; break;
+			case BC_DT_I_32:
+			case BC_DT_U_32:
+				argData.cell.as_I_32 *= -1; break;
+			case BC_DT_I_64:
+			case BC_DT_U_64:
+				argData.cell.as_I_64 *= -1; break;
+			}
+		}
 
 		return true;
 	}

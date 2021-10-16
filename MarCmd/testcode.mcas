@@ -1,13 +1,13 @@
-mov.f32 : $ec : +12.3           / Set the exit code to 12.3
+mov.f32 : $ec : 12.3            / Set the exit code to 12.3
 add.f32 : $ec : -23.0           / Subtract 23 from the exit code
-sub.f32 : $ec : +1.0            / Subtract 1 from the exit code
-mul.f32 : $ec : +3.5            / Multiply the exit code with 3.5
+sub.f32 : $ec : 1.0             / Subtract 1 from the exit code
+mul.f32 : $ec : 3.5             / Multiply the exit code with 3.5
 div.f32 : $ec : -4.0            / Divide the exit code by -4
 
 conv.f32 : $ec : i64            / Convert the exit code from f32 to i64
 
 pushc.i32 : -135                / Push -135 with type i32 onto the stack
-pushc.u64 : $ec                 / Push the address of the exit code onto the stack
+pushc.addr : $ec                / Push the address of the exit code onto the stack
 pushc.i64 : @$ec                / Push the exit code onto the stack
 
 add.i64 : $ec : +123            / Add 123 to the exit code
@@ -16,10 +16,10 @@ pushf                           / Push a new frame onto the stack
 push.i64                        / Push an empty value with type i64 onto the stack
 popf                            / Pop the current frame from the stack
 
-mov.i64 : $ac : @~4             / Set the accumulator to the address of the exit code
+mov.addr : $ac : @~4             / Set the accumulator to the address of the exit code
 
 popc.i64 : $ec                  / Pop a value from the stack and store it as the exit code
-pop.u64                         / Pop a value with type u64 from the stack
+pop.addr                        / Pop a value with type u64 from the stack
 pop.i32                         / Pop a value with type i32 from the stack
 
 mov.i64 : $ec : @$ac            / Set the exit code to the value of accumulator
@@ -31,9 +31,17 @@ mov.u64 : $lc : 10000
 sub.u64 : $lc : 1
 jne.u64 : loopLabel : @$lc : 0  / Counted loop
 
+jmp : optionalExit
+
 exit                            / Stop the execution
 
 #label : optionalExit
 
-mov.i64 : $ec : +456
+mov.i64 : $ec : 456
+
+/calx : print : 0 : "Hello world!"
+mov.u64 : $ac : "Hello world!"
+mov.u64 : $ac : "Goodbye!"
+add.i8 : @$ac : 1
+
 exit
