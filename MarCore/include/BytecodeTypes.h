@@ -19,8 +19,7 @@ namespace MarC
 		BC_DT_U_32,
 		BC_DT_U_64,
 		BC_DT_F_32,
-		BC_DT_F_64,
-		BC_DT_BOOL
+		BC_DT_F_64
 	};
 	enum BC_OpCode : uint8_t
 	{

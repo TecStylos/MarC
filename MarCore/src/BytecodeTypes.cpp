@@ -96,7 +96,6 @@ namespace MarC
 			{ "u64",  BC_DT_U_64 },
 			{ "f32",  BC_DT_F_32 },
 			{ "f64",  BC_DT_F_64 },
-			{ "bool", BC_DT_BOOL },
 			{ "addr", BC_DT_U_64 },
 		};
 
@@ -140,7 +139,6 @@ namespace MarC
 		{
 		case BC_DT_I_8:
 		case BC_DT_U_8:
-		case BC_DT_BOOL:
 			return 1;
 		case BC_DT_I_16:
 		case BC_DT_U_16:

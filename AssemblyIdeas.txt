@@ -10,7 +10,6 @@ Datatypes:
     i[8/16/32/64] = signed integer
     u[8/16/32/64] = unsigned integer
     f[32/64] = floating point value
-    bool = boolean
     addr = [u64]
 
 Generic immediate operands:
