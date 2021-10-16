@@ -59,16 +59,18 @@ namespace MarC
 		bool compileArgument(BC_OpCodeEx& ocx, const InsArgument& arg);
 		bool compileArgAddress(BC_OpCodeEx& ocx, const InsArgument& arg);
 		bool compileArgValue(BC_OpCodeEx& ocx, const InsArgument& arg);
-		bool generateArgDataRegister(TypeCell& argData);
-		bool generateArgDataFPRelative(TypeCell& argData);
-		bool generateArgDataName(TypeCell& argData);
-		bool generateArgDataString(TypeCell& argData);
-		bool generateArgDataFloat(TypeCell& argData, const BC_OpCodeEx& ocx, const InsArgument& arg);
-		bool generateArgDataInteger(TypeCell& argData, const BC_OpCodeEx& ocx, const InsArgument& arg);
+		bool generateTypeCell(TypeCell& tc, bool& getsDereferenced);
+		bool generateTypeCellRegister(TypeCell& tc);
+		bool generateTypeCellFPRelative(TypeCell& tc);
+		bool generateTypeCellName(TypeCell& tc);
+		bool generateTypeCellString(TypeCell& tc);
+		bool generateTypeCellFloat(TypeCell& tc, bool getsDereferenced);
+		bool generateTypeCellInteger(TypeCell& tc, bool getsDereferenced);
 		bool compileArgDatatype(BC_OpCodeEx& ocx, const InsArgument& arg);
 	private:
 		bool compileDirective();
 		bool compileDirLabel();
+		bool compileDirAlias();
 	private:
 		bool removeNecessaryColon();
 	private:

@@ -24,7 +24,7 @@ namespace MarC
 
 			for (auto symbol : mod.symbols)
 			{
-				if (symbol.second.usage == SYMBOL_USAGE_ADDRESS && symbol.second.value.as_ADDR.base == BC_MEM_BASE_CODE_MEMORY)
+				if (symbol.second.usage == SymbolUsage::Address && symbol.second.value.as_ADDR.base == BC_MEM_BASE_CODE_MEMORY)
 					symbol.second.value.as_ADDR.asCode.page = i;
 				m_symbols.insert(symbol);
 			}

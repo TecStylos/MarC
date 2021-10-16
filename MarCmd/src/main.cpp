@@ -96,7 +96,7 @@ int main()
 		return -1;
 	}
 
-	std::cout << "Execution time: " << timer.microseconds() << " microseconds" << std::endl;
+	std::cout << "Executed " << interpreter.nInsExecuted() << " instructions in " << timer.microseconds() << " microseconds" << std::endl;
 
 	std::cout << "Exit code: " <<
 		interpreter.getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_64 <<

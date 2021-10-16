@@ -47,6 +47,7 @@ namespace MarC
 			try
 			{
 				execNext();
+				++m_nInsExecuted;
 			}
 			catch (const InterpreterError& ie)
 			{
@@ -102,6 +103,11 @@ namespace MarC
 	BC_MemCell& Interpreter::getRegister(BC_MemRegister reg)
 	{
 		return m_mem.registers[BC_MemRegisterID(reg)];
+	}
+
+	uint64_t Interpreter::nInsExecuted() const
+	{
+		return m_nInsExecuted;
 	}
 
 	void Interpreter::initMemory(uint64_t dynStackSize)

@@ -44,4 +44,9 @@ mov.u64 : $ac : "Hello world!"
 mov.u64 : $ac : "Goodbye!"
 add.i8 : @$ac : 1
 
+#alias : regExitCode : $ec
+#alias : exitCodeSuccess : 1234
+
+mov.u64 : regExitCode : exitCodeSuccess
+
 exit

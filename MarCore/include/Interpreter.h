@@ -47,6 +47,8 @@ namespace MarC
 		BC_MemCell& hostMemCell(BC_MemAddress clientAddr, bool deref = false);
 	public:
 		BC_MemCell& getRegister(BC_MemRegister reg);
+	public:
+		uint64_t nInsExecuted() const;
 	private:
 		void initMemory(uint64_t dynStackSize);
 		template <typename T> T& readDataAndMove();
@@ -79,6 +81,7 @@ namespace MarC
 		ExecutableInfoRef m_pExeInfo;
 		InterpreterMemory m_mem;
 		InterpreterError m_lastErr;
+		uint64_t m_nInsExecuted = 0;
 	};
 
 	template <typename T> T& Interpreter::hostObject(BC_MemAddress clientAddr, bool deref)

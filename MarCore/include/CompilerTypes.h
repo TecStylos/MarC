@@ -13,7 +13,8 @@ namespace MarC
 	{
 		None = 0,
 		Unknown,
-		Label
+		Label,
+		Alias,
 	};
 
 	DirectiveID DirectiveIDFromString(const std::string& value);
@@ -27,15 +28,16 @@ namespace MarC
 		BC_MemCell cell = { };
 	};
 
-	enum SymbolUsage
+	enum class SymbolUsage
 	{
-		SYMBOL_USAGE_DEFAULT,
-		SYMBOL_USAGE_ADDRESS,
+		Value,
+		Address,
 	};
 	struct Symbol
 	{
-		SymbolUsage usage;
+		SymbolUsage usage = SymbolUsage::Value;
 		BC_MemCell value;
+		Symbol() = default;
 		Symbol(SymbolUsage usage, BC_MemCell value) : usage(usage), value(value) {}
 	};
 	struct SymbolRef
