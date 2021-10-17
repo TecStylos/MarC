@@ -1,0 +1,27 @@
+jmp : CODE_BEGIN
+
+#label : CALC_SUM
+    #alias : CALC_SUM_RET : ~-24
+    #alias : CALC_SUM_X : ~+0
+    #alias : CALC_SUM_Y : ~+8
+    mov.i64 : CALC_SUM_RET : @CALC_SUM_X
+    add.i64 : CALC_SUM_RET : @CALC_SUM_Y
+    popf                                    / Pop frame
+    popc.addr : $cp
+
+#alias : X : -69
+#alias : Y : -420
+
+#label : CODE_BEGIN
+
+push.i64                                    / Push storage for return value
+pushc.addr : AFTER_JUMP                     / Push return address
+pushf                                       / Push frame
+pushc.i64 : X                               / Push argument 1
+pushc.i64 : Y                               / Push argument 2
+jmp : CALC_SUM                              / Call function
+
+#label : AFTER_JUMP
+popc.i64 : $ec                              / Pop & copy return value
+
+exit

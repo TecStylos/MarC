@@ -81,7 +81,7 @@ int main()
 	MarC::Linker linker;
 	MarC::Interpreter interpreter(linker.getExeInfo(), 4096);
 
-	if (!addModule(linker, "../examples/copyString.mca", "copyString"))
+	if (!addModule(linker, "../examples/function_low.mca", "function_low"))
 		return -1;
 
 	while (linker.hasMissingModules())

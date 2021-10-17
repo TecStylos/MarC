@@ -240,19 +240,21 @@ namespace MarC
 	}
 	void Interpreter::exec_insPopCopy(BC_OpCodeEx ocx)
 	{
-		BC_MemCell mc = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		BC_MemCell& mc = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
 		virt_popStack(mc, BC_DatatypeSize(ocx.datatype));
 	}
 	void Interpreter::exec_insPushFrame(BC_OpCodeEx ocx)
 	{
+		BC_MemCell& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
 		BC_MemCell& regFP = getRegister(BC_MEM_REG_FRAME_POINTER);
 		virt_pushStack(regFP, BC_DatatypeSize(BC_DT_U_64));
-		regFP = getRegister(BC_MEM_REG_STACK_POINTER);
+		regFP.as_ADDR = regSP.as_ADDR;
 	}
 	void Interpreter::exec_insPopFrame(BC_OpCodeEx ocx)
 	{
+		BC_MemCell& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
 		BC_MemCell& regFP = getRegister(BC_MEM_REG_FRAME_POINTER);
-		getRegister(BC_MEM_REG_STACK_POINTER) = regFP;
+		regSP.as_ADDR = regFP.as_ADDR;
 		virt_popStack(regFP, BC_DatatypeSize(BC_DT_U_64));
 	}
 	void Interpreter::exec_insJump(BC_OpCodeEx ocx)
