@@ -68,7 +68,7 @@ namespace MarC
 		case BC_MEM_BASE_NONE:
 			break;
 		case BC_MEM_BASE_STATIC_STACK:
-			hostAddr = (char*)m_pExeInfo->staticStack->getBaseAddress() + clientAddr.addr;
+			hostAddr = (char*)m_pExeInfo->modules[clientAddr.asCode.page]->staticStack->getBaseAddress() + clientAddr.asCode.addr;
 			break;
 		case BC_MEM_BASE_DYNAMIC_STACK:
 			hostAddr = (char*)m_mem.dynamicStack->getBaseAddress() + clientAddr.addr;

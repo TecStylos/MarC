@@ -54,11 +54,13 @@ Other:
     #alias : [name] : [literal]             Store any literal under a specific name
     #static : [name] : [size]               Shortcut for: label : [name] \ add.u64 : $sp : [size]
 
-    #reqmod : [filename]                    Mark a file as a requested module
+    #reqmod : [modName]                    Mark a file as a requested module
     #insmod : [modName]                     Execute the code of a specific module
+    #func : [funcName]
+    #funx : [funcName]
     #manperm : [single/group] : [name]      Request a mandatory permission for an external function
     #optperm : [single/group] : [name]      Request a optional permission for an external function
-
+    hasperm : [single/group] : [name]
 
 Example:
     #static : var1 : 4                      / Reserve 4 bytes on the static stack

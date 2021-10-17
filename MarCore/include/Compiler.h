@@ -45,7 +45,7 @@ namespace MarC
 	class Compiler
 	{
 	public:
-		Compiler(const AsmTokenListRef tokenList, MemoryRef staticStack);
+		Compiler(const AsmTokenListRef tokenList, const std::string& moduleName = "<unnamed>");
 	public:
 		bool compile();
 	public:
@@ -72,6 +72,7 @@ namespace MarC
 		bool compileDirLabel();
 		bool compileDirAlias();
 		bool compileDirStatic();
+		bool compileDirRequestModule();
 	private:
 		bool removeNecessaryColon();
 	private:
@@ -95,7 +96,6 @@ namespace MarC
 		BC_MemAddress currCodeAddr() const;
 	private:
 		const AsmTokenListRef m_pTokenList;
-		MemoryRef m_staticStack;
 		CompilerError m_lastErr;
 		ModuleInfoRef m_pModInfo;
 		uint64_t m_nextTokenToCompile = 0;

@@ -16,6 +16,7 @@ namespace MarC
 		Label,
 		Alias,
 		Static,
+		RequestModule,
 	};
 
 	DirectiveID DirectiveIDFromString(const std::string& value);
@@ -60,6 +61,7 @@ namespace MarC
 		std::string moduleName;
 		std::vector<std::string> requiredModules;
 		MemoryRef codeMemory;
+		MemoryRef staticStack;
 		SymbolMap symbols;
 		SymbolRefList unresolvedRefs;
 	public:
@@ -72,6 +74,7 @@ namespace MarC
 		{
 			uint64_t requiredModulesSize = 0;
 			uint64_t codeMemorySize = 0;
+			uint64_t staticStackSize = 0;
 		} bud;
 	};
 

@@ -1,3 +1,5 @@
+#reqmod : "std"
+
 pushc.addr : "Hello world!"
 #static : destBuff : 13
 pushc.addr : destBuff
@@ -5,11 +7,11 @@ pushc.addr : destBuff
 #alias : src : ~0
 #alias : dest : ~8
 
-#label : loopBegin
-  drf : $ac : @src
+#label : copyLoopBegin
+  drf : ACCUMULATOR : @src
   mov.u8 : @dest : @$ac
   add.addr : src : 1
   add.addr : dest : 1
-jne.u8 : loopBegin : @$ac : 0
+jne.u8 : copyLoopBegin : @ACCUMULATOR : 0
 
 exit

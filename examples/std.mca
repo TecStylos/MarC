@@ -1,0 +1,6 @@
+#alias : STACK_POINTER : $sp
+#alias : FRAME_POINTER : $fp
+#alias : LOOP_COUNTER : $lc
+#alias : ACCUMULATOR : $ac
+#alias : CODE_POINTER : $cp
+#alias : EXIT_CODE : $ec

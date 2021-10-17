@@ -18,10 +18,11 @@ namespace MarC
 			+ "SYSFILE: " + m_sysErrFile + "  SYSLINE: " + std::to_string(m_sysErrLine);
 	}
 
-	Compiler::Compiler(const AsmTokenListRef tokenList, MemoryRef staticStack)
-		: m_pTokenList(tokenList), m_staticStack(staticStack)
+	Compiler::Compiler(const AsmTokenListRef tokenList, const std::string& moduleName)
+		: m_pTokenList(tokenList)
 	{
 		m_pModInfo = std::make_shared<ModuleInfo>();
+		m_pModInfo->moduleName = moduleName;
 	}
 
 	ModuleInfoRef Compiler::getModuleInfo()
@@ -231,8 +232,8 @@ namespace MarC
 		if (tc.datatype != BC_DT_U_64)
 			COMPILER_RETURN_WITH_ERROR(CompErrCode::DatatypeMismatch, "Cannot use string in instruction with datatype '" + std::to_string((uint64_t)tc.datatype) + "'!");
 
-		tc.cell.as_ADDR = BC_MemAddress(BC_MEM_BASE_STATIC_STACK, m_staticStack->size());
-		m_staticStack->push(currToken().value.c_str(), currToken().value.size() + 1);
+		tc.cell.as_ADDR = BC_MemAddress(BC_MEM_BASE_STATIC_STACK, 0, m_pModInfo->staticStack->size());
+		m_pModInfo->staticStack->push(currToken().value.c_str(), currToken().value.size() + 1);
 
 		return true;
 	}
@@ -310,6 +311,8 @@ namespace MarC
 			return compileDirAlias();
 		case DirectiveID::Static:
 			return compileDirStatic();
+		case DirectiveID::RequestModule:
+			return compileDirRequestModule();
 		}
 
 		COMPILER_RETURN_WITH_ERROR(CompErrCode::UnknownDirectiveID, "Unknown directive '" + currToken().value + "'!");
@@ -412,11 +415,26 @@ namespace MarC
 			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Usage of the deref operator is not allowed in the static directive!");
 
 		BC_MemCell mc;
-		mc.as_ADDR = BC_MemAddress(BC_MEM_BASE_STATIC_STACK, m_staticStack->size());
-		m_staticStack->resize(m_staticStack->size() + tc.cell.as_U_64);
+		mc.as_ADDR = BC_MemAddress(BC_MEM_BASE_STATIC_STACK, 0, m_pModInfo->staticStack->size());
+		m_pModInfo->staticStack->resize(m_pModInfo->staticStack->size() + tc.cell.as_U_64);
 
 		if (!addSymbol(name, Symbol(SymbolUsage::Address, mc)))
 			return false;
+
+		return true;
+	}
+
+	bool Compiler::compileDirRequestModule()
+	{
+		if (!removeNecessaryColon())
+			return false;
+
+		if (nextToken().type != AsmToken::Type::String)
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'string' for module name!");
+
+		std::string modName = currToken().value;
+
+		m_pModInfo->requiredModules.push_back(modName);
 
 		return true;
 	}

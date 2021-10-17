@@ -8,7 +8,7 @@ namespace MarC
 	{
 		ExecutableInfo();
 	public:
-		MemoryRef staticStack;
+		std::map<std::string, uint64_t> moduleNameMap;
 		std::vector<ModuleInfoRef> modules;
 	};
 

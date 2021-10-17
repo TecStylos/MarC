@@ -39,19 +39,12 @@ int main()
 {
 	Timer timer;
 
-	MarC::Linker linker;
-	MarC::AsmTokenizer tokenizer(readFile("../examples/copyString.mca"));
-	MarC::Compiler compiler(tokenizer.getTokenList(), linker.getExeInfo()->staticStack);
-	MarC::Interpreter interpreter(linker.getExeInfo(), 4096);
+	std::string inclDir = "../examples/";
 
-	std::cout << "Adding module...";
-	if (linker.addModule(compiler.getModuleInfo()))
-		std::cout << " DONE" << std::endl;
-	else
-	{
-		std::cout << std::endl << "  An error occured while adding the module to the linker!" << std::endl;
-		return -1;
-	}
+	MarC::AsmTokenizer tokenizer(readFile("../examples/copyString.mca"));
+	MarC::Compiler compiler(tokenizer.getTokenList(), "copyString");
+	MarC::Linker linker;
+	MarC::Interpreter interpreter(linker.getExeInfo(), 4096);
 
 	std::cout << "Running tokenizer...";
 	if (tokenizer.tokenize())
@@ -69,9 +62,34 @@ int main()
 	else
 	{
 		std::cout << std::endl << "  An error occured while running the compiler!" << std::endl
-		<< "    " << compiler.lastError().getMessage() << std::endl;
+			<< "    " << compiler.lastError().getMessage() << std::endl;
 		return -1;
 	}
+
+	std::cout << "Adding module to linker...";
+	if (linker.addModule(compiler.getModuleInfo()))
+		std::cout << " DONE" << std::endl;
+	else
+	{
+		std::cout << std::endl << "  An error occured while adding the module to the linker!" << std::endl;
+		return -1;
+	}
+
+	std::cout << "Adding missing modules...";
+	while (linker.hasMissingModules())
+	{
+		auto& mismod = linker.getMissingModule();
+		std::string path = MarC::locateModule(inclDir, mismod);
+		if (!path.empty())
+		{
+			MarC::AsmTokenizer tok(readFile(path));
+			MarC::Compiler com(tok.getTokenList(), mismod);
+			tok.tokenize();
+			com.compile();
+			linker.addModule(com.getModuleInfo());
+		}
+	}
+	std::cout << " DONE" << std::endl;
 
 	std::cout << "Running linker...";
 	if (linker.link())
@@ -82,7 +100,7 @@ int main()
 		return -1;
 	}
 
-	std::cout << "Running the interpreter...";
+	std::cout << "Running interpreter...";
 
 	timer.start();
 	bool intResult = interpreter.interpret();

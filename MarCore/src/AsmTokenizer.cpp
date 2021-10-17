@@ -175,7 +175,7 @@ namespace MarC
 					}
 					break;
 				case CurrAction::TokenizeName:
-					if (std::isalnum(c))
+					if (std::isalnum(c) || c == '_')
 					{
 						currToken.value.push_back(c);
 					}
