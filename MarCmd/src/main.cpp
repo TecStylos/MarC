@@ -81,16 +81,16 @@ int main()
 	MarC::Linker linker;
 	MarC::Interpreter interpreter(linker.getExeInfo(), 4096);
 
-	addModule(linker, "../examples/copyString.mca", "copyString");
+	if (!addModule(linker, "../examples/copyString.mca", "copyString"))
+		return -1;
 
 	while (linker.hasMissingModules())
 	{
 		auto& modName = linker.getMissingModule();
 		std::string modPath = MarC::locateModule(inclDir, modName);
 		if (!modPath.empty())
-		{
-			addModule(linker, modPath, modName);
-		}
+			if (!addModule(linker, modPath, modName))
+				return -1;
 	}
 
 	std::cout << "Linking the application...";

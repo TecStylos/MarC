@@ -14,4 +14,10 @@ pushc.addr : destBuff
   add.addr : dest : 1
 jne.u8 : copyLoopBegin : @ACCUMULATOR : 0
 
+mov.u64 : $lc : 10000000
+#label : loopBegin
+sub.u64 : $lc : 1
+jne.u64 : loopBegin : @$lc : 0
+
+
 exit
