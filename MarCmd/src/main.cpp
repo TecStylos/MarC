@@ -35,68 +35,70 @@ std::string readFile(const std::string& filepath)
 	return result;
 }
 
+bool addModule(MarC::Linker& linker, const std::string& modPath, const std::string& modName)
+{
+	MarC::AsmTokenizer tokenizer(readFile(modPath));
+	MarC::Compiler compiler(tokenizer.getTokenList(), modName);
+
+	std::cout << "Tokenizing '" << modPath << "'...";
+	if (tokenizer.tokenize())
+		std::cout << " DONE" << std::endl;
+	else
+	{
+		std::cout << "  ERROR" << std::endl
+			<< "    " << tokenizer.lastError().getMessage() << std::endl;
+		return false;
+	}
+
+	std::cout << "Compiling '" << modPath << "'...";
+	if (compiler.compile())
+		std::cout << " DONE" << std::endl;
+	else
+	{
+		std::cout << "  ERROR" << std::endl
+			<< "    " << compiler.lastError().getMessage() << std::endl;
+		return false;
+	}
+
+	std::cout << "Adding module '" << modName << "' to linker...";
+	if (linker.addModule(compiler.getModuleInfo()))
+		std::cout << " DONE" << std::endl;
+	else
+	{
+		std::cout << "  ERROR" << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
 int main()
 {
 	Timer timer;
 
 	std::string inclDir = "../examples/";
 
-	MarC::AsmTokenizer tokenizer(readFile("../examples/copyString.mca"));
-	MarC::Compiler compiler(tokenizer.getTokenList(), "copyString");
 	MarC::Linker linker;
 	MarC::Interpreter interpreter(linker.getExeInfo(), 4096);
 
-	std::cout << "Running tokenizer...";
-	if (tokenizer.tokenize())
-		std::cout << " DONE" << std::endl;
-	else
-	{
-		std::cout << std::endl << "  An error occured while running the tokenizer!" << std::endl
-			<< "    " << tokenizer.lastError().getMessage() << std::endl;
-		return -1;
-	}
+	addModule(linker, "../examples/copyString.mca", "copyString");
 
-	std::cout << "Running compiler...";
-	if (compiler.compile())
-		std::cout << " DONE" << std::endl;
-	else
-	{
-		std::cout << std::endl << "  An error occured while running the compiler!" << std::endl
-			<< "    " << compiler.lastError().getMessage() << std::endl;
-		return -1;
-	}
-
-	std::cout << "Adding module to linker...";
-	if (linker.addModule(compiler.getModuleInfo()))
-		std::cout << " DONE" << std::endl;
-	else
-	{
-		std::cout << std::endl << "  An error occured while adding the module to the linker!" << std::endl;
-		return -1;
-	}
-
-	std::cout << "Adding missing modules...";
 	while (linker.hasMissingModules())
 	{
-		auto& mismod = linker.getMissingModule();
-		std::string path = MarC::locateModule(inclDir, mismod);
-		if (!path.empty())
+		auto& modName = linker.getMissingModule();
+		std::string modPath = MarC::locateModule(inclDir, modName);
+		if (!modPath.empty())
 		{
-			MarC::AsmTokenizer tok(readFile(path));
-			MarC::Compiler com(tok.getTokenList(), mismod);
-			tok.tokenize();
-			com.compile();
-			linker.addModule(com.getModuleInfo());
+			addModule(linker, modPath, modName);
 		}
 	}
-	std::cout << " DONE" << std::endl;
 
-	std::cout << "Running linker...";
+	std::cout << "Linking the application...";
 	if (linker.link())
 		std::cout << " DONE" << std::endl;
 	else
 	{
-		std::cout << std::endl << "  An error occured while running the linker!" << std::endl;
+		std::cout << "  ERROR" << std::endl;
 		return -1;
 	}
 

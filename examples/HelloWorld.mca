@@ -1,0 +1,6 @@
+#reqmod : "std"
+#manperm : single : "print"
+
+calx : print : 0 : "Hello world!"
+
+exit

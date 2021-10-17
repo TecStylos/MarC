@@ -53,8 +53,8 @@ Other:
     #label : [name]                         Create a label with name name holding the current code pointer
     #alias : [name] : [literal]             Store any literal under a specific name
     #static : [name] : [size]               Shortcut for: label : [name] \ add.u64 : $sp : [size]
-
     #reqmod : [modName]                    Mark a file as a requested module
+
     #insmod : [modName]                     Execute the code of a specific module
     #func : [funcName]
     #funx : [funcName]
