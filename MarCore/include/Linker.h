@@ -20,7 +20,7 @@ namespace MarC
 	public:
 		bool hasModule(const std::string& name) const;
 		bool hasMissingModules() const;
-		const std::string& getMissingModule() const;
+		const std::set<std::string>& getMissingModules() const;
 	private:
 		bool loadReqMods();
 		void copySymbols();

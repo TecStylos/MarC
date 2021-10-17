@@ -2,8 +2,10 @@
 
 #include <filesystem>
 #include <string>
+#include <map>
+#include <set>
 
 namespace MarC
 {
-	std::string locateModule(const std::string& baseDir, const std::string& modName);
+	std::map<std::string, std::vector<std::string>> locateModules(const std::set<std::string>& baseDirs, const std::set<std::string>& modNames);
 }

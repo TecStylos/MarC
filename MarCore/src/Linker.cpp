@@ -56,9 +56,9 @@ namespace MarC
 		return !m_missingModules.empty();
 	}
 
-	const std::string& Linker::getMissingModule() const
+	const std::set<std::string>& Linker::getMissingModules() const
 	{
-		return *m_missingModules.begin();
+		return m_missingModules;
 	}
 
 	void Linker::copySymbols()

@@ -76,7 +76,7 @@ int main()
 {
 	Timer timer;
 
-	std::string inclDir = "../examples/";
+	std::set<std::string> inclDirs = { "../examples/" };
 
 	MarC::Linker linker;
 	MarC::Interpreter interpreter(linker.getExeInfo(), 4096);
@@ -86,11 +86,27 @@ int main()
 
 	while (linker.hasMissingModules())
 	{
-		auto& modName = linker.getMissingModule();
-		std::string modPath = MarC::locateModule(inclDir, modName);
-		if (!modPath.empty())
-			if (!addModule(linker, modPath, modName))
+		auto& misMods = linker.getMissingModules();
+		auto modPaths = MarC::locateModules(inclDirs, misMods);
+
+		for (auto& pair : modPaths)
+		{
+			if (pair.second.empty())
+			{
+				std::cout << "Unable to find module '" << pair.first << "'!" << std::endl;
 				return -1;
+			}
+			if (pair.second.size() > 1)
+			{
+				std::cout << "Module '" << pair.first << "' is ambigious! Found " << pair.second.size() << " matching files!" << std::endl;
+				for (auto& p : pair.second)
+					std::cout << "  " << p << std::endl;
+				return -1;
+			}
+
+			if (!addModule(linker, pair.second[0], pair.first))
+				return -1;
+		}
 	}
 
 	std::cout << "Linking the application...";
