@@ -11,6 +11,7 @@ namespace MarC
 		if (value == "reqmod") return DirectiveID::RequestModule;
 		if (value == "scope") return DirectiveID::Scope;
 		if (value == "end") return DirectiveID::End;
+		if (value == "func") return DirectiveID::Function;
 
 		return DirectiveID::Unknown;
 	}

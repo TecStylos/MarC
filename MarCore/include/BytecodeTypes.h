@@ -49,6 +49,9 @@ namespace MarC
 		BC_OC_JUMP_EQUAL,
 		BC_OC_JUMP_NOT_EQUAL,
 
+		BC_OC_CALL,
+		BC_OC_RETURN,
+
 		BC_OC_EXIT,
 
 		BC_OC_NUM_OF_OP_CODES,

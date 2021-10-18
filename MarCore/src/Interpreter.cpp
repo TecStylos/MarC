@@ -157,6 +157,9 @@ namespace MarC
 			{ BC_OC_JUMP_EQUAL, &Interpreter::exec_insJumpEqual },
 			{ BC_OC_JUMP_NOT_EQUAL, &Interpreter::exec_insJumpNotEqual },
 
+			{ BC_OC_CALL, nullptr },
+			{ BC_OC_RETURN, &Interpreter::exec_insReturn },
+
 			{ BC_OC_EXIT, &Interpreter::exec_insExit },
 		};
 
@@ -167,11 +170,14 @@ namespace MarC
 			return true;
 		}();
 
-		auto ocx = readDataAndMove<BC_OpCodeEx>();
+		const auto& ocx = readDataAndMove<BC_OpCodeEx>();
 
 		auto it = opCodeFuns.find((BC_OpCode)ocx.opCode);
 		if (it == opCodeFuns.end())
 			throw InterpreterError(IntErrCode::OpCodeNotExecutable, "Unknown opCode '" + std::to_string(ocx.opCode) + "'!");
+
+		if (!it->second)
+			throw InterpreterError(IntErrCode::OpCodeNotExecutable, "The opCode '" + std::to_string(ocx.opCode) + "' is not executable!");
 
 		(*this.*(it->second))(ocx);
 	}
@@ -245,17 +251,11 @@ namespace MarC
 	}
 	void Interpreter::exec_insPushFrame(BC_OpCodeEx ocx)
 	{
-		BC_MemCell& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
-		BC_MemCell& regFP = getRegister(BC_MEM_REG_FRAME_POINTER);
-		virt_pushStack(regFP, BC_DatatypeSize(BC_DT_U_64));
-		regFP.as_ADDR = regSP.as_ADDR;
+		virt_pushFrame();
 	}
 	void Interpreter::exec_insPopFrame(BC_OpCodeEx ocx)
 	{
-		BC_MemCell& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
-		BC_MemCell& regFP = getRegister(BC_MEM_REG_FRAME_POINTER);
-		regSP.as_ADDR = regFP.as_ADDR;
-		virt_popStack(regFP, BC_DatatypeSize(BC_DT_U_64));
+		virt_popFrame();
 	}
 	void Interpreter::exec_insJump(BC_OpCodeEx ocx)
 	{
@@ -291,6 +291,12 @@ namespace MarC
 		if (result)
 			getRegister(BC_MEM_REG_CODE_POINTER) = destAddr;
 	}
+	void Interpreter::exec_insReturn(BC_OpCodeEx ocx)
+	{
+		virt_popFrame();
+		auto& regCP = getRegister(BC_MEM_REG_CODE_POINTER);
+		virt_popStack(regCP, BC_DatatypeSize(BC_DT_U_64));
+	}
 	void Interpreter::exec_insExit(BC_OpCodeEx ocx)
 	{
 		throw InterpreterError(IntErrCode::AbortViaExit, "The program has been aborted with a call to exit!");
@@ -316,6 +322,22 @@ namespace MarC
 		auto src = hostAddress(regSP.as_ADDR, false);
 
 		memcpy(&mc, src, nBytes);
+	}
+
+	void Interpreter::virt_pushFrame()
+	{
+		BC_MemCell& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
+		BC_MemCell& regFP = getRegister(BC_MEM_REG_FRAME_POINTER);
+		virt_pushStack(regFP, BC_DatatypeSize(BC_DT_U_64));
+		regFP.as_ADDR = regSP.as_ADDR;
+	}
+
+	void Interpreter::virt_popFrame()
+	{
+		BC_MemCell& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
+		BC_MemCell& regFP = getRegister(BC_MEM_REG_FRAME_POINTER);
+		regSP.as_ADDR = regFP.as_ADDR;
+		virt_popStack(regFP, BC_DatatypeSize(BC_DT_U_64));
 	}
 
 	const InterpreterError& Interpreter::lastError() const

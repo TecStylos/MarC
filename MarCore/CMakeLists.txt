@@ -9,10 +9,17 @@ add_library(
 	MarCore STATIC
 	"src/MarCore.cpp"
 	"src/Memory.cpp"
-	
-	
 	"src/Interpreter.cpp"
- "include/Linker.h" "include/LinkerOutput.h" "src/Linker.cpp" "src/LinkerOutput.cpp" "include/ConvertInPlace.h" "include/Compiler.h" "include/CompilerTypes.h" "include/BytecodeTypes.h" "src/BytecodeTypes.cpp" "src/CompilerTypes.cpp" "include/AsmInstructions.h" "src/Compiler.cpp" "include/AsmTokenizer.h" "include/AsmTokenizerTypes.h" "src/AsmTokenizer.cpp" "src/AsmInstructions.cpp"  "include/ModuleLocator.h" "src/ModuleLocator.cpp")
+	"src/Linker.cpp"
+	"src/LinkerOutput.cpp"
+	"src/BytecodeTypes.cpp"
+	"src/CompilerTypes.cpp"
+	"src/Compiler.cpp"
+	"src/AsmTokenizer.cpp"
+	"src/AsmInstructions.cpp"
+	"src/ModuleLocator.cpp"
+	"src/VirtualAsmTokenList.cpp"
+)
 
 target_include_directories(
 	MarCore PUBLIC

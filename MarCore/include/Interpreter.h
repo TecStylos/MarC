@@ -73,10 +73,13 @@ namespace MarC
 		void exec_insJump(BC_OpCodeEx ocx);
 		void exec_insJumpEqual(BC_OpCodeEx ocx);
 		void exec_insJumpNotEqual(BC_OpCodeEx ocx);
+		void exec_insReturn(BC_OpCodeEx ocx);
 		void exec_insExit(BC_OpCodeEx ocx);
 	private:
 		void virt_pushStack(const BC_MemCell& mc, uint64_t nBytes);
 		void virt_popStack(BC_MemCell& mc, uint64_t nBytes);
+		void virt_pushFrame();
+		void virt_popFrame();
 	public:
 		const InterpreterError& lastError() const;
 	private:

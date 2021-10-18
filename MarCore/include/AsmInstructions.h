@@ -26,10 +26,11 @@ namespace MarC
 	{
 		BC_OpCode opCode;
 		bool requiresDatatype;
+		bool needsCustomImplementation;
 		std::vector<InsArgument> args;
 	public:
-		InstructionLayout(BC_OpCode opCode, bool requiresDatatype, std::initializer_list<InsArgument> args)
-			: opCode(opCode), requiresDatatype(requiresDatatype), args(args)
+		InstructionLayout(BC_OpCode opCode, bool requiresDatatype, std::initializer_list<InsArgument> args, bool needsCustomImplementation = false)
+			: opCode(opCode), requiresDatatype(requiresDatatype), args(args), needsCustomImplementation(needsCustomImplementation)
 		{
 			for (uint64_t i = 0; i < this->args.size(); ++i)
 			{
@@ -61,7 +62,10 @@ namespace MarC
 		{ BC_OC_JUMP_EQUAL, true, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
 		{ BC_OC_JUMP_NOT_EQUAL, true, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
 
-		{ BC_OC_EXIT, false, {} }
+		{ BC_OC_CALL, false, {}, true },
+		{ BC_OC_RETURN, false, {} },
+
+		{ BC_OC_EXIT, false, {} },
 	};
 
 	const InstructionLayout& InstructionLayoutFromOpCode(BC_OpCode oc);

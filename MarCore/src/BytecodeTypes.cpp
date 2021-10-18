@@ -67,6 +67,9 @@ namespace MarC
 			{ "jeq", BC_OC_JUMP_EQUAL },
 			{ "jne", BC_OC_JUMP_NOT_EQUAL },
 
+			{ "call", BC_OC_CALL },
+			{ "return", BC_OC_RETURN },
+
 			{ "exit",   BC_OC_EXIT },
 		};
 		static_assert(sizeof(codes) / sizeof(*codes) == BC_OC_NUM_OF_OP_CODES);

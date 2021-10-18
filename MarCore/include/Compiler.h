@@ -21,6 +21,7 @@ namespace MarC
 			UnknownDirectiveID,
 			SymbolAlreadyDefined,
 			AlreadyInGlobalScope,
+			InternalError,
 		};
 	public:
 		CompilerError() = default;
@@ -55,7 +56,11 @@ namespace MarC
 		const CompilerError& lastError() const;
 	private:
 		bool compileStatement();
+		bool compileStatement(const std::string& statement);
 		bool compileInstruction();
+	private:
+		bool compileSpecializedInstruction(BC_OpCodeEx& ocx);
+		bool compileSpecCall(BC_OpCodeEx& ocx);
 	private:
 		bool compileArgument(BC_OpCodeEx& ocx, const InsArgument& arg);
 		bool compileArgAddress(BC_OpCodeEx& ocx, const InsArgument& arg);
@@ -76,16 +81,21 @@ namespace MarC
 		bool compileDirRequestModule();
 		bool compileDirScope();
 		bool compileDirEnd();
+		bool compileDirFunction();
 	private:
 		bool removeNecessaryColon();
 	private:
+		std::string getArgAsString();
+	private:
 		bool addSymbol(const std::string& name, const Symbol& symbol);
+		bool addScope(const std::string& name);
 		std::string getScopedName(const std::string& name);
 	private:
 		bool isInstructionLike();
 		bool isDirectiveLike();
 	private:
 		const AsmToken& nextToken();
+		const AsmToken& prevToken();
 		const AsmToken& currToken() const;
 		bool isEndOfCode() const;
 	private:
@@ -99,11 +109,13 @@ namespace MarC
 		uint64_t currCodeOffset() const;
 		BC_MemAddress currCodeAddr() const;
 	private:
-		const AsmTokenListRef m_pTokenList;
+		AsmTokenListRef m_pTokenList;
 		CompilerError m_lastErr;
 		ModuleInfoRef m_pModInfo;
 		std::vector<std::string> m_scopeList;
 		uint64_t m_nextTokenToCompile = 0;
+	private:
+		friend class VirtualAsmTokenList;
 	};
 
 	bool isNegativeString(const std::string& value);

@@ -1,5 +1,8 @@
 #include "Compiler.h"
 
+#include "AsmTokenizer.h"
+#include "VirtualAsmTokenList.h"
+
 namespace MarC
 {
 	CompilerError::operator bool() const
@@ -67,6 +70,22 @@ namespace MarC
 		return true;
 	}
 
+	bool Compiler::compileStatement(const std::string& statement)
+	{
+		AsmTokenizer tok(statement);
+		if (!tok.tokenize())
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::InternalError, "Unable to tokenize internal statement '" + statement +"'!");
+		
+		{
+			VirtualAsmTokenList vtl(*this, tok.getTokenList());
+
+			if (!compileStatement())
+				return false;
+		}
+
+		return true;
+	}
+
 	bool Compiler::compileInstruction()
 	{
 		BC_OpCodeEx ocx;
@@ -75,6 +94,9 @@ namespace MarC
 			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to opCode!");
 
 		auto& layout = InstructionLayoutFromOpCode((BC_OpCode)ocx.opCode);
+
+		if (layout.needsCustomImplementation)
+			return compileSpecializedInstruction(ocx);
 
 		if (layout.requiresDatatype)
 		{
@@ -98,6 +120,64 @@ namespace MarC
 		}
 
 		writeCode(ocx, instructionBegin);
+
+		return true;
+	}
+
+	bool Compiler::compileSpecializedInstruction(BC_OpCodeEx& ocx)
+	{
+		switch (ocx.opCode)
+		{
+		case BC_OC_CALL:
+			return compileSpecCall(ocx);
+		}
+
+		COMPILER_RETURN_WITH_ERROR(CompErrCode::InternalError, "OpCode '" + std::to_string(ocx.datatype) + "' is not specialized!");
+	}
+
+	bool Compiler::compileSpecCall(BC_OpCodeEx& ocx)
+	{
+		if (!removeNecessaryColon())
+			return false;
+
+		if (nextToken().type != AsmToken::Type::Name)
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Name'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+		std::string funcName = currToken().value;
+		std::string afterCallLabel = "CALL_" + funcName + std::to_string(m_nextTokenToCompile) + "_" + std::to_string(std::rand());
+
+		if (!removeNecessaryColon())
+			return false;
+
+		std::string retDtStr = nextToken().value;
+		if (nextToken().type != AsmToken::Type::Sep_Dot)
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Sep_Dot'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+		std::string retVal = getArgAsString();
+
+		if (!compileStatement("push." + retDtStr))
+			return false;
+		if (!compileStatement("pushc.addr : " + afterCallLabel))
+			return false;
+		if (!compileStatement("pushf"))
+			return false;
+
+		while (nextToken().type == AsmToken::Type::Sep_Colon)
+		{
+			std::string argDtStr = nextToken().value;
+			if (nextToken().type != AsmToken::Type::Sep_Dot)
+				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Sep_Dot'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+			std::string argVal = getArgAsString();
+
+			if (!compileStatement("pushc." + argDtStr + " : " + argVal))
+				return false;
+		}
+		prevToken();
+
+		if (!compileStatement("jmp : " + funcName))
+			return false;
+		if (!compileStatement("#label : " + afterCallLabel))
+			return false;
+		if (!compileStatement("popc." + retDtStr + " : " + retVal))
+			return false;
 
 		return true;
 	}
@@ -317,6 +397,8 @@ namespace MarC
 			return compileDirScope();
 		case DirectiveID::End:
 			return compileDirEnd();
+		case DirectiveID::Function:
+			return compileDirFunction();
 		}
 
 		COMPILER_RETURN_WITH_ERROR(CompErrCode::UnknownDirectiveID, "Unknown directive '" + currToken().value + "'!");
@@ -451,10 +533,8 @@ namespace MarC
 		if (nextToken().type != AsmToken::Type::Name)
 			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Name'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
 
-		if (!addSymbol(currToken().value, Symbol(SymbolUsage::Address, currCodeAddr())))
+		if (!addScope(currToken().value))
 			return false;
-
-		m_scopeList.push_back(currToken().value);
 
 		return true;
 	}
@@ -470,11 +550,112 @@ namespace MarC
 		m_scopeList.pop_back();
 	}
 
+	bool Compiler::compileDirFunction()
+	{
+		if (!removeNecessaryColon())
+			return false;
+
+		if (nextToken().type != AsmToken::Type::Name)
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Name'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+
+		{
+			std::string funcName = currToken().value;
+
+			if (!compileStatement("jmp : " + funcName + ">>SCOPE_END"))
+				return false;
+			if (!addScope(funcName))
+				return false;
+		}
+
+		if (!removeNecessaryColon())
+			return false;
+
+		{
+			if (nextToken().type != AsmToken::Type::Name)
+				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Name'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+
+			BC_Datatype dt = BC_DatatypeFromString(currToken().value);
+			if (dt == BC_DT_NONE || dt == BC_DT_UNKNOWN)
+				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
+
+			if (nextToken().type != AsmToken::Type::Sep_Dot)
+				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Sep_Dot'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+
+			if (nextToken().type != AsmToken::Type::Name)
+				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Name'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+
+			std::string retName = currToken().value;
+
+			if (!compileStatement("#alias : " + retName + " : ~-" + std::to_string(2 * BC_DatatypeSize(BC_DT_U_64) + BC_DatatypeSize(dt))))
+				return false;
+		}
+
+		uint64_t offset = 0;
+		while (nextToken().type == AsmToken::Type::Sep_Colon)
+		{
+			if (nextToken().type != AsmToken::Type::Name)
+				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Name'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+
+			BC_Datatype dt = BC_DatatypeFromString(currToken().value);
+			if (dt == BC_DT_NONE || dt == BC_DT_UNKNOWN)
+				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
+
+			if (nextToken().type != AsmToken::Type::Sep_Dot)
+				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Sep_Dot'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+
+			if (nextToken().type != AsmToken::Type::Name)
+				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Name'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+
+			std::string retName = currToken().value;
+
+			if (!compileStatement("#alias : " + retName + " : ~+" + std::to_string(offset)))
+				return false;
+
+			offset += BC_DatatypeSize(dt);
+		}
+
+		prevToken();
+
+		return true;
+	}
+
 	bool Compiler::removeNecessaryColon()
 	{
 		if (nextToken().type != AsmToken::Type::Sep_Colon)
 			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token ':' but found '" + currToken().value + "'!");
 		return true;
+	}
+
+	std::string Compiler::getArgAsString()
+	{
+		std::string val;
+
+		bool breakLoop = false;
+		while (true)
+		{
+			auto& tok = nextToken();
+			switch (tok.type)
+			{
+			case AsmToken::Type::Op_Deref:
+			case AsmToken::Type::Op_FP_Relative:
+			case AsmToken::Type::Op_Register:
+			case AsmToken::Type::Name:
+			case AsmToken::Type::Float:
+			case AsmToken::Type::Integer:
+				val.append(tok.value);
+				break;
+			case AsmToken::Type::String:
+				val.append("\"" + tok.value + "\"");
+				break;
+			default:
+				prevToken();
+				breakLoop = true;
+			}
+			if (breakLoop)
+				break;
+		}
+
+		return val;
 	}
 
 	bool Compiler::addSymbol(const std::string& name, const Symbol& symbol)
@@ -484,6 +665,16 @@ namespace MarC
 		if (m_pModInfo->symbols.find(fullName) != m_pModInfo->symbols.end())
 			COMPILER_RETURN_WITH_ERROR(CompErrCode::SymbolAlreadyDefined, "A symbol with name '" + fullName + "' has already been defined!");
 		m_pModInfo->symbols.insert({ fullName, symbol });
+
+		return true;
+	}
+
+	bool Compiler::addScope(const std::string& name)
+	{
+		if (!addSymbol(name, Symbol(SymbolUsage::Address, currCodeAddr())))
+			return false;
+
+		m_scopeList.push_back(name);
 
 		return true;
 	}
@@ -514,6 +705,12 @@ namespace MarC
 	const AsmToken& Compiler::nextToken()
 	{
 		++m_nextTokenToCompile;
+		return currToken();
+	}
+
+	const AsmToken& Compiler::prevToken()
+	{
+		--m_nextTokenToCompile;
 		return currToken();
 	}
 

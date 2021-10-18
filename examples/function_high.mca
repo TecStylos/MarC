@@ -1,12 +1,12 @@
-#func : CALC_SUM : RET.i64 : X.i64 : Y.i64
-    mov.i64 : CALC_SUM_RET : @CALC_SUM_X
-    add.i64 : CALC_SUM_RET : @CALC_SUM_Y
+#func : CALC_SUM : i64.RET : i64.X : i64.Y
+    mov.i64 : RET : @X
+    add.i64 : RET : @Y
     return
 #end
 
-#alias : X : +100
-#alias : Y : +300
+#alias : X : -69
+#alias : Y : -420
 
-call : CALC_SUM : $ec.i64 : X.i64 : Y.i64
+call : CALC_SUM : i64.$ec : i64.X : i64.Y
 
 exit

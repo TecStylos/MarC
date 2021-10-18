@@ -19,6 +19,7 @@ namespace MarC
 		RequestModule,
 		Scope,
 		End,
+		Function,
 	};
 
 	DirectiveID DirectiveIDFromString(const std::string& value);

@@ -12,7 +12,6 @@ jmp : CALC_SUM>>SCOPE_END
 #alias : X : -69
 #alias : Y : -420
 
-
 push.i64                                    / Push storage for return value
 pushc.addr : AFTER_JUMP                     / Push return address
 pushf                                       / Push frame
