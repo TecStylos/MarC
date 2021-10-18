@@ -157,7 +157,7 @@ namespace MarC
 			return false;
 		if (!compileStatement("pushc.addr : " + afterCallLabel))
 			return false;
-		if (!compileStatement("pushf"))
+		if (!compileStatement("pushf")) // Should push the frame after pushing the arguments, else using a relative argument resolves to the wrong frame pointer
 			return false;
 
 		while (nextToken().type == AsmToken::Type::Sep_Colon)
@@ -684,7 +684,7 @@ namespace MarC
 		if (name.find(">>") == 0)
 			return name;
 
-		std::string fullName;
+		std::string fullName = ">>";
 		for (auto& elem : m_scopeList)
 			fullName.append(elem + ">>");
 		fullName.append(name);
