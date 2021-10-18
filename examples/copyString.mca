@@ -8,10 +8,10 @@ pushc.addr : destBuff
 #alias : dest : ~8
 
 #label : copyLoopBegin
-	drf : ACCUMULATOR : @src
+	drf : STD>>ACCUMULATOR : @src
     mov.u8 : @dest : @$ac
     add.addr : src : 1
     add.addr : dest : 1
-jne.u8 : copyLoopBegin : @ACCUMULATOR : 0
+jne.u8 : copyLoopBegin : @STD>>ACCUMULATOR : 0
 
 exit
