@@ -218,7 +218,7 @@ namespace MarC
 	{
 		m_pModInfo->unresolvedRefs.push_back(
 			{
-				currToken().value,
+				getScopedName(currToken().value),
 				currCodeOffset(),
 				tc.datatype
 			}
@@ -313,6 +313,10 @@ namespace MarC
 			return compileDirStatic();
 		case DirectiveID::RequestModule:
 			return compileDirRequestModule();
+		case DirectiveID::Scope:
+			return compileDirScope();
+		case DirectiveID::End:
+			return compileDirEnd();
 		}
 
 		COMPILER_RETURN_WITH_ERROR(CompErrCode::UnknownDirectiveID, "Unknown directive '" + currToken().value + "'!");
@@ -439,6 +443,33 @@ namespace MarC
 		return true;
 	}
 
+	bool Compiler::compileDirScope()
+	{
+		if (!removeNecessaryColon())
+			return false;
+
+		if (nextToken().type != AsmToken::Type::Name)
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Name'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+
+		if (!addSymbol(currToken().value, Symbol(SymbolUsage::Address, currCodeAddr())))
+			return false;
+
+		m_scopeList.push_back(currToken().value);
+
+		return true;
+	}
+
+	bool Compiler::compileDirEnd()
+	{
+		if (m_scopeList.size() == 0)
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::AlreadyInGlobalScope, "Cannot end scope, already in global scope!");
+
+		if (!addSymbol("SCOPE_END", Symbol(SymbolUsage::Address, currCodeAddr())))
+			return false;
+
+		m_scopeList.pop_back();
+	}
+
 	bool Compiler::removeNecessaryColon()
 	{
 		if (nextToken().type != AsmToken::Type::Sep_Colon)
@@ -448,11 +479,26 @@ namespace MarC
 
 	bool Compiler::addSymbol(const std::string& name, const Symbol& symbol)
 	{
-		if (m_pModInfo->symbols.find(name) != m_pModInfo->symbols.end())
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::SymbolAlreadyDefined, "A symbol with name '" + name + "' has already been defined!");
-		m_pModInfo->symbols.insert({ name, symbol });
+		std::string fullName = getScopedName(name);
+
+		if (m_pModInfo->symbols.find(fullName) != m_pModInfo->symbols.end())
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::SymbolAlreadyDefined, "A symbol with name '" + fullName + "' has already been defined!");
+		m_pModInfo->symbols.insert({ fullName, symbol });
 
 		return true;
+	}
+
+	std::string Compiler::getScopedName(const std::string& name)
+	{
+		if (name.find(">>") == 0)
+			return name;
+
+		std::string fullName;
+		for (auto& elem : m_scopeList)
+			fullName.append(elem + ">>");
+		fullName.append(name);
+
+		return fullName;
 	}
 
 	bool Compiler::isInstructionLike()

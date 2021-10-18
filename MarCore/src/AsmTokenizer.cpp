@@ -109,7 +109,7 @@ namespace MarC
 							currToken.value.push_back(c);
 							currAction = CurrAction::TokenizeInteger;
 						}
-						else if (std::isalpha(c))
+						else if (std::isalpha(c) || c == '>')
 						{
 							currToken.type = AsmToken::Type::Name;
 							currToken.value.push_back(c);
@@ -175,7 +175,7 @@ namespace MarC
 					}
 					break;
 				case CurrAction::TokenizeName:
-					if (std::isalnum(c) || c == '_')
+					if (std::isalnum(c) || c == '_' || c == '>')
 					{
 						currToken.value.push_back(c);
 					}

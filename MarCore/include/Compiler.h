@@ -20,6 +20,7 @@ namespace MarC
 			UnknownRegisterName,
 			UnknownDirectiveID,
 			SymbolAlreadyDefined,
+			AlreadyInGlobalScope,
 		};
 	public:
 		CompilerError() = default;
@@ -73,10 +74,13 @@ namespace MarC
 		bool compileDirAlias();
 		bool compileDirStatic();
 		bool compileDirRequestModule();
+		bool compileDirScope();
+		bool compileDirEnd();
 	private:
 		bool removeNecessaryColon();
 	private:
 		bool addSymbol(const std::string& name, const Symbol& symbol);
+		std::string getScopedName(const std::string& name);
 	private:
 		bool isInstructionLike();
 		bool isDirectiveLike();
@@ -98,6 +102,7 @@ namespace MarC
 		const AsmTokenListRef m_pTokenList;
 		CompilerError m_lastErr;
 		ModuleInfoRef m_pModInfo;
+		std::vector<std::string> m_scopeList;
 		uint64_t m_nextTokenToCompile = 0;
 	};
 

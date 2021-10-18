@@ -17,6 +17,8 @@ namespace MarC
 		Alias,
 		Static,
 		RequestModule,
+		Scope,
+		End,
 	};
 
 	DirectiveID DirectiveIDFromString(const std::string& value);

@@ -1,16 +1,16 @@
-jmp : CALC_SUM_END
-#label : CALC_SUM
-    #alias : CALC_SUM_RET : ~-24
-    #alias : CALC_SUM_X : ~+0
-    #alias : CALC_SUM_Y : ~+8
-                                                    mov.i64 : CALC_SUM_RET : @CALC_SUM_X
-                                                    add.i64 : CALC_SUM_RET : @CALC_SUM_Y
+jmp : CALC_SUM>>SCOPE_END
+#scope : CALC_SUM
+    #alias : RET : ~-24
+    #alias : X : ~+0
+    #alias : Y : ~+8
+    mov.i64 : RET : @X
+    add.i64 : RET : @Y
     popf                                    / Pop frame
     popc.addr : $cp
-#label : CALC_SUM_END
+#end
 
-                                                #alias : X : -69
-                                                #alias : Y : -420
+#alias : X : -69
+#alias : Y : -420
 
 
 push.i64                                    / Push storage for return value
@@ -22,4 +22,4 @@ jmp : CALC_SUM                              / Call function
 #label : AFTER_JUMP
 popc.i64 : $ec                              / Pop & copy return value
 
-                                                exit
+exit

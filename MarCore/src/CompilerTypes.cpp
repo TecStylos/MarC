@@ -9,6 +9,8 @@ namespace MarC
 		if (value == "alias") return DirectiveID::Alias;
 		if (value == "static") return DirectiveID::Static;
 		if (value == "reqmod") return DirectiveID::RequestModule;
+		if (value == "scope") return DirectiveID::Scope;
+		if (value == "end") return DirectiveID::End;
 
 		return DirectiveID::Unknown;
 	}
