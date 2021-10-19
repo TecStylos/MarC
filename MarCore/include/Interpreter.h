@@ -77,6 +77,7 @@ namespace MarC
 		void exec_insJumpGreaterThan(BC_OpCodeEx ocx);
 		void exec_insJumpLessEqual(BC_OpCodeEx ocx);
 		void exec_insJumpGreaterEqual(BC_OpCodeEx ocx);
+		void exec_insCall(BC_OpCodeEx ocx);
 		void exec_insReturn(BC_OpCodeEx ocx);
 		void exec_insExit(BC_OpCodeEx ocx);
 	private:

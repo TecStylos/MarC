@@ -95,9 +95,6 @@ namespace MarC
 
 		auto& layout = InstructionLayoutFromOpCode((BC_OpCode)ocx.opCode);
 
-		if (layout.needsCustomImplementation)
-			return compileSpecializedInstruction(ocx);
-
 		if (layout.requiresDatatype)
 		{
 			if (nextToken().type != AsmToken::Type::Sep_Dot)
@@ -106,6 +103,9 @@ namespace MarC
 			if (ocx.datatype == BC_DT_NONE || ocx.datatype == BC_DT_UNKNOWN)
 				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
 		}
+
+		if (layout.needsCustomImplementation)
+			return compileSpecializedInstruction(ocx);
 		
 		uint64_t instructionBegin = currCodeOffset();
 		pushCode(ocx);
@@ -153,13 +153,13 @@ namespace MarC
 			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Sep_Dot'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
 		std::string retVal = getArgAsString();
 
-		if (!compileStatement("push." + retDtStr))
+		if (!compileStatement("push." + retDtStr)) // Reserve memory for return value
 			return false;
-		if (!compileStatement("pushc.addr : " + afterCallLabel))
+		if (!compileStatement("pushc.addr : " + afterCallLabel)) // Return address
 			return false;
-		if (!compileStatement("mov.addr : $td : @$sp"))
+		if (!compileStatement("mov.addr : $td : @$sp")) // Copy address of memory for frame pointer
 			return false;
-		if (!compileStatement("push.addr"))
+		if (!compileStatement("push.addr")) // Reserve memory for frame pointer
 			return false;
 
 		while (nextToken().type == AsmToken::Type::Sep_Colon)

@@ -162,7 +162,7 @@ namespace MarC
 			{ BC_OC_JUMP_LESS_EQUAL, &Interpreter::exec_insJumpLessEqual },
 			{ BC_OC_JUMP_GREATER_EQUAL, &Interpreter::exec_insJumpGreaterEqual },
 
-			{ BC_OC_CALL, nullptr },
+			{ BC_OC_CALL, &Interpreter::exec_insCall },
 			{ BC_OC_RETURN, &Interpreter::exec_insReturn },
 
 			{ BC_OC_EXIT, &Interpreter::exec_insExit },
@@ -347,6 +347,42 @@ namespace MarC
 
 		if (result)
 			getRegister(BC_MEM_REG_CODE_POINTER) = destAddr;
+	}
+	void Interpreter::exec_insCall(BC_OpCodeEx ocx)
+	{
+		BC_MemAddress fpMem;
+		BC_MemAddress retMem;
+		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
+		auto& regFP = getRegister(BC_MEM_REG_FRAME_POINTER);
+		auto& regCP = getRegister(BC_MEM_REG_CODE_POINTER);
+
+
+		BC_MemAddress funcAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg.get(0)).as_ADDR;
+		auto& fcd = readDataAndMove<BC_FuncCallData>();
+		
+		virt_pushStack(BC_MemCell(), ocx.datatype); // Reserve memory for return value
+		retMem = regSP.as_ADDR; // Copy address of memory for return address
+		virt_pushStack(BC_MemCell(), BC_DT_U_64); // Reserve memory for return address
+		fpMem = regSP.as_ADDR; // Copy address of memory for frame pointer
+		virt_pushStack(BC_MemCell(), BC_DatatypeSize(ocx.datatype)); // Reserve memory for frame pointer
+
+		for (uint64_t i = 0; i < fcd.nArgs; ++i)
+		{
+			bool deref = ocx.derefArg.get(1 + i);
+			auto dt = fcd.argType.get(i);
+			virt_pushStack(
+				readMemCellAndMove(dt, deref),
+				BC_DatatypeSize(dt)
+			);
+		}
+
+		hostMemCell(fpMem, true).as_ADDR = regFP.as_ADDR; // Store the old frame pointer
+		fpMem.addr += 8; // Frame pointer points to first byte after frame pointer backup
+		regFP.as_ADDR = fpMem; // Initialize the new frame pointer
+
+		hostMemCell(retMem, true).as_ADDR = regCP.as_ADDR; // Store the return address
+
+		regCP.as_ADDR = funcAddr; // Jump to function address
 	}
 	void Interpreter::exec_insReturn(BC_OpCodeEx ocx)
 	{

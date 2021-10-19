@@ -148,6 +148,17 @@ namespace MarC
 		BC_MemCell(BC_MemAddress val) : as_ADDR(val) {}
 	};
 
+	struct BC_FuncCallData
+	{
+		uint8_t nArgs;
+		struct ArgTypes
+		{
+			uint32_t data;
+			BC_Datatype get(uint8_t nthArg);
+			void set(uint8_t nthArg, BC_Datatype dt);
+		} argType;
+	};
+
 	#pragma pack(pop)
 
 	BC_OpCode BC_OpCodeFromString(const std::string& ocStr);

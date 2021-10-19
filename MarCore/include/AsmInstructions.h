@@ -66,7 +66,7 @@ namespace MarC
 		{ BC_OC_JUMP_LESS_EQUAL, true, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
 		{ BC_OC_JUMP_GREATER_EQUAL, true, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
 
-		{ BC_OC_CALL, false, {}, true },
+		{ BC_OC_CALL, true, {}, true },
 		{ BC_OC_RETURN, false, {} },
 
 		{ BC_OC_EXIT, false, {} },
