@@ -17,11 +17,12 @@ Generic immediate operands:
 
 
 Registers:
+    $cp                                     Code pointer
     $sp                                     Stack pointer
     $fp                                     Frame pointer
     $lc                                     Loop counter
     $ac                                     General purpose register (accumulator)
-    $cp                                     Code pointer
+    $td                                     Temporary data (used by 'call' instruction)
     $ec                                     Exit/Error code
 
 

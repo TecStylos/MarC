@@ -121,11 +121,12 @@ namespace MarC
 			BC_MemRegister asRegister;
 		} registers[] = {
 			{ "",   BC_MEM_REG_NONE },
+			{ "cp", BC_MEM_REG_CODE_POINTER },
 			{ "sp", BC_MEM_REG_STACK_POINTER },
 			{ "fp", BC_MEM_REG_FRAME_POINTER },
 			{ "lc", BC_MEM_REG_LOOP_COUNTER },
 			{ "ac", BC_MEM_REG_ACCUMULATOR },
-			{ "cp", BC_MEM_REG_CODE_POINTER },
+			{ "td", BC_MEM_REG_TEMPORARY_DATA },
 			{ "ec", BC_MEM_REG_EXIT_CODE },
 		};
 

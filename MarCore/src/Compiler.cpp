@@ -157,7 +157,9 @@ namespace MarC
 			return false;
 		if (!compileStatement("pushc.addr : " + afterCallLabel))
 			return false;
-		if (!compileStatement("pushf")) // Should push the frame after pushing the arguments, else using a relative argument resolves to the wrong frame pointer
+		if (!compileStatement("mov.addr : $td : @$sp"))
+			return false;
+		if (!compileStatement("push.addr"))
 			return false;
 
 		while (nextToken().type == AsmToken::Type::Sep_Colon)
@@ -171,6 +173,13 @@ namespace MarC
 				return false;
 		}
 		prevToken();
+
+		if (!compileStatement("mov.addr : @$td : @$fp"))
+			return false;
+		if (!compileStatement("add.addr : $td : 8"))
+			return false;
+		if (!compileStatement("mov.addr : $fp : @$td"))
+			return false;
 
 		if (!compileStatement("jmp : " + funcName))
 			return false;
