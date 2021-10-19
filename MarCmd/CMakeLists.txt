@@ -19,3 +19,7 @@ target_link_libraries(
 	MarCmd PUBLIC
 	MarCore
 )
+
+if (MSVC) 
+  target_link_options(MarCmd PRIVATE $<$<CONFIG:RELWITHDEBINFO>:/PROFILE>)
+endif()

@@ -557,6 +557,8 @@ namespace MarC
 			return false;
 
 		m_scopeList.pop_back();
+
+		return true;
 	}
 
 	bool Compiler::compileDirFunction()

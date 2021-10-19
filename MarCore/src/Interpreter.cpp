@@ -90,7 +90,7 @@ namespace MarC
 			break;
 		}
 
-		if (deref && hostAddr) // TODO: Error handling if hostAddr == nullptr
+		if (deref)
 			hostAddr = hostAddress(*(BC_MemAddress*)hostAddr);
 		return hostAddr;
 	}
@@ -114,11 +114,12 @@ namespace MarC
 	{
 		m_mem.dynamicStack = std::make_shared<Memory>(dynStackSize);
 
+		getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR = BC_MemAddress(BC_MEM_BASE_CODE_MEMORY, 0);
 		getRegister(BC_MEM_REG_STACK_POINTER).as_ADDR = BC_MemAddress(BC_MEM_BASE_DYNAMIC_STACK, 0);
 		getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR = BC_MemAddress(BC_MEM_BASE_DYNAMIC_STACK, 0);
 		getRegister(BC_MEM_REG_LOOP_COUNTER).as_U_64 = 0;
 		getRegister(BC_MEM_REG_ACCUMULATOR).as_U_64 = 0;
-		getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR = BC_MemAddress(BC_MEM_BASE_CODE_MEMORY, 0);
+		getRegister(BC_MEM_REG_TEMPORARY_DATA).as_U_64 = 0;
 		getRegister(BC_MEM_REG_EXIT_CODE).as_U_64 = 0;
 	}
 
@@ -361,8 +362,6 @@ namespace MarC
 	void Interpreter::virt_pushStack(const BC_MemCell& mc, uint64_t nBytes)
 	{
 		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
-
-		m_mem.maxDynStackUsage = std::max(m_mem.maxDynStackUsage, regSP.as_ADDR.addr); // TODO: Remove when not wanted
 		
 		auto dest = hostAddress(regSP.as_ADDR, false);
 
@@ -401,10 +400,5 @@ namespace MarC
 	const InterpreterError& Interpreter::lastError() const
 	{
 		return m_lastErr;
-	}
-
-	uint64_t Interpreter::maxDynStackUsage() const
-	{
-		return m_mem.maxDynStackUsage;
 	}
 }

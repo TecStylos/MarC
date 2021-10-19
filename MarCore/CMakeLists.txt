@@ -25,3 +25,7 @@ target_include_directories(
 	MarCore PUBLIC
 	"include"
 )
+
+if (MSVC) 
+  target_link_options(MarCore PRIVATE $<$<CONFIG:RELWITHDEBINFO>:/PROFILE>)
+endif()

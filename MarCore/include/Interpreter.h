@@ -86,7 +86,6 @@ namespace MarC
 		void virt_popFrame();
 	public:
 		const InterpreterError& lastError() const;
-		uint64_t maxDynStackUsage() const;
 	private:
 		ExecutableInfoRef m_pExeInfo;
 		InterpreterMemory m_mem;

@@ -133,7 +133,6 @@ int main()
 	}
 
 	std::cout << "Executed " << interpreter.nInsExecuted() << " instructions in " << timer.microseconds() << " microseconds" << std::endl;
-	std::cout << "Max dynamic stack usage: " << interpreter.maxDynStackUsage() << " bytes" << std::endl;
 
 	std::cout << "Exit code: " <<
 		interpreter.getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_64 <<

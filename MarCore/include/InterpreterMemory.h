@@ -9,7 +9,6 @@ namespace MarC
 	{
 		BC_MemCell registers[BC_MEM_REG_NUM_OF_REGS];
 		MemoryRef dynamicStack;
-		uint64_t maxDynStackUsage = 0;
 		// dynamic memory manager
 	};
 }
