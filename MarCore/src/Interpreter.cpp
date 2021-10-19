@@ -156,6 +156,10 @@ namespace MarC
 			{ BC_OC_JUMP, &Interpreter::exec_insJump },
 			{ BC_OC_JUMP_EQUAL, &Interpreter::exec_insJumpEqual },
 			{ BC_OC_JUMP_NOT_EQUAL, &Interpreter::exec_insJumpNotEqual },
+			{ BC_OC_JUMP_LESS_THAN, &Interpreter::exec_insJumpLessThan },
+			{ BC_OC_JUMP_GREATER_THAN, &Interpreter::exec_insJumpGreaterThan },
+			{ BC_OC_JUMP_LESS_EQUAL, &Interpreter::exec_insJumpLessEqual },
+			{ BC_OC_JUMP_GREATER_EQUAL, &Interpreter::exec_insJumpGreaterEqual },
 
 			{ BC_OC_CALL, nullptr },
 			{ BC_OC_RETURN, &Interpreter::exec_insReturn },
@@ -291,6 +295,58 @@ namespace MarC
 		if (result)
 			getRegister(BC_MEM_REG_CODE_POINTER) = destAddr;
 	}
+	void Interpreter::exec_insJumpLessThan(BC_OpCodeEx ocx)
+	{
+		auto& destAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[0]);
+		auto& leftOperand = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
+		auto& rightOperand = readMemCellAndMove(ocx.datatype, ocx.derefArg[2]);
+
+		bool result = false;
+
+		MARC_INTERPRETER_BINARY_OP_BOOLEAN_RESULT(result, leftOperand, < , rightOperand, ocx.datatype);
+
+		if (result)
+			getRegister(BC_MEM_REG_CODE_POINTER) = destAddr;
+	}
+	void Interpreter::exec_insJumpGreaterThan(BC_OpCodeEx ocx)
+	{
+		auto& destAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[0]);
+		auto& leftOperand = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
+		auto& rightOperand = readMemCellAndMove(ocx.datatype, ocx.derefArg[2]);
+
+		bool result = false;
+
+		MARC_INTERPRETER_BINARY_OP_BOOLEAN_RESULT(result, leftOperand, > , rightOperand, ocx.datatype);
+
+		if (result)
+			getRegister(BC_MEM_REG_CODE_POINTER) = destAddr;
+	}
+	void Interpreter::exec_insJumpLessEqual(BC_OpCodeEx ocx)
+	{
+		auto& destAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[0]);
+		auto& leftOperand = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
+		auto& rightOperand = readMemCellAndMove(ocx.datatype, ocx.derefArg[2]);
+
+		bool result = false;
+
+		MARC_INTERPRETER_BINARY_OP_BOOLEAN_RESULT(result, leftOperand, <= , rightOperand, ocx.datatype);
+
+		if (result)
+			getRegister(BC_MEM_REG_CODE_POINTER) = destAddr;
+	}
+	void Interpreter::exec_insJumpGreaterEqual(BC_OpCodeEx ocx)
+	{
+		auto& destAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[0]);
+		auto& leftOperand = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
+		auto& rightOperand = readMemCellAndMove(ocx.datatype, ocx.derefArg[2]);
+
+		bool result = false;
+
+		MARC_INTERPRETER_BINARY_OP_BOOLEAN_RESULT(result, leftOperand, >= , rightOperand, ocx.datatype);
+
+		if (result)
+			getRegister(BC_MEM_REG_CODE_POINTER) = destAddr;
+	}
 	void Interpreter::exec_insReturn(BC_OpCodeEx ocx)
 	{
 		virt_popFrame();
@@ -305,6 +361,8 @@ namespace MarC
 	void Interpreter::virt_pushStack(const BC_MemCell& mc, uint64_t nBytes)
 	{
 		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
+
+		m_mem.maxDynStackUsage = std::max(m_mem.maxDynStackUsage, regSP.as_ADDR.addr); // TODO: Remove when not wanted
 		
 		auto dest = hostAddress(regSP.as_ADDR, false);
 
@@ -343,5 +401,10 @@ namespace MarC
 	const InterpreterError& Interpreter::lastError() const
 	{
 		return m_lastErr;
+	}
+
+	uint64_t Interpreter::maxDynStackUsage() const
+	{
+		return m_mem.maxDynStackUsage;
 	}
 }

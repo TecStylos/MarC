@@ -73,6 +73,10 @@ namespace MarC
 		void exec_insJump(BC_OpCodeEx ocx);
 		void exec_insJumpEqual(BC_OpCodeEx ocx);
 		void exec_insJumpNotEqual(BC_OpCodeEx ocx);
+		void exec_insJumpLessThan(BC_OpCodeEx ocx);
+		void exec_insJumpGreaterThan(BC_OpCodeEx ocx);
+		void exec_insJumpLessEqual(BC_OpCodeEx ocx);
+		void exec_insJumpGreaterEqual(BC_OpCodeEx ocx);
 		void exec_insReturn(BC_OpCodeEx ocx);
 		void exec_insExit(BC_OpCodeEx ocx);
 	private:
@@ -82,6 +86,7 @@ namespace MarC
 		void virt_popFrame();
 	public:
 		const InterpreterError& lastError() const;
+		uint64_t maxDynStackUsage() const;
 	private:
 		ExecutableInfoRef m_pExeInfo;
 		InterpreterMemory m_mem;

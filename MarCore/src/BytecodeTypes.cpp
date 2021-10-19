@@ -66,6 +66,10 @@ namespace MarC
 			{ "jmp", BC_OC_JUMP },
 			{ "jeq", BC_OC_JUMP_EQUAL },
 			{ "jne", BC_OC_JUMP_NOT_EQUAL },
+			{ "jlt", BC_OC_JUMP_LESS_THAN },
+			{ "jgt", BC_OC_JUMP_GREATER_THAN },
+			{ "jle", BC_OC_JUMP_LESS_EQUAL },
+			{ "jge", BC_OC_JUMP_GREATER_EQUAL },
 
 			{ "call", BC_OC_CALL },
 			{ "return", BC_OC_RETURN },
