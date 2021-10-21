@@ -34,4 +34,6 @@ namespace MarC
 	};
 	typedef std::vector<AsmToken> AsmTokenList;
 	typedef std::shared_ptr<AsmTokenList> AsmTokenListRef;
+
+	std::string AsmTokenTypeToString(AsmToken::Type tt);
 }

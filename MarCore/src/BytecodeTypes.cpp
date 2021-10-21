@@ -1,5 +1,7 @@
 #include "BytecodeTypes.h"
 
+#include <map>
+
 namespace MarC
 {
 	bool BC_OpCodeEx::ArgDerefs::operator[](uint64_t index) const
@@ -54,64 +56,94 @@ namespace MarC
 
 	BC_OpCode BC_OpCodeFromString(const std::string& ocStr)
 	{
-		static constexpr struct
-		{
-			const char* asStr;
-			BC_OpCode asOpCode;
-		} codes[] = {
-			{ "",       BC_OC_NONE },
-			{ "unknown", BC_OC_UNKNOWN },
+		static const std::map<std::string, BC_OpCode> ocMap = {
+			{ "",        BC_OC_NONE },
 
-			{ "mov",    BC_OC_MOVE },
+			{ "mov",     BC_OC_MOVE },
 
-			{ "add",    BC_OC_ADD },
-			{ "sub",    BC_OC_SUBTRACT },
-			{ "mul",    BC_OC_MULTIPLY },
-			{ "div",    BC_OC_DIVIDE },
+			{ "add",     BC_OC_ADD },
+			{ "sub",     BC_OC_SUBTRACT },
+			{ "mul",     BC_OC_MULTIPLY },
+			{ "div",     BC_OC_DIVIDE },
 
-			{ "drf",    BC_OC_DEREFERENCE },
+			{ "drf",     BC_OC_DEREFERENCE },
 
-			{ "conv",   BC_OC_CONVERT },
+			{ "conv",    BC_OC_CONVERT },
 
-			{ "push",   BC_OC_PUSH },
-			{ "pop",    BC_OC_POP },
-			{ "pushc",  BC_OC_PUSH_COPY },
-			{ "popc",   BC_OC_POP_COPY },
+			{ "push",    BC_OC_PUSH },
+			{ "pop",     BC_OC_POP },
+			{ "pushc",   BC_OC_PUSH_COPY },
+			{ "popc",    BC_OC_POP_COPY },
 
-			{ "pushf",  BC_OC_PUSH_FRAME },
-			{ "popf",   BC_OC_POP_FRAME },
+			{ "pushf",   BC_OC_PUSH_FRAME },
+			{ "popf",    BC_OC_POP_FRAME },
 
-			{ "jmp", BC_OC_JUMP },
-			{ "jeq", BC_OC_JUMP_EQUAL },
-			{ "jne", BC_OC_JUMP_NOT_EQUAL },
-			{ "jlt", BC_OC_JUMP_LESS_THAN },
-			{ "jgt", BC_OC_JUMP_GREATER_THAN },
-			{ "jle", BC_OC_JUMP_LESS_EQUAL },
-			{ "jge", BC_OC_JUMP_GREATER_EQUAL },
+			{ "jmp",     BC_OC_JUMP },
+			{ "jeq",     BC_OC_JUMP_EQUAL },
+			{ "jne",     BC_OC_JUMP_NOT_EQUAL },
+			{ "jlt",     BC_OC_JUMP_LESS_THAN },
+			{ "jgt",     BC_OC_JUMP_GREATER_THAN },
+			{ "jle",     BC_OC_JUMP_LESS_EQUAL },
+			{ "jge",     BC_OC_JUMP_GREATER_EQUAL },
 
-			{ "call", BC_OC_CALL },
-			{ "return", BC_OC_RETURN },
+			{ "call",    BC_OC_CALL },
+			{ "return",  BC_OC_RETURN },
 
-			{ "exit",   BC_OC_EXIT },
+			{ "exit",    BC_OC_EXIT },
 		};
-		static_assert(sizeof(codes) / sizeof(*codes) == BC_OC_NUM_OF_OP_CODES);
 
-		for (auto code : codes)
-		{
-			if (code.asStr == ocStr)
-				return code.asOpCode;
-		}
+		auto& it = ocMap.find(ocStr);
+		if (it == ocMap.end())
+			return BC_OC_UNKNOWN;
+		return it->second;
+	}
+	std::string BC_OpCodeToString(BC_OpCode oc)
+	{
+		static const std::map<BC_OpCode, std::string> ocMap = {
+			{ BC_OC_NONE, "" },
 
-		return BC_OC_UNKNOWN;
+			{ BC_OC_MOVE, "mov"},
+
+			{ BC_OC_ADD, "add" },
+			{ BC_OC_SUBTRACT, "sub" },
+			{ BC_OC_MULTIPLY, "mul" },
+			{ BC_OC_DIVIDE, "div" },
+
+			{ BC_OC_DEREFERENCE, "drf" },
+
+			{ BC_OC_CONVERT, "conv" },
+
+			{ BC_OC_PUSH, "push" },
+			{ BC_OC_POP, "pop" },
+			{ BC_OC_PUSH_COPY, "pushc" },
+			{ BC_OC_POP_COPY, "popc" },
+
+			{ BC_OC_PUSH_FRAME, "pushf" },
+			{ BC_OC_POP_FRAME, "popf" },
+
+			{ BC_OC_JUMP, "jmp" },
+			{ BC_OC_JUMP_EQUAL, "jeq" },
+			{ BC_OC_JUMP_NOT_EQUAL, "jne" },
+			{ BC_OC_JUMP_LESS_THAN, "jlt" },
+			{ BC_OC_JUMP_GREATER_THAN, "jgt" },
+			{ BC_OC_JUMP_LESS_EQUAL, "jle" },
+			{ BC_OC_JUMP_GREATER_EQUAL, "jge" },
+
+			{ BC_OC_CALL, "call" },
+			{ BC_OC_RETURN, "return" },
+
+			{ BC_OC_EXIT, "exit" },
+		};
+
+		auto& it = ocMap.find(oc);
+		if (it == ocMap.end())
+			return "<unknown>";
+		return it->second;
 	}
 
 	BC_Datatype BC_DatatypeFromString(const std::string& dtStr)
 	{
-		static constexpr struct
-		{
-			const char* asStr;
-			BC_Datatype asDatatype;
-		} datatypes[] = {
+		static const std::map<std::string, BC_Datatype> dtMap = {
 			{ "",     BC_DT_NONE },
 			{ "i8",   BC_DT_I_8  },
 			{ "i16",  BC_DT_I_16 },
@@ -126,39 +158,69 @@ namespace MarC
 			{ "addr", BC_DT_U_64 },
 		};
 
-		for (auto dt : datatypes)
-		{
-			if (dt.asStr == dtStr)
-				return dt.asDatatype;
-		}
+		auto& it = dtMap.find(dtStr);
+		if (it == dtMap.end())
+			return BC_DT_UNKNOWN;
+		return it->second;
+	}
+	std::string BC_DatatypeToString(BC_Datatype dt)
+	{
+		static const std::map<BC_Datatype, std::string> dtMap = {
+			{ BC_DT_NONE, ""      },
+			{ BC_DT_I_8,  "i8"    },
+			{ BC_DT_I_16, "i16"   },
+			{ BC_DT_I_32, "i32"   },
+			{ BC_DT_I_64, "i64"   },
+			{ BC_DT_U_8,  "u8"    },
+			{ BC_DT_U_16, "u16"   },
+			{ BC_DT_U_32, "u32"   },
+			{ BC_DT_U_64, "u64"   },
+			{ BC_DT_F_32, "f32"   },
+			{ BC_DT_F_64, "f64"   },
+			{ BC_DT_U_64, "addr"  },
+		};
 
-		return BC_DT_UNKNOWN;
+		auto& it = dtMap.find(dt);
+		if (it == dtMap.end())
+			return "<unknown>";
+		return it->second;
 	}
 
 	BC_MemRegister BC_RegisterFromString(const std::string& regStr)
 	{
-		static constexpr struct
-		{
-			const char* asStr;
-			BC_MemRegister asRegister;
-		} registers[] = {
-			{ "",   BC_MEM_REG_NONE },
-			{ "cp", BC_MEM_REG_CODE_POINTER },
-			{ "sp", BC_MEM_REG_STACK_POINTER },
-			{ "fp", BC_MEM_REG_FRAME_POINTER },
-			{ "lc", BC_MEM_REG_LOOP_COUNTER },
-			{ "ac", BC_MEM_REG_ACCUMULATOR },
-			{ "td", BC_MEM_REG_TEMPORARY_DATA },
-			{ "ec", BC_MEM_REG_EXIT_CODE },
+		static const std::map<std::string, BC_MemRegister> regMap = {
+			{ "",        BC_MEM_REG_NONE           },
+			{ "cp",      BC_MEM_REG_CODE_POINTER   },
+			{ "sp",      BC_MEM_REG_STACK_POINTER  },
+			{ "fp",      BC_MEM_REG_FRAME_POINTER  },
+			{ "lc",      BC_MEM_REG_LOOP_COUNTER   },
+			{ "ac",      BC_MEM_REG_ACCUMULATOR    },
+			{ "td",      BC_MEM_REG_TEMPORARY_DATA },
+			{ "ec",      BC_MEM_REG_EXIT_CODE      },
 		};
 
-		for (auto r : registers)
-		{
-			if (r.asStr == regStr)
-				return r.asRegister;
-		}
+		auto& it = regMap.find(regStr);
+		if (it == regMap.end())
+			return BC_MEM_REG_UNKNOWN;
+		return it->second;
+	}
+	std::string BC_RegisterToString(BC_MemRegister reg)
+	{
+		static const std::map<BC_MemRegister, std::string> regMap = {
+			{ BC_MEM_REG_NONE,           ""         },
+			{ BC_MEM_REG_CODE_POINTER,   "cp"       },
+			{ BC_MEM_REG_STACK_POINTER,  "sp"       },
+			{ BC_MEM_REG_FRAME_POINTER,  "fp"       },
+			{ BC_MEM_REG_LOOP_COUNTER,   "lc"       },
+			{ BC_MEM_REG_ACCUMULATOR,    "ac"       },
+			{ BC_MEM_REG_TEMPORARY_DATA, "td"       },
+			{ BC_MEM_REG_EXIT_CODE,      "ec"       },
+		};
 
-		return BC_MEM_REG_UNKNOWN;
+		auto& it = regMap.find(reg);
+		if (it == regMap.end())
+			return "<unknown>";
+		return it->second;
 	}
 
 	uint64_t BC_DatatypeSize(BC_Datatype dt)

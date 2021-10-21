@@ -65,7 +65,7 @@ namespace MarC
 		while (nextToken().type == AsmToken::Type::Sep_Newline)
 			++nNewlines;
 		if (nNewlines == 0 && !isEndOfCode())
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token '\\n' but found '" + currToken().value + "'!");
+			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Newline, currToken());
 
 		return true;
 	}
@@ -98,7 +98,7 @@ namespace MarC
 		if (layout.requiresDatatype)
 		{
 			if (nextToken().type != AsmToken::Type::Sep_Dot)
-				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token '.' but found '" + currToken().value + "'!");
+				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 			ocx.datatype = BC_DatatypeFromString(nextToken().value);
 			if (ocx.datatype == BC_DT_NONE || ocx.datatype == BC_DT_UNKNOWN)
 				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
@@ -132,7 +132,7 @@ namespace MarC
 			return compileSpecCall(ocx);
 		}
 
-		COMPILER_RETURN_WITH_ERROR(CompErrCode::InternalError, "OpCode '" + std::to_string(ocx.datatype) + "' is not specialized!");
+		COMPILER_RETURN_WITH_ERROR(CompErrCode::InternalError, "OpCode '" + BC_OpCodeToString(ocx.opCode) + "' is not specialized!");
 	}
 
 	bool Compiler::compileSpecCall(BC_OpCodeEx& ocx)
@@ -151,7 +151,7 @@ namespace MarC
 
 		std::string retDtStr = nextToken().value;
 		if (nextToken().type != AsmToken::Type::Sep_Dot)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Sep_Dot'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 		std::string retVal = getArgAsString();
 
 		BC_FuncCallData fcd;
@@ -160,12 +160,12 @@ namespace MarC
 		while (nextToken().type == AsmToken::Type::Sep_Colon)
 		{
 			if (nextToken().type != AsmToken::Type::Name)
-				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Name'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 			BC_Datatype argDt = BC_DatatypeFromString(currToken().value);
 			fcd.argType.set(fcd.nArgs, argDt);
 
 			if (nextToken().type != AsmToken::Type::Sep_Dot)
-				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Sep_Dot'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 
 			if (!compileArgument(ocx, { InsArgType::Value, (uint64_t)1 + fcd.nArgs }))
 				return false;
@@ -283,7 +283,7 @@ namespace MarC
 	bool Compiler::generateTypeCellFPRelative(TypeCell& tc)
 	{
 		if (nextToken().type != AsmToken::Type::Integer)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type integer, got type '" + std::to_string((uint64_t)currToken().type) + "' with value '" + currToken().value + "'!");
+			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Integer, currToken());
 
 		uint64_t offset = std::stoull(positiveString(currToken().value));
 
@@ -311,7 +311,7 @@ namespace MarC
 	bool Compiler::generateTypeCellString(TypeCell& tc)
 	{
 		if (tc.datatype != BC_DT_U_64)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::DatatypeMismatch, "Cannot use string in instruction with datatype '" + std::to_string((uint64_t)tc.datatype) + "'!");
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::DatatypeMismatch, "Cannot use string in instruction with datatype '" + BC_DatatypeToString(tc.datatype) + "'!");
 
 		tc.cell.as_ADDR = BC_MemAddress(BC_MEM_BASE_STATIC_STACK, 0, m_pModInfo->staticStack->size());
 		m_pModInfo->staticStack->push(currToken().value.c_str(), currToken().value.size() + 1);
@@ -330,7 +330,7 @@ namespace MarC
 		case BC_DT_F_64:
 			tc.cell.as_F_64 = std::stod(currToken().value); break;
 		default:
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Cannot use floating-point literal '" + currToken().value + "' in instruction with datatype '" + std::to_string((uint64_t)tc.datatype) + "'!");
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::DatatypeMismatch, "Cannot use floating-point literal '" + currToken().value + "' in instruction with datatype '" + BC_DatatypeToString(tc.datatype) + "'!");
 		}
 
 		return true;
@@ -339,7 +339,7 @@ namespace MarC
 	bool Compiler::generateTypeCellInteger(TypeCell& tc, bool getsDereferenced)
 	{
 		if (!getsDereferenced && (tc.datatype == BC_DT_F_32 || tc.datatype == BC_DT_F_64))
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Cannot use integer '" + currToken().value + "' in instruction with datatype '" + std::to_string((uint64_t)tc.datatype) + "'!");
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::DatatypeMismatch, "Cannot use integer '" + currToken().value + "' in instruction with datatype '" + BC_DatatypeToString(tc.datatype) + "'!");
 
 		tc.cell.as_U_64 = std::stoull(positiveString(currToken().value));
 		if (isNegativeString(currToken().value))
@@ -411,7 +411,7 @@ namespace MarC
 			return false;
 
 		if (nextToken().type != AsmToken::Type::Name)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Name'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		if (!addSymbol(currToken().value, Symbol(SymbolUsage::Address, currCodeAddr())))
 			return false;
@@ -425,7 +425,7 @@ namespace MarC
 			return false;
 
 		if (nextToken().type != AsmToken::Type::Name)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'name' for alias name!");
+			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		std::string name = currToken().value;
 
@@ -482,7 +482,7 @@ namespace MarC
 			return false;
 
 		if (nextToken().type != AsmToken::Type::Name)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'name' for static name!");
+			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		std::string name = currToken().value;
 
@@ -517,7 +517,7 @@ namespace MarC
 			return false;
 
 		if (nextToken().type != AsmToken::Type::String)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'string' for module name!");
+			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::String, currToken());
 
 		std::string modName = currToken().value;
 
@@ -532,7 +532,7 @@ namespace MarC
 			return false;
 
 		if (nextToken().type != AsmToken::Type::Name)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Name'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		if (!addScope(currToken().value))
 			return false;
@@ -559,7 +559,7 @@ namespace MarC
 			return false;
 
 		if (nextToken().type != AsmToken::Type::Name)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Name'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		{
 			std::string funcName = currToken().value;
@@ -575,17 +575,17 @@ namespace MarC
 
 		{
 			if (nextToken().type != AsmToken::Type::Name)
-				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Name'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 			BC_Datatype dt = BC_DatatypeFromString(currToken().value);
 			if (dt == BC_DT_NONE || dt == BC_DT_UNKNOWN)
 				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
 
 			if (nextToken().type != AsmToken::Type::Sep_Dot)
-				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Sep_Dot'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 
 			if (nextToken().type != AsmToken::Type::Name)
-				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Name'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 			std::string retName = currToken().value;
 
@@ -597,17 +597,17 @@ namespace MarC
 		while (nextToken().type == AsmToken::Type::Sep_Colon)
 		{
 			if (nextToken().type != AsmToken::Type::Name)
-				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Name'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 			BC_Datatype dt = BC_DatatypeFromString(currToken().value);
 			if (dt == BC_DT_NONE || dt == BC_DT_UNKNOWN)
 				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
 
 			if (nextToken().type != AsmToken::Type::Sep_Dot)
-				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Sep_Dot'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 
 			if (nextToken().type != AsmToken::Type::Name)
-				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Name'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 			std::string retName = currToken().value;
 
@@ -625,7 +625,7 @@ namespace MarC
 	bool Compiler::removeNecessaryColon()
 	{
 		if (nextToken().type != AsmToken::Type::Sep_Colon)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token ':' but found '" + currToken().value + "'!");
+			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Colon, currToken());
 		return true;
 	}
 

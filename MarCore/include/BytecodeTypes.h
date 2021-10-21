@@ -162,10 +162,13 @@ namespace MarC
 	#pragma pack(pop)
 
 	BC_OpCode BC_OpCodeFromString(const std::string& ocStr);
+	std::string BC_OpCodeToString(BC_OpCode oc);
 
 	BC_Datatype BC_DatatypeFromString(const std::string& dtStr);
+	std::string BC_DatatypeToString(BC_Datatype dt);
 
 	BC_MemRegister BC_RegisterFromString(const std::string& regStr);
+	std::string BC_RegisterToString(BC_MemRegister reg);
 
 	uint64_t BC_DatatypeSize(BC_Datatype dt);
 }

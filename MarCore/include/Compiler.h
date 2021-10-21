@@ -43,6 +43,7 @@ namespace MarC
 	typedef CompilerError::Code CompErrCode;
 
 	#define COMPILER_RETURN_WITH_ERROR(errCode, errText) { m_lastErr = CompilerError(errCode, m_nextTokenToCompile, errText, __LINE__, __FILE__); return false; }
+	#define COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(expectedType, token) COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type '" + AsmTokenTypeToString(expectedType) + "'! Got '" + AsmTokenTypeToString(token.type) + "' with value '" + token.value + "'!")
 
 	class Compiler
 	{
