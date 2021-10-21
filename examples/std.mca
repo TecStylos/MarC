@@ -1,8 +1,10 @@
-#scope : STD
-    #alias : STACK_POINTER : $sp
-    #alias : FRAME_POINTER : $fp
-    #alias : LOOP_COUNTER : $lc
-    #alias : ACCUMULATOR : $ac
-    #alias : CODE_POINTER : $cp
-    #alias : EXIT_CODE : $ec
-#end / STD
+#scope : std
+    #scope : reg
+        #alias : stackPointer : $sp
+        #alias : framePointer : $fp
+        #alias : loopCounter : $lc
+        #alias : accumulator : $ac
+        #alias : codePointer : $cp
+        #alias : exitCode : $ec
+    #end / reg
+#end / std
