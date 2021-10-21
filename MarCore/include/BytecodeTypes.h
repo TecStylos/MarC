@@ -150,10 +150,10 @@ namespace MarC
 
 	struct BC_FuncCallData
 	{
-		uint8_t nArgs;
+		uint8_t nArgs = 0;
 		struct ArgTypes
 		{
-			uint32_t data;
+			uint32_t data = 0;
 			BC_Datatype get(uint8_t nthArg);
 			void set(uint8_t nthArg, BC_Datatype dt);
 		} argType;

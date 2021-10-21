@@ -195,31 +195,31 @@ namespace MarC
 	void Interpreter::exec_insMove(BC_OpCodeEx ocx)
 	{
 		void* dest = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
-		BC_MemCell src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
+		auto& src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
 		memcpy(dest, &src, BC_DatatypeSize(ocx.datatype));
 	}
 	void Interpreter::exec_insAdd(BC_OpCodeEx ocx)
 	{
 		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
-		BC_MemCell src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
+		auto& src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
 		MARC_INTERPRETER_BINARY_OP(dest, +=, src, ocx.datatype);
 	}
 	void Interpreter::exec_insSubtract(BC_OpCodeEx ocx)
 	{
 		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
-		BC_MemCell src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
+		auto& src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
 		MARC_INTERPRETER_BINARY_OP(dest, -=, src, ocx.datatype);
 	}
 	void Interpreter::exec_insMultiply(BC_OpCodeEx ocx)
 	{
 		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
-		BC_MemCell src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
+		auto& src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
 		MARC_INTERPRETER_BINARY_OP(dest, *=, src, ocx.datatype);
 	}
 	void Interpreter::exec_insDivide(BC_OpCodeEx ocx)
 	{
 		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
-		BC_MemCell src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
+		auto& src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
 		MARC_INTERPRETER_BINARY_OP(dest, /=, src, ocx.datatype);
 	}
 	void Interpreter::exec_insDereference(BC_OpCodeEx ocx)
@@ -236,22 +236,20 @@ namespace MarC
 	}
 	void Interpreter::exec_insPush(BC_OpCodeEx ocx)
 	{
-		BC_MemCell mc;
-		virt_pushStack(mc, BC_DatatypeSize(ocx.datatype));
+		virt_pushStack(BC_MemCell(), BC_DatatypeSize(ocx.datatype));
 	}
 	void Interpreter::exec_insPop(BC_OpCodeEx ocx)
 	{
-		BC_MemCell mc;
-		virt_popStack(mc, BC_DatatypeSize(ocx.datatype));
+		virt_popStack(BC_MemCell(), BC_DatatypeSize(ocx.datatype));
 	}
 	void Interpreter::exec_insPushCopy(BC_OpCodeEx ocx)
 	{
-		BC_MemCell mc = readMemCellAndMove(ocx.datatype, ocx.derefArg[0]);
+		auto& mc = readMemCellAndMove(ocx.datatype, ocx.derefArg[0]);
 		virt_pushStack(mc, BC_DatatypeSize(ocx.datatype));
 	}
 	void Interpreter::exec_insPopCopy(BC_OpCodeEx ocx)
 	{
-		BC_MemCell& mc = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		auto& mc = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
 		virt_popStack(mc, BC_DatatypeSize(ocx.datatype));
 	}
 	void Interpreter::exec_insPushFrame(BC_OpCodeEx ocx)
@@ -360,11 +358,11 @@ namespace MarC
 		BC_MemAddress funcAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg.get(0)).as_ADDR;
 		auto& fcd = readDataAndMove<BC_FuncCallData>();
 		
-		virt_pushStack(BC_MemCell(), ocx.datatype); // Reserve memory for return value
+		virt_pushStack(BC_MemCell(), BC_DatatypeSize(ocx.datatype)); // Reserve memory for return value
 		retMem = regSP.as_ADDR; // Copy address of memory for return address
-		virt_pushStack(BC_MemCell(), BC_DT_U_64); // Reserve memory for return address
+		virt_pushStack(BC_MemCell(), BC_DatatypeSize(BC_DT_U_64)); // Reserve memory for return address
 		fpMem = regSP.as_ADDR; // Copy address of memory for frame pointer
-		virt_pushStack(BC_MemCell(), BC_DatatypeSize(ocx.datatype)); // Reserve memory for frame pointer
+		virt_pushStack(BC_MemCell(), BC_DatatypeSize(BC_DT_U_64)); // Reserve memory for frame pointer
 
 		for (uint64_t i = 0; i < fcd.nArgs; ++i)
 		{
@@ -376,11 +374,11 @@ namespace MarC
 			);
 		}
 
-		hostMemCell(fpMem, true).as_ADDR = regFP.as_ADDR; // Store the old frame pointer
+		hostMemCell(fpMem, false).as_ADDR = regFP.as_ADDR; // Store the old frame pointer
 		fpMem.addr += 8; // Frame pointer points to first byte after frame pointer backup
 		regFP.as_ADDR = fpMem; // Initialize the new frame pointer
 
-		hostMemCell(retMem, true).as_ADDR = regCP.as_ADDR; // Store the return address
+		hostMemCell(retMem, false).as_ADDR = regCP.as_ADDR; // Store the return address
 
 		regCP.as_ADDR = funcAddr; // Jump to function address
 	}
@@ -419,16 +417,16 @@ namespace MarC
 
 	void Interpreter::virt_pushFrame()
 	{
-		BC_MemCell& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
-		BC_MemCell& regFP = getRegister(BC_MEM_REG_FRAME_POINTER);
+		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
+		auto& regFP = getRegister(BC_MEM_REG_FRAME_POINTER);
 		virt_pushStack(regFP, BC_DatatypeSize(BC_DT_U_64));
 		regFP.as_ADDR = regSP.as_ADDR;
 	}
 
 	void Interpreter::virt_popFrame()
 	{
-		BC_MemCell& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
-		BC_MemCell& regFP = getRegister(BC_MEM_REG_FRAME_POINTER);
+		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
+		auto& regFP = getRegister(BC_MEM_REG_FRAME_POINTER);
 		regSP.as_ADDR = regFP.as_ADDR;
 		virt_popStack(regFP, BC_DatatypeSize(BC_DT_U_64));
 	}

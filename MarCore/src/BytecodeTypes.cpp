@@ -34,6 +34,24 @@ namespace MarC
 		asCode.addr = addr;
 	}
 
+	BC_Datatype BC_FuncCallData::ArgTypes::get(uint8_t nthArg)
+	{
+		uint8_t shift = 4 * nthArg;
+		uint32_t val = data >> shift;
+		uint32_t mask = (uint32_t)15;
+		val &= mask;
+		return (BC_Datatype)val;
+	}
+
+	void BC_FuncCallData::ArgTypes::set(uint8_t nthArg, BC_Datatype dt)
+	{
+		uint8_t shift = 4 * nthArg;
+		uint32_t val = (uint32_t)dt << shift;
+		uint32_t clrMask = ~((uint32_t)15 << shift);
+		data &= clrMask;
+		data |= val;
+	}
+
 	BC_OpCode BC_OpCodeFromString(const std::string& ocStr)
 	{
 		static constexpr struct

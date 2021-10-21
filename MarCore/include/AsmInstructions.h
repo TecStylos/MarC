@@ -15,10 +15,10 @@ namespace MarC
 	struct InsArgument
 	{
 		InsArgType type;
-		uint64_t index = -1;
+		uint64_t index;
 	public:
-		InsArgument(InsArgType type)
-			: type(type)
+		InsArgument(InsArgType type, uint64_t index = -1)
+			: type(type), index(index)
 		{}
 	};
 

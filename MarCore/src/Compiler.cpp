@@ -140,10 +140,11 @@ namespace MarC
 		if (!removeNecessaryColon())
 			return false;
 
-		if (nextToken().type != AsmToken::Type::Name)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Name'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
-		std::string funcName = currToken().value;
-		std::string afterCallLabel = "CALL_" + funcName + std::to_string(m_nextTokenToCompile) + "_" + std::to_string(std::rand());
+		uint64_t opCodeBegin = currCodeOffset();
+		pushCode(ocx);
+
+		if (!compileArgAddress(ocx, { InsArgType::Address, 0 }))
+			return false;
 
 		if (!removeNecessaryColon())
 			return false;
@@ -153,38 +154,29 @@ namespace MarC
 			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Sep_Dot'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
 		std::string retVal = getArgAsString();
 
-		if (!compileStatement("push." + retDtStr)) // Reserve memory for return value
-			return false;
-		if (!compileStatement("pushc.addr : " + afterCallLabel)) // Return address
-			return false;
-		if (!compileStatement("mov.addr : $td : @$sp")) // Copy address of memory for frame pointer
-			return false;
-		if (!compileStatement("push.addr")) // Reserve memory for frame pointer
-			return false;
-
+		BC_FuncCallData fcd;
+		uint64_t fcdBegin = currCodeOffset();
+		pushCode(fcd);
 		while (nextToken().type == AsmToken::Type::Sep_Colon)
 		{
-			std::string argDtStr = nextToken().value;
+			if (nextToken().type != AsmToken::Type::Name)
+				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Name'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
+			BC_Datatype argDt = BC_DatatypeFromString(currToken().value);
+			fcd.argType.set(fcd.nArgs, argDt);
+
 			if (nextToken().type != AsmToken::Type::Sep_Dot)
 				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Sep_Dot'! Got '" + std::to_string((uint64_t)currToken().type) + "'!");
-			std::string argVal = getArgAsString();
 
-			if (!compileStatement("pushc." + argDtStr + " : " + argVal))
+			if (!compileArgument(ocx, { InsArgType::Value, (uint64_t)1 + fcd.nArgs }))
 				return false;
+
+			++fcd.nArgs;
 		}
 		prevToken();
 
-		if (!compileStatement("mov.addr : @$td : @$fp"))
-			return false;
-		if (!compileStatement("add.addr : $td : 8"))
-			return false;
-		if (!compileStatement("mov.addr : $fp : @$td"))
-			return false;
+		writeCode(ocx, opCodeBegin);
+		writeCode(fcd, fcdBegin);
 
-		if (!compileStatement("jmp : " + funcName))
-			return false;
-		if (!compileStatement("#label : " + afterCallLabel))
-			return false;
 		if (!compileStatement("popc." + retDtStr + " : " + retVal))
 			return false;
 
