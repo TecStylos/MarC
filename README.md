@@ -38,7 +38,7 @@ Usage | Definition
 -----------|-----------
 @[addr] | Dereference address
 ^[dt] | Size of datatype (not implemented yet)
-~[int] | Address relative to current frame pointer
+~[i64] | Address relative to current frame pointer
 
 ### Instructions:
 OpCode | Datatype Required | Arguments | Definition
