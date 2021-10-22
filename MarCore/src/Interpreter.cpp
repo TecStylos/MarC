@@ -132,59 +132,47 @@ namespace MarC
 
 	void Interpreter::execNext()
 	{
-		static const std::unordered_map<BC_OpCode, void (Interpreter::*)(BC_OpCodeEx)> opCodeFuns = {
-			{ BC_OC_NONE, &Interpreter::exec_insUndefined },
-			{ BC_OC_UNKNOWN, &Interpreter::exec_insUndefined },
-
-			{ BC_OC_MOVE, &Interpreter::exec_insMove },
-			{ BC_OC_ADD, &Interpreter::exec_insAdd },
-			{ BC_OC_SUBTRACT, &Interpreter::exec_insSubtract },
-			{ BC_OC_MULTIPLY, &Interpreter::exec_insMultiply },
-			{ BC_OC_DIVIDE, &Interpreter::exec_insDivide },
-
-			{ BC_OC_DEREFERENCE, &Interpreter::exec_insDereference },
-
-			{ BC_OC_CONVERT, &Interpreter::exec_insConvert },
-
-			{ BC_OC_PUSH, &Interpreter::exec_insPush },
-			{ BC_OC_POP, &Interpreter::exec_insPop },
-			{ BC_OC_PUSH_COPY, &Interpreter::exec_insPushCopy },
-			{ BC_OC_POP_COPY, &Interpreter::exec_insPopCopy },
-
-			{ BC_OC_PUSH_FRAME, &Interpreter::exec_insPushFrame },
-			{ BC_OC_POP_FRAME, &Interpreter::exec_insPopFrame },
-
-			{ BC_OC_JUMP, &Interpreter::exec_insJump },
-			{ BC_OC_JUMP_EQUAL, &Interpreter::exec_insJumpEqual },
-			{ BC_OC_JUMP_NOT_EQUAL, &Interpreter::exec_insJumpNotEqual },
-			{ BC_OC_JUMP_LESS_THAN, &Interpreter::exec_insJumpLessThan },
-			{ BC_OC_JUMP_GREATER_THAN, &Interpreter::exec_insJumpGreaterThan },
-			{ BC_OC_JUMP_LESS_EQUAL, &Interpreter::exec_insJumpLessEqual },
-			{ BC_OC_JUMP_GREATER_EQUAL, &Interpreter::exec_insJumpGreaterEqual },
-
-			{ BC_OC_CALL, &Interpreter::exec_insCall },
-			{ BC_OC_RETURN, &Interpreter::exec_insReturn },
-
-			{ BC_OC_EXIT, &Interpreter::exec_insExit },
-		};
-
-		static bool noOpCodeMissing = []()
-		{
-			if (opCodeFuns.size() != BC_OC_NUM_OF_OP_CODES)
-				throw InterpreterError(IntErrCode::OpCodeNotImplemented, "There are non-implemented opCodes!");
-			return true;
-		}();
-
 		const auto& ocx = readDataAndMove<BC_OpCodeEx>();
 
-		auto it = opCodeFuns.find((BC_OpCode)ocx.opCode);
-		if (it == opCodeFuns.end())
+		switch (ocx.opCode)
+		{
+		case BC_OC_NONE:  Interpreter::exec_insUndefined(ocx); break;
+			case BC_OC_UNKNOWN: Interpreter::exec_insUndefined(ocx); break;
+
+			case BC_OC_MOVE: Interpreter::exec_insMove(ocx); break;
+			case BC_OC_ADD: Interpreter::exec_insAdd(ocx); break;
+			case BC_OC_SUBTRACT: Interpreter::exec_insSubtract(ocx); break;
+			case BC_OC_MULTIPLY: Interpreter::exec_insMultiply(ocx); break;
+			case BC_OC_DIVIDE: Interpreter::exec_insDivide(ocx); break;
+
+			case BC_OC_DEREFERENCE: Interpreter::exec_insDereference(ocx); break;
+
+			case BC_OC_CONVERT: Interpreter::exec_insConvert(ocx); break;
+
+			case BC_OC_PUSH: Interpreter::exec_insPush(ocx); break;
+			case BC_OC_POP: Interpreter::exec_insPop(ocx); break;
+			case BC_OC_PUSH_COPY: Interpreter::exec_insPushCopy(ocx); break;
+			case BC_OC_POP_COPY: Interpreter::exec_insPopCopy(ocx); break;
+
+			case BC_OC_PUSH_FRAME: Interpreter::exec_insPushFrame(ocx); break;
+			case BC_OC_POP_FRAME: Interpreter::exec_insPopFrame(ocx); break;
+
+			case BC_OC_JUMP: Interpreter::exec_insJump(ocx); break;
+			case BC_OC_JUMP_EQUAL: Interpreter::exec_insJumpEqual(ocx); break;
+			case BC_OC_JUMP_NOT_EQUAL: Interpreter::exec_insJumpNotEqual(ocx); break;
+			case BC_OC_JUMP_LESS_THAN: Interpreter::exec_insJumpLessThan(ocx); break;
+			case BC_OC_JUMP_GREATER_THAN: Interpreter::exec_insJumpGreaterThan(ocx); break;
+			case BC_OC_JUMP_LESS_EQUAL: Interpreter::exec_insJumpLessEqual(ocx); break;
+			case BC_OC_JUMP_GREATER_EQUAL: Interpreter::exec_insJumpGreaterEqual(ocx); break;
+
+			case BC_OC_CALL: Interpreter::exec_insCall(ocx); break;
+			case BC_OC_RETURN: Interpreter::exec_insReturn(ocx); break;
+
+			case BC_OC_EXIT: Interpreter::exec_insExit(ocx); break;
+		default:
 			throw InterpreterError(IntErrCode::OpCodeNotExecutable, "Unknown opCode '" + std::to_string(ocx.opCode) + "'!");
+		}
 
-		if (!it->second)
-			throw InterpreterError(IntErrCode::OpCodeNotExecutable, "The opCode '" + std::to_string(ocx.opCode) + "' is not executable!");
-
-		(*this.*(it->second))(ocx);
 	}
 
 	void Interpreter::exec_insUndefined(BC_OpCodeEx ocx)
