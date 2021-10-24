@@ -83,7 +83,7 @@ namespace MarC
 			hostAddr = (char*)m_pExeInfo->modules[clientAddr.asCode.page]->codeMemory->getBaseAddress() + clientAddr.asCode.addr;
 			break;
 		case BC_MEM_BASE_REGISTER:
-			hostAddr = &m_mem.registers[clientAddr.addr];
+			hostAddr = &getRegister((BC_MemRegister)clientAddr.addr);
 			break;
 		case BC_MEM_BASE_EXTERN:
 			hostAddr = (char*)0 + clientAddr.addr;

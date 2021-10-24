@@ -7,11 +7,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 add_executable(
 	MarCmd
-	"src/main.cpp"
+	
+	"src/EntryPoint.cpp"
+	"include/CmdArgParser.h"
+	"src/MarCmdInterpreter.cpp"
 )
 
 target_include_directories(
 	MarCmd PUBLIC 
+	"${CMAKE_SOURCE_DIR}/MarCmd/include"
 	"${CMAKE_SOURCE_DIR}/MarCore/include"
 )
 
