@@ -45,7 +45,7 @@ namespace MarCmd
 		}
 		
 		if (verbose)
-			std::cout << "Running linker..." << std::endl;
+			std::cout << "Linking the application..." << std::endl;
 		if (!linker.link())
 		{
 			std::cout << "An error occured while running the linker!" << std::endl;
@@ -53,7 +53,7 @@ namespace MarCmd
 		}
 
 		if (verbose)
-			std::cout << "Running interpreter..." << std::endl;
+			std::cout << "Starting interpreter..." << std::endl;
 		timer.start();
 		bool intResult = interpreter.interpret();
 		timer.stop();
@@ -105,7 +105,7 @@ namespace MarCmd
 		MarC::Compiler compiler(tokenizer.getTokenList(), modName);
 
 		if (verbose)
-			std::cout << "Running tokenizer..." << std::endl;
+			std::cout << "Tokenizing module '" << modName << "'..." << std::endl;
 		if (!tokenizer.tokenize())
 		{
 			std::cout << "An error occured while running the tokenizer!" << std::endl
@@ -114,7 +114,7 @@ namespace MarCmd
 		}
 
 		if (verbose)
-			std::cout << "Running compiler..." << std::endl;
+			std::cout << "Compiling module '" << modName << "'..." << std::endl;
 		if (!compiler.compile())
 		{
 			std::cout << "An error occured while running the compiler!:" << std::endl
@@ -123,7 +123,7 @@ namespace MarCmd
 		}
 
 		if (verbose)
-			std::cout << "Adding module '" << compiler.getModuleInfo()->moduleName << "'..." << std::endl;
+			std::cout << "Adding module '" << compiler.getModuleInfo()->moduleName << "' to the linker..." << std::endl;
 		if (!linker.addModule(compiler.getModuleInfo()))
 		{
 			std::cout << "An error occurd while adding the module '" << compiler.getModuleInfo()->moduleName << "' to the linker!" << std::endl;

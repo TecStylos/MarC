@@ -8,11 +8,6 @@
 #include "MarCmdHelp.h"
 #include "MarCmdInterpreter.h"
 
-bool startswith(const std::string& left, const std::string& right)
-{
-	return left.find(right) == 0;
-}
-
 enum class ExitBehavior
 {
 	CloseWhenZero,
@@ -38,47 +33,47 @@ int main(int argc, const char** argv, const char** env)
 	{
 		std::string elem = cmd.getNext();
 
-		if (startswith(elem, "-help"))
+		if (elem == "-help")
 		{
 			mode = Mode::Help;
 			continue;
 		}
-		if (startswith(elem, "-verbose"))
+		if (elem == "-verbose")
 		{
 			verbose = true;
 			continue;
 		}
-		if (startswith(elem, "-livecode"))
+		if (elem == "-livecode")
 		{
 			mode = Mode::LiveCode;
 			continue;
 		}
-		if (startswith(elem, "-liveasm"))
+		if (elem == "-liveasm")
 		{
 			mode = Mode::LiveAsm;
 			continue;
 		}
-		if (startswith(elem, "-execute"))
+		if (elem == "-execute")
 		{
 			mode = Mode::Execute;
 			continue;
 		}
-		if (startswith(elem, "-assemble"))
+		if (elem == "-assemble")
 		{
 			mode = Mode::Assemble;
 			continue;
 		}
-		if (startswith(elem, "-compile"))
+		if (elem == "-compile")
 		{
 			mode = Mode::Compile;
 			continue;
 		}
-		if (startswith(elem, "-link"))
+		if (elem == "-link")
 		{
 			mode = Mode::Link;
 			continue;
 		}
-		if (startswith(elem, "-i"))
+		if (elem == "-i")
 		{
 			if (!cmd.hasNext())
 			{
@@ -88,7 +83,7 @@ int main(int argc, const char** argv, const char** env)
 			inFile = cmd.getNext();
 			continue;
 		}
-		if (startswith(elem, "-o"))
+		if (elem == "-o")
 		{
 			if (!cmd.hasNext())
 			{
@@ -98,7 +93,7 @@ int main(int argc, const char** argv, const char** env)
 			outFile = cmd.getNext();
 			continue;
 		}
-		if (startswith(elem, "-m"))
+		if (elem == "-m")
 		{
 			if (!cmd.hasNext())
 			{
@@ -108,12 +103,12 @@ int main(int argc, const char** argv, const char** env)
 			modDirs.insert(cmd.getNext());
 			continue;
 		}
-		if (startswith(elem, "-keeponexit"))
+		if (elem == "-keeponexit")
 		{
 			exitBehavior = ExitBehavior::KeepOnExit;
 			continue;
 		}
-		if (startswith(elem, "-closeonexit"))
+		if (elem == "-closeonexit")
 		{
 			exitBehavior = ExitBehavior::CloseOnExit;
 			continue;
