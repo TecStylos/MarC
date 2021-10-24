@@ -1,9 +1,11 @@
+#include <filesystem>
 #include <iostream>
 #include <set>
 
 #include "CmdArgParser.h"
 #include "MarCmdMode.h"
 
+#include "MarCmdHelp.h"
 #include "MarCmdInterpreter.h"
 
 bool startswith(const std::string& left, const std::string& right)
@@ -36,42 +38,42 @@ int main(int argc, const char** argv, const char** env)
 	{
 		std::string elem = cmd.getNext();
 
-		if (startswith(elem, "--help"))
+		if (startswith(elem, "-help"))
 		{
 			mode = Mode::Help;
 			continue;
 		}
-		if (startswith(elem, "--verbose"))
+		if (startswith(elem, "-verbose"))
 		{
 			verbose = true;
 			continue;
 		}
-		if (startswith(elem, "--livecode"))
+		if (startswith(elem, "-livecode"))
 		{
 			mode = Mode::LiveCode;
 			continue;
 		}
-		if (startswith(elem, "--liveasm"))
+		if (startswith(elem, "-liveasm"))
 		{
 			mode = Mode::LiveAsm;
 			continue;
 		}
-		if (startswith(elem, "--execute"))
+		if (startswith(elem, "-execute"))
 		{
 			mode = Mode::Execute;
 			continue;
 		}
-		if (startswith(elem, "--assemble"))
+		if (startswith(elem, "-assemble"))
 		{
 			mode = Mode::Assemble;
 			continue;
 		}
-		if (startswith(elem, "--compile"))
+		if (startswith(elem, "-compile"))
 		{
 			mode = Mode::Compile;
 			continue;
 		}
-		if (startswith(elem, "--link"))
+		if (startswith(elem, "-link"))
 		{
 			mode = Mode::Link;
 			continue;
@@ -96,7 +98,7 @@ int main(int argc, const char** argv, const char** env)
 			outFile = cmd.getNext();
 			continue;
 		}
-		if (startswith(elem, "--mod"))
+		if (startswith(elem, "-m"))
 		{
 			if (!cmd.hasNext())
 			{
@@ -106,18 +108,19 @@ int main(int argc, const char** argv, const char** env)
 			modDirs.insert(cmd.getNext());
 			continue;
 		}
-		if (startswith(elem, "--keepopen"))
+		if (startswith(elem, "-keeponexit"))
 		{
 			exitBehavior = ExitBehavior::KeepOnExit;
 			continue;
 		}
-		if (startswith(elem, "--closeonexit"))
+		if (startswith(elem, "-closeonexit"))
 		{
 			exitBehavior = ExitBehavior::CloseOnExit;
 			continue;
 		}
 
 		runFile = elem;
+		modDirs.insert(std::filesystem::path(runFile).parent_path().string());
 		mode = Mode::Interpret;
 		break;
 	}
@@ -136,8 +139,8 @@ int main(int argc, const char** argv, const char** env)
 	switch (mode)
 	{
 	case Mode::Help:
-		std::cout << "Mode 'help' has not been implemented yet!" << std::endl;
-		exitCode = -1;
+		std::cout << MarCmd::HelpText << std::endl;
+		exitCode = 0;
 		break;
 	case Mode::LiveCode:
 		std::cout << "Mode 'livecode' has not been implemented yet!" << std::endl;
