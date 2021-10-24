@@ -23,7 +23,7 @@ int main(int argc, const char** argv, const char** env)
 	Mode mode = Mode::None;
 	std::string inFile = "";
 	std::string outFile = "";
-	std::set<std::string> modDirs = { "./" };
+	std::set<std::string> modDirs = {};
 	std::string runFile = "";
 	ExitBehavior exitBehavior = ExitBehavior::KeepOnExit;
 
