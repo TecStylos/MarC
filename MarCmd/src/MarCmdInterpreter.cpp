@@ -43,35 +43,33 @@ namespace MarCmd
 					return -1;
 			}
 		}
-
-		std::cout << "Linking the application...";
-		if (linker.link())
-			std::cout << " DONE" << std::endl;
-		else
+		
+		if (verbose)
+			std::cout << "Running linker..." << std::endl;
+		if (!linker.link())
 		{
-			std::cout << "  ERROR" << std::endl;
+			std::cout << "An error occured while running the linker!" << std::endl;
 			return -1;
 		}
 
-		std::cout << "Running interpreter...";
-
+		if (verbose)
+			std::cout << "Running interpreter..." << std::endl;
 		timer.start();
 		bool intResult = interpreter.interpret();
 		timer.stop();
-		if (intResult || interpreter.lastError().isOK())
-			std::cout << " DONE" << std::endl;
-		else
+		if (!intResult && !interpreter.lastError().isOK())
 		{
 			std::cout << std::endl << "  An error occured while interpreting the code!" << std::endl
 				<< "    " << interpreter.lastError().getMessage() << std::endl;
 			return -1;
 		}
 
-		std::cout << "Executed " << interpreter.nInsExecuted() << " instructions in " << timer.microseconds() << " microseconds" << std::endl;
+		if (verbose)
+			std::cout << "Executed " << interpreter.nInsExecuted() << " instructions in " << timer.microseconds() << " microseconds" << std::endl;
 
-		int exitCode = interpreter.getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_64;
+		int exitCode = interpreter.getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_32;
 
-		std::cout << "Exit code: " << exitCode << std::endl;
+		std::cout << inMod << " exited with code " << exitCode << "." << std::endl;
 
 		return exitCode;
 	}
@@ -106,32 +104,29 @@ namespace MarCmd
 		MarC::AsmTokenizer tokenizer(readFile(modPath));
 		MarC::Compiler compiler(tokenizer.getTokenList(), modName);
 
-		std::cout << "Tokenizing '" << modPath << "'...";
-		if (tokenizer.tokenize())
-			std::cout << " DONE" << std::endl;
-		else
+		if (verbose)
+			std::cout << "Running tokenizer..." << std::endl;
+		if (!tokenizer.tokenize())
 		{
-			std::cout << "  ERROR" << std::endl
-				<< "    " << tokenizer.lastError().getMessage() << std::endl;
+			std::cout << "An error occured while running the tokenizer!" << std::endl
+				<< "  " << tokenizer.lastError().getMessage() << std::endl;
 			return false;
 		}
 
-		std::cout << "Compiling '" << modPath << "'...";
-		if (compiler.compile())
-			std::cout << " DONE" << std::endl;
-		else
+		if (verbose)
+			std::cout << "Running compiler..." << std::endl;
+		if (!compiler.compile())
 		{
-			std::cout << "  ERROR" << std::endl
-				<< "    " << compiler.lastError().getMessage() << std::endl;
+			std::cout << "An error occured while running the compiler!:" << std::endl
+				<< "  " << compiler.lastError().getMessage() << std::endl;
 			return false;
 		}
 
-		std::cout << "Adding module '" << modName << "' to linker...";
-		if (linker.addModule(compiler.getModuleInfo()))
-			std::cout << " DONE" << std::endl;
-		else
+		if (verbose)
+			std::cout << "Adding module '" << compiler.getModuleInfo()->moduleName << "'..." << std::endl;
+		if (!linker.addModule(compiler.getModuleInfo()))
 		{
-			std::cout << "  ERROR" << std::endl;
+			std::cout << "An error occurd while adding the module '" << compiler.getModuleInfo()->moduleName << "' to the linker!" << std::endl;
 			return false;
 		}
 

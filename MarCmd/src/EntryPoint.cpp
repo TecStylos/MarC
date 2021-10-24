@@ -11,6 +11,13 @@ bool startswith(const std::string& left, const std::string& right)
 	return left.find(right) == 0;
 }
 
+enum class ExitBehavior
+{
+	CloseWhenZero,
+	CloseOnExit,
+	KeepOnExit,
+};
+
 int main(int argc, const char** argv, const char** env)
 {
 	using Mode = MarCmd::Mode;
@@ -21,6 +28,7 @@ int main(int argc, const char** argv, const char** env)
 	std::string outFile = "";
 	std::set<std::string> modDirs = { "./" };
 	std::string runFile = "";
+	ExitBehavior exitBehavior = ExitBehavior::KeepOnExit;
 
 	MarCmd::CmdArgParser cmd(argc, argv);
 
@@ -98,6 +106,16 @@ int main(int argc, const char** argv, const char** env)
 			modDirs.insert(cmd.getNext());
 			continue;
 		}
+		if (startswith(elem, "--keepopen"))
+		{
+			exitBehavior = ExitBehavior::KeepOnExit;
+			continue;
+		}
+		if (startswith(elem, "--closeonexit"))
+		{
+			exitBehavior = ExitBehavior::CloseOnExit;
+			continue;
+		}
 
 		runFile = elem;
 		mode = Mode::Interpret;
@@ -150,7 +168,12 @@ int main(int argc, const char** argv, const char** env)
 		break;
 	}
 
-	if (exitCode != 0)
+	if (
+		exitBehavior == ExitBehavior::KeepOnExit ||
+		(
+			exitBehavior == ExitBehavior::CloseWhenZero && exitCode != 0
+			)
+		)
 	{
 		std::cout << "Press enter to exit...";
 		std::cin.clear();
