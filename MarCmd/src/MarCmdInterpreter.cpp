@@ -7,7 +7,7 @@
 
 namespace MarCmd
 {
-	int Interpreter::run(const std::string& inFile, const std::set<std::string>& modDirs)
+	int Interpreter::run(const std::string& inFile, const std::set<std::string>& modDirs, bool verbose)
 	{
 		std::string inMod = modNameFromPath(inFile);
 
@@ -16,7 +16,7 @@ namespace MarCmd
 		MarC::Linker linker;
 		MarC::Interpreter interpreter(linker.getExeInfo(), 4096);
 
-		if (!addModule(linker, inFile, inMod))
+		if (!addModule(linker, inFile, inMod, verbose))
 			return -1;
 
 		while (linker.hasMissingModules())
@@ -39,7 +39,7 @@ namespace MarCmd
 					return -1;
 				}
 
-				if (!addModule(linker, pair.second[0], pair.first))
+				if (!addModule(linker, pair.second[0], pair.first, verbose))
 					return -1;
 			}
 		}
@@ -101,7 +101,7 @@ namespace MarCmd
 		return result;
 	}
 
-	bool Interpreter::addModule(MarC::Linker& linker, const std::string& modPath, const std::string& modName)
+	bool Interpreter::addModule(MarC::Linker& linker, const std::string& modPath, const std::string& modName, bool verbose)
 	{
 		MarC::AsmTokenizer tokenizer(readFile(modPath));
 		MarC::Compiler compiler(tokenizer.getTokenList(), modName);

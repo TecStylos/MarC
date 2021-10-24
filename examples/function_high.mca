@@ -7,6 +7,6 @@
 #alias : X : -69
 #alias : Y : -420
 
-call : CALC_SUM : i64.$ec : i64.X : i64.Y
+call.i64 : CALC_SUM : i64.$ec : i64.X : i64.Y
 
 exit

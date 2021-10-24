@@ -15,6 +15,7 @@ int main(int argc, const char** argv, const char** env)
 {
 	using Mode = MarCmd::Mode;
 
+	bool verbose = false;
 	Mode mode = Mode::None;
 	std::string inFile = "";
 	std::string outFile = "";
@@ -30,6 +31,11 @@ int main(int argc, const char** argv, const char** env)
 		if (startswith(elem, "--help"))
 		{
 			mode = Mode::Help;
+			continue;
+		}
+		if (startswith(elem, "--verbose"))
+		{
+			verbose = true;
 			continue;
 		}
 		if (startswith(elem, "--livecode"))
@@ -140,7 +146,7 @@ int main(int argc, const char** argv, const char** env)
 		exitCode =  -1;
 		break;
 	case Mode::Interpret:
-		exitCode = MarCmd::Interpreter::run(runFile, modDirs);
+		exitCode = MarCmd::Interpreter::run(runFile, modDirs, verbose);
 		break;
 	}
 
