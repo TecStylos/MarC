@@ -25,7 +25,7 @@ int main(int argc, const char** argv, const char** env)
 	std::string outFile = "";
 	std::set<std::string> modDirs = {};
 	std::string runFile = "";
-	ExitBehavior exitBehavior = ExitBehavior::KeepOnExit;
+	ExitBehavior exitBehavior = ExitBehavior::CloseWhenZero;
 
 	MarCmd::CmdArgParser cmd(argc, argv);
 
