@@ -269,6 +269,7 @@ namespace MarC
 				return false;
 			break;
 		}
+		return true;
 	}
 
 	bool Compiler::generateTypeCellRegister(TypeCell& tc)

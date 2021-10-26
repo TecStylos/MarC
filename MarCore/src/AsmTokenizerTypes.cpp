@@ -23,7 +23,7 @@ namespace MarC
 			{ AsmToken::Type::Comment,        "Comment" },
 		};
 
-		auto& it = ttMap.find(tt);
+		auto it = ttMap.find(tt);
 		if (it == ttMap.end())
 			return "<unknown>";
 		return it->second;

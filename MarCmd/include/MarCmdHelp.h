@@ -2,7 +2,7 @@
 
 namespace MarCmd
 {
-	constexpr char* HelpText =
+	const char* HelpText =
 		"Options:\n"
 		"    -help            View this help page.\n"
 		"    -verbose         View more runtime information.\n"

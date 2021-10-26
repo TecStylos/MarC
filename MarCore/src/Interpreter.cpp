@@ -1,5 +1,6 @@
 #include "Interpreter.h"
 
+#include <cstring>
 #include <algorithm>
 #include <unordered_map>
 #include "ConvertInPlace.h"
@@ -228,7 +229,8 @@ namespace MarC
 	}
 	void Interpreter::exec_insPop(BC_OpCodeEx ocx)
 	{
-		virt_popStack(BC_MemCell(), BC_DatatypeSize(ocx.datatype));
+	  BC_MemCell mc;
+		virt_popStack(mc, BC_DatatypeSize(ocx.datatype));
 	}
 	void Interpreter::exec_insPushCopy(BC_OpCodeEx ocx)
 	{

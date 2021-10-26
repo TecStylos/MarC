@@ -92,7 +92,7 @@ namespace MarC
 			{ "exit",    BC_OC_EXIT },
 		};
 
-		auto& it = ocMap.find(ocStr);
+		auto it = ocMap.find(ocStr);
 		if (it == ocMap.end())
 			return BC_OC_UNKNOWN;
 		return it->second;
@@ -135,7 +135,7 @@ namespace MarC
 			{ BC_OC_EXIT, "exit" },
 		};
 
-		auto& it = ocMap.find(oc);
+		auto it = ocMap.find(oc);
 		if (it == ocMap.end())
 			return "<unknown>";
 		return it->second;
@@ -158,7 +158,7 @@ namespace MarC
 			{ "addr", BC_DT_U_64 },
 		};
 
-		auto& it = dtMap.find(dtStr);
+		auto it = dtMap.find(dtStr);
 		if (it == dtMap.end())
 			return BC_DT_UNKNOWN;
 		return it->second;
@@ -180,7 +180,7 @@ namespace MarC
 			{ BC_DT_U_64, "addr"  },
 		};
 
-		auto& it = dtMap.find(dt);
+		auto it = dtMap.find(dt);
 		if (it == dtMap.end())
 			return "<unknown>";
 		return it->second;
@@ -199,7 +199,7 @@ namespace MarC
 			{ "ec",      BC_MEM_REG_EXIT_CODE      },
 		};
 
-		auto& it = regMap.find(regStr);
+		auto it = regMap.find(regStr);
 		if (it == regMap.end())
 			return BC_MEM_REG_UNKNOWN;
 		return it->second;
@@ -217,7 +217,7 @@ namespace MarC
 			{ BC_MEM_REG_EXIT_CODE,      "ec"       },
 		};
 
-		auto& it = regMap.find(reg);
+		auto it = regMap.find(reg);
 		if (it == regMap.end())
 			return "<unknown>";
 		return it->second;
