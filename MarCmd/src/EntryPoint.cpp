@@ -33,42 +33,42 @@ int main(int argc, const char** argv, const char** env)
 	{
 		std::string elem = cmd.getNext();
 
-		if (elem == "-help")
+		if (elem == "--help")
 		{
 			mode = Mode::Help;
 			continue;
 		}
-		if (elem == "-verbose")
+		if (elem == "--verbose")
 		{
 			verbose = true;
 			continue;
 		}
-		if (elem == "-livecode")
+		if (elem == "--livecode")
 		{
 			mode = Mode::LiveCode;
 			continue;
 		}
-		if (elem == "-liveasm")
+		if (elem == "--liveasm")
 		{
 			mode = Mode::LiveAsm;
 			continue;
 		}
-		if (elem == "-execute")
+		if (elem == "--execute")
 		{
 			mode = Mode::Execute;
 			continue;
 		}
-		if (elem == "-assemble")
+		if (elem == "--assemble")
 		{
 			mode = Mode::Assemble;
 			continue;
 		}
-		if (elem == "-compile")
+		if (elem == "--compile")
 		{
 			mode = Mode::Compile;
 			continue;
 		}
-		if (elem == "-link")
+		if (elem == "--link")
 		{
 			mode = Mode::Link;
 			continue;
@@ -103,12 +103,12 @@ int main(int argc, const char** argv, const char** env)
 			modDirs.insert(cmd.getNext());
 			continue;
 		}
-		if (elem == "-keeponexit")
+		if (elem == "--keeponexit")
 		{
 			exitBehavior = ExitBehavior::KeepOnExit;
 			continue;
 		}
-		if (elem == "-closeonexit")
+		if (elem == "--closeonexit")
 		{
 			exitBehavior = ExitBehavior::CloseOnExit;
 			continue;
