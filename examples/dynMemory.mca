@@ -1,5 +1,30 @@
-alloc : $ac : 1024
+#alias : BUFFSIZE : 1024
 
-free : $ac
+        / Memory init
+push.addr
+#alias : src : ~0
+alloc : src : BUFFSIZE
+push.addr
+#alias : dest : ~8
+alloc : dest : BUFFSIZE
+
+        / Loop init
+pushc.u64 : 0
+#alias : loopCount : ~16
+
+        / Loop body
+#label : LOOP_BEGIN
+    drf : $ac : @src
+    mov.u8 : @dest : @$ac
+    add.addr : src : 1
+    add.u64 : loopCount : 1
+jne.u64 : LOOP_BEGIN : @loopCount : BUFFSIZE
+
+        / Memory free
+pop.u64
+free : @dest
+free : @src
+pop.addr
+pop.addr
 
 exit
