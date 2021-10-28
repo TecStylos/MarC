@@ -87,8 +87,13 @@ namespace MarC
 			hostAddr = &getRegister((BC_MemRegister)clientAddr.addr);
 			break;
 		case BC_MEM_BASE_EXTERN:
-			hostAddr = (char*)0 + clientAddr.addr;
-			break;
+		  {
+		    auto it = m_mem.dynMemMap.lower_bound(clientAddr);
+		    if (it != m_mem.dynMemMap.begin())
+		      --it;
+		    hostAddr = (char*)it->second + (clientAddr.addr - it->first.addr);
+		    break;
+		  }
 		}
 
 		if (deref)
@@ -166,7 +171,10 @@ namespace MarC
 			case BC_OC_JUMP_LESS_EQUAL: Interpreter::exec_insJumpLessEqual(ocx); break;
 			case BC_OC_JUMP_GREATER_EQUAL: Interpreter::exec_insJumpGreaterEqual(ocx); break;
 
-			case BC_OC_CALL: Interpreter::exec_insCall(ocx); break;
+		case BC_OC_ALLOCATE: Interpreter::exec_insAllocate(ocx); break;
+		case BC_OC_FREE: Interpreter::exec_insFree(ocx); break;
+		  
+		case BC_OC_CALL: Interpreter::exec_insCall(ocx); break;
 			case BC_OC_RETURN: Interpreter::exec_insReturn(ocx); break;
 
 			case BC_OC_EXIT: Interpreter::exec_insExit(ocx); break;
@@ -336,7 +344,25 @@ namespace MarC
 		if (result)
 			getRegister(BC_MEM_REG_CODE_POINTER) = destAddr;
 	}
-	void Interpreter::exec_insCall(BC_OpCodeEx ocx)
+  void Interpreter::exec_insAllocate(BC_OpCodeEx ocx)
+  {
+    BC_MemAddress& addr = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]).as_ADDR;
+    uint64_t size = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[1]).as_U_64;
+    addr.base = BC_MEM_BASE_EXTERN;
+    addr.addr = m_mem.nextDynAddr;
+    void* ptr = malloc(size);
+    m_mem.dynMemMap.insert({ addr, ptr });
+    m_mem.nextDynAddr += size;
+  }
+  void Interpreter::exec_insFree(BC_OpCodeEx ocx)
+  {
+    auto& addr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[0]).as_ADDR;
+    auto it = m_mem.dynMemMap.find(addr);
+    if (it != m_mem.dynMemMap.end())
+      free(it->second);
+    m_mem.dynMemMap.erase(addr);
+  }
+  void Interpreter::exec_insCall(BC_OpCodeEx ocx)
 	{
 		BC_MemAddress fpMem;
 		BC_MemAddress retMem;

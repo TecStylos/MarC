@@ -1,0 +1,5 @@
+alloc : $ac : 1024
+
+free : $ac
+
+exit

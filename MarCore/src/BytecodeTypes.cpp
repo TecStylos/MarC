@@ -35,7 +35,13 @@ namespace MarC
 		asCode.page = page;
 		asCode.addr = addr;
 	}
-
+  bool BC_MemAddress::operator<(const BC_MemAddress& other) const
+  {
+    if (base != other.base)
+      return base < other.base;
+    return addr < other.addr;
+  }
+  
 	BC_Datatype BC_FuncCallData::ArgTypes::get(uint8_t nthArg)
 	{
 		uint8_t shift = 4 * nthArg;
@@ -86,6 +92,9 @@ namespace MarC
 			{ "jle",     BC_OC_JUMP_LESS_EQUAL },
 			{ "jge",     BC_OC_JUMP_GREATER_EQUAL },
 
+			{ "alloc",   BC_OC_ALLOCATE },
+			{ "free",    BC_OC_FREE },
+			
 			{ "call",    BC_OC_CALL },
 			{ "return",  BC_OC_RETURN },
 
@@ -129,6 +138,9 @@ namespace MarC
 			{ BC_OC_JUMP_LESS_EQUAL, "jle" },
 			{ BC_OC_JUMP_GREATER_EQUAL, "jge" },
 
+			{ BC_OC_ALLOCATE, "alloc" },
+			{ BC_OC_FREE, "free" },
+			
 			{ BC_OC_CALL, "call" },
 			{ BC_OC_RETURN, "return" },
 
