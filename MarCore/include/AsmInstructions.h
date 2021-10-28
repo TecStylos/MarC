@@ -10,15 +10,17 @@ namespace MarC
 		Address,
 		Value,
 		Datatype,
+		TypedValue,
 	};
 
 	struct InsArgument
 	{
 		InsArgType type;
 		uint64_t index;
+		BC_Datatype datatype;
 	public:
-		InsArgument(InsArgType type, uint64_t index = -1)
-			: type(type), index(index)
+		InsArgument(InsArgType type, BC_Datatype datatype = BC_DT_NONE, uint64_t index = -1)
+			: type(type), datatype(datatype), index(index)
 		{}
 	};
 
@@ -66,6 +68,9 @@ namespace MarC
 		{ BC_OC_JUMP_LESS_EQUAL, true, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
 		{ BC_OC_JUMP_GREATER_EQUAL, true, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
 
+		{ BC_OC_ALLOCATE, false, { { InsArgType::Address }, { InsArgType::TypedValue, BC_DT_U_64 } } },
+		{ BC_OC_FREE, false, { { InsArgType::Address } } },
+		
 		{ BC_OC_CALL, true, {}, true },
 		{ BC_OC_RETURN, false, {} },
 

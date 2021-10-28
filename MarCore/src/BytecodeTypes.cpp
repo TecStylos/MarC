@@ -35,7 +35,13 @@ namespace MarC
 		asCode.page = page;
 		asCode.addr = addr;
 	}
-
+  bool BC_MemAddress::operator<(const BC_MemAddress& other) const
+  {
+    if (base != other.base)
+      return base < other.base;
+    return addr < other.addr;
+  }
+  
 	BC_Datatype BC_FuncCallData::ArgTypes::get(uint8_t nthArg)
 	{
 		uint8_t shift = 4 * nthArg;
@@ -86,13 +92,16 @@ namespace MarC
 			{ "jle",     BC_OC_JUMP_LESS_EQUAL },
 			{ "jge",     BC_OC_JUMP_GREATER_EQUAL },
 
+			{ "alloc",   BC_OC_ALLOCATE },
+			{ "free",    BC_OC_FREE },
+			
 			{ "call",    BC_OC_CALL },
 			{ "return",  BC_OC_RETURN },
 
 			{ "exit",    BC_OC_EXIT },
 		};
 
-		auto& it = ocMap.find(ocStr);
+		auto it = ocMap.find(ocStr);
 		if (it == ocMap.end())
 			return BC_OC_UNKNOWN;
 		return it->second;
@@ -129,13 +138,16 @@ namespace MarC
 			{ BC_OC_JUMP_LESS_EQUAL, "jle" },
 			{ BC_OC_JUMP_GREATER_EQUAL, "jge" },
 
+			{ BC_OC_ALLOCATE, "alloc" },
+			{ BC_OC_FREE, "free" },
+			
 			{ BC_OC_CALL, "call" },
 			{ BC_OC_RETURN, "return" },
 
 			{ BC_OC_EXIT, "exit" },
 		};
 
-		auto& it = ocMap.find(oc);
+		auto it = ocMap.find(oc);
 		if (it == ocMap.end())
 			return "<unknown>";
 		return it->second;
@@ -158,7 +170,7 @@ namespace MarC
 			{ "addr", BC_DT_U_64 },
 		};
 
-		auto& it = dtMap.find(dtStr);
+		auto it = dtMap.find(dtStr);
 		if (it == dtMap.end())
 			return BC_DT_UNKNOWN;
 		return it->second;
@@ -180,7 +192,7 @@ namespace MarC
 			{ BC_DT_U_64, "addr"  },
 		};
 
-		auto& it = dtMap.find(dt);
+		auto it = dtMap.find(dt);
 		if (it == dtMap.end())
 			return "<unknown>";
 		return it->second;
@@ -199,7 +211,7 @@ namespace MarC
 			{ "ec",      BC_MEM_REG_EXIT_CODE      },
 		};
 
-		auto& it = regMap.find(regStr);
+		auto it = regMap.find(regStr);
 		if (it == regMap.end())
 			return BC_MEM_REG_UNKNOWN;
 		return it->second;
@@ -217,7 +229,7 @@ namespace MarC
 			{ BC_MEM_REG_EXIT_CODE,      "ec"       },
 		};
 
-		auto& it = regMap.find(reg);
+		auto it = regMap.find(reg);
 		if (it == regMap.end())
 			return "<unknown>";
 		return it->second;

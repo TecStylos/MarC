@@ -53,6 +53,9 @@ namespace MarC
 		BC_OC_JUMP_LESS_EQUAL,
 		BC_OC_JUMP_GREATER_EQUAL,
 
+		BC_OC_ALLOCATE,
+		BC_OC_FREE,
+		
 		BC_OC_CALL,
 		BC_OC_RETURN,
 
@@ -122,6 +125,7 @@ namespace MarC
 		BC_MemAddress() = default;
 		BC_MemAddress(BC_MemBase base, uint64_t addr);
 		BC_MemAddress(BC_MemBase base, uint64_t page, uint64_t addr);
+	  bool operator<(const BC_MemAddress& other) const;
 	};
 
 	union BC_MemCell

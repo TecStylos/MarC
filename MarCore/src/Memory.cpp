@@ -1,5 +1,7 @@
 #include "Memory.h"
 
+#include <cstring>
+
 namespace MarC
 {
 	Memory::Memory()

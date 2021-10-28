@@ -20,7 +20,7 @@ namespace MarC
 
 				auto stem = p.path().stem().string();
 
-				auto& modMatch = modNames.find(stem);
+				auto modMatch = modNames.find(stem);
 				if (modMatch == modNames.end())
 					continue;
 

@@ -108,7 +108,7 @@ namespace MarC
 			for (uint64_t i = 0; i < mod->unresolvedRefs.size(); ++i)
 			{
 				auto& ref = mod->unresolvedRefs[i];
-				auto& result = m_symbols.find(ref.name);
+				auto result = m_symbols.find(ref.name);
 				if (result == m_symbols.end())
 					continue;
 

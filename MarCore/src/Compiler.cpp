@@ -143,7 +143,7 @@ namespace MarC
 		uint64_t opCodeBegin = currCodeOffset();
 		pushCode(ocx);
 
-		if (!compileArgAddress(ocx, { InsArgType::Address, 0 }))
+		if (!compileArgAddress(ocx, { InsArgType::Address, BC_DT_NONE, 0 }))
 			return false;
 
 		if (!removeNecessaryColon())
@@ -167,7 +167,7 @@ namespace MarC
 			if (nextToken().type != AsmToken::Type::Sep_Dot)
 				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 
-			if (!compileArgument(ocx, { InsArgType::Value, (uint64_t)1 + fcd.nArgs }))
+			if (!compileArgument(ocx, { InsArgType::Value, BC_DT_NONE, (uint64_t)1 + fcd.nArgs }))
 				return false;
 
 			++fcd.nArgs;
@@ -192,6 +192,7 @@ namespace MarC
 				return false;
 			break;
 		case InsArgType::Value:
+		case InsArgType::TypedValue:
 			if (!compileArgValue(ocx, arg))
 				return false;
 			break;
@@ -218,7 +219,12 @@ namespace MarC
 		nextToken();
 
 		TypeCell tc;
-		tc.datatype = (arg.type == InsArgType::Address) ? BC_DT_U_64 : ocx.datatype;
+		switch (arg.type)
+		{
+		case InsArgType::Address: tc.datatype = BC_DT_U_64; break;
+		case InsArgType::TypedValue: tc.datatype = arg.datatype; break;
+		case InsArgType::Value: tc.datatype = ocx.datatype; break;
+		}
 
 		bool getsDereferenced;
 		if (!generateTypeCell(tc, getsDereferenced))
@@ -269,6 +275,7 @@ namespace MarC
 				return false;
 			break;
 		}
+		return true;
 	}
 
 	bool Compiler::generateTypeCellRegister(TypeCell& tc)
