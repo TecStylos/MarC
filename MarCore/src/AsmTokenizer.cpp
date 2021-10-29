@@ -16,9 +16,7 @@ namespace MarC
 	{
 		return
 			"ERROR ON L: " + std::to_string(m_line) + " C: " + std::to_string(m_column) + "\n" +
-			"  -> " + getText() + "\n" +
-			"  SYSFILE: " + m_sysErrFile + " - SYSLINE: " + std::to_string(m_sysErrLine) + "\n"
-			;
+			"  -> " + getText();
 	}
 
 	AsmTokenizer::AsmTokenizer(const std::string& asmCode)
@@ -121,6 +119,10 @@ namespace MarC
 							currToken.type = AsmToken::Type::Name;
 							currToken.value.push_back(c);
 							currAction = CurrAction::TokenizeName;
+						}
+						else
+						{
+							ASM_TOKENIZER_THROW_ERROR(AsmTokErrCode::UnexpectedChar, std::string("Unexpected char '") + c + "' while beginning a token!");
 						}
 					}
 					break;

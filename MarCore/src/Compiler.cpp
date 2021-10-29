@@ -17,11 +17,9 @@ namespace MarC
 
 	std::string CompilerError::getMessage() const
 	{
-		return 
+		return
 			"ERROR ON L: " + std::to_string(m_line) + " C: " + std::to_string(m_column) + "\n" +
-			"  -> " + getText() + "\n" +
-			"  SYSFILE: " + m_sysErrFile + "  SYSLINE: " + std::to_string(m_sysErrLine)
-			;
+			"  -> " + getText();
 	}
 
 	Compiler::Compiler(const AsmTokenListRef tokenList, const std::string& moduleName)
