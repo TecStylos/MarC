@@ -117,7 +117,6 @@ int main(int argc, const char** argv, const char** env)
 		runFile = elem;
 		modDirs.insert(std::filesystem::path(runFile).parent_path().string());
 		mode = Mode::Interpret;
-		break;
 	}
 
 	if (mode == Mode::None)

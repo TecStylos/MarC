@@ -8,6 +8,8 @@ namespace MarC
 {
 	struct AsmToken
 	{
+		uint16_t line;
+		uint16_t column;
 		enum class Type
 		{
 			None = 0,
@@ -24,12 +26,11 @@ namespace MarC
 			Integer,
 			String,
 			Comment,
-		} type = Type::None;
-		std::string value = "";
+		} type;
+		std::string value;
 	public:
-		AsmToken() = default;
-		AsmToken(Type type, const std::string& value = "")
-			: type(type), value(value)
+		AsmToken(uint16_t line, uint16_t column, Type type = Type::None, const std::string& value = "")
+			: line(line), column(column), type(type), value(value)
 		{}
 	};
 	typedef std::vector<AsmToken> AsmTokenList;

@@ -14,8 +14,11 @@ namespace MarC
 
 	std::string AsmTokenizerError::getMessage() const
 	{
-		return "Error on line " + std::to_string(m_errLine) + ": " + getText() + "\n"
-			+ "SYSFILE: " + m_sysErrFile + "  SYSLINE: " + std::to_string(m_sysErrLine);
+		return
+			"ERROR ON L: " + std::to_string(m_line) + " C: " + std::to_string(m_column) + "\n" +
+			"  -> " + getText() + "\n" +
+			"  SYSFILE: " + m_sysErrFile + " - SYSLINE: " + std::to_string(m_sysErrLine) + "\n"
+			;
 	}
 
 	AsmTokenizer::AsmTokenizer(const std::string& asmCode)
@@ -37,7 +40,10 @@ namespace MarC
 			TokenizeName,
 		} currAction = CurrAction::BeginToken;
 
-		AsmToken currToken;
+		uint16_t line = 1;
+		uint16_t lineBegin = 0;
+
+		AsmToken currToken(line, 1);
 
 		if (m_pTokenList->size() > 0 && (*m_pTokenList)[m_pTokenList->size() - 1].type == AsmToken::Type::END_OF_CODE)
 			m_pTokenList->pop_back();
@@ -54,10 +60,9 @@ namespace MarC
 					switch (c)
 					{
 					case ' ':
-						break;
 					case '\t':
-						break;
 					case '\0':
+						currAction = CurrAction::EndToken;
 						break;
 					case '.':
 						currToken.type = AsmToken::Type::Sep_Dot;
@@ -72,6 +77,8 @@ namespace MarC
 					case '\n':
 						currToken.type = AsmToken::Type::Sep_Newline;
 						currToken.value = "\n";
+						++line;
+						lineBegin = nextChar;
 						currAction = CurrAction::EndToken;
 						break;
 					case '@':
@@ -195,9 +202,14 @@ namespace MarC
 
 				if (currAction == CurrAction::EndToken)
 				{
-					if (currToken.type != AsmToken::Type::Comment)
+					if (
+						currToken.type != AsmToken::Type::None &&
+						currToken.type != AsmToken::Type::Comment
+						)
+					{
 						m_pTokenList->push_back(currToken);
-					currToken = AsmToken();
+					}
+					currToken = AsmToken(line, nextChar - lineBegin);
 					currAction = CurrAction::BeginToken;
 				}
 			}
@@ -210,7 +222,7 @@ namespace MarC
 
 		m_nextCharToTokenize = m_asmCode.size();
 
-		m_pTokenList->push_back(AsmToken(AsmToken::Type::END_OF_CODE, "<END_OF_CODE>"));
+		m_pTokenList->push_back({ line + 1u, 1u, AsmToken::Type::END_OF_CODE, "<END_OF_CODE>" });
 
 		return true;
 	}
