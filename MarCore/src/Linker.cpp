@@ -69,18 +69,18 @@ namespace MarC
 
 	void Linker::copySymbols(ModuleInfoRef pModInfo)
 	{
-		for (auto& symbol : pModInfo->symbols)
+		for (auto& symbol : pModInfo->definedSymbols)
 		{
-			if (symbol.second.usage == SymbolUsage::Address &&
+			if (symbol.usage == SymbolUsage::Address &&
 				(
-					symbol.second.value.as_ADDR.base == BC_MEM_BASE_CODE_MEMORY ||
-					symbol.second.value.as_ADDR.base == BC_MEM_BASE_STATIC_STACK
+					symbol.value.as_ADDR.base == BC_MEM_BASE_CODE_MEMORY ||
+					symbol.value.as_ADDR.base == BC_MEM_BASE_STATIC_STACK
 					)
 				)
-				symbol.second.value.as_ADDR.asCode.page = m_pExeInfo->moduleNameMap.find(pModInfo->moduleName)->second;
+				symbol.value.as_ADDR.asCode.page = m_pExeInfo->moduleNameMap.find(pModInfo->moduleName)->second;
 			m_symbols.insert(symbol);
 		}
-		pModInfo->symbols.clear();
+		pModInfo->definedSymbols.clear();
 	}
 
 	void Linker::copyReqMods()
@@ -105,20 +105,20 @@ namespace MarC
 
 		for (auto& mod : m_pExeInfo->modules)
 		{
-			for (uint64_t i = 0; i < mod->unresolvedRefs.size(); ++i)
+			for (uint64_t i = 0; i < mod->unresolvedSymbolRefs.size(); ++i)
 			{
-				auto& ref = mod->unresolvedRefs[i];
+				auto& ref = mod->unresolvedSymbolRefs[i];
 				auto result = m_symbols.find(ref.name);
 				if (result == m_symbols.end())
 					continue;
 
-				mod->codeMemory->write(&result->second.value, BC_DatatypeSize(ref.datatype), ref.offset);
+				mod->codeMemory->write(&result->value, BC_DatatypeSize(ref.datatype), ref.offset);
 
-				mod->unresolvedRefs.erase(mod->unresolvedRefs.begin() + i);
+				mod->unresolvedSymbolRefs.erase(mod->unresolvedSymbolRefs.begin() + i);
 				--i;
 			}
 
-			if (!mod->unresolvedRefs.empty())
+			if (!mod->unresolvedSymbolRefs.empty())
 				resolvedAll = false;
 		}
 

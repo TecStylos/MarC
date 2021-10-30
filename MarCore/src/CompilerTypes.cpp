@@ -28,12 +28,16 @@ namespace MarC
 		bud.requiredModulesSize = requiredModules.size();
 		bud.codeMemorySize = codeMemory->size();
 		bud.staticStackSize = staticStack->size();
+		bud.definedSymbolsSize = definedSymbols.size();
+		bud.unresolvedSymbolRefsSize = unresolvedSymbolRefs.size();
 	}
 
 	void ModuleInfo::recover()
 	{
 		requiredModules.resize(bud.requiredModulesSize);
 		codeMemory->resize(bud.codeMemorySize);
-		staticStack->resizable(bud.staticStackSize);
+		staticStack->resize(bud.staticStackSize);
+		definedSymbols.resize(bud.definedSymbolsSize);
+		unresolvedSymbolRefs.resize(bud.unresolvedSymbolRefsSize);
 	}
 }

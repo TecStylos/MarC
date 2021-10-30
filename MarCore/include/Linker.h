@@ -30,7 +30,7 @@ namespace MarC
 		bool resolveSymbols();
 	private:
 		ExecutableInfoRef m_pExeInfo;
-		SymbolMap m_symbols;
+		std::set<Symbol> m_symbols;
 		std::set<std::string> m_missingModules;
 	};
 }

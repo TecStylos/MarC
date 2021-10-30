@@ -305,7 +305,7 @@ namespace MarC
 
 	bool Compiler::generateTypeCellName(TypeCell& tc)
 	{
-		m_pModInfo->unresolvedRefs.push_back(
+		m_pModInfo->unresolvedSymbolRefs.push_back(
 			{
 				getScopedName(currToken().value),
 				currCodeOffset(),
@@ -421,8 +421,7 @@ namespace MarC
 		if (nextToken().type != AsmToken::Type::Name)
 			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
-		if (!addSymbol(currToken().value, Symbol(SymbolUsage::Address, currCodeAddr())))
-			return false;
+		addSymbol({ currToken().value, SymbolUsage::Address, currCodeAddr() });
 
 		return true;
 	}
@@ -435,12 +434,11 @@ namespace MarC
 		if (nextToken().type != AsmToken::Type::Name)
 			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
-		std::string name = currToken().value;
+		Symbol symbol;
+		symbol.name = currToken().value;
 
 		if (!removeNecessaryColon())
 			return false;
-
-		Symbol symbol;
 
 		TypeCell tc;
 		switch (nextToken().type)
@@ -478,8 +476,7 @@ namespace MarC
 
 		symbol.value = tc.cell;
 
-		if (!addSymbol(name, symbol))
-			return false;
+		addSymbol(symbol);
 
 		return true;
 	}
@@ -513,7 +510,7 @@ namespace MarC
 		mc.as_ADDR = BC_MemAddress(BC_MEM_BASE_STATIC_STACK, 0, m_pModInfo->staticStack->size());
 		m_pModInfo->staticStack->resize(m_pModInfo->staticStack->size() + tc.cell.as_U_64);
 
-		if (!addSymbol(name, Symbol(SymbolUsage::Address, mc)))
+		addSymbol({ name, SymbolUsage::Address, mc });
 			return false;
 
 		return true;
@@ -542,8 +539,7 @@ namespace MarC
 		if (nextToken().type != AsmToken::Type::Name)
 			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
-		if (!addScope(currToken().value))
-			return false;
+		addScope(currToken().value);
 
 		return true;
 	}
@@ -553,8 +549,7 @@ namespace MarC
 		if (m_scopeList.size() == 0)
 			COMPILER_RETURN_WITH_ERROR(CompErrCode::AlreadyInGlobalScope, "Cannot end scope, already in global scope!");
 
-		if (!addSymbol("SCOPE_END", Symbol(SymbolUsage::Address, currCodeAddr())))
-			return false;
+		addSymbol({ "SCOPE_END", SymbolUsage::Address, currCodeAddr() });
 
 		m_scopeList.pop_back();
 
@@ -574,8 +569,7 @@ namespace MarC
 
 			if (!compileStatement("jmp : " + funcName + ">>SCOPE_END"))
 				return false;
-			if (!addScope(funcName))
-				return false;
+			addScope(funcName);
 		}
 
 		if (!removeNecessaryColon())
@@ -669,25 +663,17 @@ namespace MarC
 		return val;
 	}
 
-	bool Compiler::addSymbol(const std::string& name, const Symbol& symbol)
+	void Compiler::addSymbol(Symbol symbol)
 	{
-		std::string fullName = getScopedName(name);
-
-		if (m_pModInfo->symbols.find(fullName) != m_pModInfo->symbols.end())
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::SymbolAlreadyDefined, "A symbol with name '" + fullName + "' has already been defined!");
-		m_pModInfo->symbols.insert({ fullName, symbol });
-
-		return true;
+		symbol.name = getScopedName(symbol.name);
+		m_pModInfo->definedSymbols.push_back(symbol);
 	}
 
-	bool Compiler::addScope(const std::string& name)
+	void Compiler::addScope(const std::string& name)
 	{
-		if (!addSymbol(name, Symbol(SymbolUsage::Address, currCodeAddr())))
-			return false;
+		addSymbol({ name, SymbolUsage::Address, currCodeAddr() });
 
 		m_scopeList.push_back(name);
-
-		return true;
 	}
 
 	std::string Compiler::getScopedName(const std::string& name)

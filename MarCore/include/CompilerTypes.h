@@ -38,12 +38,18 @@ namespace MarC
 		Value,
 		Address,
 	};
+
 	struct Symbol
 	{
+		std::string name;
 		SymbolUsage usage = SymbolUsage::Value;
 		BC_MemCell value;
+	public:
 		Symbol() = default;
-		Symbol(SymbolUsage usage, BC_MemCell value) : usage(usage), value(value) {}
+		Symbol(const std::string& name) : name(name) {}
+		Symbol(const std::string& name, SymbolUsage usage, BC_MemCell value) : name(name), usage(usage), value(value) {}
+	public:
+		bool operator<(const Symbol& other) const { return name < other.name; }
 	};
 	struct SymbolRef
 	{
@@ -55,8 +61,6 @@ namespace MarC
 		uint64_t offset;
 		BC_Datatype datatype;
 	};
-	typedef std::vector<SymbolRef> SymbolRefList;
-	typedef std::map<std::string, Symbol> SymbolMap;
 
 	class ModuleInfo
 	{
@@ -65,8 +69,8 @@ namespace MarC
 		std::vector<std::string> requiredModules;
 		MemoryRef codeMemory;
 		MemoryRef staticStack;
-		SymbolMap symbols;
-		SymbolRefList unresolvedRefs;
+		std::vector<Symbol> definedSymbols;
+		std::vector<SymbolRef> unresolvedSymbolRefs;
 	public:
 		ModuleInfo();
 	public:
@@ -78,6 +82,8 @@ namespace MarC
 			uint64_t requiredModulesSize = 0;
 			uint64_t codeMemorySize = 0;
 			uint64_t staticStackSize = 0;
+			uint64_t definedSymbolsSize = 0;
+			uint64_t unresolvedSymbolRefsSize = 0;
 		} bud;
 	};
 

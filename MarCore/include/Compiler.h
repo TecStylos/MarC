@@ -89,8 +89,8 @@ namespace MarC
 	private:
 		std::string getArgAsString();
 	private:
-		bool addSymbol(const std::string& name, const Symbol& symbol);
-		bool addScope(const std::string& name);
+		void addSymbol(Symbol symbol);
+		void addScope(const std::string& name);
 		std::string getScopedName(const std::string& name);
 	private:
 		bool isInstructionLike();
