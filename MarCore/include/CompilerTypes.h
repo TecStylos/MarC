@@ -51,6 +51,7 @@ namespace MarC
 	public:
 		bool operator<(const Symbol& other) const { return name < other.name; }
 	};
+
 	struct SymbolRef
 	{
 		SymbolRef() = default;

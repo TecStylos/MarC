@@ -11,7 +11,7 @@ add_executable(
 	"src/EntryPoint.cpp"
 	"include/CmdArgParser.h"
 	"src/MarCmdInterpreter.cpp"
-)
+ "include/MarCmdFlags.h")
 
 target_include_directories(
 	MarCmd PUBLIC 

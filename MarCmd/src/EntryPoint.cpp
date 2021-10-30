@@ -6,6 +6,7 @@
 #include "MarCmdMode.h"
 
 #include "MarCmdHelp.h"
+#include "MarCmdFlags.h"
 #include "MarCmdInterpreter.h"
 
 enum class ExitBehavior
@@ -19,7 +20,7 @@ int main(int argc, const char** argv, const char** env)
 {
 	using Mode = MarCmd::Mode;
 
-	bool verbose = false;
+	MarCmd::Flags<MarCmd::CmdFlags> flags;
 	Mode mode = Mode::None;
 	std::string inFile = "";
 	std::string outFile = "";
@@ -40,7 +41,7 @@ int main(int argc, const char** argv, const char** env)
 		}
 		if (elem == "--verbose")
 		{
-			verbose = true;
+			flags.setFlag(MarCmd::CmdFlags::Verbose);
 			continue;
 		}
 		if (elem == "--livecode")
@@ -113,6 +114,16 @@ int main(int argc, const char** argv, const char** env)
 			exitBehavior = ExitBehavior::CloseOnExit;
 			continue;
 		}
+		if (elem == "--debug")
+		{
+			flags.setFlag(MarCmd::CmdFlags::Debug);
+			continue;
+		}
+		if (elem == "--profile")
+		{
+			flags.setFlag(MarCmd::CmdFlags::Profile);
+			continue;
+		}
 
 		runFile = elem;
 		modDirs.insert(std::filesystem::path(runFile).parent_path().string());
@@ -161,7 +172,7 @@ int main(int argc, const char** argv, const char** env)
 		exitCode =  -1;
 		break;
 	case Mode::Interpret:
-		exitCode = MarCmd::Interpreter::run(runFile, modDirs, verbose);
+		exitCode = MarCmd::Interpreter::run(runFile, modDirs, flags);
 		break;
 	}
 

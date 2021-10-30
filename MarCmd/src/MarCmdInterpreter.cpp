@@ -7,7 +7,7 @@
 
 namespace MarCmd
 {
-	int Interpreter::run(const std::string& inFile, const std::set<std::string>& modDirs, bool verbose)
+	int Interpreter::run(const std::string& inFile, const std::set<std::string>& modDirs, Flags<CmdFlags> flags)
 	{
 		std::string inMod = modNameFromPath(inFile);
 
@@ -16,7 +16,7 @@ namespace MarCmd
 		MarC::Linker linker;
 		MarC::Interpreter interpreter(linker.getExeInfo(), 4096);
 
-		if (!addModule(linker, inFile, inMod, verbose))
+		if (!addModule(linker, inFile, inMod, flags.hasFlag(CmdFlags::Verbose)))
 			return -1;
 
 		while (linker.hasMissingModules())
@@ -39,12 +39,12 @@ namespace MarCmd
 					return -1;
 				}
 
-				if (!addModule(linker, pair.second[0], pair.first, verbose))
+				if (!addModule(linker, pair.second[0], pair.first, flags.hasFlag(CmdFlags::Verbose)))
 					return -1;
 			}
 		}
 		
-		if (verbose)
+		if (flags.hasFlag(CmdFlags::Verbose))
 			std::cout << "Linking the application..." << std::endl;
 		if (!linker.link())
 		{
@@ -52,7 +52,7 @@ namespace MarCmd
 			return -1;
 		}
 
-		if (verbose)
+		if (flags.hasFlag(CmdFlags::Verbose))
 			std::cout << "Starting interpreter..." << std::endl;
 		timer.start();
 		bool intResult = interpreter.interpret();
@@ -64,7 +64,7 @@ namespace MarCmd
 			return -1;
 		}
 
-		if (verbose)
+		if (flags.hasFlag(CmdFlags::Verbose))
 			std::cout << "Executed " << interpreter.nInsExecuted() << " instructions in " << timer.microseconds() << " microseconds" << std::endl;
 
 		int exitCode = interpreter.getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_32;
