@@ -379,7 +379,7 @@ namespace MarC
 		fpMem = regSP.as_ADDR; // Copy address of memory for frame pointer
 		virt_pushStack(BC_MemCell(), BC_DatatypeSize(BC_DT_U_64)); // Reserve memory for frame pointer
 
-		for (uint64_t i = 0; i < fcd.nArgs; ++i)
+		for (uint8_t i = 0; i < fcd.nArgs; ++i)
 		{
 			bool deref = ocx.derefArg.get(1 + i);
 			auto dt = fcd.argType.get(i);

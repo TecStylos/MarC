@@ -45,21 +45,22 @@ namespace MarC
 		SymbolUsage usage = SymbolUsage::Value;
 		BC_MemCell value;
 	public:
-		Symbol() = default;
-		Symbol(const std::string& name) : name(name) {}
+		Symbol() : name("<unnamed>"), usage(SymbolUsage::Value), value(0ull) {}
+		Symbol(const std::string& name) : Symbol() { this->name = name; }
 		Symbol(const std::string& name, SymbolUsage usage, BC_MemCell value) : name(name), usage(usage), value(value) {}
 	public:
 		bool operator<(const Symbol& other) const { return name < other.name; }
 	};
 	struct SymbolRef
 	{
+		SymbolRef() = default;
 		SymbolRef(const std::string& name, uint64_t offset, BC_Datatype datatype)
 			: name(name), offset(offset), datatype(datatype)
 		{}
 	public:
-		std::string name;
-		uint64_t offset;
-		BC_Datatype datatype;
+		std::string name = "<unnamed>";
+		uint64_t offset = -1;
+		BC_Datatype datatype = BC_DT_NONE;
 	};
 
 	class ModuleInfo
