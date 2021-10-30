@@ -19,7 +19,8 @@ add_library(
 	"src/AsmInstructions.cpp"
 	"src/ModuleLocator.cpp"
 	"src/VirtualAsmTokenList.cpp"
- "src/AsmTokenizerTypes.cpp")
+	"src/AsmTokenizerTypes.cpp"
+)
 
 target_include_directories(
 	MarCore PUBLIC

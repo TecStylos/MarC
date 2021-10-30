@@ -87,13 +87,11 @@ namespace MarC
 			hostAddr = &getRegister((BC_MemRegister)clientAddr.addr);
 			break;
 		case BC_MEM_BASE_EXTERN:
-		  {
-		    auto it = m_mem.dynMemMap.lower_bound(clientAddr);
-		    if (it != m_mem.dynMemMap.begin())
-		      --it;
-		    hostAddr = (char*)it->second + (clientAddr.addr - it->first.addr);
-		    break;
-		  }
+		{
+			auto& it = findGreatestSmaller(clientAddr, m_mem.dynMemMap);
+			hostAddr = (char*)it.second + (clientAddr.addr - it.first.addr);
+			break;
+		}
 		}
 
 		if (deref)
