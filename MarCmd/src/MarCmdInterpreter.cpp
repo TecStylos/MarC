@@ -65,7 +65,7 @@ namespace MarCmd
 			return -1;
 		}
 
-		int exitCode = interpreter.getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_32;
+		int64_t exitCode = interpreter.getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_64;
 
 		std::cout << "Module '" << inMod << "' exited with code " << exitCode << "." << std::endl;
 
