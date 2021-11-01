@@ -20,5 +20,3 @@ pushc.i64 : Y                               / Push argument 2
 jmp : CALC_SUM                              / Call function
 #label : AFTER_JUMP
 popc.i64 : $ec                              / Pop & copy return value
-
-exit

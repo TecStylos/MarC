@@ -25,11 +25,31 @@ namespace MarC
 	{
 		return m_code;
 	}
+	std::string InterpreterError::getCodeStr() const
+	{
+		switch (getCode())
+		{
+		case IntErrCode::Success: return "Success";
+		case IntErrCode::OpCodeUnknown: return "OpCode unknown";
+		case IntErrCode::OpCodeNotExecutable: return "OpCode not executable";
+		case IntErrCode::OpCodeNotImplemented: return "OpCode not implemented";
+		case IntErrCode::AbortViaExit: return "Abort via exit";
+		case IntErrCode::AbortViaEndOfCode: return "Abort via EndOfCode";
+		}
+
+		return "<unknown>";
+	}
 	bool InterpreterError::isOK() const
 	{
-		return
-			m_code == Code::Success ||
-			m_code == Code::AbortViaExit;
+		switch (m_code)
+		{
+		case Code::Success:
+		case Code::AbortViaExit:
+		case Code::AbortViaEndOfCode:
+			return true;
+		}
+
+		return false;
 	}
 
 	Interpreter::Interpreter(ExecutableInfoRef pExeInfo, uint64_t dynStackSize)
@@ -111,6 +131,11 @@ namespace MarC
 		return m_mem.registers[reg];
 	}
 
+	const BC_MemCell& Interpreter::getRegister(BC_MemRegister reg) const
+	{
+		return m_mem.registers[reg];
+	}
+
 	uint64_t Interpreter::nInsExecuted() const
 	{
 		return m_nInsExecuted;
@@ -138,6 +163,9 @@ namespace MarC
 
 	void Interpreter::execNext()
 	{
+		if (reachedEndOfCode())
+			throw InterpreterError(IntErrCode::AbortViaEndOfCode, "Reached end of executable code!");
+
 		const auto& ocx = readDataAndMove<BC_OpCodeEx>();
 
 		switch (ocx.opCode)
@@ -444,6 +472,16 @@ namespace MarC
 		auto& regFP = getRegister(BC_MEM_REG_FRAME_POINTER);
 		regSP.as_ADDR = regFP.as_ADDR;
 		virt_popStack(regFP, BC_DatatypeSize(BC_DT_U_64));
+	}
+
+	bool Interpreter::reachedEndOfCode() const
+	{
+		auto& cp = getRegister(BC_MEM_REG_CODE_POINTER);
+		auto addr = cp.as_ADDR.asCode.addr;
+		auto& mod = *m_pExeInfo->modules[cp.as_ADDR.asCode.page];
+		auto& code = *mod.codeMemory;
+
+		return addr >= code.size();
 	}
 
 	const InterpreterError& Interpreter::lastError() const

@@ -72,6 +72,9 @@ namespace MarCmd
 
 		std::cout << inMod << " exited with code " << exitCode << "." << std::endl;
 
+		if (flags.hasFlag(CmdFlags::Verbose))
+			std::cout << "Abort reason: '" << interpreter.lastError().getCodeStr() << "'" << std::endl;
+
 		return exitCode;
 	}
 

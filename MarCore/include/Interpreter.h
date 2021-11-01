@@ -15,6 +15,7 @@ namespace MarC
 			OpCodeNotExecutable,
 			OpCodeNotImplemented,
 			AbortViaExit,
+			AbortViaEndOfCode,
 		};
 	public:
 		InterpreterError() = default;
@@ -26,6 +27,7 @@ namespace MarC
 		const std::string& getText() const;
 		std::string getMessage() const;
 		Code getCode() const;
+		std::string getCodeStr() const;
 		bool isOK() const;
 	private:
 		Code m_code = Code::Success;
@@ -47,6 +49,7 @@ namespace MarC
 		BC_MemCell& hostMemCell(BC_MemAddress clientAddr, bool deref = false);
 	public:
 		BC_MemCell& getRegister(BC_MemRegister reg);
+		const BC_MemCell& getRegister(BC_MemRegister reg) const;
 	public:
 		uint64_t nInsExecuted() const;
 	private:
@@ -77,9 +80,9 @@ namespace MarC
 		void exec_insJumpGreaterThan(BC_OpCodeEx ocx);
 		void exec_insJumpLessEqual(BC_OpCodeEx ocx);
 		void exec_insJumpGreaterEqual(BC_OpCodeEx ocx);
-	  void exec_insAllocate(BC_OpCodeEx ocx);
-	  void exec_insFree(BC_OpCodeEx ocx);
-	  void exec_insCall(BC_OpCodeEx ocx);
+		void exec_insAllocate(BC_OpCodeEx ocx);
+		void exec_insFree(BC_OpCodeEx ocx);
+		void exec_insCall(BC_OpCodeEx ocx);
 		void exec_insReturn(BC_OpCodeEx ocx);
 		void exec_insExit(BC_OpCodeEx ocx);
 	private:
@@ -87,6 +90,8 @@ namespace MarC
 		void virt_popStack(BC_MemCell& mc, uint64_t nBytes);
 		void virt_pushFrame();
 		void virt_popFrame();
+	private:
+		bool reachedEndOfCode() const;
 	public:
 		const InterpreterError& lastError() const;
 	private:

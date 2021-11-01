@@ -26,5 +26,3 @@ free : @dest
 free : @src
 pop.addr
 pop.addr
-
-exit

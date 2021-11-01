@@ -2,5 +2,3 @@
 #manperm : single : "print"
 
 calx : std>>print : 0 : "Hello world!"
-
-exit

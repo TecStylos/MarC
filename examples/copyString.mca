@@ -13,5 +13,3 @@ pushc.addr : destBuff
     add.addr : src : 1
     add.addr : dest : 1
 jne.u8 : copyLoopBegin : @std>>reg>>accumulator : 0
-
-exit

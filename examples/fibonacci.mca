@@ -16,7 +16,3 @@
 #alias : N : 34
 
 call.i64 : FIBONACCI : i64.$ec : i64.N
-
-exit
-
-/execNext -> change unordered_map to switch-case
