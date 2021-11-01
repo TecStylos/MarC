@@ -511,7 +511,6 @@ namespace MarC
 		m_pModInfo->staticStack->resize(m_pModInfo->staticStack->size() + tc.cell.as_U_64);
 
 		addSymbol({ name, SymbolUsage::Address, mc });
-			return false;
 
 		return true;
 	}
