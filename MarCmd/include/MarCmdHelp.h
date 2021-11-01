@@ -20,5 +20,8 @@ namespace MarCmd
 		"  Exit behavior: (Default: Keeps MarCmd open when the exit code is non-zero.)\n"
 		"    --keeponexit      Keep MarCmd open after the execution has finished.\n"
 		"    --closeonexit     Close MarCmd after the execution has finished.\n"
+		"  Miscellaneous:\n"
+		"    --profile\n"
+		"    --debug\n"
 		;
 }

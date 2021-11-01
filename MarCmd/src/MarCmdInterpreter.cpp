@@ -48,7 +48,8 @@ namespace MarCmd
 			std::cout << "Linking the application..." << std::endl;
 		if (!linker.link())
 		{
-			std::cout << "An error occured while running the linker!" << std::endl;
+			std::cout << "An error occured while running the linker!" << std::endl
+				<< "  " << linker.lastError().getMessage() << std::endl;
 			return -1;
 		}
 

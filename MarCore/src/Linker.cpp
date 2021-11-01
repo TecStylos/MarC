@@ -2,6 +2,22 @@
 
 namespace MarC
 {
+	LinkerError::operator bool() const
+	{
+		return m_code != Code::Success;
+	}
+
+	const std::string& LinkerError::getText() const
+	{
+		return m_errText;
+	}
+
+	std::string LinkerError::getMessage() const
+	{
+		return
+			"ERROR\n  -> " + getText();
+	}
+
 	Linker::Linker()
 	{
 		m_pExeInfo = std::make_shared<ExecutableInfo>();
@@ -10,7 +26,7 @@ namespace MarC
 	bool Linker::addModule(ModuleInfoRef pModInfo)
 	{
 		if (hasModule(pModInfo->moduleName))
-			return false;
+			LINKER_RETURN_WITH_ERROR(LinkErrCode::ModuleAlreadyExisting, "Cannot add module '" + pModInfo->moduleName + "'! Module with same name already added!");
 
 		m_missingModules.erase(pModInfo->moduleName);
 
@@ -19,6 +35,7 @@ namespace MarC
 
 		copySymbols(pModInfo);
 		copyReqMods(pModInfo);
+
 		return true;
 	}
 
@@ -33,7 +50,7 @@ namespace MarC
 		update();
 
 		if (hasMissingModules())
-			return false; // Cannot link with missing modules
+			LINKER_RETURN_WITH_ERROR(LinkErrCode::MissingModules, "Cannot link with missing modules! (" + misModListStr() + ")");
 
 		if (!resolveSymbols())
 			return false;
@@ -61,16 +78,22 @@ namespace MarC
 		return m_missingModules;
 	}
 
-	void Linker::copySymbols()
+	bool Linker::copySymbols()
 	{
 		for (auto& mod : m_pExeInfo->modules)
-			copySymbols(mod);
+			if (!copySymbols(mod))
+				return false;
+
+		return true;
 	}
 
-	void Linker::copySymbols(ModuleInfoRef pModInfo)
+	bool Linker::copySymbols(ModuleInfoRef pModInfo)
 	{
 		for (auto& symbol : pModInfo->definedSymbols)
 		{
+			if (m_symbols.find(symbol) != m_symbols.end())
+				LINKER_RETURN_WITH_ERROR(LinkErrCode::SymbolAlreadyDefined, "A symbol with name '" + symbol.name + "' has already been defined!");
+
 			if (symbol.usage == SymbolUsage::Address &&
 				(
 					symbol.value.as_ADDR.base == BC_MEM_BASE_CODE_MEMORY ||
@@ -81,6 +104,8 @@ namespace MarC
 			m_symbols.insert(symbol);
 		}
 		pModInfo->definedSymbols.clear();
+
+		return true;
 	}
 
 	void Linker::copyReqMods()
@@ -122,6 +147,46 @@ namespace MarC
 				resolvedAll = false;
 		}
 
-		return resolvedAll;
+		if (!resolvedAll)
+			LINKER_RETURN_WITH_ERROR(LinkErrCode::UnresolvedSymbols, "Cannot resolve all symbols references! (" + unresSymRefsListStr() + ")")
+
+		return true;
+	}
+
+	std::string Linker::misModListStr() const
+	{
+		std::string out;
+		uint64_t count = 0;
+		for (auto& elem : m_missingModules)
+		{
+			out.append("'" + elem + "'");
+			if (++count < m_missingModules.size())
+				out.append(", ");
+		}
+		return out;
+	}
+
+	std::string Linker::unresSymRefsListStr() const
+	{
+		std::string out;
+		uint64_t modCount = 0;
+		for (auto& mod : m_pExeInfo->modules)
+		{
+			uint64_t symCount = 0;
+			for (auto& sym : mod->unresolvedSymbolRefs)
+			{
+				out.append("'" + sym.name + "'");
+				if (++symCount < mod->unresolvedSymbolRefs.size())
+					out.append(", ");
+			}
+			if (++modCount < m_pExeInfo->modules.size())
+				out.append(", ");
+		}
+		return out;
+	}
+
+	const LinkerError& Linker::lastError() const
+	{
+		return m_lastErr;
 	}
 }

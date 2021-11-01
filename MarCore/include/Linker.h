@@ -6,6 +6,37 @@
 
 namespace MarC
 {
+	class LinkerError
+	{
+	public:
+		enum class Code
+		{
+			Success = 0,
+			ModuleAlreadyExisting,
+			MissingModules,
+			SymbolAlreadyDefined,
+			UnresolvedSymbols,
+		};
+	public:
+		LinkerError() = default;
+		LinkerError(Code code, const std::string& errText, uint64_t sysErrLine, const std::string& sysErrFile)
+			: m_code(code), m_errText(errText), m_sysErrLine(sysErrLine), m_sysErrFile(sysErrFile)
+		{}
+	public:
+		operator bool() const;
+		const std::string& getText() const;
+		std::string getMessage() const;
+	private:
+		Code m_code = Code::Success;
+		std::string m_errText = "Success!";
+		uint64_t m_sysErrLine = 0;
+		std::string m_sysErrFile = "<unspecified>";
+	};
+
+	typedef LinkerError::Code LinkErrCode;
+
+	#define LINKER_RETURN_WITH_ERROR(errCode, errText) { m_lastErr = LinkerError(errCode, errText, __LINE__, __FILE__); return false; }
+
 	class Linker
 	{
 	public:
@@ -23,12 +54,18 @@ namespace MarC
 		const std::set<std::string>& getMissingModules() const;
 	private:
 		bool loadReqMods();
-		void copySymbols();
-		void copySymbols(ModuleInfoRef pModInfo);
+		bool copySymbols();
+		bool copySymbols(ModuleInfoRef pModInfo);
 		void copyReqMods();
 		void copyReqMods(ModuleInfoRef pModInfo);
 		bool resolveSymbols();
 	private:
+		std::string misModListStr() const;
+		std::string unresSymRefsListStr() const;
+	public:
+		const LinkerError& lastError() const;
+	private:
+		LinkerError m_lastErr;
 		ExecutableInfoRef m_pExeInfo;
 		std::set<Symbol> m_symbols;
 		std::set<std::string> m_missingModules;
