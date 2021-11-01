@@ -60,20 +60,20 @@ namespace MarCmd
 		timer.stop();
 		if (!intResult && !interpreter.lastError().isOK())
 		{
-			std::cout << std::endl << "  An error occured while interpreting the code!" << std::endl
+			std::cout << std::endl << "An error occured while interpreting the code!" << std::endl
 				<< "    " << interpreter.lastError().getMessage() << std::endl;
 			return -1;
 		}
 
-		if (flags.hasFlag(CmdFlags::Verbose))
-			std::cout << "Executed " << interpreter.nInsExecuted() << " instructions in " << timer.microseconds() << " microseconds" << std::endl;
-
 		int exitCode = interpreter.getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_32;
 
-		std::cout << inMod << " exited with code " << exitCode << "." << std::endl;
+		std::cout << "Module '" << inMod << "' exited with code " << exitCode << "." << std::endl;
 
 		if (flags.hasFlag(CmdFlags::Verbose))
-			std::cout << "Abort reason: '" << interpreter.lastError().getCodeStr() << "'" << std::endl;
+			std::cout << "  Reason: '" << interpreter.lastError().getCodeStr() << "'" << std::endl;
+
+		if (flags.hasFlag(CmdFlags::Verbose))
+			std::cout << "Executed " << interpreter.nInsExecuted() << " instructions in " << timer.microseconds() << " microseconds" << std::endl;
 
 		return exitCode;
 	}

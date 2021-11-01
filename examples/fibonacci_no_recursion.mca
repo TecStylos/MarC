@@ -1,0 +1,20 @@
+#func : FIBONACCI : i64.A : i64.N
+	mov.i64 : A : 0
+	pushc.i64 : 1
+	#alias : B : ~8
+	push.i64
+	#alias : TEMP : ~16
+
+	#label : LOOP_BEGIN
+		mov.i64 : TEMP : @B
+		add.i64 : B : @A
+		mov.i64 : A : @TEMP
+		sub.i64 : N : 1
+	jne.i64 : LOOP_BEGIN : @N : 0
+
+	return
+#end
+
+#alias : N : 34
+
+call.i64 : FIBONACCI : i64.$ec : i64.N
