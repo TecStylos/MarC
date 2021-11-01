@@ -94,6 +94,7 @@ namespace MarC
 		bool reachedEndOfCode() const;
 	public:
 		const InterpreterError& lastError() const;
+		void resetError();
 	private:
 		ExecutableInfoRef m_pExeInfo;
 		InterpreterMemory m_mem;

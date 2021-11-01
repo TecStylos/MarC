@@ -8,8 +8,9 @@
 
 namespace MarCmd
 {
-	struct Interpreter
+	class Interpreter
 	{
+	public:
 		static int run(const std::string& inFile, const std::set<std::string>& modDirs, Flags<CmdFlags> flags);
 	private:
 		static std::string modNameFromPath(const std::string& filepath);

@@ -8,6 +8,7 @@
 #include "MarCmdHelp.h"
 #include "MarCmdFlags.h"
 #include "MarCmdInterpreter.h"
+#include "MarCmdLiveAsmInterpreter.h"
 
 enum class ExitBehavior
 {
@@ -18,6 +19,16 @@ enum class ExitBehavior
 
 int main(int argc, const char** argv, const char** env)
 {
+	std::map<std::string, std::string> envMap;
+	for (int i = 0; env[i] != 0; ++i)
+	{
+		std::string envStr = env[i];
+		auto sep = envStr.find('=');
+		std::string key = envStr.substr(0, sep);
+		std::string val = envStr.substr(sep + 1);
+		envMap.insert({ key, val });
+	}
+
 	using Mode = MarCmd::Mode;
 
 	MarCmd::Flags<MarCmd::CmdFlags> flags;
@@ -152,8 +163,7 @@ int main(int argc, const char** argv, const char** env)
 		exitCode = -1;
 		break;
 	case Mode::LiveAsm:
-		std::cout << "Mode 'liveasm' has not been implemented yet!" << std::endl;
-		exitCode = -1;
+		exitCode = MarCmd::LiveAsmInterpreter::run(modDirs, flags);
 		break;
 	case Mode::Execute:
 		std::cout << "Mode 'execute' has not been implemented yet!" << std::endl;

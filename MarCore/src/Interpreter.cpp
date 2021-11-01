@@ -488,4 +488,9 @@ namespace MarC
 	{
 		return m_lastErr;
 	}
+
+	void Interpreter::resetError()
+	{
+		m_lastErr = InterpreterError();
+	}
 }

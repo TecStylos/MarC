@@ -49,7 +49,7 @@ namespace MarC
 	private:
 		;
 	private:
-		std::string m_asmCode;
+		const std::string& m_asmCode;
 		AsmTokenListRef m_pTokenList;
 		AsmTokenizerError m_lastErr;
 		uint64_t m_nextCharToTokenize = 0;
