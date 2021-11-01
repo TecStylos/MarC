@@ -47,6 +47,8 @@ namespace MarC
 
 	bool Linker::link()
 	{
+		resetError();
+
 		update();
 
 		if (hasMissingModules())
@@ -188,5 +190,10 @@ namespace MarC
 	const LinkerError& Linker::lastError() const
 	{
 		return m_lastErr;
+	}
+
+	void Linker::resetError()
+	{
+		m_lastErr = LinkerError();
 	}
 }

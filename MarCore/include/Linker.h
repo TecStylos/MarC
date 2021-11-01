@@ -64,6 +64,7 @@ namespace MarC
 		std::string unresSymRefsListStr() const;
 	public:
 		const LinkerError& lastError() const;
+		void resetError();
 	private:
 		LinkerError m_lastErr;
 		ExecutableInfoRef m_pExeInfo;

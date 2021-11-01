@@ -2,48 +2,106 @@
 
 #include <iostream>
 
-#include "MarCore.h"
-
 namespace MarCmd
 {
 	int LiveAsmInterpreter::run(const std::set<std::string>& modDirs, Flags<CmdFlags> flags)
 	{
-		std::string codeStr;
+		LiveAsmInterpreter lai(modDirs, flags);
+		return lai.run();
+	}
 
-		MarC::AsmTokenizer tokenizer(codeStr);
-		MarC::Compiler compiler(tokenizer.getTokenList(), "<cin>");
+	LiveAsmInterpreter::LiveAsmInterpreter(const std::set<std::string>& modDirs, Flags<CmdFlags> flags)
+		: m_modDirs(modDirs), m_flags(flags)
+	{
+		m_codeStr = "";
+		m_pTokenizer = std::make_shared<MarC::AsmTokenizer>(m_codeStr);
+		m_pCompiler = std::make_shared<MarC::Compiler>(m_pTokenizer->getTokenList(), "<cin>");
+		m_pLinker = std::make_shared<MarC::Linker>();
+		m_pInterpreter = std::make_shared<MarC::Interpreter>(m_pLinker->getExeInfo(), 4096);
+	
+		m_pLinker->addModule(m_pCompiler->getModuleInfo());
+	}
 
-		MarC::Linker linker;
-		linker.addModule(compiler.getModuleInfo());
-		MarC::Interpreter interpreter(linker.getExeInfo(), 4096);
-
+	int LiveAsmInterpreter::run()
+	{
 		std::cout << "MarCmd Live MarCembly Interpreter" << std::endl;
 
-		while (!interpreter.lastError())
+		while (!m_pInterpreter->lastError())
 		{
 			std::cout << " >>> ";
-			codeStr.append(readCodeFromConsole());
+			m_backupCodeStrSize = m_codeStr.size();
+			m_codeStr.append(readCodeFromConsole());
 
-			// TODO: Check for errors
+			if (!m_pTokenizer->tokenize())
+			{
+				recover(RecoverBegin::Tokenizer);
+				std::cout << "An error occured while running the tokenizer!" << std::endl
+					<< "  " << m_pTokenizer->lastError().getMessage() << std::endl;
+				continue;
+			}
 
-			tokenizer.tokenize();
-			compiler.compile();
+			if (!m_pCompiler->compile())
+			{
+				recover(RecoverBegin::Compiler);
+				std::cout << "An error occured while running the compiler!:" << std::endl
+					<< "  " << m_pCompiler->lastError().getMessage() << std::endl;
+				continue;
+			}
 
 			// TODO: Load/add required modules
 
-			linker.link();
-			if (!interpreter.interpret() && interpreter.lastError().getCode() == MarC::IntErrCode::AbortViaEndOfCode)
-				interpreter.resetError();
+			if (!m_pLinker->link())
+			{
+				recover(RecoverBegin::Linker);
+				std::cout << "An error occured while running the linker!" << std::endl
+					<< "  " << m_pLinker->lastError().getMessage() << std::endl;
+				continue;
+			}
+
+			if (!m_pInterpreter->interpret())
+			{
+				if (m_pInterpreter->lastError().getCode() == MarC::IntErrCode::AbortViaEndOfCode)
+				{
+					m_pInterpreter->resetError();
+				}
+				if (!m_pInterpreter->lastError().isOK())
+				{
+					recover(RecoverBegin::Interpreter);
+					std::cout << std::endl << "An error occured while interpreting the code!" << std::endl
+						<< "    " << m_pInterpreter->lastError().getMessage() << std::endl;
+				}
+			}
 		}
 
-		int64_t exitCode = interpreter.getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_64;
+		int64_t exitCode = m_pInterpreter->getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_64;
 
 		std::cout << "Module '<cin>' exited with code " << exitCode << "." << std::endl;
 
-		if (flags.hasFlag(CmdFlags::Verbose))
-			std::cout << "  Reason: '" << interpreter.lastError().getCodeStr() << "'" << std::endl;
+		if (m_flags.hasFlag(CmdFlags::Verbose))
+			std::cout << "  Reason: '" << m_pInterpreter->lastError().getCodeStr() << "'" << std::endl;
 
-		return interpreter.getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_32;
+		return m_pInterpreter->getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_32;
+	}
+
+	void LiveAsmInterpreter::recover(RecoverBegin rs)
+	{
+		switch (rs)
+		{
+		case RecoverBegin::Interpreter:
+			std::cout << "CANNOT RECOVER FROM INTERPRETER ERRORS! IT IS RECOMMENDED RESTARTING THE PROGRAM." << std::endl;
+			//__fallthrough
+		case RecoverBegin::Linker:
+			std::cout << "CANNOT RECOVER FROM LINKER ERRORS! IT IS RECOMMENDED RESTARTING THE PROGRAM." << std::endl;
+			//__fallthrough
+		case RecoverBegin::Compiler:
+			m_pTokenizer->recover();
+			//__fallthrough
+		case RecoverBegin::Tokenizer: 
+			m_codeStr.resize(m_backupCodeStrSize);
+			//__fallthrough
+		case RecoverBegin::None:
+			break;
+		}
 	}
 
 	std::string LiveAsmInterpreter::readCodeFromConsole()

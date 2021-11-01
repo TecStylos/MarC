@@ -39,8 +39,15 @@ namespace MarC
 		return m_lastErr;
 	}
 
+	void Compiler::resetError()
+	{
+		m_lastErr = CompilerError();
+	}
+
 	bool Compiler::compile()
 	{
+		resetError();
+
 		m_pModInfo->backup();
 
 		while (!isEndOfCode())

@@ -33,7 +33,7 @@ namespace MarCmd
 				}
 				if (pair.second.size() > 1)
 				{
-					std::cout << "Module '" << pair.first << "' is ambigious! Found " << pair.second.size() << " matching files!" << std::endl;
+					std::cout << "Module name '" << pair.first << "' is ambigious! Found " << pair.second.size() << " matching modules!" << std::endl;
 					for (auto& p : pair.second)
 						std::cout << "  " << p << std::endl;
 					return -1;

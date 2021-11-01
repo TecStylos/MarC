@@ -27,6 +27,8 @@ namespace MarC
 
 	bool AsmTokenizer::tokenize()
 	{
+		resetError();
+
 		enum class CurrAction
 		{
 			BeginToken,
@@ -45,6 +47,8 @@ namespace MarC
 
 		if (m_pTokenList->size() > 0 && (*m_pTokenList)[m_pTokenList->size() - 1].type == AsmToken::Type::END_OF_CODE)
 			m_pTokenList->pop_back();
+
+		backup();
 
 		try
 		{
@@ -219,6 +223,7 @@ namespace MarC
 		catch (const AsmTokenizerError& ate)
 		{
 			m_lastErr = ate;
+			recover();
 			return false;
 		}
 
@@ -237,5 +242,22 @@ namespace MarC
 	const AsmTokenizerError& AsmTokenizer::lastError() const
 	{
 		return m_lastErr;
+	}
+
+	void AsmTokenizer::resetError()
+	{
+		m_lastErr = AsmTokenizerError();
+	}
+
+	void AsmTokenizer::backup()
+	{
+		m_bud.tokenListSize = m_pTokenList->size();
+		m_bud.nextCharToTokenize = m_nextCharToTokenize;
+	}
+
+	void AsmTokenizer::recover()
+	{
+		m_pTokenList->resize(m_bud.tokenListSize);
+		m_nextCharToTokenize = m_bud.nextCharToTokenize;
 	}
 }

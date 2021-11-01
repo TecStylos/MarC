@@ -56,6 +56,7 @@ namespace MarC
 		ModuleInfoRef getModuleInfo();
 	public:
 		const CompilerError& lastError() const;
+		void resetError();
 	private:
 		bool compileStatement();
 		bool compileStatement(const std::string& statement);

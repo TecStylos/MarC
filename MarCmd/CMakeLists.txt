@@ -7,11 +7,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 add_executable(
 	MarCmd
-	
 	"src/EntryPoint.cpp"
-	"include/CmdArgParser.h"
 	"src/MarCmdInterpreter.cpp"
- "include/MarCmdFlags.h" "include/MarCmdLiveAsmInterpreter.h" "src/MarCmdLiveAsmInterpreter.cpp")
+	"src/MarCmdLiveAsmInterpreter.cpp"
+)
 
 target_include_directories(
 	MarCmd PUBLIC 

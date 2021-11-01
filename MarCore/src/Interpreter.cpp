@@ -60,7 +60,7 @@ namespace MarC
 
 	bool Interpreter::interpret(uint64_t nInstructions)
 	{
-		m_lastErr = InterpreterError();
+		resetError();
 
 		if (!nInstructions)
 			return true;
