@@ -108,7 +108,21 @@ namespace MarCmd
 	{
 		std::string line;
 		std::getline(std::cin, line);
-		line.push_back('\n');
-		return line;
+		if (line != "%")
+			return line + '\n';
+
+
+		std::cout << "     ";
+		std::getline(std::cin, line);
+		std::string code;
+		do
+		{
+			code.append(line);
+			code.push_back('\n');
+			std::cout << "     ";
+			std::getline(std::cin, line);
+		} while (line != "%");
+
+		return code;
 	}
 }
