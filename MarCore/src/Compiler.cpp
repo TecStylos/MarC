@@ -44,11 +44,23 @@ namespace MarC
 		m_lastErr = CompilerError();
 	}
 
+	void Compiler::backup()
+	{
+		m_pModInfo->backup();
+		m_backupNextTokenToCompile = m_nextTokenToCompile;
+	}
+	
+	void Compiler::recover()
+	{
+		m_pModInfo->recover();
+		m_nextTokenToCompile = m_backupNextTokenToCompile;
+	}
+
 	bool Compiler::compile()
 	{
 		resetError();
 
-		m_pModInfo->backup();
+		backup();
 
 		while (!isEndOfCode())
 			if (!compileStatement())
@@ -56,7 +68,7 @@ namespace MarC
 
 		if (m_lastErr)
 		{
-			m_pModInfo->recover();
+			recover();
 			return false;
 		}
 		return true;

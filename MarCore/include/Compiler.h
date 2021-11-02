@@ -57,6 +57,9 @@ namespace MarC
 	public:
 		const CompilerError& lastError() const;
 		void resetError();
+	public:
+		void backup();
+		void recover();
 	private:
 		bool compileStatement();
 		bool compileStatement(const std::string& statement);
@@ -117,6 +120,7 @@ namespace MarC
 		ModuleInfoRef m_pModInfo;
 		std::vector<std::string> m_scopeList;
 		uint64_t m_nextTokenToCompile = 0;
+		uint64_t m_backupNextTokenToCompile = 0;
 	private:
 		friend class VirtualAsmTokenList;
 	};
