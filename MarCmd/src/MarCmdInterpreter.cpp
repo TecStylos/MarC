@@ -105,7 +105,8 @@ namespace MarCmd
 
 	bool Interpreter::addModule(MarC::Linker& linker, const std::string& modPath, const std::string& modName, bool verbose)
 	{
-		MarC::AsmTokenizer tokenizer(readFile(modPath));
+		std::string codeStr = readFile(modPath);
+		MarC::AsmTokenizer tokenizer(codeStr);
 		MarC::Compiler compiler(tokenizer.getTokenList(), modName);
 
 		if (verbose)
