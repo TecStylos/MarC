@@ -128,27 +128,28 @@ namespace MarC
 	  bool operator<(const BC_MemAddress& other) const;
 	};
 
-	union BC_MemCell
+	struct BC_MemCell
 	{
-		int8_t as_I_8;
-		int16_t as_I_16;
-		int32_t as_I_32;
-		int64_t as_I_64;
-		uint8_t as_U_8;
-		uint16_t as_U_16;
-		uint32_t as_U_32;
-		uint64_t as_U_64;
-		float as_F_32;
-		double as_F_64;
-		bool as_BOOL;
-		BC_MemAddress as_ADDR;
+		union
+		{
+			int8_t as_I_8;
+			int16_t as_I_16;
+			int32_t as_I_32;
+			int64_t as_I_64;
+			uint8_t as_U_8;
+			uint16_t as_U_16;
+			uint32_t as_U_32;
+			uint64_t as_U_64;
+			float as_F_32;
+			double as_F_64;
+			BC_MemAddress as_ADDR;
+		};
 	public:
-		BC_MemCell() = default;
-		BC_MemCell(int64_t val) : as_I_64(val) {}
-		BC_MemCell(uint64_t val) : as_U_64(val) {}
-		BC_MemCell(float val) : as_F_32(val) {}
-		BC_MemCell(double val) : as_F_64(val) {}
-		BC_MemCell(bool val) : as_BOOL(val) {}
+		BC_MemCell() { as_U_64 = 0; };
+		//BC_MemCell(int64_t val) : as_I_64(val) {}
+		//BC_MemCell(uint64_t val) : as_U_64(val) {}
+		//BC_MemCell(float val) : as_F_32(val) {}
+		//BC_MemCell(double val) : as_F_64(val) {}
 		BC_MemCell(BC_MemAddress val) : as_ADDR(val) {}
 	};
 

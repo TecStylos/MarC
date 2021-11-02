@@ -41,11 +41,11 @@ namespace MarC
 
 	struct Symbol
 	{
-		std::string name;
+		std::string name = "<unnamed>";
 		SymbolUsage usage = SymbolUsage::Value;
 		BC_MemCell value;
 	public:
-		Symbol() : name("<unnamed>"), usage(SymbolUsage::Value), value(0ull) {}
+		Symbol() = default;
 		Symbol(const std::string& name) : Symbol() { this->name = name; }
 		Symbol(const std::string& name, SymbolUsage usage, BC_MemCell value) : name(name), usage(usage), value(value) {}
 	public:
