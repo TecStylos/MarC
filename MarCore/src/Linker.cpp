@@ -33,23 +33,30 @@ namespace MarC
 		m_pExeInfo->moduleNameMap.insert({ pModInfo->moduleName, m_pExeInfo->modules.size() });
 		m_pExeInfo->modules.push_back(pModInfo);
 
-		copySymbols(pModInfo);
+		if (!copySymbols(pModInfo))
+			return false;
+
 		copyReqMods(pModInfo);
 
 		return true;
 	}
 
-	void Linker::update()
+	bool Linker::update()
 	{
-		copySymbols();
+		if (!copySymbols())
+			return false;
+
 		copyReqMods();
+
+		return true;
 	}
 
 	bool Linker::link()
 	{
 		resetError();
 
-		update();
+		if (!update())
+			return false;
 
 		if (hasMissingModules())
 			LINKER_RETURN_WITH_ERROR(LinkErrCode::MissingModules, "Cannot link with missing modules! (" + misModListStr() + ")");

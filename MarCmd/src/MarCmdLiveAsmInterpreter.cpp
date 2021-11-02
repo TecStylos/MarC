@@ -92,6 +92,7 @@ namespace MarCmd
 			//__fallthrough
 		case RecoverBegin::Linker:
 			std::cout << "CANNOT RECOVER FROM LINKER ERRORS! IT IS RECOMMENDED RESTARTING THE PROGRAM." << std::endl;
+			m_pCompiler->recover();
 			//__fallthrough
 		case RecoverBegin::Compiler:
 			m_pTokenizer->recover();

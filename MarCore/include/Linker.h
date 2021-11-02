@@ -44,7 +44,7 @@ namespace MarC
 	public:
 		bool addModule(ModuleInfoRef pModInfo);
 	public:
-		void update();
+		bool update();
 		bool link();
 	public:
 		ExecutableInfoRef getExeInfo();
