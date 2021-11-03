@@ -2,9 +2,9 @@
     jle.i64 : END_RECURSION : @N : 1
 
     sub.i64 : N : 1
-    call.i64 : >>FIBONACCI : i64.RET : i64.@N
+    call.i64 : >>FIBONACCI : RET : i64.@N
     sub.i64 : N : 1
-    call.i64 : >>FIBONACCI : i64.$ac : i64.@N
+    call.i64 : >>FIBONACCI : $ac : i64.@N
     add.i64 : RET : @$ac
     return
 
@@ -15,4 +15,4 @@
 
 #alias : N : 34
 
-call.i64 : FIBONACCI : i64.$ec : i64.N
+call.i64 : FIBONACCI : $ec : i64.N

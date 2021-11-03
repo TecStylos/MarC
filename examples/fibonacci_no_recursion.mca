@@ -17,4 +17,4 @@
 
 #alias : N : 92
 
-call.i64 : FIBONACCI : i64.$ec : i64.N
+call.i64 : FIBONACCI : $ec : i64.N

@@ -169,9 +169,7 @@ namespace MarC
 		if (!removeNecessaryColon())
 			return false;
 
-		std::string retDtStr = nextToken().value;
-		if (nextToken().type != AsmToken::Type::Sep_Dot)
-			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
+		std::string retDtStr = BC_DatatypeToString(ocx.datatype);
 		std::string retVal = getArgAsString();
 
 		BC_FuncCallData fcd;

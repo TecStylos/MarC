@@ -41,7 +41,7 @@ namespace MarC
 		} currAction = CurrAction::BeginToken;
 
 		uint16_t line = 1;
-		uint16_t lineBegin = 0;
+		uint64_t lineBegin = 0;
 
 		AsmToken currToken(line, 1);
 
@@ -215,7 +215,7 @@ namespace MarC
 					{
 						m_pTokenList->push_back(currToken);
 					}
-					currToken = AsmToken(line, nextChar - lineBegin);
+					currToken = AsmToken(line, uint16_t(nextChar - lineBegin));
 					currAction = CurrAction::BeginToken;
 				}
 			}
