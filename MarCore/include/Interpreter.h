@@ -40,7 +40,7 @@ namespace MarC
 	{
 		static constexpr uint64_t RunTillEOC = -1; // Run until the interpreter reaches the end of code.
 	public:
-		Interpreter(ExecutableInfoRef pExeInfo, uint64_t dynStackSize);
+		Interpreter(ExecutableInfoRef pExeInfo, uint64_t defDynStackSize = 512);
 	public:
 		bool interpret(uint64_t nInstructinos = RunTillEOC);
 	public:

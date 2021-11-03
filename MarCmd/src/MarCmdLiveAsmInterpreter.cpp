@@ -18,7 +18,7 @@ namespace MarCmd
 		m_pTokenizer = std::make_shared<MarC::AsmTokenizer>(m_codeStr);
 		m_pCompiler = std::make_shared<MarC::Compiler>(m_pTokenizer->getTokenList(), "<cin>");
 		m_pLinker = std::make_shared<MarC::Linker>();
-		m_pInterpreter = std::make_shared<MarC::Interpreter>(m_pLinker->getExeInfo(), 4096);
+		m_pInterpreter = std::make_shared<MarC::Interpreter>(m_pLinker->getExeInfo());
 	
 		m_pLinker->addModule(m_pCompiler->getModuleInfo());
 	}

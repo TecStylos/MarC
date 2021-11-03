@@ -14,7 +14,7 @@ namespace MarCmd
 		Timer timer;
 
 		MarC::Linker linker;
-		MarC::Interpreter interpreter(linker.getExeInfo(), 4096);
+		MarC::Interpreter interpreter(linker.getExeInfo());
 
 		if (!addModule(linker, inFile, inMod, flags.hasFlag(CmdFlags::Verbose)))
 			return -1;
@@ -75,7 +75,7 @@ namespace MarCmd
 		if (flags.hasFlag(CmdFlags::Verbose))
 			std::cout << "Executed " << interpreter.nInsExecuted() << " instructions in " << timer.microseconds() << " microseconds" << std::endl;
 
-		return exitCode;
+		return (int)exitCode;
 	}
 
 	std::string Interpreter::modNameFromPath(const std::string& filepath)

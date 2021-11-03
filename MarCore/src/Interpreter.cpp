@@ -52,10 +52,10 @@ namespace MarC
 		return false;
 	}
 
-	Interpreter::Interpreter(ExecutableInfoRef pExeInfo, uint64_t dynStackSize)
+	Interpreter::Interpreter(ExecutableInfoRef pExeInfo, uint64_t defDynStackSize)
 		: m_pExeInfo(pExeInfo)
 	{
-		initMemory(dynStackSize);
+		initMemory(defDynStackSize);
 	}
 
 	bool Interpreter::interpret(uint64_t nInstructions)
@@ -439,6 +439,9 @@ namespace MarC
 	void Interpreter::virt_pushStack(const BC_MemCell& mc, uint64_t nBytes)
 	{
 		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
+
+		if (m_mem.dynamicStack->size() < regSP.as_ADDR.addr + nBytes)
+			m_mem.dynamicStack->resize(m_mem.dynamicStack->size() * 2);
 		
 		auto dest = hostAddress(regSP.as_ADDR, false);
 
