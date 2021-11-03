@@ -276,6 +276,10 @@ namespace MarC
 			if (!generateTypeCellFPRelative(tc))
 				return false;
 			break;
+		case AsmToken::Type::Op_DT_Size:
+			if (!generateTypeCellDTSize(tc))
+				return false;
+			break;
 		case AsmToken::Type::Name:
 			if (!generateTypeCellName(tc))
 				return false;
@@ -307,15 +311,41 @@ namespace MarC
 
 	bool Compiler::generateTypeCellFPRelative(TypeCell& tc)
 	{
-		if (nextToken().type != AsmToken::Type::Integer)
-			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Integer, currToken());
+		if (nextToken().type == AsmToken::Type::Op_DT_Size)
+		{
+			if (!generateTypeCellDTSize(tc))
+				return false;
 
-		uint64_t offset = std::stoull(positiveString(currToken().value));
+			auto base = BC_MEM_BASE_DYN_FRAME_ADD; // TODO: Add support for BC_MEM_BASE_DYN_FRAME_SUB
 
-		bool isNegative = isNegativeString(currToken().value);
-		auto base = isNegative ? BC_MEM_BASE_DYN_FRAME_SUB : BC_MEM_BASE_DYN_FRAME_ADD;
+			tc.cell.as_ADDR = BC_MemAddress(base, tc.cell.as_U_64);
 
-		tc.cell.as_ADDR = BC_MemAddress(base, offset);
+			return true;
+		}
+
+		if (currToken().type == AsmToken::Type::Integer)
+		{
+			uint64_t offset = std::stoull(positiveString(currToken().value));
+
+			bool isNegative = isNegativeString(currToken().value);
+			auto base = isNegative ? BC_MEM_BASE_DYN_FRAME_SUB : BC_MEM_BASE_DYN_FRAME_ADD;
+
+			tc.cell.as_ADDR = BC_MemAddress(base, offset);
+
+			return true;
+		}
+
+		COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Op_DT_Size' or 'Integer'! Got '" + AsmTokenTypeToString(currToken().type) + "' with value '" + currToken().value + "'!");
+	}
+
+	bool Compiler::generateTypeCellDTSize(TypeCell& tc)
+	{
+		if (nextToken().type != AsmToken::Type::Name)
+			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+
+		tc.cell.as_U_64 = BC_DatatypeSize(BC_DatatypeFromString(currToken().value));
+		if (tc.cell.as_U_64 == 0)
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Unable to convert name '" + currToken().value + "' to datatype!");
 
 		return true;
 	}

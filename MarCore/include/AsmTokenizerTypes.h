@@ -19,6 +19,7 @@ namespace MarC
 			Sep_Newline,
 			Op_Deref,
 			Op_FP_Relative,
+			Op_DT_Size,
 			Op_Register,
 			Op_Directive,
 			Name,

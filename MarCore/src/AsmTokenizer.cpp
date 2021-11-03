@@ -93,6 +93,11 @@ namespace MarC
 						currToken.value = "~";
 						currAction = CurrAction::EndToken;
 						break;
+					case '^':
+						currToken.type = AsmToken::Type::Op_DT_Size;
+						currToken.value = "^";
+						currAction = CurrAction::EndToken;
+						break;
 					case '$':
 						currToken.type = AsmToken::Type::Op_Register;
 						currToken.value = "$";

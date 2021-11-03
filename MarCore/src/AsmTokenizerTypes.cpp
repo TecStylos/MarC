@@ -14,6 +14,7 @@ namespace MarC
 			{ AsmToken::Type::Sep_Newline,    "Sep_Newline" },
 			{ AsmToken::Type::Op_Deref,       "Op_Deref" },
 			{ AsmToken::Type::Op_FP_Relative, "Op_FP_Relative" },
+			{ AsmToken::Type::Op_DT_Size,     "Op_DT_Size" },
 			{ AsmToken::Type::Op_Register,    "Op_Register" },
 			{ AsmToken::Type::Op_Directive,   "Op_Directive" },
 			{ AsmToken::Type::Name,           "Name" },

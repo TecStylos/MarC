@@ -74,6 +74,7 @@ namespace MarC
 		bool generateTypeCell(TypeCell& tc, bool& getsDereferenced);
 		bool generateTypeCellRegister(TypeCell& tc);
 		bool generateTypeCellFPRelative(TypeCell& tc);
+		bool generateTypeCellDTSize(TypeCell& tc);
 		bool generateTypeCellName(TypeCell& tc);
 		bool generateTypeCellString(TypeCell& tc);
 		bool generateTypeCellFloat(TypeCell& tc, bool getsDereferenced);
