@@ -5,7 +5,7 @@ push.addr
 #alias : src : ~0
 alloc : src : BUFFSIZE
 push.addr
-#alias : dest : ~8
+#alias : dest : ~^i64
 alloc : dest : BUFFSIZE
 
         / Loop init

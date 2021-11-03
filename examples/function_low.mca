@@ -2,7 +2,7 @@ jmp : CALC_SUM>>SCOPE_END
 #scope : CALC_SUM
     #alias : RET : ~-24
     #alias : X : ~+0
-    #alias : Y : ~+8
+    #alias : Y : ~^i64
     mov.i64 : RET : @X
     add.i64 : RET : @Y
     popf                                    / Pop frame

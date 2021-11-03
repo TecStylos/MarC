@@ -5,7 +5,7 @@ pushc.addr : "Hello world!"
 pushc.addr : destBuff
 
 #alias : src : ~0
-#alias : dest : ~8
+#alias : dest : ~^addr
 
 #label : copyLoopBegin
 	drf : std>>reg>>accumulator : @src

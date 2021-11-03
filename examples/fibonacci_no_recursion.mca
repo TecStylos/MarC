@@ -1,7 +1,7 @@
 #func.i64 : FIBONACCI : A : i64.N
 	mov.i64 : A : 0
 	pushc.i64 : 1
-	#alias : B : ~8
+	#alias : B : ~^i64
 	push.i64
 	#alias : TEMP : ~16
 
