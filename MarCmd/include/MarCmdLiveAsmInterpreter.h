@@ -28,6 +28,8 @@ namespace MarCmd
 		};
 		void recover(RecoverBegin rs);
 		static std::string readCodeFromConsole();
+		static std::string readFile(const std::string& filepath);
+		static bool addModule(MarC::Linker& linker, const std::string& modPath, const std::string& modName, bool verbose);
 	private:
 		const std::set<std::string>& m_modDirs;
 		Flags<CmdFlags> m_flags;

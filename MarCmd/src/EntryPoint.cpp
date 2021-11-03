@@ -35,7 +35,7 @@ int main(int argc, const char** argv, const char** env)
 	Mode mode = Mode::None;
 	std::string inFile = "";
 	std::string outFile = "";
-	std::set<std::string> modDirs = {};
+	std::set<std::string> modDirs = { std::filesystem::current_path().string() };
 	std::string runFile = "";
 	ExitBehavior exitBehavior = ExitBehavior::CloseWhenZero;
 

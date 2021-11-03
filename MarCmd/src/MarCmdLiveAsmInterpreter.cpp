@@ -1,6 +1,7 @@
 #include "MarCmdLiveAsmInterpreter.h"
 
 #include <iostream>
+#include <fstream>
 
 namespace MarCmd
 {
@@ -48,7 +49,50 @@ namespace MarCmd
 				continue;
 			}
 
-			// TODO: Load/add required modules
+			if (!m_pLinker->update())
+			{
+				std::cout << "An error occured while updating the linker information:" << std::endl
+					<< "  " << m_pLinker->lastError().getMessage() << std::endl;
+				continue;
+			}
+
+			bool foundAllMissingModules = true;
+
+			while (foundAllMissingModules && m_pLinker->hasMissingModules())
+			{
+				auto& misMods = m_pLinker->getMissingModules();
+				auto modPaths = MarC::locateModules(m_modDirs, misMods);
+
+				for (auto& pair : modPaths)
+				{
+					if (pair.second.empty())
+					{
+						std::cout << "Unable to find module '" << pair.first << "'!" << std::endl;
+						foundAllMissingModules = false;
+						break;
+					}
+					if (pair.second.size() > 1)
+					{
+						std::cout << "Module name '" << pair.first << "' is ambigious! Found " << pair.second.size() << " matching modules!" << std::endl;
+						for (auto& p : pair.second)
+							std::cout << "  " << p << std::endl;
+						foundAllMissingModules = false;
+						break;
+					}
+
+					if (!addModule(*m_pLinker, pair.second[0], pair.first, m_flags.hasFlag(CmdFlags::Verbose)))
+					{
+						foundAllMissingModules = false;
+						break;
+					}
+				}
+			}
+
+			if (!foundAllMissingModules)
+			{
+				recover(RecoverBegin::Linker);
+				continue;
+			}
 
 			if (!m_pLinker->link())
 			{
@@ -113,17 +157,72 @@ namespace MarCmd
 			return line + '\n';
 
 
-		std::cout << "     ";
+		std::cout << "   > ";
 		std::getline(std::cin, line);
 		std::string code;
 		do
 		{
 			code.append(line);
 			code.push_back('\n');
-			std::cout << "     ";
+			std::cout << "   > ";
 			std::getline(std::cin, line);
 		} while (line != "%");
 
 		return code;
+	}
+
+	std::string LiveAsmInterpreter::readFile(const std::string& filepath)
+	{
+		std::ifstream f(filepath);
+		if (!f.good())
+			return "";
+
+		std::string result;
+		while (!f.eof())
+		{
+			std::string line;
+			std::getline(f, line);
+			result.append(line);
+			result.push_back('\n');
+		}
+		if (!result.empty())
+			result.pop_back();
+
+		return result;
+	}
+
+	bool LiveAsmInterpreter::addModule(MarC::Linker& linker, const std::string& modPath, const std::string& modName, bool verbose)
+	{
+		std::string codeStr = readFile(modPath);
+		MarC::AsmTokenizer tokenizer(codeStr);
+		MarC::Compiler compiler(tokenizer.getTokenList(), modName);
+
+		if (verbose)
+			std::cout << "Tokenizing module '" << modName << "'..." << std::endl;
+		if (!tokenizer.tokenize())
+		{
+			std::cout << "An error occured while running the tokenizer!" << std::endl
+				<< "  " << tokenizer.lastError().getMessage() << std::endl;
+			return false;
+		}
+
+		if (verbose)
+			std::cout << "Compiling module '" << modName << "'..." << std::endl;
+		if (!compiler.compile())
+		{
+			std::cout << "An error occured while running the compiler!:" << std::endl
+				<< "  " << compiler.lastError().getMessage() << std::endl;
+			return false;
+		}
+
+		if (verbose)
+			std::cout << "Adding module '" << compiler.getModuleInfo()->moduleName << "' to the linker..." << std::endl;
+		if (!linker.addModule(compiler.getModuleInfo()))
+		{
+			std::cout << "An error occurd while adding the module '" << compiler.getModuleInfo()->moduleName << "' to the linker!" << std::endl;
+			return false;
+		}
+
+		return true;
 	}
 }
