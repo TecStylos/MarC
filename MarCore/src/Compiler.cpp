@@ -574,13 +574,23 @@ namespace MarC
 
 	bool Compiler::compileDirFunction()
 	{
-		if (!removeNecessaryColon())
-			return false;
+		if (nextToken().type != AsmToken::Type::Sep_Dot)
+			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 
 		if (nextToken().type != AsmToken::Type::Name)
 			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
+		BC_Datatype dt = BC_DatatypeFromString(currToken().value);
+		if (dt == BC_DT_NONE || dt == BC_DT_UNKNOWN)
+			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
+
+		if (!removeNecessaryColon())
+			return false;
+
 		{
+			if (nextToken().type != AsmToken::Type::Name)
+				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+
 			std::string funcName = currToken().value;
 
 			if (!compileStatement("jmp : " + funcName + ">>SCOPE_END"))
@@ -592,16 +602,6 @@ namespace MarC
 			return false;
 
 		{
-			if (nextToken().type != AsmToken::Type::Name)
-				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
-
-			BC_Datatype dt = BC_DatatypeFromString(currToken().value);
-			if (dt == BC_DT_NONE || dt == BC_DT_UNKNOWN)
-				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
-
-			if (nextToken().type != AsmToken::Type::Sep_Dot)
-				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
-
 			if (nextToken().type != AsmToken::Type::Name)
 				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 

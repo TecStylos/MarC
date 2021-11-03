@@ -1,4 +1,4 @@
-#func : CALC_SUM : i64.RET : i64.X : i64.Y
+#func.i64 : CALC_SUM : RET : i64.X : i64.Y
     mov.i64 : RET : @X
     add.i64 : RET : @Y
     return

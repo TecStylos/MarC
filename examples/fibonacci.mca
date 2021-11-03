@@ -1,4 +1,4 @@
-#func : FIBONACCI : i64.RET : i64.N
+#func.i64 : FIBONACCI : RET : i64.N
     jle.i64 : END_RECURSION : @N : 1
 
     sub.i64 : N : 1
