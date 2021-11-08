@@ -732,7 +732,7 @@ namespace MarC
 		if (!compileStatement("#alias : " + name + " : \"" + getScopedName(name) + "\""))
 			return false;
 
-		m_pModInfo->requiresExtension = true;
+		m_pModInfo->extensionRequired = true;
 
 		return true;
 	}

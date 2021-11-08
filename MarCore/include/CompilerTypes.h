@@ -71,7 +71,8 @@ namespace MarC
 	public:
 		std::string moduleName;
 		std::vector<std::string> requiredModules;
-		bool requiresExtension;
+		bool extensionRequired;
+		bool extensionLoaded;
 		MemoryRef codeMemory;
 		MemoryRef staticStack;
 		std::vector<Symbol> definedSymbols;
@@ -85,7 +86,8 @@ namespace MarC
 		struct BackupData
 		{
 			uint64_t requiredModulesSize = 0;
-			bool requiresExtension = false;
+			bool extensionRequired = false;
+			bool extensionLoaded = false;
 			uint64_t codeMemorySize = 0;
 			uint64_t staticStackSize = 0;
 			uint64_t definedSymbolsSize = 0;

@@ -6,7 +6,7 @@
 #include "ConvertInPlace.h"
 
 #include "SearchAlgorithms.h"
-
+#include "ExtensionLocator.h"
 #include "ExternalFunction.h"
 
 namespace MarC
@@ -67,18 +67,19 @@ namespace MarC
 		if (!nInstructions)
 			return true;
 
-		while (nInstructions--)
+		try
 		{
-			try
+			loadMissingExtensions();
+
+			while (nInstructions--)
 			{
 				execNext();
 				++m_nInsExecuted;
 			}
-			catch (const InterpreterError& ie)
-			{
-				m_lastErr = ie;
-				break;
-			}
+		}
+		catch (const InterpreterError& ie)
+		{
+			m_lastErr = ie;
 		}
 
 		return !lastError();
@@ -154,6 +155,28 @@ namespace MarC
 		getRegister(BC_MEM_REG_ACCUMULATOR).as_U_64 = 0;
 		getRegister(BC_MEM_REG_TEMPORARY_DATA).as_U_64 = 0;
 		getRegister(BC_MEM_REG_EXIT_CODE).as_U_64 = 0;
+	}
+
+	void Interpreter::loadMissingExtensions()
+	{
+		std::set<std::string> missingExtensions;
+
+		for (auto& pModInfo : m_pExeInfo->modules)
+			if (pModInfo->extensionRequired && !pModInfo->extensionLoaded)
+				missingExtensions.insert(pModInfo->moduleName);
+
+		auto results = locateExtensions(m_extDirs, missingExtensions);
+
+		for (auto& result : results)
+		{
+			if (result.second.empty())
+				throw InterpreterError(IntErrCode::ExtensionLoadFailure, "Extension '" + result.first + "' could not be found!");
+			if (result.second.size() > 1)
+				throw InterpreterError(IntErrCode::ExtensionLoadFailure, "Multiple extensions with name '" + result.first + "' found!");
+
+			if (!PluS::PluginManager::get().loadPlugin(*result.second.begin()))
+				throw InterpreterError(IntErrCode::ExtensionLoadFailure, "Unable to load extension '" + result.first + "'!");
+		}
 	}
 
 	BC_MemCell& Interpreter::readMemCellAndMove(BC_Datatype dt, bool deref)
@@ -398,13 +421,12 @@ namespace MarC
 		BC_MemAddress funcNameAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg.get(0)).as_ADDR;
 		std::string funcName = &hostObject<char>(funcNameAddr);
 
-		throw InterpreterError(IntErrCode::OpCodeNotImplemented, "The opCode 'calx' has not been implemented yet!");
-
-		auto& func = m_externalFunctions.find(funcNameAddr);
-		if (func == m_externalFunctions.end())
+		auto& func = m_extFuncs.find(funcNameAddr);
+		if (func == m_extFuncs.end())
 		{
 			auto uid = PluS::PluginManager::get().findFeature(funcName);
-			ExternalFunction* exFunc = PluS::PluginManager::get().createFeature<ExternalFunction>(uid);
+			ExternalFunctionPtr exFunc = PluS::PluginManager::get().createFeature<ExternalFunction>(uid);
+			m_extFuncs.insert({ funcNameAddr, exFunc });
 		}
 
 		// Locate function implementation

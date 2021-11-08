@@ -21,7 +21,8 @@ namespace MarC
 	ModuleInfo::ModuleInfo()
 	{
 		moduleName = "<unnamed>";
-		requiresExtension = false;
+		extensionRequired = false;
+		extensionLoaded = false;
 		codeMemory = std::make_shared<Memory>();
 		staticStack = std::make_shared<Memory>();
 	}
@@ -29,7 +30,8 @@ namespace MarC
 	void ModuleInfo::backup()
 	{
 		bud.requiredModulesSize = requiredModules.size();
-		bud.requiresExtension = requiresExtension;
+		bud.extensionRequired = extensionRequired;
+		bud.extensionLoaded = extensionLoaded;
 		bud.codeMemorySize = codeMemory->size();
 		bud.staticStackSize = staticStack->size();
 		bud.definedSymbolsSize = definedSymbols.size();
@@ -39,7 +41,8 @@ namespace MarC
 	void ModuleInfo::recover()
 	{
 		requiredModules.resize(bud.requiredModulesSize);
-		requiresExtension = bud.requiresExtension;
+		extensionRequired = bud.extensionRequired;
+		extensionLoaded = bud.extensionLoaded;
 		codeMemory->resize(bud.codeMemorySize);
 		staticStack->resize(bud.staticStackSize);
 		definedSymbols.resize(bud.definedSymbolsSize);

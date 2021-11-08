@@ -1,9 +1,9 @@
 #pragma once
 
-#include <PluS.h>
-
 #include "InterpreterMemory.h"
 #include "LinkerOutput.h"
+
+#include "ExternalFunction.h"
 
 namespace MarC
 {
@@ -18,6 +18,7 @@ namespace MarC
 			OpCodeNotImplemented,
 			AbortViaExit,
 			AbortViaEndOfCode,
+			ExtensionLoadFailure,
 		};
 	public:
 		InterpreterError() = default;
@@ -56,6 +57,7 @@ namespace MarC
 		uint64_t nInsExecuted() const;
 	private:
 		void initMemory(uint64_t dynStackSize);
+		void loadMissingExtensions();
 		template <typename T> T& readDataAndMove();
 		template <typename T> T& readDataAndMove(uint64_t shift);
 		BC_MemCell& readMemCellAndMove(BC_Datatype dt, bool deref);
@@ -101,7 +103,8 @@ namespace MarC
 	private:
 		ExecutableInfoRef m_pExeInfo;
 		InterpreterMemory m_mem;
-		std::map<BC_MemAddress, PluS::FeaturePtr> m_externalFunctions;
+		std::map<BC_MemAddress, ExternalFunctionPtr> m_extFuncs;
+		std::set<std::string> m_extDirs;
 		InterpreterError m_lastErr;
 		uint64_t m_nInsExecuted = 0;
 	};
