@@ -202,6 +202,8 @@ namespace MarC
 			case BC_OC_ALLOCATE: Interpreter::exec_insAllocate(ocx); break;
 			case BC_OC_FREE: Interpreter::exec_insFree(ocx); break;
 		  
+			case BC_OC_CALL_EXTERN: Interpreter::exec_insCallExtern(ocx); break;
+
 			case BC_OC_CALL: Interpreter::exec_insCall(ocx); break;
 			case BC_OC_RETURN: Interpreter::exec_insReturn(ocx); break;
 
@@ -388,6 +390,15 @@ namespace MarC
 		if (it != m_mem.dynMemMap.end())
 			free(it->second);
 		m_mem.dynMemMap.erase(addr);
+	}
+	void Interpreter::exec_insCallExtern(BC_OpCodeEx ocx)
+	{
+		BC_MemAddress funcNameAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg.get(0)).as_ADDR;
+		std::string funcName = &hostObject<char>(funcNameAddr);
+
+		throw InterpreterError(IntErrCode::OpCodeNotImplemented, "The opCode 'calx' has not been implemented yet!");
+
+		//TODO: Call function from extension matching the funcName
 	}
 	void Interpreter::exec_insCall(BC_OpCodeEx ocx)
 	{

@@ -19,7 +19,7 @@ namespace MarC
 		BC_DT_U_32,
 		BC_DT_U_64,
 		BC_DT_F_32,
-		BC_DT_F_64
+		BC_DT_F_64,
 	};
 	enum BC_OpCode : uint8_t
 	{
@@ -56,6 +56,8 @@ namespace MarC
 		BC_OC_ALLOCATE,
 		BC_OC_FREE,
 		
+		BC_OC_CALL_EXTERN,
+
 		BC_OC_CALL,
 		BC_OC_RETURN,
 
@@ -111,14 +113,14 @@ namespace MarC
 		{
 			struct
 			{
-				uint64_t addr : 61;
-				uint64_t base : 3;
+				uint64_t addr : 60;
+				uint64_t base : 4;
 			};
 			struct
 			{
-				uint64_t addr : 56;
+				uint64_t addr : 55;
 				uint64_t page : 5;
-				uint64_t base : 3;
+				uint64_t base : 4;
 			} asCode;
 		};
 	public:
@@ -146,10 +148,6 @@ namespace MarC
 		};
 	public:
 		BC_MemCell() { as_U_64 = 0; };
-		//BC_MemCell(int64_t val) : as_I_64(val) {}
-		//BC_MemCell(uint64_t val) : as_U_64(val) {}
-		//BC_MemCell(float val) : as_F_32(val) {}
-		//BC_MemCell(double val) : as_F_64(val) {}
 		BC_MemCell(BC_MemAddress val) : as_ADDR(val) {}
 	};
 

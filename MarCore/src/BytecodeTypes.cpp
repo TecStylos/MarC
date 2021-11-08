@@ -94,6 +94,8 @@ namespace MarC
 
 			{ "alloc",   BC_OC_ALLOCATE },
 			{ "free",    BC_OC_FREE },
+
+			{ "calx",    BC_OC_CALL_EXTERN },
 			
 			{ "call",    BC_OC_CALL },
 			{ "return",  BC_OC_RETURN },
@@ -141,6 +143,8 @@ namespace MarC
 			{ BC_OC_ALLOCATE, "alloc" },
 			{ BC_OC_FREE, "free" },
 			
+			{ BC_OC_CALL_EXTERN, "calx" },
+
 			{ BC_OC_CALL, "call" },
 			{ BC_OC_RETURN, "return" },
 
@@ -178,18 +182,18 @@ namespace MarC
 	std::string BC_DatatypeToString(BC_Datatype dt)
 	{
 		static const std::map<BC_Datatype, std::string> dtMap = {
-			{ BC_DT_NONE, ""      },
-			{ BC_DT_I_8,  "i8"    },
-			{ BC_DT_I_16, "i16"   },
-			{ BC_DT_I_32, "i32"   },
-			{ BC_DT_I_64, "i64"   },
-			{ BC_DT_U_8,  "u8"    },
-			{ BC_DT_U_16, "u16"   },
-			{ BC_DT_U_32, "u32"   },
-			{ BC_DT_U_64, "u64"   },
-			{ BC_DT_F_32, "f32"   },
-			{ BC_DT_F_64, "f64"   },
-			{ BC_DT_U_64, "addr"  },
+			{ BC_DT_NONE,    ""      },
+			{ BC_DT_I_8,     "i8"    },
+			{ BC_DT_I_16,    "i16"   },
+			{ BC_DT_I_32,    "i32"   },
+			{ BC_DT_I_64,    "i64"   },
+			{ BC_DT_U_8,     "u8"    },
+			{ BC_DT_U_16,    "u16"   },
+			{ BC_DT_U_32,    "u32"   },
+			{ BC_DT_U_64,    "u64"   },
+			{ BC_DT_F_32,    "f32"   },
+			{ BC_DT_F_64,    "f64"   },
+			{ BC_DT_U_64,    "addr"  },
 		};
 
 		auto it = dtMap.find(dt);

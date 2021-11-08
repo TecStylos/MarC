@@ -12,6 +12,8 @@ namespace MarC
 		if (value == "scope") return DirectiveID::Scope;
 		if (value == "end") return DirectiveID::End;
 		if (value == "func") return DirectiveID::Function;
+		if (value == "funx") return DirectiveID::FunctionExtern;
+		if (value == "string") return DirectiveID::StaticString;
 
 		return DirectiveID::Unknown;
 	}
@@ -19,6 +21,7 @@ namespace MarC
 	ModuleInfo::ModuleInfo()
 	{
 		moduleName = "<unnamed>";
+		requiresExtension = false;
 		codeMemory = std::make_shared<Memory>();
 		staticStack = std::make_shared<Memory>();
 	}
@@ -26,6 +29,7 @@ namespace MarC
 	void ModuleInfo::backup()
 	{
 		bud.requiredModulesSize = requiredModules.size();
+		bud.requiresExtension = requiresExtension;
 		bud.codeMemorySize = codeMemory->size();
 		bud.staticStackSize = staticStack->size();
 		bud.definedSymbolsSize = definedSymbols.size();
@@ -35,6 +39,7 @@ namespace MarC
 	void ModuleInfo::recover()
 	{
 		requiredModules.resize(bud.requiredModulesSize);
+		requiresExtension = bud.requiresExtension;
 		codeMemory->resize(bud.codeMemorySize);
 		staticStack->resize(bud.staticStackSize);
 		definedSymbols.resize(bud.definedSymbolsSize);

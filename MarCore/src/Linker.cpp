@@ -43,10 +43,9 @@ namespace MarC
 
 	bool Linker::update()
 	{
-		if (!copySymbols())
-			return false;
-
-		copyReqMods();
+		for (auto& mod : m_pExeInfo->modules)
+			if (!update(mod))
+				return false;
 
 		return true;
 	}
@@ -87,15 +86,6 @@ namespace MarC
 		return m_missingModules;
 	}
 
-	bool Linker::copySymbols()
-	{
-		for (auto& mod : m_pExeInfo->modules)
-			if (!copySymbols(mod))
-				return false;
-
-		return true;
-	}
-
 	bool Linker::copySymbols(ModuleInfoRef pModInfo)
 	{
 		for (auto& symbol : pModInfo->definedSymbols)
@@ -117,12 +107,6 @@ namespace MarC
 		return true;
 	}
 
-	void Linker::copyReqMods()
-	{
-		for (auto& mod : m_pExeInfo->modules)
-			copyReqMods(mod);
-	}
-
 	void Linker::copyReqMods(ModuleInfoRef pModInfo)
 	{
 		for (auto& reqmod : pModInfo->requiredModules)
@@ -131,6 +115,13 @@ namespace MarC
 				m_missingModules.insert(reqmod);
 		}
 		pModInfo->requiredModules.clear();
+	}
+
+	bool Linker::update(ModuleInfoRef pModInfo)
+	{
+		if (!copySymbols(pModInfo))
+			return false;
+		copyReqMods(pModInfo);
 	}
 
 	bool Linker::resolveSymbols()

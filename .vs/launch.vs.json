@@ -7,12 +7,11 @@
       "project": "CMakeLists.txt",
       "projectTarget": "MarCmd.exe (MarCmd\\MarCmd.exe)",
       "name": "MarCmd.exe (MarCmd\\MarCmd.exe)",
-      "currentDir": "${workspaceRoot}/",
+      "currentDir": "${workspaceRoot}",
       "args": [
         "--verbose",
         "--closeonexit",
-        "--liveasm"
-        //"examples/fibonacci_no_recursion.mca"
+        "examples/HelloWorld.mca"
       ]
     }
   ]

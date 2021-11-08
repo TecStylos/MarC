@@ -39,7 +39,7 @@ namespace MarCmd
 					return -1;
 				}
 
-				if (!addModule(linker, pair.second[0], pair.first, flags.hasFlag(CmdFlags::Verbose)))
+				if (!addModule(linker, *pair.second.begin(), pair.first, flags.hasFlag(CmdFlags::Verbose)))
 					return -1;
 			}
 		}

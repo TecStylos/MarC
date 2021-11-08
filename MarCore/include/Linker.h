@@ -53,10 +53,8 @@ namespace MarC
 		bool hasMissingModules() const;
 		const std::set<std::string>& getMissingModules() const;
 	private:
-		bool loadReqMods();
-		bool copySymbols();
+		bool update(ModuleInfoRef pModInfo);
 		bool copySymbols(ModuleInfoRef pModInfo);
-		void copyReqMods();
 		void copyReqMods(ModuleInfoRef pModInfo);
 		bool resolveSymbols();
 	private:

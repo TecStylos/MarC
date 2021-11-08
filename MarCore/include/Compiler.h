@@ -67,6 +67,7 @@ namespace MarC
 	private:
 		bool compileSpecializedInstruction(BC_OpCodeEx& ocx);
 		bool compileSpecCall(BC_OpCodeEx& ocx);
+		bool compileSpecCallExtern(BC_OpCodeEx& ocx);
 	private:
 		bool compileArgument(BC_OpCodeEx& ocx, const InsArgument& arg);
 		bool compileArgAddress(BC_OpCodeEx& ocx, const InsArgument& arg);
@@ -89,6 +90,8 @@ namespace MarC
 		bool compileDirScope();
 		bool compileDirEnd();
 		bool compileDirFunction();
+		bool compileDirFunctionExtern();
+		bool compileDirStaticString();
 	private:
 		bool removeNecessaryColon();
 	private:
@@ -115,6 +118,8 @@ namespace MarC
 	private:
 		uint64_t currCodeOffset() const;
 		BC_MemAddress currCodeAddr() const;
+		uint64_t currStaticStackOffset() const;
+		BC_MemAddress currStaticStackAddr() const;
 	private:
 		AsmTokenListRef m_pTokenList;
 		CompilerError m_lastErr;

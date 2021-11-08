@@ -70,7 +70,9 @@ namespace MarC
 
 		{ BC_OC_ALLOCATE, false, { { InsArgType::Address }, { InsArgType::TypedValue, BC_DT_U_64 } } },
 		{ BC_OC_FREE, false, { { InsArgType::Address } } },
-		
+
+		{ BC_OC_CALL_EXTERN, true, {}, true },
+
 		{ BC_OC_CALL, true, {}, true },
 		{ BC_OC_RETURN, false, {} },
 

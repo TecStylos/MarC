@@ -7,4 +7,6 @@
         #alias : codePointer : $cp
         #alias : exitCode : $ec
     #end / reg
+
+    #funx : prints
 #end / std

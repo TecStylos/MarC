@@ -150,6 +150,8 @@ namespace MarC
 		{
 		case BC_OC_CALL:
 			return compileSpecCall(ocx);
+		case BC_OC_CALL_EXTERN:
+			return compileSpecCallExtern(ocx);
 		}
 
 		COMPILER_RETURN_WITH_ERROR(CompErrCode::InternalError, "OpCode '" + BC_OpCodeToString(ocx.opCode) + "' is not specialized!");
@@ -197,6 +199,49 @@ namespace MarC
 
 		if (!compileStatement("popc." + retDtStr + " : " + retVal))
 			return false;
+
+		return true;
+	}
+
+	bool Compiler::compileSpecCallExtern(BC_OpCodeEx& ocx)
+	{
+		if (!removeNecessaryColon())
+			return false;
+
+		uint64_t opCodeBegin = currCodeOffset();
+		pushCode(ocx);
+
+		if (!compileArgAddress(ocx, { InsArgType::Address, BC_DT_NONE, 0 }))
+			return false;
+
+		if (!removeNecessaryColon())
+			return false;
+
+		std::string retDtStr = BC_DatatypeToString(ocx.datatype);
+		std::string retVal = getArgAsString();
+
+		BC_FuncCallData fcd;
+		uint64_t fcdBegin = currCodeOffset();
+		pushCode(fcd);
+		while (nextToken().type == AsmToken::Type::Sep_Colon)
+		{
+			if (nextToken().type != AsmToken::Type::Name)
+				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+			BC_Datatype argDt = BC_DatatypeFromString(currToken().value);
+			fcd.argType.set(fcd.nArgs, argDt);
+
+			if (nextToken().type != AsmToken::Type::Sep_Dot)
+				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
+
+			if (!compileArgument(ocx, { InsArgType::TypedValue, argDt, (uint64_t)1 + fcd.nArgs }))
+				return false;
+
+			++fcd.nArgs;
+		}
+		prevToken();
+
+		writeCode(ocx, opCodeBegin);
+		writeCode(fcd, fcdBegin);
 
 		return true;
 	}
@@ -368,7 +413,7 @@ namespace MarC
 		if (tc.datatype != BC_DT_U_64)
 			COMPILER_RETURN_WITH_ERROR(CompErrCode::DatatypeMismatch, "Cannot use string in instruction with datatype '" + BC_DatatypeToString(tc.datatype) + "'!");
 
-		tc.cell.as_ADDR = BC_MemAddress(BC_MEM_BASE_STATIC_STACK, 0, m_pModInfo->staticStack->size());
+		tc.cell.as_ADDR = currStaticStackAddr();
 		m_pModInfo->staticStack->push(currToken().value.c_str(), currToken().value.size() + 1);
 
 		return true;
@@ -455,6 +500,10 @@ namespace MarC
 			return compileDirEnd();
 		case DirectiveID::Function:
 			return compileDirFunction();
+		case DirectiveID::FunctionExtern:
+			return compileDirFunctionExtern();
+		case DirectiveID::StaticString:
+			return compileDirStaticString();
 		}
 
 		COMPILER_RETURN_WITH_ERROR(CompErrCode::UnknownDirectiveID, "Unknown directive '" + currToken().value + "'!");
@@ -554,7 +603,7 @@ namespace MarC
 			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Usage of the deref operator is not allowed in the static directive!");
 
 		BC_MemCell mc;
-		mc.as_ADDR = BC_MemAddress(BC_MEM_BASE_STATIC_STACK, 0, m_pModInfo->staticStack->size());
+		mc.as_ADDR = currStaticStackAddr();
 		m_pModInfo->staticStack->resize(m_pModInfo->staticStack->size() + tc.cell.as_U_64);
 
 		addSymbol({ name, SymbolUsage::Address, mc });
@@ -667,6 +716,34 @@ namespace MarC
 
 		prevToken();
 
+		return true;
+	}
+
+	bool Compiler::compileDirFunctionExtern()
+	{
+		if (!removeNecessaryColon())
+			return false;
+
+		if (nextToken().type != AsmToken::Type::Name)
+			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+
+		std::string name = currToken().value;
+
+		if (!compileStatement("#alias : " + name + " : \"" + getScopedName(name) + "\""))
+			return false;
+
+		m_pModInfo->requiresExtension = true;
+
+		return true;
+	}
+
+	bool Compiler::compileDirStaticString()
+	{
+		addSymbol({ currToken().value, SymbolUsage::Address, currCodeAddr() });
+		if (!compileStatement("#alias : "))
+			return false;
+		if (!compileStatement("#static : "))
+			return false;
 		return true;
 	}
 
@@ -785,6 +862,16 @@ namespace MarC
 	BC_MemAddress Compiler::currCodeAddr() const
 	{
 		return BC_MemAddress(BC_MEM_BASE_CODE_MEMORY, 0, currCodeOffset());
+	}
+
+	uint64_t Compiler::currStaticStackOffset() const
+	{
+		return m_pModInfo->staticStack->size();
+	}
+
+	BC_MemAddress Compiler::currStaticStackAddr() const
+	{
+		return BC_MemAddress(BC_MEM_BASE_STATIC_STACK, currStaticStackOffset());
 	}
 
 	bool isNegativeString(const std::string& value)

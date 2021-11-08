@@ -1,4 +1,4 @@
 #reqmod : "std"
-#manperm : single : "print"
+/ #manperm : single : "prints"
 
-calx.i8 : std>>print : 0 : addr."Hello world!"
+calx.i8 : std>>prints : 0 : addr."Hello world!"

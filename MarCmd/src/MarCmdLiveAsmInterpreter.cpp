@@ -80,7 +80,7 @@ namespace MarCmd
 						break;
 					}
 
-					if (!addModule(*m_pLinker, pair.second[0], pair.first, m_flags.hasFlag(CmdFlags::Verbose)))
+					if (!addModule(*m_pLinker, *pair.second.begin(), pair.first, m_flags.hasFlag(CmdFlags::Verbose)))
 					{
 						foundAllMissingModules = false;
 						break;
@@ -141,7 +141,7 @@ namespace MarCmd
 		case RecoverBegin::Compiler:
 			m_pTokenizer->recover();
 			//__fallthrough
-		case RecoverBegin::Tokenizer: 
+		case RecoverBegin::Tokenizer:
 			m_codeStr.resize(m_backupCodeStrSize);
 			//__fallthrough
 		case RecoverBegin::None:
@@ -153,9 +153,19 @@ namespace MarCmd
 	{
 		std::string line;
 		std::getline(std::cin, line);
-		if (line != "%")
+		if (line.empty() || line[0] != '%')
 			return line + '\n';
 
+		if (line.size() > 1)
+		{
+			if (line.find("%moddir ") == 0)
+			{
+				line = line.substr(strlen("%moddir "));
+				m_modDirs.insert(line);
+				return "";
+			}
+			std::cout << "Unknown live interpreter command!" << std::endl;
+		}
 
 		std::cout << "   > ";
 		std::getline(std::cin, line);
