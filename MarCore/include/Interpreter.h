@@ -1,5 +1,7 @@
 #pragma once
 
+#include <PluS.h>
+
 #include "InterpreterMemory.h"
 #include "LinkerOutput.h"
 
@@ -99,6 +101,7 @@ namespace MarC
 	private:
 		ExecutableInfoRef m_pExeInfo;
 		InterpreterMemory m_mem;
+		std::map<BC_MemAddress, PluS::FeaturePtr> m_externalFunctions;
 		InterpreterError m_lastErr;
 		uint64_t m_nInsExecuted = 0;
 	};

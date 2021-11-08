@@ -7,6 +7,8 @@
 
 #include "SearchAlgorithms.h"
 
+#include "ExternalFunction.h"
+
 namespace MarC
 {
 	InterpreterError::operator bool() const
@@ -398,7 +400,18 @@ namespace MarC
 
 		throw InterpreterError(IntErrCode::OpCodeNotImplemented, "The opCode 'calx' has not been implemented yet!");
 
-		//TODO: Call function from extension matching the funcName
+		auto& func = m_externalFunctions.find(funcNameAddr);
+		if (func == m_externalFunctions.end())
+		{
+			auto uid = PluS::PluginManager::get().findFeature(funcName);
+			ExternalFunction* exFunc = PluS::PluginManager::get().createFeature<ExternalFunction>(uid);
+		}
+
+		// Locate function implementation
+
+		// Retrieve all parameters from code memory
+
+		// Call external function
 	}
 	void Interpreter::exec_insCall(BC_OpCodeEx ocx)
 	{

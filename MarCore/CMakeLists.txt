@@ -25,8 +25,21 @@ add_library(
 target_include_directories(
 	MarCore PUBLIC
 	"include"
+	"../vendor/PluS/PluS/include"
 )
 
+if (WIN32)
+	target_compile_definitions(
+		MarCore PUBLIC 
+		PLUS_PLATFORM_WINDOWS
+	)
+elseif (UNIX)
+	target_compile_definitions(
+		MarCore PUBLIC 
+		PLUS_PLATFORM_UNIX
+	)
+endif()
+
 if (MSVC) 
-  target_link_options(MarCore PRIVATE $<$<CONFIG:RELWITHDEBINFO>:/PROFILE>)
+	target_link_options(MarCore PRIVATE $<$<CONFIG:RELWITHDEBINFO>:/PROFILE>)
 endif()
