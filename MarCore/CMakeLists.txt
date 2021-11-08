@@ -28,6 +28,11 @@ target_include_directories(
 	"../vendor/PluS/PluS/include"
 )
 
+target_link_libraries(
+	MarCore PUBLIC 
+	PluS
+)
+
 if (WIN32)
 	target_compile_definitions(
 		MarCore PUBLIC 
