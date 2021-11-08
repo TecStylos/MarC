@@ -25,29 +25,45 @@ namespace MarC
 
 	bool Linker::addModule(ModuleInfoRef pModInfo)
 	{
-		if (hasModule(pModInfo->moduleName))
-			LINKER_RETURN_WITH_ERROR(LinkErrCode::ModuleAlreadyExisting, "Cannot add module '" + pModInfo->moduleName + "'! Module with same name already added!");
+		resetError();
 
-		m_missingModules.erase(pModInfo->moduleName);
+		try
+		{
+			if (hasModule(pModInfo->moduleName))
+				throw LinkerError(LinkErrCode::ModuleAlreadyExisting, "Cannot add module '" + pModInfo->moduleName + "'! Module with same name already added!");
 
-		m_pExeInfo->moduleNameMap.insert({ pModInfo->moduleName, m_pExeInfo->modules.size() });
-		m_pExeInfo->modules.push_back(pModInfo);
+			m_missingModules.erase(pModInfo->moduleName);
 
-		if (!copySymbols(pModInfo))
-			return false;
+			m_pExeInfo->moduleNameMap.insert({ pModInfo->moduleName, m_pExeInfo->modules.size() });
+			m_pExeInfo->modules.push_back(pModInfo);
 
-		copyReqMods(pModInfo);
+			copyReqMods(pModInfo);
 
-		return true;
+			copySymbols(pModInfo);
+		}
+		catch (LinkerError& err)
+		{
+			m_lastErr = err;
+		}
+
+		return !m_lastErr;
 	}
 
 	bool Linker::update()
 	{
-		for (auto& mod : m_pExeInfo->modules)
-			if (!update(mod))
-				return false;
+		resetError();
 
-		return true;
+		try
+		{
+			for (auto& pModInfo : m_pExeInfo->modules)
+				update(pModInfo);
+		}
+		catch (LinkerError& err)
+		{
+			m_lastErr = err;
+		}
+
+		return !m_lastErr;
 	}
 
 	bool Linker::link()
@@ -57,13 +73,19 @@ namespace MarC
 		if (!update())
 			return false;
 
-		if (hasMissingModules())
-			LINKER_RETURN_WITH_ERROR(LinkErrCode::MissingModules, "Cannot link with missing modules! (" + misModListStr() + ")");
+		try
+		{
+			if (hasMissingModules())
+				throw LinkerError(LinkErrCode::MissingModules, "Cannot link with missing modules! (" + misModListStr() + ")");
 
-		if (!resolveSymbols())
-			return false;
+			resolveSymbols();
+		}
+		catch (LinkerError& err)
+		{
+			m_lastErr = err;
+		}
 
-		return true;
+		return !m_lastErr;
 	}
 
 	ExecutableInfoRef Linker::getExeInfo()
@@ -86,12 +108,12 @@ namespace MarC
 		return m_missingModules;
 	}
 
-	bool Linker::copySymbols(ModuleInfoRef pModInfo)
+	void Linker::copySymbols(ModuleInfoRef pModInfo)
 	{
 		for (auto& symbol : pModInfo->definedSymbols)
 		{
 			if (m_symbols.find(symbol) != m_symbols.end())
-				LINKER_RETURN_WITH_ERROR(LinkErrCode::SymbolAlreadyDefined, "A symbol with name '" + symbol.name + "' has already been defined!");
+				throw LinkerError(LinkErrCode::SymbolAlreadyDefined, "A symbol with name '" + symbol.name + "' has already been defined!");
 
 			if (symbol.usage == SymbolUsage::Address &&
 				(
@@ -103,8 +125,6 @@ namespace MarC
 			m_symbols.insert(symbol);
 		}
 		pModInfo->definedSymbols.clear();
-
-		return true;
 	}
 
 	void Linker::copyReqMods(ModuleInfoRef pModInfo)
@@ -117,14 +137,13 @@ namespace MarC
 		pModInfo->requiredModules.clear();
 	}
 
-	bool Linker::update(ModuleInfoRef pModInfo)
+	void Linker::update(ModuleInfoRef pModInfo)
 	{
-		if (!copySymbols(pModInfo))
-			return false;
+		copySymbols(pModInfo);
 		copyReqMods(pModInfo);
 	}
 
-	bool Linker::resolveSymbols()
+	void Linker::resolveSymbols()
 	{
 		bool resolvedAll = true;
 
@@ -148,9 +167,7 @@ namespace MarC
 		}
 
 		if (!resolvedAll)
-			LINKER_RETURN_WITH_ERROR(LinkErrCode::UnresolvedSymbols, "Cannot resolve all symbols references! (" + unresSymRefsListStr() + ")")
-
-		return true;
+			throw LinkerError(LinkErrCode::UnresolvedSymbols, "Cannot resolve all symbols references! (" + unresSymRefsListStr() + ")");
 	}
 
 	std::string Linker::misModListStr() const

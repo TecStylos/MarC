@@ -19,18 +19,16 @@ namespace MarC
 		};
 	public:
 		LinkerError() = default;
-		LinkerError(Code code, const std::string& errText, uint64_t sysErrLine, const std::string& sysErrFile)
-			: m_code(code), m_errText(errText), m_sysErrLine(sysErrLine), m_sysErrFile(sysErrFile)
+		LinkerError(Code code, const std::string& errText)
+			: m_code(code), m_errText(errText)
 		{}
 	public:
-		operator bool() const;
+		explicit operator bool() const;
 		const std::string& getText() const;
 		std::string getMessage() const;
 	private:
 		Code m_code = Code::Success;
 		std::string m_errText = "Success!";
-		uint64_t m_sysErrLine = 0;
-		std::string m_sysErrFile = "<unspecified>";
 	};
 
 	typedef LinkerError::Code LinkErrCode;
@@ -53,10 +51,10 @@ namespace MarC
 		bool hasMissingModules() const;
 		const std::set<std::string>& getMissingModules() const;
 	private:
-		bool update(ModuleInfoRef pModInfo);
-		bool copySymbols(ModuleInfoRef pModInfo);
+		void update(ModuleInfoRef pModInfo);
+		void copySymbols(ModuleInfoRef pModInfo);
 		void copyReqMods(ModuleInfoRef pModInfo);
-		bool resolveSymbols();
+		void resolveSymbols();
 	private:
 		std::string misModListStr() const;
 		std::string unresSymRefsListStr() const;
