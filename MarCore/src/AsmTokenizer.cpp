@@ -152,6 +152,30 @@ namespace MarC
 				case CurrAction::TokenizeStringEscapeSequence:
 					switch (c)
 					{
+					case 'a':
+						currToken.value.push_back('\a');
+						break;
+					case 'b':
+						currToken.value.push_back('\b');
+						break;
+					case 't':
+						currToken.value.push_back('\t');
+						break;
+					case 'n':
+						currToken.value.push_back('\n');
+						break;
+					case 'v':
+						currToken.value.push_back('\v');
+						break;
+					case 'f':
+						currToken.value.push_back('\f');
+						break;
+					case 'r':
+						currToken.value.push_back('\r');
+						break;
+					case 'e':
+						currToken.value.push_back('\033');
+						break;
 					case '\'':
 						currToken.value.push_back(c);
 						break;
@@ -160,27 +184,6 @@ namespace MarC
 						break;
 					case '\\':
 						currToken.value.push_back(c);
-						break;
-					case 'a':
-						currToken.value.push_back('\a');
-						break;
-					case 'b':
-						currToken.value.push_back('\b');
-						break;
-					case 'f':
-						currToken.value.push_back('\f');
-						break;
-					case 'n':
-						currToken.value.push_back('\n');
-						break;
-					case 'r':
-						currToken.value.push_back('\r');
-						break;
-					case 't':
-						currToken.value.push_back('\t');
-						break;
-					case 'v':
-						currToken.value.push_back('\v');
 						break;
 					default:
 						ASM_TOKENIZER_THROW_ERROR(AsmTokErrCode::UnexpectedChar, std::string("Unexpected char '") + c + "' for escape sequence!");
