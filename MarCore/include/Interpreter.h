@@ -45,6 +45,8 @@ namespace MarC
 	public:
 		Interpreter(ExecutableInfoRef pExeInfo, uint64_t defDynStackSize = 512);
 	public:
+		void addExtDir(const std::string& path);
+	public:
 		bool interpret(uint64_t nInstructinos = RunTillEOC);
 	public:
 		void* hostAddress(BC_MemAddress clientAddr, bool deref = false);

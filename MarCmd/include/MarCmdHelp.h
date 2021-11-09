@@ -17,6 +17,7 @@ namespace MarCmd
 		"    -i [filepath]    Input file.\n"
 		"    -o [filepath]    Output file.\n"
 		"    -m [directory]   Directory to search for modules in (Can be used multiple times).\n"
+		"    -e [directory]   Directory to search for extensions in (Can be used multiple times).\n"
 		"  Exit behavior: (Default: Keeps MarCmd open when the exit code is non-zero.)\n"
 		"    --keeponexit      Keep MarCmd open after the execution has finished.\n"
 		"    --closeonexit     Close MarCmd after the execution has finished.\n"

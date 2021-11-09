@@ -36,6 +36,7 @@ int main(int argc, const char** argv, const char** env)
 	std::string inFile = "";
 	std::string outFile = "";
 	std::set<std::string> modDirs = { std::filesystem::current_path().string() };
+	std::set<std::string> extDirs = { std::filesystem::current_path().string() };
 	std::string runFile = "";
 	ExitBehavior exitBehavior = ExitBehavior::CloseWhenZero;
 
@@ -115,6 +116,16 @@ int main(int argc, const char** argv, const char** env)
 			modDirs.insert(cmd.getNext());
 			continue;
 		}
+		if (elem == "-e")
+		{
+			if (!cmd.hasNext())
+			{
+				std::cout << "Missing extension directory!" << std::endl;
+				return -1;
+			}
+			extDirs.insert(cmd.getNext());
+			continue;
+		}
 		if (elem == "--keeponexit")
 		{
 			exitBehavior = ExitBehavior::KeepOnExit;
@@ -163,7 +174,7 @@ int main(int argc, const char** argv, const char** env)
 		exitCode = -1;
 		break;
 	case Mode::LiveAsm:
-		exitCode = MarCmd::LiveAsmInterpreter::run(modDirs, flags);
+		exitCode = MarCmd::LiveAsmInterpreter::run(modDirs, extDirs, flags);
 		break;
 	case Mode::Execute:
 		std::cout << "Mode 'execute' has not been implemented yet!" << std::endl;
@@ -182,7 +193,7 @@ int main(int argc, const char** argv, const char** env)
 		exitCode =  -1;
 		break;
 	case Mode::Interpret:
-		exitCode = MarCmd::Interpreter::run(runFile, modDirs, flags);
+		exitCode = MarCmd::Interpreter::run(runFile, modDirs, extDirs, flags);
 		break;
 	}
 

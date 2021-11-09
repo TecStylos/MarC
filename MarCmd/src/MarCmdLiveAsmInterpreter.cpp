@@ -5,13 +5,13 @@
 
 namespace MarCmd
 {
-	int LiveAsmInterpreter::run(const std::set<std::string>& modDirs, Flags<CmdFlags> flags)
+	int LiveAsmInterpreter::run(const std::set<std::string>& modDirs, const std::set<std::string>& extDirs, Flags<CmdFlags> flags)
 	{
-		LiveAsmInterpreter lai(modDirs, flags);
+		LiveAsmInterpreter lai(modDirs, extDirs, flags);
 		return lai.run();
 	}
 
-	LiveAsmInterpreter::LiveAsmInterpreter(const std::set<std::string>& modDirs, Flags<CmdFlags> flags)
+	LiveAsmInterpreter::LiveAsmInterpreter(const std::set<std::string>& modDirs, const std::set<std::string>& extDirs, Flags<CmdFlags> flags)
 		: m_modDirs(modDirs), m_flags(flags)
 	{
 		m_codeStr = "";
@@ -19,6 +19,9 @@ namespace MarCmd
 		m_pCompiler = std::make_shared<MarC::Compiler>(m_pTokenizer->getTokenList(), "<cin>");
 		m_pLinker = std::make_shared<MarC::Linker>();
 		m_pInterpreter = std::make_shared<MarC::Interpreter>(m_pLinker->getExeInfo());
+
+		for (auto& entry : extDirs)
+			m_pInterpreter->addExtDir(entry);
 	
 		m_pLinker->addModule(m_pCompiler->getModuleInfo());
 	}

@@ -7,7 +7,7 @@
 
 namespace MarCmd
 {
-	int Interpreter::run(const std::string& inFile, const std::set<std::string>& modDirs, Flags<CmdFlags> flags)
+	int Interpreter::run(const std::string& inFile, const std::set<std::string>& modDirs, const std::set<std::string>& extDirs, Flags<CmdFlags> flags)
 	{
 		std::string inMod = modNameFromPath(inFile);
 
@@ -15,6 +15,9 @@ namespace MarCmd
 
 		MarC::Linker linker;
 		MarC::Interpreter interpreter(linker.getExeInfo());
+
+		for (auto& entry : extDirs)
+			interpreter.addExtDir(entry);
 
 		if (!addModule(linker, inFile, inMod, flags.hasFlag(CmdFlags::Verbose)))
 			return -1;

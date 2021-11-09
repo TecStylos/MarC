@@ -12,9 +12,9 @@ namespace MarCmd
 	class LiveAsmInterpreter
 	{
 	public:
-		static int run(const std::set<std::string>& modDirs, Flags<CmdFlags> flags);
+		static int run(const std::set<std::string>& modDirs, const std::set<std::string>& extDirs, Flags<CmdFlags> flags);
 	private:
-		LiveAsmInterpreter(const std::set<std::string>& modDirs, Flags<CmdFlags> flags);
+		LiveAsmInterpreter(const std::set<std::string>& modDirs, const std::set<std::string>& extDirs, Flags<CmdFlags> flags);
 	private:
 		int run();
 	private:

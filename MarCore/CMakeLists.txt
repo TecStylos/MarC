@@ -20,7 +20,7 @@ add_library(
 	"src/ModuleLocator.cpp"
 	"src/VirtualAsmTokenList.cpp"
 	"src/AsmTokenizerTypes.cpp"
- "include/ExtensionLocator.h" "src/ExtensionLocator.cpp")
+	"src/ExtensionLocator.cpp")
 
 target_include_directories(
 	MarCore PUBLIC

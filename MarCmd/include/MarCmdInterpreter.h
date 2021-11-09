@@ -11,7 +11,7 @@ namespace MarCmd
 	class Interpreter
 	{
 	public:
-		static int run(const std::string& inFile, const std::set<std::string>& modDirs, Flags<CmdFlags> flags);
+		static int run(const std::string& inFile, const std::set<std::string>& modDirs, const std::set<std::string>& extDirs, Flags<CmdFlags> flags);
 	private:
 		static std::string modNameFromPath(const std::string& filepath);
 		static std::string readFile(const std::string& filepath);

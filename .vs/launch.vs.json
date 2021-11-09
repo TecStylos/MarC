@@ -13,6 +13,13 @@
         "--closeonexit",
         "examples/HelloWorld.mca"
       ]
+    },
+    {
+      "type": "dll",
+      "exe": "",
+      "project": "CMakeLists.txt",
+      "projectTarget": "std.dll (stdlib\\std\\std.dll)",
+      "name": "std.dll (stdlib\\std\\std.dll)"
     }
   ]
 }

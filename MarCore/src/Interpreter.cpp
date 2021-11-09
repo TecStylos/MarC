@@ -60,6 +60,11 @@ namespace MarC
 		initMemory(defDynStackSize);
 	}
 
+	void Interpreter::addExtDir(const std::string& path)
+	{
+		m_extDirs.insert(path);
+	}
+
 	bool Interpreter::interpret(uint64_t nInstructions)
 	{
 		resetError();
@@ -69,8 +74,6 @@ namespace MarC
 
 		try
 		{
-			loadMissingExtensions();
-
 			while (nInstructions--)
 			{
 				execNext();
@@ -421,19 +424,20 @@ namespace MarC
 		BC_MemAddress funcNameAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg.get(0)).as_ADDR;
 		std::string funcName = &hostObject<char>(funcNameAddr);
 
-		auto& func = m_extFuncs.find(funcNameAddr);
-		if (func == m_extFuncs.end())
+		auto funcIt = m_extFuncs.find(funcNameAddr);
+		if (funcIt == m_extFuncs.end())
 		{
+			loadMissingExtensions();
+
 			auto uid = PluS::PluginManager::get().findFeature(funcName);
 			ExternalFunctionPtr exFunc = PluS::PluginManager::get().createFeature<ExternalFunction>(uid);
-			m_extFuncs.insert({ funcNameAddr, exFunc });
+			funcIt = m_extFuncs.insert({ funcNameAddr, exFunc }).first;
 		}
-
-		// Locate function implementation
 
 		// Retrieve all parameters from code memory
 
-		// Call external function
+		auto& func = funcIt->second;
+		func->call();
 	}
 	void Interpreter::exec_insCall(BC_OpCodeEx ocx)
 	{
