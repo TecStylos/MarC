@@ -25,11 +25,18 @@ target_link_libraries(
 
 if (MSVC) 
   target_link_options(MarCmd PRIVATE $<$<CONFIG:RELWITHDEBINFO>:/PROFILE>)
-endif()
 
-add_custom_command(
-	TARGET MarCmd POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		"${PROJECT_SOURCE_DIR}/../bin/$<CONFIG>/vendor/PluS/PluS/PluS.dll"
-		$<TARGET_FILE_DIR:MarCmd>
-)
+  add_custom_command(
+    TARGET MarCmd POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${PROJECT_SOURCE_DIR}/../bin/$<CONFIG>/vendor/PluS/PluS/PluS.dll"
+    $<TARGET_FILE_DIR:MarCmd>
+    )
+elseif (UNIX)
+  add_custom_command(
+    TARGET MarCmd POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${PROJECT_SOURCE_DIR}/../bin/$<CONFIG>/vendor/PluS/PluS/PluS.so"
+    $<TARGET_FILE_DIR:MarCmd>
+    )
+endif()

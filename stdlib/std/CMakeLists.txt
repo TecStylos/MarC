@@ -13,6 +13,9 @@ add_library(
 set_target_properties(
 	EXTENSION_STD PROPERTIES OUTPUT_NAME "std"
 )
+set_target_properties(
+	EXTENSION_STD PROPERTIES PREFIX ""
+)
 
 target_include_directories(
 	EXTENSION_STD PUBLIC 

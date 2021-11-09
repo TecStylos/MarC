@@ -28,6 +28,10 @@ target_include_directories(
 	"../vendor/PluS/PluS/include"
 )
 
+SET_TARGET_PROPERTIES(
+	MarCore PROPERTIES PREFIX ""
+)
+
 target_link_libraries(
 	MarCore PUBLIC 
 	PluS
