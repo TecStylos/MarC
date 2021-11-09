@@ -21,6 +21,7 @@ target_include_directories(
 
 target_link_libraries(
    EXTENSION_STD PUBLIC 
+   MarCore
    PluS
 )
 

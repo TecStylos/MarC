@@ -199,43 +199,43 @@ namespace MarC
 		switch (ocx.opCode)
 		{
 		case BC_OC_NONE:  Interpreter::exec_insUndefined(ocx); break;
-			case BC_OC_UNKNOWN: Interpreter::exec_insUndefined(ocx); break;
+		case BC_OC_UNKNOWN: Interpreter::exec_insUndefined(ocx); break;
 
-			case BC_OC_MOVE: Interpreter::exec_insMove(ocx); break;
-			case BC_OC_ADD: Interpreter::exec_insAdd(ocx); break;
-			case BC_OC_SUBTRACT: Interpreter::exec_insSubtract(ocx); break;
-			case BC_OC_MULTIPLY: Interpreter::exec_insMultiply(ocx); break;
-			case BC_OC_DIVIDE: Interpreter::exec_insDivide(ocx); break;
+		case BC_OC_MOVE: Interpreter::exec_insMove(ocx); break;
+		case BC_OC_ADD: Interpreter::exec_insAdd(ocx); break;
+		case BC_OC_SUBTRACT: Interpreter::exec_insSubtract(ocx); break;
+		case BC_OC_MULTIPLY: Interpreter::exec_insMultiply(ocx); break;
+		case BC_OC_DIVIDE: Interpreter::exec_insDivide(ocx); break;
 
-			case BC_OC_DEREFERENCE: Interpreter::exec_insDereference(ocx); break;
+		case BC_OC_DEREFERENCE: Interpreter::exec_insDereference(ocx); break;
 
-			case BC_OC_CONVERT: Interpreter::exec_insConvert(ocx); break;
+		case BC_OC_CONVERT: Interpreter::exec_insConvert(ocx); break;
 
-			case BC_OC_PUSH: Interpreter::exec_insPush(ocx); break;
-			case BC_OC_POP: Interpreter::exec_insPop(ocx); break;
-			case BC_OC_PUSH_COPY: Interpreter::exec_insPushCopy(ocx); break;
-			case BC_OC_POP_COPY: Interpreter::exec_insPopCopy(ocx); break;
+		case BC_OC_PUSH: Interpreter::exec_insPush(ocx); break;
+		case BC_OC_POP: Interpreter::exec_insPop(ocx); break;
+		case BC_OC_PUSH_COPY: Interpreter::exec_insPushCopy(ocx); break;
+		case BC_OC_POP_COPY: Interpreter::exec_insPopCopy(ocx); break;
 
-			case BC_OC_PUSH_FRAME: Interpreter::exec_insPushFrame(ocx); break;
-			case BC_OC_POP_FRAME: Interpreter::exec_insPopFrame(ocx); break;
+		case BC_OC_PUSH_FRAME: Interpreter::exec_insPushFrame(ocx); break;
+		case BC_OC_POP_FRAME: Interpreter::exec_insPopFrame(ocx); break;
 
-			case BC_OC_JUMP: Interpreter::exec_insJump(ocx); break;
-			case BC_OC_JUMP_EQUAL: Interpreter::exec_insJumpEqual(ocx); break;
-			case BC_OC_JUMP_NOT_EQUAL: Interpreter::exec_insJumpNotEqual(ocx); break;
-			case BC_OC_JUMP_LESS_THAN: Interpreter::exec_insJumpLessThan(ocx); break;
-			case BC_OC_JUMP_GREATER_THAN: Interpreter::exec_insJumpGreaterThan(ocx); break;
-			case BC_OC_JUMP_LESS_EQUAL: Interpreter::exec_insJumpLessEqual(ocx); break;
-			case BC_OC_JUMP_GREATER_EQUAL: Interpreter::exec_insJumpGreaterEqual(ocx); break;
+		case BC_OC_JUMP: Interpreter::exec_insJump(ocx); break;
+		case BC_OC_JUMP_EQUAL: Interpreter::exec_insJumpEqual(ocx); break;
+		case BC_OC_JUMP_NOT_EQUAL: Interpreter::exec_insJumpNotEqual(ocx); break;
+		case BC_OC_JUMP_LESS_THAN: Interpreter::exec_insJumpLessThan(ocx); break;
+		case BC_OC_JUMP_GREATER_THAN: Interpreter::exec_insJumpGreaterThan(ocx); break;
+		case BC_OC_JUMP_LESS_EQUAL: Interpreter::exec_insJumpLessEqual(ocx); break;
+		case BC_OC_JUMP_GREATER_EQUAL: Interpreter::exec_insJumpGreaterEqual(ocx); break;
 
-			case BC_OC_ALLOCATE: Interpreter::exec_insAllocate(ocx); break;
-			case BC_OC_FREE: Interpreter::exec_insFree(ocx); break;
-		  
-			case BC_OC_CALL_EXTERN: Interpreter::exec_insCallExtern(ocx); break;
+		case BC_OC_ALLOCATE: Interpreter::exec_insAllocate(ocx); break;
+		case BC_OC_FREE: Interpreter::exec_insFree(ocx); break;
 
-			case BC_OC_CALL: Interpreter::exec_insCall(ocx); break;
-			case BC_OC_RETURN: Interpreter::exec_insReturn(ocx); break;
+		case BC_OC_CALL_EXTERN: Interpreter::exec_insCallExtern(ocx); break;
 
-			case BC_OC_EXIT: Interpreter::exec_insExit(ocx); break;
+		case BC_OC_CALL: Interpreter::exec_insCall(ocx); break;
+		case BC_OC_RETURN: Interpreter::exec_insReturn(ocx); break;
+
+		case BC_OC_EXIT: Interpreter::exec_insExit(ocx); break;
 		default:
 			throw InterpreterError(IntErrCode::OpCodeNotExecutable, "Unknown opCode '" + std::to_string(ocx.opCode) + "'!");
 		}
@@ -422,22 +422,38 @@ namespace MarC
 	void Interpreter::exec_insCallExtern(BC_OpCodeEx ocx)
 	{
 		BC_MemAddress funcNameAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg.get(0)).as_ADDR;
-		std::string funcName = &hostObject<char>(funcNameAddr);
+		auto& fcd = readDataAndMove<BC_FuncCallData>();
 
 		auto funcIt = m_extFuncs.find(funcNameAddr);
 		if (funcIt == m_extFuncs.end())
 		{
 			loadMissingExtensions();
 
+			std::string funcName = &hostObject<char>(funcNameAddr);
 			auto uid = PluS::PluginManager::get().findFeature(funcName);
 			ExternalFunctionPtr exFunc = PluS::PluginManager::get().createFeature<ExternalFunction>(uid);
 			funcIt = m_extFuncs.insert({ funcNameAddr, exFunc }).first;
 		}
 
-		// Retrieve all parameters from code memory
+		ExFuncData efd;
+		efd.retVal.datatype = ocx.datatype;
+		efd.nParams = fcd.nArgs;
 
-		auto& func = funcIt->second;
-		func->call();
+		auto retDest = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[1]);
+
+		for (uint8_t i = 0; i < fcd.nArgs; ++i)
+		{
+			bool deref = ocx.derefArg.get(2ull + i);
+			auto dt = fcd.argType.get(i);
+			efd.param[i].datatype = dt;
+			efd.param[i].cell = readMemCellAndMove(dt, deref);
+		}
+
+		auto func = funcIt->second;
+		func->call(*this, efd);
+
+		if (retDest)
+			memcpy(retDest, &efd.retVal.cell, BC_DatatypeSize(efd.retVal.datatype));
 	}
 	void Interpreter::exec_insCall(BC_OpCodeEx ocx)
 	{
@@ -446,7 +462,6 @@ namespace MarC
 		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
 		auto& regFP = getRegister(BC_MEM_REG_FRAME_POINTER);
 		auto& regCP = getRegister(BC_MEM_REG_CODE_POINTER);
-
 
 		BC_MemAddress funcAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg.get(0)).as_ADDR;
 		auto& fcd = readDataAndMove<BC_FuncCallData>();

@@ -19,6 +19,7 @@ namespace MarC
 			AbortViaExit,
 			AbortViaEndOfCode,
 			ExtensionLoadFailure,
+			WrongExtCallParamCount,
 		};
 	public:
 		InterpreterError() = default;

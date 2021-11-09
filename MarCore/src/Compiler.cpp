@@ -214,15 +214,16 @@ namespace MarC
 		if (!compileArgAddress(ocx, { InsArgType::Address, BC_DT_NONE, 0 }))
 			return false;
 
-		if (!removeNecessaryColon())
-			return false;
-
-		std::string retDtStr = BC_DatatypeToString(ocx.datatype);
-		std::string retVal = getArgAsString();
-
 		BC_FuncCallData fcd;
 		uint64_t fcdBegin = currCodeOffset();
 		pushCode(fcd);
+
+		if (!removeNecessaryColon())
+			return false;
+
+		if (!compileArgument(ocx, { InsArgType::Address, ocx.datatype, 1 }))
+			return false;
+
 		while (nextToken().type == AsmToken::Type::Sep_Colon)
 		{
 			if (nextToken().type != AsmToken::Type::Name)
@@ -233,7 +234,7 @@ namespace MarC
 			if (nextToken().type != AsmToken::Type::Sep_Dot)
 				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 
-			if (!compileArgument(ocx, { InsArgType::TypedValue, argDt, (uint64_t)1 + fcd.nArgs }))
+			if (!compileArgument(ocx, { InsArgType::TypedValue, argDt, 2ull + fcd.nArgs }))
 				return false;
 
 			++fcd.nArgs;

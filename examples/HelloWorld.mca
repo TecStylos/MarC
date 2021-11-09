@@ -1,4 +1,8 @@
 #reqmod : "std"
 / #manperm : single : "prints"
 
-calx.i8 : std>>prints : 0 : addr."Hello world!"
+mov.i64 : $ac : 10
+#label : loopBegin
+    calx.i8 : std>>prints : 0 : addr."Hello world!"
+    sub.i64 : $ac : 1
+jne.i64 : loopBegin : @$ac : 0
