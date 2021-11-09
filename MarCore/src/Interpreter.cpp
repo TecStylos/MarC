@@ -180,6 +180,9 @@ namespace MarC
 			if (!PluS::PluginManager::get().loadPlugin(*result.second.begin()))
 				throw InterpreterError(IntErrCode::ExtensionLoadFailure, "Unable to load extension '" + result.first + "'!");
 		}
+
+		for (auto& pModInfo : m_pExeInfo->modules)
+			pModInfo->extensionLoaded = true;
 	}
 
 	BC_MemCell& Interpreter::readMemCellAndMove(BC_Datatype dt, bool deref)
@@ -431,6 +434,8 @@ namespace MarC
 
 			std::string funcName = &hostObject<char>(funcNameAddr);
 			auto uid = PluS::PluginManager::get().findFeature(funcName);
+			if (!uid)
+				throw InterpreterError(IntErrCode::ExternalFunctionNotFound, "Unable to locate external function '" + funcName + "'!");
 			ExternalFunctionPtr exFunc = PluS::PluginManager::get().createFeature<ExternalFunction>(uid);
 			funcIt = m_extFuncs.insert({ funcNameAddr, exFunc }).first;
 		}

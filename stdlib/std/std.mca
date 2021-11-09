@@ -8,6 +8,8 @@
         #alias : exitCode : $ec
     #end / reg
 
+    / Print a string to the console
     #funx : prints
+    / Print value of specified type to the console
     #funx : printt
 #end / std

@@ -20,6 +20,8 @@ namespace MarC
 			AbortViaEndOfCode,
 			ExtensionLoadFailure,
 			WrongExtCallParamCount,
+			ExternalFunctionNotFound,
+			InvalidDatatype,
 		};
 	public:
 		InterpreterError() = default;
