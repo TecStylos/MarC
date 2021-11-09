@@ -1,5 +1,7 @@
 #include "ExtensionLocator.h"
 
+#include "PluS/Defines.h"
+
 namespace MarC
 {
 	std::map<std::string, std::set<std::string>> locateExtensions(const std::set<std::string>& baseDirs, const std::set<std::string>& extNames)
@@ -15,7 +17,7 @@ namespace MarC
 			{
 				if (!entry.is_regular_file())
 					continue;
-				if (entry.path().extension().string() != ".dll")
+				if (entry.path().extension().string() != PLUS_PLATFORM_PLUGIN_EXTENSION)
 					continue;
 
 				auto stem = entry.path().stem().string();
