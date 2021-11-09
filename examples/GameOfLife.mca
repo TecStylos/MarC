@@ -1,0 +1,90 @@
+#reqmod : "std"
+
+#alias : WIDTH : 10
+#alias : HEIGHT : 10
+#alias : GRID_SIZE : 111
+#static : DATA : 120
+
+#func.i8 : INIT : RET
+    mov.addr : $ac : >>DATA
+    add.addr : $ac : >>GRID_SIZE
+    sub.addr : $ac : 1
+    pushc.addr : @$ac
+
+    mov.addr : $ac : >>DATA
+    #label : SPACE_LOOP_BEGIN
+        mov.i8 : @$ac : 35
+        add.addr : $ac : 1
+    jlt.addr : SPACE_LOOP_BEGIN : @$ac : @~0
+
+    mov.addr : $ac : >>DATA
+    sub.addr : $ac : 1
+    #label : NEWLINE_LOOP_BEGIN
+        add.addr : $ac : 11
+        mov.i8 : @$ac : 10
+    jlt.addr : NEWLINE_LOOP_BEGIN : @$ac : @~0
+    return
+#end
+
+#func.i8 : RENDER : RET
+    calx.i8 : >>std>>prints : 0 : addr.>>DATA
+    calx.i8 : >>std>>prints : 0 : addr."\n"
+    return
+#end
+
+#func.addr : XY_TO_INDEX : RET : addr.X : addr.Y
+    mov.addr : RET : >>WIDTH
+    add.addr : RET : 1
+    mul.addr : RET : @Y
+    add.addr : RET : @X
+    return
+#end
+
+#func.addr : XY_TO_ADDR : RET : addr.X : addr.Y
+    call.addr : >>XY_TO_INDEX : RET : addr.@X : addr.@Y
+    add.addr : RET : >>DATA
+    return
+#end
+
+#func.i8 : SET_ALIVE : RET : addr.X : addr.Y
+    call.addr : >>XY_TO_ADDR : $ac : addr.@X : addr.@Y
+    mov.i8 : @$ac : 35
+    return
+#end
+
+#func.i8 : SET_NOT_ALIVE : RET : addr.X : addr.Y
+    call.addr : >>XY_TO_ADDR : $ac : addr.@X : addr.@Y
+    mov.i8 : @$ac : 32
+    return
+#end
+
+#func.i8 : IS_ALIVE : RET : addr.X : addr.Y
+    call.addr : >>XY_TO_ADDR : $ac : addr.@X : addr.@Y
+
+    jeq.i8 : IS_NOT_ALIVE : @$ac : 32
+
+    mov.i8 : RET : 1
+    return
+
+    #label : IS_NOT_ALIVE
+    mov.i8 : RET : 0
+    return
+#end
+
+#func.i8 : EVOLVE : RET
+    / Should be 'call.i8' but parameters would not be aligned NEEDS IMMEDIATE FIX!!!
+    call.addr : >>SET_NOT_ALIVE : $ac : addr.1 : addr.1
+    call.addr : >>SET_NOT_ALIVE : $ac : addr.3 : addr.1
+    return
+#end
+
+
+
+call.i8 : INIT : $td
+
+mov.i64 : $lc : 2
+#label : MAIN_LOOP
+    call.i8 : RENDER : $td
+    call.i8 : EVOLVE : $td
+    sub.i64 : $lc : 1
+jne.i64 : MAIN_LOOP : @$lc : 0

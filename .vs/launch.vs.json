@@ -11,15 +11,8 @@
       "args": [
         "--verbose",
         "--closeonexit",
-        "examples/HelloWorld.mca"
+        "examples/GameOfLife.mca"
       ]
-    },
-    {
-      "type": "dll",
-      "exe": "",
-      "project": "CMakeLists.txt",
-      "projectTarget": "std.dll (stdlib\\std\\std.dll)",
-      "name": "std.dll (stdlib\\std\\std.dll)"
     }
   ]
 }

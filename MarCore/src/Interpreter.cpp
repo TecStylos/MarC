@@ -297,7 +297,7 @@ namespace MarC
 	}
 	void Interpreter::exec_insPop(BC_OpCodeEx ocx)
 	{
-	  BC_MemCell mc;
+		BC_MemCell mc;
 		virt_popStack(mc, BC_DatatypeSize(ocx.datatype));
 	}
 	void Interpreter::exec_insPushCopy(BC_OpCodeEx ocx)
