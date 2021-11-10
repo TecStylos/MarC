@@ -3,32 +3,69 @@
 #alias : WIDTH : 10
 #alias : HEIGHT : 10
 #alias : GRID_SIZE : 111
-#static : DATA : 120
+#static : GRID1 : 120
+#static : GRID2 : 120
 
-#func.i8 : INIT : RET
-    mov.addr : $ac : >>DATA
+#alias : LINE_0 : " #        "
+#alias : LINE_1 : " #        "
+#alias : LINE_2 : " #        "
+#alias : LINE_3 : "          "
+#alias : LINE_4 : " ##       "
+#alias : LINE_5 : "##        "
+#alias : LINE_6 : " #        "
+#alias : LINE_7 : "          "
+#alias : LINE_8 : "          "
+#alias : LINE_9 : "          "
+
+#func.i8 : COPY_STRING : RET : addr.DEST : addr.SRC
+    #label : LOOP_BEGIN
+        drf : $td : @SRC
+        mov.u8 : @DEST : @$td
+        add.addr : DEST : 1
+        add.addr : SRC : 1
+    jne.u8 : LOOP_BEGIN : @$td : 0
+    return
+#end
+
+#func.i8 : INIT : RET : addr.BASE
+    mov.addr : $ac : @BASE
     add.addr : $ac : >>GRID_SIZE
     sub.addr : $ac : 1
     pushc.addr : @$ac
 
-    mov.addr : $ac : >>DATA
-    #label : SPACE_LOOP_BEGIN
-        mov.i8 : @$ac : 35
-        add.addr : $ac : 1
-    jlt.addr : SPACE_LOOP_BEGIN : @$ac : @~0
+    mov.addr : $ac : @BASE
+    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_0
+    add.addr : $ac : 11
+    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_1
+    add.addr : $ac : 11
+    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_2
+    add.addr : $ac : 11
+    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_3
+    add.addr : $ac : 11
+    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_4
+    add.addr : $ac : 11
+    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_5
+    add.addr : $ac : 11
+    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_6
+    add.addr : $ac : 11
+    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_7
+    add.addr : $ac : 11
+    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_8
+    add.addr : $ac : 11
+    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_9
 
-    mov.addr : $ac : >>DATA
+    mov.addr : $ac : @BASE
     sub.addr : $ac : 1
     #label : NEWLINE_LOOP_BEGIN
         add.addr : $ac : 11
         mov.i8 : @$ac : 10
-    jlt.addr : NEWLINE_LOOP_BEGIN : @$ac : @~0
+    jlt.addr : NEWLINE_LOOP_BEGIN : @$ac : @~8
     return
 #end
 
 #func.i8 : CLEAR : RET
     mov.u64 : $ac : >>HEIGHT
-    add.u64 : $ac : 2
+    add.u64 : $ac : 1
     calx.i8 : >>std>>prints : 0 : addr."\r"
     #label : LOOP_BEGIN
         calx.i8 : >>std>>prints : 0 : addr."\e[1F"
@@ -37,8 +74,8 @@
     return
 #end
 
-#func.i8 : RENDER : RET
-    calx.i8 : >>std>>prints : 0 : addr.>>DATA
+#func.i8 : RENDER : RET : addr.BASE
+    calx.i8 : >>std>>prints : 0 : addr.@BASE
     calx.i8 : >>std>>prints : 0 : addr."\n"
     return
 #end
@@ -51,26 +88,26 @@
     return
 #end
 
-#func.addr : XY_TO_ADDR : RET : u64.X : u64.Y
+#func.addr : XY_TO_ADDR : RET : addr.BASE : u64.X : u64.Y
     call.u64 : >>XY_TO_INDEX : RET : u64.@X : u64.@Y
-    add.addr : RET : >>DATA
+    add.addr : RET : @BASE
     return
 #end
 
-#func.i8 : SET_ALIVE : RET : u64.X : u64.Y
-    call.addr : >>XY_TO_ADDR : $ac : u64.@X : u64.@Y
+#func.i8 : SET_ALIVE : RET : addr.BASE : u64.X : u64.Y
+    call.addr : >>XY_TO_ADDR : $ac : addr.@BASE : u64.@X : u64.@Y
     mov.i8 : @$ac : 35
     return
 #end
 
-#func.i8 : SET_NOT_ALIVE : RET : u64.X : u64.Y
-    call.addr : >>XY_TO_ADDR : $ac : u64.@X : u64.@Y
+#func.i8 : SET_DEAD : RET : addr.BASE : u64.X : u64.Y
+    call.addr : >>XY_TO_ADDR : $ac : addr.@BASE : u64.@X : u64.@Y
     mov.i8 : @$ac : 32
     return
 #end
 
-#func.i8 : IS_ALIVE : RET : u64.X : u64.Y
-    call.addr : >>XY_TO_ADDR : $ac : u64.@X : u64.@Y
+#func.i8 : IS_ALIVE : RET : addr.BASE : u64.X : u64.Y
+    call.addr : >>XY_TO_ADDR : $ac : addr.@BASE : u64.@X : u64.@Y
 
     drf : $ac : @$ac
     jeq.i8 : IS_NOT_ALIVE : @$ac : 32
@@ -83,29 +120,125 @@
     return
 #end
 
-#func.i8 : EVOLVE : RET
-    call.i8 : >>IS_ALIVE : $ac : u64.1 : u64.1
-    jeq.i8 : IS_ALIVE : @$ac : 1
+#func.i8 : NEIGHBOR_ALIVE_COUNT : RET : addr.BASE : u64.X : u64.Y
+    mov.i8 : RET : 0
 
-    call.i8 : >>SET_ALIVE : $ac : u64.1 : u64.1
+    sub.u64 : Y : 1
+    jeq.u64 : UPPER_MID_END : @Y : -1
+    call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
+    add.i8 : RET : @$ac
+    #label : UPPER_MID_END
+
+    add.u64 : X : 1
+    jeq.u64 : UPPER_RIGHT_END : @Y : -1
+    jeq.u64 : UPPER_RIGHT_END : @X : >>WIDTH
+    call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
+    add.i8 : RET : @$ac
+    #label : UPPER_RIGHT_END
+
+    add.u64 : Y : 1
+    jeq.u64 : MID_RIGHT_END : @X : >>WIDTH
+    call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
+    add.i8 : RET : @$ac
+    #label : MID_RIGHT_END
+
+    add.u64 : Y : 1
+    jeq.u64 : LOWER_RIGHT_END : @Y : >>HEIGHT
+    jeq.u64 : LOWER_RIGHT_END : @X : >>WIDTH
+    call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
+    add.i8 : RET : @$ac
+    #label : LOWER_RIGHT_END
+
+    sub.u64 : X : 1
+    jeq.u64 : LOWER_MID_END : @Y : >>HEIGHT
+    call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
+    add.i8 : RET : @$ac
+    #label : LOWER_MID_END
+
+    sub.u64 : X : 1
+    jeq.u64 : LOWER_LEFT_END : @Y : >>HEIGHT
+    jeq.u64 : LOWER_LEFT_END : @X : -1
+    call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
+    add.i8 : RET : @$ac
+    #label : LOWER_LEFT_END
+
+    sub.u64 : Y : 1
+    jeq.u64 : MID_LEFT_END : @X : -1
+    call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
+    add.i8 : RET : @$ac
+    #label : MID_LEFT_END
+
+    sub.u64 : Y : 1
+    jeq.u64 : UPPER_LEFT_END : @Y : -1
+    jeq.u64 : UPPER_LEFT_END : @X : -1
+    call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
+    add.i8 : RET : @$ac
+    #label : UPPER_LEFT_END
+
     return
+#end
 
-    #label : IS_ALIVE
-    call.i8 : >>SET_NOT_ALIVE : $ac : u64.1 : u64.1
+#func.i8 : EVOLVE_CELL : RET : addr.FROM : addr.TO : u64.X : u64.Y
+    push.i8
+    push.i8
+    #alias : NAC : ~32
+    #alias : IA : ~33
+    call.i8 : >>NEIGHBOR_ALIVE_COUNT : NAC : addr.@FROM : u64.@X : u64.@Y
+    call.i8 : >>IS_ALIVE : IA : addr.@FROM : u64.@X : u64.@Y
+
+    jeq.i8 : CELL_IS_ALIVE : @IA : 1
+    jeq.i8 : NEXT_GEN_ALIVE : @NAC : 3
+    jmp : NEXT_GEN_DEAD
+
+    #label : CELL_IS_ALIVE
+    jeq.i8 : NEXT_GEN_ALIVE : @NAC : 2
+    jeq.i8 : NEXT_GEN_ALIVE : @NAC : 3
+    jmp : NEXT_GEN_DEAD
+    
+    #label : NEXT_GEN_ALIVE
+    call.i8 : >>SET_ALIVE : $td : addr.@TO : u64.@X : u64.@Y
+    return
+    #label : NEXT_GEN_DEAD
+    call.i8 : >>SET_DEAD : $td : addr.@TO : u64.@X : u64.@Y
+    return
+#end
+
+#func.i8 : EVOLVE : RET : addr.FROM : addr.TO
+    push.u64
+    push.u64
+    #alias : X : ~16
+    #alias : Y : ~24
+
+    mov.u64 : X : 0
+    #label : X_LOOP_BEGIN
+        mov.u64 : Y : 0
+        #label : Y_LOOP_BEGIN
+            call.i8 : >>EVOLVE_CELL : $ac : addr.@FROM : addr.@TO : u64.@X : u64.@Y
+            add.u64 : Y : 1
+        jne.u64 : Y_LOOP_BEGIN : @Y : >>HEIGHT
+        add.u64 : X : 1
+    jne.u64 : X_LOOP_BEGIN : @X : >>WIDTH
     return
 #end
 
 
 
-call.i8 : INIT : $td
+call.i8 : INIT : $td : addr.GRID1
+call.i8 : INIT : $td : addr.GRID2
 
-mov.i64 : $lc : 10
+call.i8 : RENDER : $td : addr.GRID1
+
+mov.i64 : $lc : 100
 #label : MAIN_LOOP
-    call.i8 : RENDER : $td
-    calx.i8 : >>std>>sleepms : 0 : u64.1000
+    calx.i8 : >>std>>sleepms : 0 : u64.500
+    call.i8 : EVOLVE : $td : addr.GRID1 : addr.GRID2
     call.i8 : CLEAR : $td
-    call.i8 : EVOLVE : $td
+    call.i8 : RENDER : $td : addr.GRID2
+
+    calx.i8 : >>std>>sleepms : 0 : u64.500
+    call.i8 : EVOLVE : $td : addr.GRID2 : addr.GRID1
+    call.i8 : CLEAR : $td
+    call.i8 : RENDER : $td : addr.GRID1
+
     sub.i64 : $lc : 1
 jne.i64 : MAIN_LOOP : @$lc : 0
-
-call.i8 : RENDER : $td

@@ -167,7 +167,7 @@ namespace MarC
 		}
 
 		if (!resolvedAll)
-			throw LinkerError(LinkErrCode::UnresolvedSymbols, "Cannot resolve all symbols references! (" + unresSymRefsListStr() + ")");
+			throw LinkerError(LinkErrCode::UnresolvedSymbols, "Cannot resolve all symbol references! (" + unresSymRefsListStr() + ")");
 	}
 
 	std::string Linker::misModListStr() const
