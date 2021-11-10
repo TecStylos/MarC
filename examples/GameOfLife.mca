@@ -26,6 +26,17 @@
     return
 #end
 
+#func.i8 : CLEAR : RET
+    mov.u64 : $ac : >>HEIGHT
+    add.u64 : $ac : 2
+    calx.i8 : >>std>>prints : 0 : addr."\r"
+    #label : LOOP_BEGIN
+        calx.i8 : >>std>>prints : 0 : addr."\e[1F"
+        sub.u64 : $ac : 1
+    jne.u64 : LOOP_BEGIN : @$ac : 0
+    return
+#end
+
 #func.i8 : RENDER : RET
     calx.i8 : >>std>>prints : 0 : addr.>>DATA
     calx.i8 : >>std>>prints : 0 : addr."\n"
@@ -88,9 +99,13 @@
 
 call.i8 : INIT : $td
 
-mov.i64 : $lc : 4
+mov.i64 : $lc : 10
 #label : MAIN_LOOP
     call.i8 : RENDER : $td
+    calx.i8 : >>std>>sleepms : 0 : u64.1000
+    call.i8 : CLEAR : $td
     call.i8 : EVOLVE : $td
     sub.i64 : $lc : 1
 jne.i64 : MAIN_LOOP : @$lc : 0
+
+call.i8 : RENDER : $td

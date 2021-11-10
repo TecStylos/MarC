@@ -12,4 +12,6 @@
     #funx : prints
     / Print value of specified type to the console
     #funx : printt
+    / Sleep n milliseconds
+    #funx : sleepms
 #end / std

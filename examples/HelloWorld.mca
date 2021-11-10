@@ -3,7 +3,7 @@
 
 mov.i64 : $ac : 10
 #label : loopBegin
-    calx.i8 : std>>prints : 0 : addr."Hello world! "
+    calx.i8 : std>>prints : 0 : addr."Hello world!"
     calx.i8 : std>>printt : 0 : i64.@$ac
     calx.i8 : std>>prints : 0 : addr."\n"
     sub.i64 : $ac : 1
