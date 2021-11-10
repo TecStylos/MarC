@@ -187,7 +187,7 @@ namespace MarC
 			if (nextToken().type != AsmToken::Type::Sep_Dot)
 				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 
-			if (!compileArgument(ocx, { InsArgType::Value, BC_DT_NONE, (uint64_t)1 + fcd.nArgs }))
+			if (!compileArgument(ocx, { InsArgType::TypedValue, argDt, fcd.nArgs + 1ull }))
 				return false;
 
 			++fcd.nArgs;

@@ -72,9 +72,8 @@
 #end
 
 #func.i8 : EVOLVE : RET
-    / Should be 'call.i8' but parameters would not be aligned NEEDS IMMEDIATE FIX!!!
-    call.addr : >>SET_NOT_ALIVE : $ac : addr.1 : addr.1
-    call.addr : >>SET_NOT_ALIVE : $ac : addr.3 : addr.1
+    call.i8 : >>SET_NOT_ALIVE : $ac : addr.1 : addr.1
+    call.i8 : >>SET_NOT_ALIVE : $ac : addr.3 : addr.1
     return
 #end
 
