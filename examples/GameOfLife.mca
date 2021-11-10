@@ -32,35 +32,36 @@
     return
 #end
 
-#func.addr : XY_TO_INDEX : RET : addr.X : addr.Y
-    mov.addr : RET : >>WIDTH
-    add.addr : RET : 1
-    mul.addr : RET : @Y
-    add.addr : RET : @X
+#func.u64 : XY_TO_INDEX : RET : u64.X : u64.Y
+    mov.u64 : RET : >>WIDTH
+    add.u64 : RET : 1
+    mul.u64 : RET : @Y
+    add.u64 : RET : @X
     return
 #end
 
-#func.addr : XY_TO_ADDR : RET : addr.X : addr.Y
-    call.addr : >>XY_TO_INDEX : RET : addr.@X : addr.@Y
+#func.addr : XY_TO_ADDR : RET : u64.X : u64.Y
+    call.u64 : >>XY_TO_INDEX : RET : u64.@X : u64.@Y
     add.addr : RET : >>DATA
     return
 #end
 
-#func.i8 : SET_ALIVE : RET : addr.X : addr.Y
-    call.addr : >>XY_TO_ADDR : $ac : addr.@X : addr.@Y
+#func.i8 : SET_ALIVE : RET : u64.X : u64.Y
+    call.addr : >>XY_TO_ADDR : $ac : u64.@X : u64.@Y
     mov.i8 : @$ac : 35
     return
 #end
 
-#func.i8 : SET_NOT_ALIVE : RET : addr.X : addr.Y
-    call.addr : >>XY_TO_ADDR : $ac : addr.@X : addr.@Y
+#func.i8 : SET_NOT_ALIVE : RET : u64.X : u64.Y
+    call.addr : >>XY_TO_ADDR : $ac : u64.@X : u64.@Y
     mov.i8 : @$ac : 32
     return
 #end
 
-#func.i8 : IS_ALIVE : RET : addr.X : addr.Y
-    call.addr : >>XY_TO_ADDR : $ac : addr.@X : addr.@Y
+#func.i8 : IS_ALIVE : RET : u64.X : u64.Y
+    call.addr : >>XY_TO_ADDR : $ac : u64.@X : u64.@Y
 
+    drf : $ac : @$ac
     jeq.i8 : IS_NOT_ALIVE : @$ac : 32
 
     mov.i8 : RET : 1
@@ -72,8 +73,14 @@
 #end
 
 #func.i8 : EVOLVE : RET
-    call.i8 : >>SET_NOT_ALIVE : $ac : addr.1 : addr.1
-    call.i8 : >>SET_NOT_ALIVE : $ac : addr.3 : addr.1
+    call.i8 : >>IS_ALIVE : $ac : u64.1 : u64.1
+    jeq.i8 : IS_ALIVE : @$ac : 1
+
+    call.i8 : >>SET_ALIVE : $ac : u64.1 : u64.1
+    return
+
+    #label : IS_ALIVE
+    call.i8 : >>SET_NOT_ALIVE : $ac : u64.1 : u64.1
     return
 #end
 
@@ -81,7 +88,7 @@
 
 call.i8 : INIT : $td
 
-mov.i64 : $lc : 2
+mov.i64 : $lc : 4
 #label : MAIN_LOOP
     call.i8 : RENDER : $td
     call.i8 : EVOLVE : $td
