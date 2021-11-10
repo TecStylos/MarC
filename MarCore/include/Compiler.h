@@ -129,6 +129,47 @@ namespace MarC
 		uint64_t m_backupNextTokenToCompile = 0;
 	private:
 		friend class VirtualAsmTokenList;
+	private:
+		template <typename T>
+		class DelayedPusher
+		{
+		public:
+			DelayedPusher(Compiler& compiler)
+				: DelayedPusher(compiler, new T(), true)
+			{}
+			DelayedPusher(Compiler& compiler, T& obj)
+				: DelayedPusher(compiler, &obj, false)
+			{}
+			~DelayedPusher()
+			{
+				m_comp.writeCode(*m_pObj, m_codeOffset);
+				if (m_destroyObjOnDestruct && m_pObj)
+					delete m_pObj;
+			}
+			T* operator->()
+			{
+				return m_pObj;
+			}
+			T& operator*()
+			{
+				return *m_pObj;
+			}
+		private:
+			DelayedPusher(Compiler& compiler, T* pObj, bool destroyObjOnDestruct)
+				: m_comp(compiler), m_pObj(pObj), m_destroyObjOnDestruct(destroyObjOnDestruct)
+			{
+				m_codeOffset = compiler.currCodeOffset();
+				m_comp.pushCode(*m_pObj);
+			}
+			DelayedPusher() = delete;
+			DelayedPusher(const DelayedPusher&) = delete;
+			DelayedPusher(DelayedPusher&&) = delete;
+		private:
+			Compiler& m_comp;
+			T* m_pObj = nullptr;
+			uint64_t m_codeOffset = -1;
+			bool m_destroyObjOnDestruct = false;
+		};
 	};
 
 	bool isNegativeString(const std::string& value);

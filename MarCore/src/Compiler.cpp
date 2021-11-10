@@ -109,11 +109,12 @@ namespace MarC
 	bool Compiler::compileInstruction()
 	{
 		BC_OpCodeEx ocx;
+
 		ocx.opCode = BC_OpCodeFromString(currToken().value);
 		if (ocx.opCode == BC_OC_NONE || ocx.opCode == BC_OC_UNKNOWN)
 			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to opCode!");
 
-		auto& layout = InstructionLayoutFromOpCode((BC_OpCode)ocx.opCode);
+		auto& layout = InstructionLayoutFromOpCode(ocx.opCode);
 
 		if (layout.requiresDatatype)
 		{
@@ -124,11 +125,10 @@ namespace MarC
 				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
 		}
 
+		DelayedPusher<BC_OpCodeEx> ocxDelayed(*this, ocx);
+
 		if (layout.needsCustomImplementation)
 			return compileSpecializedInstruction(ocx);
-		
-		uint64_t instructionBegin = currCodeOffset();
-		pushCode(ocx);
 
 		for (auto& arg : layout.args)
 		{
@@ -138,8 +138,6 @@ namespace MarC
 			if (!compileArgument(ocx, arg))
 				return false;
 		}
-
-		writeCode(ocx, instructionBegin);
 
 		return true;
 	}
@@ -162,9 +160,6 @@ namespace MarC
 		if (!removeNecessaryColon())
 			return false;
 
-		uint64_t opCodeBegin = currCodeOffset();
-		pushCode(ocx);
-
 		if (!compileArgAddress(ocx, { InsArgType::Address, BC_DT_NONE, 0 }))
 			return false;
 
@@ -174,28 +169,24 @@ namespace MarC
 		std::string retDtStr = BC_DatatypeToString(ocx.datatype);
 		std::string retVal = getArgAsString();
 
-		BC_FuncCallData fcd;
-		uint64_t fcdBegin = currCodeOffset();
-		pushCode(fcd);
+		DelayedPusher<BC_FuncCallData> fcd(*this);
+
 		while (nextToken().type == AsmToken::Type::Sep_Colon)
 		{
 			if (nextToken().type != AsmToken::Type::Name)
 				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 			BC_Datatype argDt = BC_DatatypeFromString(currToken().value);
-			fcd.argType.set(fcd.nArgs, argDt);
+			fcd->argType.set(fcd->nArgs, argDt);
 
 			if (nextToken().type != AsmToken::Type::Sep_Dot)
 				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 
-			if (!compileArgument(ocx, { InsArgType::TypedValue, argDt, fcd.nArgs + 1ull }))
+			if (!compileArgument(ocx, { InsArgType::TypedValue, argDt, fcd->nArgs + 1ull }))
 				return false;
 
-			++fcd.nArgs;
+			++fcd->nArgs;
 		}
 		prevToken();
-
-		writeCode(ocx, opCodeBegin);
-		writeCode(fcd, fcdBegin);
 
 		if (!compileStatement("popc." + retDtStr + " : " + retVal))
 			return false;
@@ -208,15 +199,10 @@ namespace MarC
 		if (!removeNecessaryColon())
 			return false;
 
-		uint64_t opCodeBegin = currCodeOffset();
-		pushCode(ocx);
-
 		if (!compileArgAddress(ocx, { InsArgType::Address, BC_DT_NONE, 0 }))
 			return false;
 
-		BC_FuncCallData fcd;
-		uint64_t fcdBegin = currCodeOffset();
-		pushCode(fcd);
+		DelayedPusher<BC_FuncCallData> fcd(*this);
 
 		if (!removeNecessaryColon())
 			return false;
@@ -229,20 +215,17 @@ namespace MarC
 			if (nextToken().type != AsmToken::Type::Name)
 				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 			BC_Datatype argDt = BC_DatatypeFromString(currToken().value);
-			fcd.argType.set(fcd.nArgs, argDt);
+			fcd->argType.set(fcd->nArgs, argDt);
 
 			if (nextToken().type != AsmToken::Type::Sep_Dot)
 				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 
-			if (!compileArgument(ocx, { InsArgType::TypedValue, argDt, 2ull + fcd.nArgs }))
+			if (!compileArgument(ocx, { InsArgType::TypedValue, argDt, fcd->nArgs + 2ull }))
 				return false;
 
-			++fcd.nArgs;
+			++fcd->nArgs;
 		}
 		prevToken();
-
-		writeCode(ocx, opCodeBegin);
-		writeCode(fcd, fcdBegin);
 
 		return true;
 	}
