@@ -160,7 +160,7 @@ namespace MarC
 	BC_Datatype BC_DatatypeFromString(const std::string& dtStr)
 	{
 		static const std::map<std::string, BC_Datatype> dtMap = {
-			{ "",     BC_DT_NONE },
+			{ "none", BC_DT_NONE },
 			{ "i8",   BC_DT_I_8  },
 			{ "i16",  BC_DT_I_16 },
 			{ "i32",  BC_DT_I_32 },
@@ -182,7 +182,7 @@ namespace MarC
 	std::string BC_DatatypeToString(BC_Datatype dt)
 	{
 		static const std::map<BC_Datatype, std::string> dtMap = {
-			{ BC_DT_NONE,    ""      },
+			{ BC_DT_NONE,    "none"  },
 			{ BC_DT_I_8,     "i8"    },
 			{ BC_DT_I_16,    "i16"   },
 			{ BC_DT_I_32,    "i32"   },

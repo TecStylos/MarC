@@ -29,7 +29,7 @@ namespace MarC
 			: m_code(code), m_errText(errText)
 		{}
 	public:
-		operator bool() const;
+		explicit operator bool() const;
 		const std::string& getText() const;
 		std::string getMessage() const;
 		Code getCode() const;

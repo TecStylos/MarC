@@ -62,206 +62,176 @@ namespace MarC
 
 		backup();
 
-		while (!isEndOfCode())
-			if (!compileStatement())
-				break;
-
-		if (m_lastErr)
+		try
 		{
-			recover();
-			return false;
+			while (!isEndOfCode())
+				compileStatement();
 		}
-		return true;
+		catch (CompilerError& err)
+		{
+			m_lastErr = err;
+			recover();
+		}
+
+		return !m_lastErr;
 	}
 
-	bool Compiler::compileStatement()
+	void Compiler::compileStatement()
 	{
-		if (isInstructionLike() && !compileInstruction())
-			return false;
-		else if (isDirectiveLike() && !compileDirective())
-			return false;
+		if (isInstructionLike())
+			compileInstruction();
+		if (isDirectiveLike())
+			compileDirective();
 
 		uint64_t nNewlines = 0;
 		while (nextToken().type == AsmToken::Type::Sep_Newline)
 			++nNewlines;
 		if (nNewlines == 0 && !isEndOfCode())
-			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Newline, currToken());
-
-		return true;
+			COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Newline, currToken());
 	}
 
-	bool Compiler::compileStatement(const std::string& statement)
+	void Compiler::compileStatement(const std::string& statement)
 	{
 		AsmTokenizer tok(statement);
 		if (!tok.tokenize())
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::InternalError, "Unable to tokenize internal statement '" + statement +"'!");
+			COMPILER_THROW_ERROR(CompErrCode::InternalError, "Unable to tokenize internal statement '" + statement +"'!");
 		
 		{
 			VirtualAsmTokenList vtl(*this, tok.getTokenList());
 
-			if (!compileStatement())
-				return false;
+			compileStatement();
 		}
-
-		return true;
 	}
 
-	bool Compiler::compileInstruction()
+	void Compiler::compileInstruction()
 	{
 		BC_OpCodeEx ocx;
 
 		ocx.opCode = BC_OpCodeFromString(currToken().value);
 		if (ocx.opCode == BC_OC_NONE || ocx.opCode == BC_OC_UNKNOWN)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to opCode!");
+			COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to opCode!");
 
 		auto& layout = InstructionLayoutFromOpCode(ocx.opCode);
 
 		if (layout.requiresDatatype)
 		{
 			if (nextToken().type != AsmToken::Type::Sep_Dot)
-				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
+				COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 			ocx.datatype = BC_DatatypeFromString(nextToken().value);
 			if (ocx.datatype == BC_DT_NONE || ocx.datatype == BC_DT_UNKNOWN)
-				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
+				COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
 		}
 
-		DelayedPusher<BC_OpCodeEx> ocxDelayed(*this, ocx);
+		DelayedPush<BC_OpCodeEx> ocxDelayed(*this, ocx);
 
 		if (layout.needsCustomImplementation)
-			return compileSpecializedInstruction(ocx);
+		{
+			compileSpecializedInstruction(ocx);
+			return;
+		}
 
 		for (auto& arg : layout.args)
 		{
-			if (!removeNecessaryColon())
-				return false;
+			removeNecessaryColon();
 
-			if (!compileArgument(ocx, arg))
-				return false;
+			compileArgument(ocx, arg);
 		}
-
-		return true;
 	}
 
-	bool Compiler::compileSpecializedInstruction(BC_OpCodeEx& ocx)
+	void Compiler::compileSpecializedInstruction(BC_OpCodeEx& ocx)
 	{
 		switch (ocx.opCode)
 		{
-		case BC_OC_CALL:
-			return compileSpecCall(ocx);
-		case BC_OC_CALL_EXTERN:
-			return compileSpecCallExtern(ocx);
+		case BC_OC_CALL: compileSpecCall(ocx); return;
+		case BC_OC_CALL_EXTERN: compileSpecCallExtern(ocx); return;
 		}
 
-		COMPILER_RETURN_WITH_ERROR(CompErrCode::InternalError, "OpCode '" + BC_OpCodeToString(ocx.opCode) + "' is not specialized!");
+		COMPILER_THROW_ERROR(CompErrCode::InternalError, "OpCode '" + BC_OpCodeToString(ocx.opCode) + "' is not specialized!");
 	}
 
-	bool Compiler::compileSpecCall(BC_OpCodeEx& ocx)
+	void Compiler::compileSpecCall(BC_OpCodeEx& ocx)
 	{
-		if (!removeNecessaryColon())
-			return false;
+		removeNecessaryColon();
 
-		if (!compileArgAddress(ocx, { InsArgType::Address, BC_DT_NONE, 0 }))
-			return false;
+		compileArgAddress(ocx, { InsArgType::Address, BC_DT_NONE, 0 });
 
-		if (!removeNecessaryColon())
-			return false;
+		removeNecessaryColon();
 
 		std::string retDtStr = BC_DatatypeToString(ocx.datatype);
 		std::string retVal = getArgAsString();
 
-		DelayedPusher<BC_FuncCallData> fcd(*this);
+		DelayedPush<BC_FuncCallData> fcd(*this);
 
 		while (nextToken().type == AsmToken::Type::Sep_Colon)
 		{
 			if (nextToken().type != AsmToken::Type::Name)
-				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+				COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 			BC_Datatype argDt = BC_DatatypeFromString(currToken().value);
 			fcd->argType.set(fcd->nArgs, argDt);
 
 			if (nextToken().type != AsmToken::Type::Sep_Dot)
-				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
+				COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 
-			if (!compileArgument(ocx, { InsArgType::TypedValue, argDt, fcd->nArgs + 1ull }))
-				return false;
+			compileArgument(ocx, { InsArgType::TypedValue, argDt, fcd->nArgs + 1ull });
 
 			++fcd->nArgs;
 		}
 		prevToken();
 
-		if (!compileStatement("popc." + retDtStr + " : " + retVal))
-			return false;
-
-		return true;
+		compileStatement("popc." + retDtStr + " : " + retVal);
 	}
 
-	bool Compiler::compileSpecCallExtern(BC_OpCodeEx& ocx)
+	void Compiler::compileSpecCallExtern(BC_OpCodeEx& ocx)
 	{
-		if (!removeNecessaryColon())
-			return false;
+		removeNecessaryColon();
 
-		if (!compileArgAddress(ocx, { InsArgType::Address, BC_DT_NONE, 0 }))
-			return false;
+		compileArgAddress(ocx, { InsArgType::Address, BC_DT_NONE, 0 });
 
-		DelayedPusher<BC_FuncCallData> fcd(*this);
+		DelayedPush<BC_FuncCallData> fcd(*this);
 
-		if (!removeNecessaryColon())
-			return false;
+		removeNecessaryColon();
 
-		if (!compileArgument(ocx, { InsArgType::Address, ocx.datatype, 1 }))
-			return false;
+		compileArgument(ocx, { InsArgType::Address, ocx.datatype, 1 });
 
 		while (nextToken().type == AsmToken::Type::Sep_Colon)
 		{
 			if (nextToken().type != AsmToken::Type::Name)
-				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+				COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 			BC_Datatype argDt = BC_DatatypeFromString(currToken().value);
 			fcd->argType.set(fcd->nArgs, argDt);
 
 			if (nextToken().type != AsmToken::Type::Sep_Dot)
-				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
+				COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 
-			if (!compileArgument(ocx, { InsArgType::TypedValue, argDt, fcd->nArgs + 2ull }))
-				return false;
+			compileArgument(ocx, { InsArgType::TypedValue, argDt, fcd->nArgs + 2ull });
 
 			++fcd->nArgs;
 		}
 		prevToken();
-
-		return true;
 	}
 
-	bool Compiler::compileArgument(BC_OpCodeEx& ocx, const InsArgument& arg)
+	void Compiler::compileArgument(BC_OpCodeEx& ocx, const InsArgument& arg)
 	{
 		switch (arg.type)
 		{
 		case InsArgType::Address:
-			if (!compileArgAddress(ocx, arg))
-				return false;
-			break;
+			compileArgAddress(ocx, arg); break;
 		case InsArgType::Value:
 		case InsArgType::TypedValue:
-			if (!compileArgValue(ocx, arg))
-				return false;
-			break;
+			compileArgValue(ocx, arg); break;
 		case InsArgType::Datatype:
-			if (!compileArgDatatype(ocx, arg))
-				return false;
-			break;
+			compileArgDatatype(ocx, arg); break;
 		default:
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnknownInsArgType, "Cannot handle InsArgType '" + std::to_string((uint64_t)arg.type) + "'!");
+			COMPILER_THROW_ERROR(CompErrCode::UnknownInsArgType, "Cannot handle InsArgType '" + std::to_string((uint64_t)arg.type) + "'!");
 		}
-
-		return true;
 	}
 
-	bool Compiler::compileArgAddress(BC_OpCodeEx& ocx, const InsArgument& arg)
+	void Compiler::compileArgAddress(BC_OpCodeEx& ocx, const InsArgument& arg)
 	{
-		if (!compileArgValue(ocx, arg))
-			return false;
-		return true;
+		compileArgValue(ocx, arg);
 	}
 
-	bool Compiler::compileArgValue(BC_OpCodeEx& ocx, const InsArgument& arg)
+	void Compiler::compileArgValue(BC_OpCodeEx& ocx, const InsArgument& arg)
 	{
 		nextToken();
 
@@ -274,18 +244,15 @@ namespace MarC
 		}
 
 		bool getsDereferenced;
-		if (!generateTypeCell(tc, getsDereferenced))
-			return false;
+		generateTypeCell(tc, getsDereferenced);
 
 		if (getsDereferenced)
 			ocx.derefArg.set(arg.index);
 
 		pushCode(&tc.cell, BC_DatatypeSize(tc.datatype));
-
-		return true;
 	}
 
-	bool Compiler::generateTypeCell(TypeCell& tc, bool& getsDereferenced)
+	void Compiler::generateTypeCell(TypeCell& tc, bool& getsDereferenced)
 	{
 		getsDereferenced = false;
 		if (currToken().type == AsmToken::Type::Op_Deref)
@@ -298,58 +265,43 @@ namespace MarC
 		switch (currToken().type)
 		{
 		case AsmToken::Type::Op_Register:
-			if (!generateTypeCellRegister(tc))
-				return false;
-			break;
+			generateTypeCellRegister(tc); break;
 		case AsmToken::Type::Op_FP_Relative:
-			if (!generateTypeCellFPRelative(tc))
-				return false;
-			break;
+			generateTypeCellFPRelative(tc); break;
 		case AsmToken::Type::Op_DT_Size:
-			if (!generateTypeCellDTSize(tc))
-				return false;
-			break;
+			generateTypeCellDTSize(tc); break;
 		case AsmToken::Type::Name:
-			if (!generateTypeCellName(tc))
-				return false;
-			break;
+			generateTypeCellName(tc); break;
 		case AsmToken::Type::String:
-			if (!generateTypeCellString(tc))
-				return false;
-			break;
+			generateTypeCellString(tc); break;
 		case AsmToken::Type::Float:
-			if (!generateTypeCellFloat(tc, getsDereferenced))
-				return false;
-			break;
+			generateTypeCellFloat(tc, getsDereferenced); break;
 		case AsmToken::Type::Integer:
-			if (!generateTypeCellInteger(tc, getsDereferenced))
-				return false;
-			break;
+			generateTypeCellInteger(tc, getsDereferenced); break;
+		default:
+			COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::None, currToken());
 		}
-		return true;
 	}
 
-	bool Compiler::generateTypeCellRegister(TypeCell& tc)
+	void Compiler::generateTypeCellRegister(TypeCell& tc)
 	{
 		auto reg = BC_RegisterFromString(nextToken().value);
 		if (reg == BC_MEM_REG_NONE || reg == BC_MEM_REG_UNKNOWN)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnknownRegisterName, "Unknown register name '" + currToken().value + "'!");
+			COMPILER_THROW_ERROR(CompErrCode::UnknownRegisterName, "Unknown register name '" + currToken().value + "'!");
 		tc.cell.as_ADDR = BC_MemAddress(BC_MEM_BASE_REGISTER, reg);
-		return true;
 	}
 
-	bool Compiler::generateTypeCellFPRelative(TypeCell& tc)
+	void Compiler::generateTypeCellFPRelative(TypeCell& tc)
 	{
 		if (nextToken().type == AsmToken::Type::Op_DT_Size)
 		{
-			if (!generateTypeCellDTSize(tc))
-				return false;
+			generateTypeCellDTSize(tc);
 
 			auto base = BC_MEM_BASE_DYN_FRAME_ADD; // TODO: Add support for BC_MEM_BASE_DYN_FRAME_SUB
 
 			tc.cell.as_ADDR = BC_MemAddress(base, tc.cell.as_U_64);
 
-			return true;
+			return;
 		}
 
 		if (currToken().type == AsmToken::Type::Integer)
@@ -361,25 +313,23 @@ namespace MarC
 
 			tc.cell.as_ADDR = BC_MemAddress(base, offset);
 
-			return true;
+			return;
 		}
 
-		COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Op_DT_Size' or 'Integer'! Got '" + AsmTokenTypeToString(currToken().type) + "' with value '" + currToken().value + "'!");
+		COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Expected token of type 'Op_DT_Size' or 'Integer'! Got '" + AsmTokenTypeToString(currToken().type) + "' with value '" + currToken().value + "'!");
 	}
 
-	bool Compiler::generateTypeCellDTSize(TypeCell& tc)
+	void Compiler::generateTypeCellDTSize(TypeCell& tc)
 	{
 		if (nextToken().type != AsmToken::Type::Name)
-			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+			COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		tc.cell.as_U_64 = BC_DatatypeSize(BC_DatatypeFromString(currToken().value));
 		if (tc.cell.as_U_64 == 0)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Unable to convert name '" + currToken().value + "' to datatype!");
-
-		return true;
+			COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Unable to convert name '" + currToken().value + "' to datatype!");
 	}
 
-	bool Compiler::generateTypeCellName(TypeCell& tc)
+	void Compiler::generateTypeCellName(TypeCell& tc)
 	{
 		m_pModInfo->unresolvedSymbolRefs.push_back(
 			{
@@ -388,25 +338,21 @@ namespace MarC
 				tc.datatype
 			}
 		);
-
-		return true;
 	}
 
-	bool Compiler::generateTypeCellString(TypeCell& tc)
+	void Compiler::generateTypeCellString(TypeCell& tc)
 	{
 		if (tc.datatype != BC_DT_U_64)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::DatatypeMismatch, "Cannot use string in instruction with datatype '" + BC_DatatypeToString(tc.datatype) + "'!");
+			COMPILER_THROW_ERROR(CompErrCode::DatatypeMismatch, "Cannot use string in instruction with datatype '" + BC_DatatypeToString(tc.datatype) + "'!");
 
 		tc.cell.as_ADDR = currStaticStackAddr();
 		m_pModInfo->staticStack->push(currToken().value.c_str(), currToken().value.size() + 1);
-
-		return true;
 	}
 
-	bool Compiler::generateTypeCellFloat(TypeCell& tc, bool getsDereferenced)
+	void Compiler::generateTypeCellFloat(TypeCell& tc, bool getsDereferenced)
 	{
 		if (getsDereferenced)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Cannot dereference argument of type 'float'!");
+			COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Cannot dereference argument of type 'float'!");
 		switch (tc.datatype)
 		{
 		case BC_DT_F_32:
@@ -414,22 +360,20 @@ namespace MarC
 		case BC_DT_F_64:
 			tc.cell.as_F_64 = std::stod(currToken().value); break;
 		default:
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::DatatypeMismatch, "Cannot use floating-point literal '" + currToken().value + "' in instruction with datatype '" + BC_DatatypeToString(tc.datatype) + "'!");
+			COMPILER_THROW_ERROR(CompErrCode::DatatypeMismatch, "Cannot use floating-point literal '" + currToken().value + "' in instruction with datatype '" + BC_DatatypeToString(tc.datatype) + "'!");
 		}
-
-		return true;
 	}
 
-	bool Compiler::generateTypeCellInteger(TypeCell& tc, bool getsDereferenced)
+	void Compiler::generateTypeCellInteger(TypeCell& tc, bool getsDereferenced)
 	{
 		if (!getsDereferenced && (tc.datatype == BC_DT_F_32 || tc.datatype == BC_DT_F_64))
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::DatatypeMismatch, "Cannot use integer '" + currToken().value + "' in instruction with datatype '" + BC_DatatypeToString(tc.datatype) + "'!");
+			COMPILER_THROW_ERROR(CompErrCode::DatatypeMismatch, "Cannot use integer '" + currToken().value + "' in instruction with datatype '" + BC_DatatypeToString(tc.datatype) + "'!");
 
 		tc.cell.as_U_64 = std::stoull(positiveString(currToken().value));
 		if (isNegativeString(currToken().value))
 		{
 			if (getsDereferenced)
-				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Cannot dereference literal with negative value!");
+				COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Cannot dereference literal with negative value!");
 
 			switch (tc.datatype)
 			{
@@ -447,28 +391,24 @@ namespace MarC
 				tc.cell.as_I_64 *= -1; break;
 			}
 		}
-
-		return true;
 	}
 
-	bool Compiler::compileArgDatatype(BC_OpCodeEx& ocx, const InsArgument& arg)
+	void Compiler::compileArgDatatype(BC_OpCodeEx& ocx, const InsArgument& arg)
 	{
 		auto dt = BC_DatatypeFromString(nextToken().value);
 		if (dt == BC_DT_NONE || dt == BC_DT_UNKNOWN)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
+			COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
 
 		pushCode(dt);
-
-		return true;
 	}
 
-	bool Compiler::compileDirective()
+	void Compiler::compileDirective()
 	{
 		switch (DirectiveIDFromString(nextToken().value))
 		{
 		case DirectiveID::None:
 		case DirectiveID::Unknown:
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnknownDirectiveID, "Unknown directive '" + currToken().value + "'!");
+			COMPILER_THROW_ERROR(CompErrCode::UnknownDirectiveID, "Unknown directive '" + currToken().value + "'!");
 			break;
 		case DirectiveID::Label:
 			return compileDirLabel();
@@ -486,39 +426,32 @@ namespace MarC
 			return compileDirFunction();
 		case DirectiveID::FunctionExtern:
 			return compileDirFunctionExtern();
-		case DirectiveID::StaticString:
-			return compileDirStaticString();
 		}
 
-		COMPILER_RETURN_WITH_ERROR(CompErrCode::UnknownDirectiveID, "Unknown directive '" + currToken().value + "'!");
+		COMPILER_THROW_ERROR(CompErrCode::UnknownDirectiveID, "Unknown directive '" + currToken().value + "'!");
 	}
 
-	bool Compiler::compileDirLabel()
+	void Compiler::compileDirLabel()
 	{
-		if (!removeNecessaryColon())
-			return false;
+		removeNecessaryColon();
 
 		if (nextToken().type != AsmToken::Type::Name)
-			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+			COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		addSymbol({ currToken().value, SymbolUsage::Address, currCodeAddr() });
-
-		return true;
 	}
 
-	bool Compiler::compileDirAlias()
+	void Compiler::compileDirAlias()
 	{
-		if (!removeNecessaryColon())
-			return false;
+		removeNecessaryColon();
 
 		if (nextToken().type != AsmToken::Type::Name)
-			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+			COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		Symbol symbol;
 		symbol.name = currToken().value;
 
-		if (!removeNecessaryColon())
-			return false;
+		removeNecessaryColon();
 
 		TypeCell tc;
 		switch (nextToken().type)
@@ -544,35 +477,30 @@ namespace MarC
 			symbol.usage = SymbolUsage::Value;
 			break;
 		default:
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Unexpected token'" + currToken().value + "' for alias value!");
+			COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Unexpected token'" + currToken().value + "' for alias value!");
 		}
 
 		bool getsDereferenced;
-		if (!generateTypeCell(tc, getsDereferenced))
-			return false;
+		generateTypeCell(tc, getsDereferenced);
 
 		if (getsDereferenced)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Usage of the deref operator is not allowed in the alias directive!");
+			COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Usage of the deref operator is not allowed in the alias directive!");
 
 		symbol.value = tc.cell;
 
 		addSymbol(symbol);
-
-		return true;
 	}
 
-	bool Compiler::compileDirStatic()
+	void Compiler::compileDirStatic()
 	{
-		if (!removeNecessaryColon())
-			return false;
+		removeNecessaryColon();
 
 		if (nextToken().type != AsmToken::Type::Name)
-			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+			COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		std::string name = currToken().value;
 
-		if (!removeNecessaryColon())
-			return false;
+		removeNecessaryColon();
 
 		TypeCell tc;
 		tc.datatype = BC_DT_U_64;
@@ -580,162 +508,129 @@ namespace MarC
 		nextToken();
 
 		bool getsDereferenced;
-		if (!generateTypeCell(tc, getsDereferenced))
-			return false;
+		generateTypeCell(tc, getsDereferenced);
 
 		if (getsDereferenced)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Usage of the deref operator is not allowed in the static directive!");
+			COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Usage of the deref operator is not allowed in the static directive!");
 
 		BC_MemCell mc;
 		mc.as_ADDR = currStaticStackAddr();
 		m_pModInfo->staticStack->resize(m_pModInfo->staticStack->size() + tc.cell.as_U_64);
 
 		addSymbol({ name, SymbolUsage::Address, mc });
-
-		return true;
 	}
 
-	bool Compiler::compileDirRequestModule()
+	void Compiler::compileDirRequestModule()
 	{
-		if (!removeNecessaryColon())
-			return false;
+		removeNecessaryColon();
 
 		if (nextToken().type != AsmToken::Type::String)
-			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::String, currToken());
+			COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::String, currToken());
 
 		std::string modName = currToken().value;
 
 		m_pModInfo->requiredModules.push_back(modName);
-
-		return true;
 	}
 
-	bool Compiler::compileDirScope()
+	void Compiler::compileDirScope()
 	{
-		if (!removeNecessaryColon())
-			return false;
+		removeNecessaryColon();
 
 		if (nextToken().type != AsmToken::Type::Name)
-			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+			COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		addScope(currToken().value);
-
-		return true;
 	}
 
-	bool Compiler::compileDirEnd()
+	void Compiler::compileDirEnd()
 	{
 		if (m_scopeList.size() == 0)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::AlreadyInGlobalScope, "Cannot end scope, already in global scope!");
+			COMPILER_THROW_ERROR(CompErrCode::AlreadyInGlobalScope, "Cannot end scope, already in global scope!");
 
 		addSymbol({ "SCOPE_END", SymbolUsage::Address, currCodeAddr() });
 
 		m_scopeList.pop_back();
-
-		return true;
 	}
 
-	bool Compiler::compileDirFunction()
+	void Compiler::compileDirFunction()
 	{
 		if (nextToken().type != AsmToken::Type::Sep_Dot)
-			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
+			COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 
 		if (nextToken().type != AsmToken::Type::Name)
-			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+			COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		BC_Datatype dt = BC_DatatypeFromString(currToken().value);
 		if (dt == BC_DT_NONE || dt == BC_DT_UNKNOWN)
-			COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
+			COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
 
-		if (!removeNecessaryColon())
-			return false;
+		removeNecessaryColon();
 
 		{
 			if (nextToken().type != AsmToken::Type::Name)
-				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+				COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 			std::string funcName = currToken().value;
 
-			if (!compileStatement("jmp : " + funcName + ">>SCOPE_END"))
-				return false;
+			compileStatement("jmp : " + funcName + ">>SCOPE_END");
 			addScope(funcName);
 		}
 
-		if (!removeNecessaryColon())
-			return false;
+		removeNecessaryColon();
 
 		{
 			if (nextToken().type != AsmToken::Type::Name)
-				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+				COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 			std::string retName = currToken().value;
 
-			if (!compileStatement("#alias : " + retName + " : ~-" + std::to_string(2 * BC_DatatypeSize(BC_DT_U_64) + BC_DatatypeSize(dt))))
-				return false;
+			compileStatement("#alias : " + retName + " : ~-" + std::to_string(2 * BC_DatatypeSize(BC_DT_U_64) + BC_DatatypeSize(dt)));
 		}
 
 		uint64_t offset = 0;
 		while (nextToken().type == AsmToken::Type::Sep_Colon)
 		{
 			if (nextToken().type != AsmToken::Type::Name)
-				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+				COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 			BC_Datatype dt = BC_DatatypeFromString(currToken().value);
 			if (dt == BC_DT_NONE || dt == BC_DT_UNKNOWN)
-				COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
+				COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
 
 			if (nextToken().type != AsmToken::Type::Sep_Dot)
-				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
+				COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 
 			if (nextToken().type != AsmToken::Type::Name)
-				COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+				COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 			std::string retName = currToken().value;
 
-			if (!compileStatement("#alias : " + retName + " : ~+" + std::to_string(offset)))
-				return false;
+			compileStatement("#alias : " + retName + " : ~+" + std::to_string(offset));
 
 			offset += BC_DatatypeSize(dt);
 		}
 
 		prevToken();
-
-		return true;
 	}
 
-	bool Compiler::compileDirFunctionExtern()
+	void Compiler::compileDirFunctionExtern()
 	{
-		if (!removeNecessaryColon())
-			return false;
+		removeNecessaryColon();
 
 		if (nextToken().type != AsmToken::Type::Name)
-			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+			COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		std::string name = currToken().value;
 
-		if (!compileStatement("#alias : " + name + " : \"" + getScopedName(name) + "\""))
-			return false;
+		compileStatement("#alias : " + name + " : \"" + getScopedName(name) + "\"");
 
 		m_pModInfo->extensionRequired = true;
-
-		return true;
 	}
 
-	bool Compiler::compileDirStaticString()
-	{
-		addSymbol({ currToken().value, SymbolUsage::Address, currCodeAddr() });
-		if (!compileStatement("#alias : "))
-			return false;
-		if (!compileStatement("#static : "))
-			return false;
-		return true;
-	}
-
-	bool Compiler::removeNecessaryColon()
+	void Compiler::removeNecessaryColon()
 	{
 		if (nextToken().type != AsmToken::Type::Sep_Colon)
-			COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Colon, currToken());
-		return true;
+			COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Colon, currToken());
 	}
 
 	std::string Compiler::getArgAsString()

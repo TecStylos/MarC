@@ -29,7 +29,7 @@ namespace MarC
 			: m_code(code), m_line(errToken.line), m_column(errToken.column), m_errText(errText), m_sysErrLine(sysErrLine), m_sysErrFile(sysErrFile)
 		{}
 	public:
-		operator bool() const;
+		explicit operator bool() const;
 		const std::string& getText() const;
 		std::string getMessage() const;
 	private:
@@ -43,9 +43,10 @@ namespace MarC
 
 	typedef CompilerError::Code CompErrCode;
 
-	#define COMPILER_RETURN_WITH_ERROR(errCode, errText) { m_lastErr = CompilerError(errCode, currToken(), errText, __LINE__, __FILE__); return false; }
-	#define COMPILER_RETURN_ERR_UNEXPECTED_TOKEN(expectedType, token) COMPILER_RETURN_WITH_ERROR(CompErrCode::UnexpectedToken, "Expected token of type '" + AsmTokenTypeToString(expectedType) + "'! Got '" + AsmTokenTypeToString(token.type) + "' with value '" + token.value + "'!")
-
+	#define COMPILER_THROW_ERROR(errCode, errText) throw CompilerError(errCode, currToken(), errText, __LINE__, __FILE__)
+	#define COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(expectedType, token) \
+	COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Expected token of type '" + AsmTokenTypeToString(expectedType) + "'! Got '" + AsmTokenTypeToString(token.type) + "' with value '" + token.value + "'!")
+	
 	class Compiler
 	{
 	public:
@@ -61,39 +62,38 @@ namespace MarC
 		void backup();
 		void recover();
 	private:
-		bool compileStatement();
-		bool compileStatement(const std::string& statement);
-		bool compileInstruction();
+		void compileStatement();
+		void compileStatement(const std::string& statement);
+		void compileInstruction();
 	private:
-		bool compileSpecializedInstruction(BC_OpCodeEx& ocx);
-		bool compileSpecCall(BC_OpCodeEx& ocx);
-		bool compileSpecCallExtern(BC_OpCodeEx& ocx);
+		void compileSpecializedInstruction(BC_OpCodeEx& ocx);
+		void compileSpecCall(BC_OpCodeEx& ocx);
+		void compileSpecCallExtern(BC_OpCodeEx& ocx);
 	private:
-		bool compileArgument(BC_OpCodeEx& ocx, const InsArgument& arg);
-		bool compileArgAddress(BC_OpCodeEx& ocx, const InsArgument& arg);
-		bool compileArgValue(BC_OpCodeEx& ocx, const InsArgument& arg);
-		bool generateTypeCell(TypeCell& tc, bool& getsDereferenced);
-		bool generateTypeCellRegister(TypeCell& tc);
-		bool generateTypeCellFPRelative(TypeCell& tc);
-		bool generateTypeCellDTSize(TypeCell& tc);
-		bool generateTypeCellName(TypeCell& tc);
-		bool generateTypeCellString(TypeCell& tc);
-		bool generateTypeCellFloat(TypeCell& tc, bool getsDereferenced);
-		bool generateTypeCellInteger(TypeCell& tc, bool getsDereferenced);
-		bool compileArgDatatype(BC_OpCodeEx& ocx, const InsArgument& arg);
+		void compileArgument(BC_OpCodeEx& ocx, const InsArgument& arg);
+		void compileArgAddress(BC_OpCodeEx& ocx, const InsArgument& arg);
+		void compileArgValue(BC_OpCodeEx& ocx, const InsArgument& arg);
+		void generateTypeCell(TypeCell& tc, bool& getsDereferenced);
+		void generateTypeCellRegister(TypeCell& tc);
+		void generateTypeCellFPRelative(TypeCell& tc);
+		void generateTypeCellDTSize(TypeCell& tc);
+		void generateTypeCellName(TypeCell& tc);
+		void generateTypeCellString(TypeCell& tc);
+		void generateTypeCellFloat(TypeCell& tc, bool getsDereferenced);
+		void generateTypeCellInteger(TypeCell& tc, bool getsDereferenced);
+		void compileArgDatatype(BC_OpCodeEx& ocx, const InsArgument& arg);
 	private:
-		bool compileDirective();
-		bool compileDirLabel();
-		bool compileDirAlias();
-		bool compileDirStatic();
-		bool compileDirRequestModule();
-		bool compileDirScope();
-		bool compileDirEnd();
-		bool compileDirFunction();
-		bool compileDirFunctionExtern();
-		bool compileDirStaticString();
+		void compileDirective();
+		void compileDirLabel();
+		void compileDirAlias();
+		void compileDirStatic();
+		void compileDirRequestModule();
+		void compileDirScope();
+		void compileDirEnd();
+		void compileDirFunction();
+		void compileDirFunctionExtern();
 	private:
-		bool removeNecessaryColon();
+		void removeNecessaryColon();
 	private:
 		std::string getArgAsString();
 	private:
@@ -131,16 +131,16 @@ namespace MarC
 		friend class VirtualAsmTokenList;
 	private:
 		template <typename T>
-		class DelayedPusher
+		class DelayedPush
 		{
 		public:
-			DelayedPusher(Compiler& compiler)
-				: DelayedPusher(compiler, new T(), true)
+			DelayedPush(Compiler& compiler)
+				: DelayedPush(compiler, new T(), true)
 			{}
-			DelayedPusher(Compiler& compiler, T& obj)
-				: DelayedPusher(compiler, &obj, false)
+			DelayedPush(Compiler& compiler, T& obj)
+				: DelayedPush(compiler, &obj, false)
 			{}
-			~DelayedPusher()
+			~DelayedPush()
 			{
 				m_comp.writeCode(*m_pObj, m_codeOffset);
 				if (m_destroyObjOnDestruct && m_pObj)
@@ -155,15 +155,15 @@ namespace MarC
 				return *m_pObj;
 			}
 		private:
-			DelayedPusher(Compiler& compiler, T* pObj, bool destroyObjOnDestruct)
+			DelayedPush(Compiler& compiler, T* pObj, bool destroyObjOnDestruct)
 				: m_comp(compiler), m_pObj(pObj), m_destroyObjOnDestruct(destroyObjOnDestruct)
 			{
 				m_codeOffset = compiler.currCodeOffset();
 				m_comp.pushCode(*m_pObj);
 			}
-			DelayedPusher() = delete;
-			DelayedPusher(const DelayedPusher&) = delete;
-			DelayedPusher(DelayedPusher&&) = delete;
+			DelayedPush() = delete;
+			DelayedPush(const DelayedPush&) = delete;
+			DelayedPush(DelayedPush&&) = delete;
 		private:
 			Compiler& m_comp;
 			T* m_pObj = nullptr;

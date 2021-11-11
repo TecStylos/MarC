@@ -1,5 +1,7 @@
 #reqmod : "std"
 
+#alias : FRAME_TIME : 100
+#alias : MAIN_LOOP_COUNT : 100
 #alias : WIDTH : 10
 #alias : HEIGHT : 10
 #alias : GRID_SIZE : 111
@@ -228,14 +230,14 @@ call.i8 : INIT : $td : addr.GRID2
 
 call.i8 : RENDER : $td : addr.GRID1
 
-mov.i64 : $lc : 100
+mov.i64 : $lc : MAIN_LOOP_COUNT
 #label : MAIN_LOOP
-    calx.i8 : >>std>>sleepms : 0 : u64.500
+    calx.i8 : >>std>>sleepms : 0 : u64.FRAME_TIME
     call.i8 : EVOLVE : $td : addr.GRID1 : addr.GRID2
     call.i8 : CLEAR : $td
     call.i8 : RENDER : $td : addr.GRID2
 
-    calx.i8 : >>std>>sleepms : 0 : u64.500
+    calx.i8 : >>std>>sleepms : 0 : u64.FRAME_TIME
     call.i8 : EVOLVE : $td : addr.GRID2 : addr.GRID1
     call.i8 : CLEAR : $td
     call.i8 : RENDER : $td : addr.GRID1

@@ -13,7 +13,6 @@ namespace MarC
 		if (value == "end") return DirectiveID::End;
 		if (value == "func") return DirectiveID::Function;
 		if (value == "funx") return DirectiveID::FunctionExtern;
-		if (value == "string") return DirectiveID::StaticString;
 
 		return DirectiveID::Unknown;
 	}

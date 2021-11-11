@@ -21,7 +21,6 @@ namespace MarC
 		End,
 		Function,
 		FunctionExtern,
-		StaticString
 	};
 
 	DirectiveID DirectiveIDFromString(const std::string& value);
