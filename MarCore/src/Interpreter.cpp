@@ -424,7 +424,9 @@ namespace MarC
 	}
 	void Interpreter::exec_insCallExtern(BC_OpCodeEx ocx)
 	{
-		BC_MemAddress funcNameAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg.get(0)).as_ADDR;
+		uint64_t argIndex = 0;
+
+		BC_MemAddress funcNameAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[argIndex++]).as_ADDR;
 		auto& fcd = readDataAndMove<BC_FuncCallData>();
 
 		auto funcIt = m_extFuncs.find(funcNameAddr);
@@ -444,11 +446,13 @@ namespace MarC
 		efd.retVal.datatype = ocx.datatype;
 		efd.nParams = fcd.nArgs;
 
-		auto retDest = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[1]);
+		void* retDest = nullptr;
+		if (ocx.datatype != BC_DT_NONE)
+			hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[argIndex++]);
 
 		for (uint8_t i = 0; i < fcd.nArgs; ++i)
 		{
-			bool deref = ocx.derefArg.get(2ull + i);
+			bool deref = ocx.derefArg.get(argIndex++);
 			auto dt = fcd.argType.get(i);
 			efd.param[i].datatype = dt;
 			efd.param[i].cell = readMemCellAndMove(dt, deref);

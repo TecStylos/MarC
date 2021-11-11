@@ -196,15 +196,19 @@ namespace MarC
 
 	void Compiler::compileSpecCallExtern(BC_OpCodeEx& ocx)
 	{
+		uint64_t argIndex = 0;
+
 		removeNecessaryColon();
 
-		compileArgAddress(ocx, { InsArgType::Address, BC_DT_NONE, 0 });
+		compileArgAddress(ocx, { InsArgType::Address, BC_DT_NONE, argIndex++ });
 
 		DelayedPush<BC_FuncCallData> fcd(*this);
 
-		removeNecessaryColon();
-
-		compileArgument(ocx, { InsArgType::Address, ocx.datatype, 1 });
+		if (ocx.datatype != BC_DT_NONE)
+		{
+			removeNecessaryColon();
+			compileArgument(ocx, { InsArgType::Address, ocx.datatype, argIndex++ });
+		}
 
 		while (nextToken().type == AsmToken::Type::Sep_Colon)
 		{
@@ -216,7 +220,7 @@ namespace MarC
 			if (nextToken().type != AsmToken::Type::Sep_Dot)
 				COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 
-			compileArgument(ocx, { InsArgType::TypedValue, argDt, fcd->nArgs + 2ull });
+			compileArgument(ocx, { InsArgType::TypedValue, argDt, fcd->nArgs + argIndex });
 
 			++fcd->nArgs;
 		}
