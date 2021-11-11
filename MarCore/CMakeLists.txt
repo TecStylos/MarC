@@ -37,17 +37,10 @@ target_link_libraries(
 	PluS
 )
 
-if (WIN32)
-	target_compile_definitions(
-		MarCore PUBLIC 
-		PLUS_PLATFORM_WINDOWS
-	)
-elseif (UNIX)
-	target_compile_definitions(
-		MarCore PUBLIC 
-		PLUS_PLATFORM_UNIX
-	)
-endif()
+target_compile_definitions(
+	MarCore PUBLIC 
+	${PLUS_COMPILE_DEFINITIONS}
+)
 
 if (MSVC) 
 	target_link_options(MarCore PRIVATE $<$<CONFIG:RELWITHDEBINFO>:/PROFILE>)

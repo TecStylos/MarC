@@ -1,3 +1,4 @@
 [submodule "vendor/PluS"]
 	path = vendor/PluS
 	url = https://github.com/TecStylos/PluS.git
+	branch = main

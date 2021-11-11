@@ -16,6 +16,15 @@ set_target_properties(
 set_target_properties(
 	EXTENSION_STD PROPERTIES PREFIX ""
 )
+set_target_properties(
+	EXTENSION_STD PROPERTIES DEBUG_POSTFIX "-dbg"
+)
+set_target_properties(
+	EXTENSION_STD PROPERTIES RELWITHDEBINFO_POSTFIX "-rel"
+)
+set_target_properties(
+	EXTENSION_STD PROPERTIES RELEASE_POSTFIX "-dist"
+)
 
 target_include_directories(
 	EXTENSION_STD PUBLIC 
@@ -30,19 +39,6 @@ target_link_libraries(
 
 target_compile_definitions(
 	EXTENSION_STD PUBLIC
+	${PLUS_COMPILE_DEFINITIONS}
 	"PLUS_BUILD_PLUGIN"
 )
-
-if (WIN32)
-	target_compile_definitions(
-		EXTENSION_STD PUBLIC
-		"PLUS_PLATFORM_WINDOWS"
-	)
-endif()
-
-if (UNIX)
-	target_compile_definitions(
-		EXTENSION_STD PUBLIC
-		"PLUS_PLATFORM_UNIX"
-	)
-endif()
