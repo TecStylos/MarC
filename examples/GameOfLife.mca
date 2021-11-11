@@ -1,20 +1,20 @@
 #reqmod : "std"
 
 #alias : FRAME_TIME : 100
-#alias : MAIN_LOOP_COUNT : 100
+#alias : MAIN_LOOP_COUNT : 13
 #alias : WIDTH : 10
 #alias : HEIGHT : 10
 #alias : GRID_SIZE : 111
 #static : GRID1 : 120
 #static : GRID2 : 120
 
-#alias : LINE_0 : " #        "
-#alias : LINE_1 : " #        "
-#alias : LINE_2 : " #        "
+#alias : LINE_0 : "  #       "
+#alias : LINE_1 : "# #       "
+#alias : LINE_2 : " ##       "
 #alias : LINE_3 : "          "
-#alias : LINE_4 : " ##       "
-#alias : LINE_5 : "##        "
-#alias : LINE_6 : " #        "
+#alias : LINE_4 : "          "
+#alias : LINE_5 : "          "
+#alias : LINE_6 : "          "
 #alias : LINE_7 : "          "
 #alias : LINE_8 : "          "
 #alias : LINE_9 : "          "

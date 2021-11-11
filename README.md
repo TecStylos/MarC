@@ -1,68 +1,45 @@
-# MarC
+# <a name="MarC"></a> MarC
 
-MarC is going to be an language inspired by C.
-Currently there is only the MarCembly language (MarC Assembly) available.
+## <a name="MarCLang"></a> MarC Language
+MarC is going to be an interpreted C-like language.
+Currently there is only the [MarCembly](#MarCemblyLang) language (MarC Assembly) available.
+For more info check the [MarC Documentation](/docs/MarC.md).
+***
+## <a name="MarCemblyLang"></a> MarCembly Language
 
-## MarCembly
+MarCembly is the underlying implementation of the MarC language.
+For more info check the [MarCembly Documentation](/docs/MarCembly.md).
+***
 
-MarCembly code can get live interpreted or compiled down to bytecode.
+## <a name="MarCmdCLI"></a> MarCmd CLI
+MarCmd is the command line tool for compiling/interpreting/debugging MarC and MarCembly code.
+For more info check the [MarCmd Documentation](/docs/MarCmd.md)
+***
+## Getting Started
+### Prerequisites
+ * CMake
+ * Make
+ * C++17 Compiler
 
-Feature Set
----
+### Downloading the repo
+Download the repo with `git clone --recursive https://github.com/TecStylos/MarC.git`
 
-### Datatypes [dt]:
-- i8
-- i16
-- i32
-- i64
-- u8
-- u16
-- u32
-- u64
-- f32
-- f64
+### Building
+ 1. Create a directory `/bin/<configuration>`
+ 2. Go into the created directory and run `cmake ../.. -DCMAKE_BUILD_TYPE=<configuration>`
+ 3. Run `make`
 
-### Registers [addr]:
-Identifier | Definition
------------|-----------
-$cp | Code Pointer
-$sp | Stack Pointer
-$fp | Frame Pointer
-$lc | Loop Counter
-$ac | Accumulator
-$td | Temporary Data
-$ec | Exit Code
+Configurations:
+ * `Debug`
+ * `RelWithDebInfo`
+ * `Release`
 
-### Operators:
-Usage | Definition
------------|-----------
-@[addr] | Dereference address
-^[dt] | Size of datatype (not implemented yet)
-~[i64] | Address relative to current frame pointer
+## Examples
+Examples for the MarCembly language can be found in the [/examples](/examples) folder.
+All examples requiring the standard library should be run from the root directory. Otherwise (without specifying a [module directory](/docs/MarCmd.md#ExtensionDirectory)) the interpreter won't find the appropriate module file.
 
-### Instructions:
-OpCode | Datatype Required | Arguments | Definition
--------|-------------------|---------- | ----------
-mov | true | [dest] : [val] | Copy [val] to [dest]
-add | true | [dest] : [val] | Add [val] to value at [dest]
-sub | true | [dest] : [val] | Subtract [val] from value at [dest]
-mul | true | [dest] : [val] | Multiply value at [dest] with [val]
-div | true | [dest] : [val] | Divide value at [dest] by [val]
-drf | false | [dest] : [addr] | Dereference [addr] and store it at [dest]
-conv | true | [addr] : [dt] | Convert value at [addr] from [ocdt] datatype to [dt]
-push | true | none | Push uninitialized memory of size ^[ocdt] onto the dynamic stack
-pop | true | none | Pop value of size ^[ocdt] from the dynamic stack
-pushc | true | [val] | Push [val] onto the dynamic stack
-popc | true | [addr] | Pop value from the dynamic stack and store it at [addr]
-pushf | false | none | Push a new frame onto the dynamic stack
-popf | false | none | Pop the current frame from the dynamic stack
-jmp | false | [addr] | Jump to [addr]
-jeq | true | [addr] : [val1] : [val2] | Jump to [addr] if val1 == val2
-jne | true | [addr] : [val1] : [val2] | Jump to [addr] if val1 != val2
-jlt | true | [addr] : [val1] : [val2] | Jump to [addr] if val1 < val2
-jgt | true | [addr] : [val1] : [val2] | Jump to [addr] if val1 > val2
-jle | true | [addr] : [val1] : [val2] | Jump to [addr] if val1 <= val2
-jge | true | [addr] : [val1] : [val2] | Jump to [addr] if val1 >= val2
-call | true | [addr1] : [addr2] : [args] | Call [addr1] and store the return value at [addr2]
-return | false | none | Return from the current function call
-exit | false | none | Stop the execution with the exit code stored at $ec (dt = i64)
+### Here the classic 'Hello world' example in MarCembly:
+```MarCembly
+#reqmod : "std"
+calx : std>>prints : addr."Hello world!"
+```
