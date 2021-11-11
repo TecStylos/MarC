@@ -19,7 +19,7 @@
 #alias : LINE_8 : "          "
 #alias : LINE_9 : "          "
 
-#func.i8 : COPY_STRING : RET : addr.DEST : addr.SRC
+#func : COPY_STRING : addr.DEST : addr.SRC
     #label : LOOP_BEGIN
         drf : $td : @SRC
         mov.u8 : @DEST : @$td
@@ -29,32 +29,32 @@
     return
 #end
 
-#func.i8 : INIT : RET : addr.BASE
+#func : INIT : addr.BASE
     mov.addr : $ac : @BASE
     add.addr : $ac : >>GRID_SIZE
     sub.addr : $ac : 1
     pushc.addr : @$ac
 
     mov.addr : $ac : @BASE
-    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_0
+    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_0
     add.addr : $ac : 11
-    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_1
+    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_1
     add.addr : $ac : 11
-    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_2
+    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_2
     add.addr : $ac : 11
-    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_3
+    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_3
     add.addr : $ac : 11
-    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_4
+    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_4
     add.addr : $ac : 11
-    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_5
+    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_5
     add.addr : $ac : 11
-    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_6
+    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_6
     add.addr : $ac : 11
-    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_7
+    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_7
     add.addr : $ac : 11
-    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_8
+    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_8
     add.addr : $ac : 11
-    call.i8 : >>COPY_STRING : $td : addr.@$ac : addr.>>LINE_9
+    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_9
 
     mov.addr : $ac : @BASE
     sub.addr : $ac : 1
@@ -65,7 +65,7 @@
     return
 #end
 
-#func.i8 : CLEAR : RET
+#func : CLEAR
     mov.u64 : $ac : >>HEIGHT
     add.u64 : $ac : 1
     calx.i8 : >>std>>prints : 0 : addr."\r"
@@ -76,7 +76,7 @@
     return
 #end
 
-#func.i8 : RENDER : RET : addr.BASE
+#func : RENDER : addr.BASE
     calx.i8 : >>std>>prints : 0 : addr.@BASE
     calx.i8 : >>std>>prints : 0 : addr."\n"
     return
@@ -96,13 +96,13 @@
     return
 #end
 
-#func.i8 : SET_ALIVE : RET : addr.BASE : u64.X : u64.Y
+#func : SET_ALIVE : addr.BASE : u64.X : u64.Y
     call.addr : >>XY_TO_ADDR : $ac : addr.@BASE : u64.@X : u64.@Y
     mov.i8 : @$ac : 35
     return
 #end
 
-#func.i8 : SET_DEAD : RET : addr.BASE : u64.X : u64.Y
+#func : SET_DEAD : addr.BASE : u64.X : u64.Y
     call.addr : >>XY_TO_ADDR : $ac : addr.@BASE : u64.@X : u64.@Y
     mov.i8 : @$ac : 32
     return
@@ -180,7 +180,7 @@
     return
 #end
 
-#func.i8 : EVOLVE_CELL : RET : addr.FROM : addr.TO : u64.X : u64.Y
+#func : EVOLVE_CELL : addr.FROM : addr.TO : u64.X : u64.Y
     push.i8
     push.i8
     #alias : NAC : ~32
@@ -198,14 +198,14 @@
     jmp : NEXT_GEN_DEAD
     
     #label : NEXT_GEN_ALIVE
-    call.i8 : >>SET_ALIVE : $td : addr.@TO : u64.@X : u64.@Y
+    call : >>SET_ALIVE : addr.@TO : u64.@X : u64.@Y
     return
     #label : NEXT_GEN_DEAD
-    call.i8 : >>SET_DEAD : $td : addr.@TO : u64.@X : u64.@Y
+    call : >>SET_DEAD : addr.@TO : u64.@X : u64.@Y
     return
 #end
 
-#func.i8 : EVOLVE : RET : addr.FROM : addr.TO
+#func : EVOLVE : addr.FROM : addr.TO
     push.u64
     push.u64
     #alias : X : ~16
@@ -215,7 +215,7 @@
     #label : X_LOOP_BEGIN
         mov.u64 : Y : 0
         #label : Y_LOOP_BEGIN
-            call.i8 : >>EVOLVE_CELL : $ac : addr.@FROM : addr.@TO : u64.@X : u64.@Y
+            call : >>EVOLVE_CELL : addr.@FROM : addr.@TO : u64.@X : u64.@Y
             add.u64 : Y : 1
         jne.u64 : Y_LOOP_BEGIN : @Y : >>HEIGHT
         add.u64 : X : 1
@@ -225,22 +225,22 @@
 
 
 
-call.i8 : INIT : $td : addr.GRID1
-call.i8 : INIT : $td : addr.GRID2
+call : INIT : addr.GRID1
+call : INIT : addr.GRID2
 
-call.i8 : RENDER : $td : addr.GRID1
+call : RENDER : addr.GRID1
 
 mov.i64 : $lc : MAIN_LOOP_COUNT
 #label : MAIN_LOOP
     calx.i8 : >>std>>sleepms : 0 : u64.FRAME_TIME
-    call.i8 : EVOLVE : $td : addr.GRID1 : addr.GRID2
-    call.i8 : CLEAR : $td
-    call.i8 : RENDER : $td : addr.GRID2
+    call : EVOLVE : addr.GRID1 : addr.GRID2
+    call : CLEAR
+    call : RENDER : addr.GRID2
 
     calx.i8 : >>std>>sleepms : 0 : u64.FRAME_TIME
-    call.i8 : EVOLVE : $td : addr.GRID2 : addr.GRID1
-    call.i8 : CLEAR : $td
-    call.i8 : RENDER : $td : addr.GRID1
+    call : EVOLVE : addr.GRID2 : addr.GRID1
+    call : CLEAR
+    call : RENDER : addr.GRID1
 
     sub.i64 : $lc : 1
 jne.i64 : MAIN_LOOP : @$lc : 0

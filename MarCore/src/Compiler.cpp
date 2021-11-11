@@ -113,13 +113,20 @@ namespace MarC
 
 		auto& layout = InstructionLayoutFromOpCode(ocx.opCode);
 
-		if (layout.requiresDatatype)
+		if (layout.insDt != InsDt::None)
 		{
-			if (nextToken().type != AsmToken::Type::Sep_Dot)
-				COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
-			ocx.datatype = BC_DatatypeFromString(nextToken().value);
-			if (ocx.datatype == BC_DT_NONE || ocx.datatype == BC_DT_UNKNOWN)
-				COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
+			if (nextToken().type == AsmToken::Type::Sep_Dot)
+			{
+				ocx.datatype = BC_DatatypeFromString(nextToken().value);
+				if (ocx.datatype == BC_DT_UNKNOWN)
+					COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
+			}
+			else
+			{
+				if (layout.insDt == InsDt::Required)
+					COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
+				prevToken();
+			}
 		}
 
 		DelayedPush<BC_OpCodeEx> ocxDelayed(*this, ocx);
@@ -155,10 +162,15 @@ namespace MarC
 
 		compileArgAddress(ocx, { InsArgType::Address, BC_DT_NONE, 0 });
 
-		removeNecessaryColon();
+		std::string retDtStr;
+		std::string retVal;
+		if (ocx.datatype != BC_DT_NONE)
+		{
+			removeNecessaryColon();
 
-		std::string retDtStr = BC_DatatypeToString(ocx.datatype);
-		std::string retVal = getArgAsString();
+			retDtStr = BC_DatatypeToString(ocx.datatype);
+			retVal = getArgAsString();
+		}
 
 		DelayedPush<BC_FuncCallData> fcd(*this);
 
@@ -178,7 +190,8 @@ namespace MarC
 		}
 		prevToken();
 
-		compileStatement("popc." + retDtStr + " : " + retVal);
+		if (ocx.datatype != BC_DT_NONE)
+			compileStatement("popc." + retDtStr + " : " + retVal);
 	}
 
 	void Compiler::compileSpecCallExtern(BC_OpCodeEx& ocx)
@@ -396,7 +409,7 @@ namespace MarC
 	void Compiler::compileArgDatatype(BC_OpCodeEx& ocx, const InsArgument& arg)
 	{
 		auto dt = BC_DatatypeFromString(nextToken().value);
-		if (dt == BC_DT_NONE || dt == BC_DT_UNKNOWN)
+		if (dt == BC_DT_UNKNOWN)
 			COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
 
 		pushCode(dt);
@@ -554,15 +567,23 @@ namespace MarC
 
 	void Compiler::compileDirFunction()
 	{
+		bool hasDatatype = true;
 		if (nextToken().type != AsmToken::Type::Sep_Dot)
-			COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
+		{
+			hasDatatype = false;
+			prevToken();
+		}
 
-		if (nextToken().type != AsmToken::Type::Name)
-			COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+		BC_Datatype dt = BC_DT_NONE;
+		if (hasDatatype)
+		{
+			if (nextToken().type != AsmToken::Type::Name)
+				COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
-		BC_Datatype dt = BC_DatatypeFromString(currToken().value);
-		if (dt == BC_DT_NONE || dt == BC_DT_UNKNOWN)
-			COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
+			dt = BC_DatatypeFromString(currToken().value);
+			if (dt == BC_DT_UNKNOWN)
+				COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
+		}
 
 		removeNecessaryColon();
 
@@ -576,9 +597,10 @@ namespace MarC
 			addScope(funcName);
 		}
 
-		removeNecessaryColon();
-
+		if (hasDatatype)
 		{
+			removeNecessaryColon();
+
 			if (nextToken().type != AsmToken::Type::Name)
 				COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
@@ -594,7 +616,7 @@ namespace MarC
 				COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 			BC_Datatype dt = BC_DatatypeFromString(currToken().value);
-			if (dt == BC_DT_NONE || dt == BC_DT_UNKNOWN)
+			if (dt == BC_DT_UNKNOWN)
 				COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
 
 			if (nextToken().type != AsmToken::Type::Sep_Dot)

@@ -24,15 +24,22 @@ namespace MarC
 		{}
 	};
 
+	enum class InsDt
+	{
+		None,
+		Optional,
+		Required
+	};
+
 	struct InstructionLayout
 	{
 		BC_OpCode opCode;
-		bool requiresDatatype;
+		InsDt insDt;
 		bool needsCustomImplementation;
 		std::vector<InsArgument> args;
 	public:
-		InstructionLayout(BC_OpCode opCode, bool requiresDatatype, std::initializer_list<InsArgument> args, bool needsCustomImplementation = false)
-			: opCode(opCode), requiresDatatype(requiresDatatype), args(args), needsCustomImplementation(needsCustomImplementation)
+		InstructionLayout(BC_OpCode opCode, InsDt insDt, std::initializer_list<InsArgument> args, bool needsCustomImplementation = false)
+			: opCode(opCode), insDt(insDt), args(args), needsCustomImplementation(needsCustomImplementation)
 		{
 			for (uint64_t i = 0; i < this->args.size(); ++i)
 			{
@@ -42,41 +49,41 @@ namespace MarC
 	};
 
 	static const InstructionLayout InstructionSet[] = {
-		{ BC_OC_MOVE, true, { { InsArgType::Address }, { InsArgType::Value } } },
-		{ BC_OC_ADD, true, { { InsArgType::Address }, { InsArgType::Value } } },
-		{ BC_OC_SUBTRACT, true, { { InsArgType::Address }, { InsArgType::Value } } },
-		{ BC_OC_MULTIPLY, true, { { InsArgType::Address }, { InsArgType::Value } } },
-		{ BC_OC_DIVIDE, true, { { InsArgType::Address }, { InsArgType::Value } } },
+		{ BC_OC_MOVE, InsDt::Required, { { InsArgType::Address }, { InsArgType::Value } } },
+		{ BC_OC_ADD, InsDt::Required, { { InsArgType::Address }, { InsArgType::Value } } },
+		{ BC_OC_SUBTRACT, InsDt::Required, { { InsArgType::Address }, { InsArgType::Value } } },
+		{ BC_OC_MULTIPLY, InsDt::Required, { { InsArgType::Address }, { InsArgType::Value } } },
+		{ BC_OC_DIVIDE, InsDt::Required, { { InsArgType::Address }, { InsArgType::Value } } },
 
-		{ BC_OC_DEREFERENCE, false, { { InsArgType::Address }, { InsArgType::Address } } },
+		{ BC_OC_DEREFERENCE, InsDt::None, { { InsArgType::Address }, { InsArgType::Address } } },
 
-		{ BC_OC_CONVERT, true, { { InsArgType::Address }, { InsArgType::Datatype } } },
+		{ BC_OC_CONVERT, InsDt::Required, { { InsArgType::Address }, { InsArgType::Datatype } } },
 
-		{ BC_OC_PUSH, true, {} },
-		{ BC_OC_POP, true, {} },
-		{ BC_OC_PUSH_COPY, true, { { InsArgType::Value } } },
-		{ BC_OC_POP_COPY, true, { { InsArgType::Address } } },
+		{ BC_OC_PUSH, InsDt::Required, {} },
+		{ BC_OC_POP, InsDt::Required, {} },
+		{ BC_OC_PUSH_COPY, InsDt::Required, { { InsArgType::Value } } },
+		{ BC_OC_POP_COPY, InsDt::Required, { { InsArgType::Address } } },
 
-		{ BC_OC_PUSH_FRAME, false, {} },
-		{ BC_OC_POP_FRAME, false, {} },
+		{ BC_OC_PUSH_FRAME, InsDt::None, {} },
+		{ BC_OC_POP_FRAME, InsDt::None, {} },
 
-		{ BC_OC_JUMP, false, { { InsArgType::Address } } },
-		{ BC_OC_JUMP_EQUAL, true, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
-		{ BC_OC_JUMP_NOT_EQUAL, true, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
-		{ BC_OC_JUMP_LESS_THAN, true, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
-		{ BC_OC_JUMP_GREATER_THAN, true, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
-		{ BC_OC_JUMP_LESS_EQUAL, true, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
-		{ BC_OC_JUMP_GREATER_EQUAL, true, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
+		{ BC_OC_JUMP, InsDt::None, { { InsArgType::Address } } },
+		{ BC_OC_JUMP_EQUAL, InsDt::Required, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
+		{ BC_OC_JUMP_NOT_EQUAL, InsDt::Required, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
+		{ BC_OC_JUMP_LESS_THAN, InsDt::Required, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
+		{ BC_OC_JUMP_GREATER_THAN, InsDt::Required, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
+		{ BC_OC_JUMP_LESS_EQUAL, InsDt::Required, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
+		{ BC_OC_JUMP_GREATER_EQUAL, InsDt::Required, { { InsArgType::Address }, { InsArgType::Value }, { InsArgType::Value } } },
 
-		{ BC_OC_ALLOCATE, false, { { InsArgType::Address }, { InsArgType::TypedValue, BC_DT_U_64 } } },
-		{ BC_OC_FREE, false, { { InsArgType::Address } } },
+		{ BC_OC_ALLOCATE, InsDt::None, { { InsArgType::Address }, { InsArgType::TypedValue, BC_DT_U_64 } } },
+		{ BC_OC_FREE, InsDt::None, { { InsArgType::Address } } },
 
-		{ BC_OC_CALL_EXTERN, true, {}, true },
+		{ BC_OC_CALL_EXTERN, InsDt::Required, {}, true },
 
-		{ BC_OC_CALL, true, {}, true },
-		{ BC_OC_RETURN, false, {} },
+		{ BC_OC_CALL, InsDt::Optional, {}, true },
+		{ BC_OC_RETURN, InsDt::None, {} },
 
-		{ BC_OC_EXIT, false, {} },
+		{ BC_OC_EXIT, InsDt::None, {} },
 	};
 
 	const InstructionLayout& InstructionLayoutFromOpCode(BC_OpCode oc);
