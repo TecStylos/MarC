@@ -1,5 +1,6 @@
 #include "ExtensionLocator.h"
 
+#include <cstring>
 #include "PluS/Defines.h"
 
 #if defined PLUS_BUILD_TYPE_DEBUG
