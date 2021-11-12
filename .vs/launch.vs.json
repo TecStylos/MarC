@@ -11,7 +11,7 @@
       "args": [
         "--verbose",
         "--closeonexit",
-        "examples/GameOfLife.mca"
+        "examples/dynMemory.mca"
       ]
     }
   ]

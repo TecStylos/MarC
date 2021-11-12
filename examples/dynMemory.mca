@@ -1,28 +1,27 @@
-#alias : BUFFSIZE : 1024
+#reqmod : "std"
+#manperm : >>std>>prints
+
+#func : COPY_STRING : addr.DEST : addr.SRC
+    #label : LOOP_BEGIN
+        drf : $td : @SRC
+        mov.u8 : @DEST : @$td
+        add.addr : DEST : 1
+        add.addr : SRC : 1
+    jne.u8 : LOOP_BEGIN : @$td : 0
+    return
+#end
 
         / Memory init
-push.addr
-#alias : src : ~0
-alloc : src : BUFFSIZE
-push.addr
-#alias : dest : ~^i64
-alloc : dest : BUFFSIZE
+#alias : BUFFSIZE : 14
+#alias : src : "Hello world!\n"
+#static : dst : ^addr
+alloc : dst : BUFFSIZE
 
-        / Loop init
-pushc.u64 : 0
-#alias : loopCount : ~16
+call : COPY_STRING : addr.@dst : addr.src
 
-        / Loop body
-#label : LOOP_BEGIN
-    drf : $ac : @src
-    mov.u8 : @dest : @$ac
-    add.addr : src : 1
-    add.u64 : loopCount : 1
-jne.u64 : LOOP_BEGIN : @loopCount : BUFFSIZE
+calx : >>std>>prints : addr."src: "
+calx : >>std>>prints : addr.src
+calx : >>std>>prints : addr."dst: "
+calx : >>std>>prints : addr.@dst
 
-        / Memory free
-pop.u64
-free : @dest
-free : @src
-pop.addr
-pop.addr
+free : @dst

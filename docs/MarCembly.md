@@ -58,8 +58,8 @@ jlt | Required | [addr] : [val1] : [val2] | Jump to [addr] if val1 < val2
 jgt | Required | [addr] : [val1] : [val2] | Jump to [addr] if val1 > val2
 jle | Required | [addr] : [val1] : [val2] | Jump to [addr] if val1 <= val2
 jge | Required | [addr] : [val1] : [val2] | Jump to [addr] if val1 >= val2
-alloc | Not implemented yet
-free | Not implemented yet
+alloc | None | [addr] : [size] | Allocate [size] bytes and store the address in [addr]
+free | None | [addr] | Free memory allocated with alloc
 calx | Optional | [funxAddr] : [retAddr] : [args] | Call an external function
 call | Optional | [funcAddr] : [retAddr] : [args] | Call an internal function
 return | None | - | Return from the current function call

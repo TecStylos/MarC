@@ -481,7 +481,8 @@ namespace MarC
 	}
 	void Interpreter::exec_insFree(BC_OpCodeEx ocx)
 	{
-		auto& addr = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]).as_ADDR;
+		auto& addr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[0]).as_ADDR;
+		//auto& addr = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]).as_ADDR;
 		auto it = m_mem.dynMemMap.find(addr);
 		if (it != m_mem.dynMemMap.end())
 			free(it->second);
