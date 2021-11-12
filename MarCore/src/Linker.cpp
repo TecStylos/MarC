@@ -112,7 +112,7 @@ namespace MarC
 	{
 		for (auto& symbol : pModInfo->definedSymbols)
 		{
-			if (m_symbols.find(symbol) != m_symbols.end())
+			if (m_pExeInfo->symbols.find(symbol) != m_pExeInfo->symbols.end())
 				throw LinkerError(LinkErrCode::SymbolAlreadyDefined, "A symbol with name '" + symbol.name + "' has already been defined!");
 
 			if (symbol.usage == SymbolUsage::Address &&
@@ -122,7 +122,7 @@ namespace MarC
 					)
 				)
 				symbol.value.as_ADDR.asCode.page = m_pExeInfo->moduleNameMap.find(pModInfo->moduleName)->second;
-			m_symbols.insert(symbol);
+			m_pExeInfo->symbols.insert(symbol);
 		}
 		pModInfo->definedSymbols.clear();
 	}
@@ -137,10 +137,28 @@ namespace MarC
 		pModInfo->requiredModules.clear();
 	}
 
+	void Linker::copyPerms(ModuleInfoRef pModInfo)
+	{
+		for (auto& manperm : pModInfo->mandatoryPermissions)
+		{
+			m_pExeInfo->mandatoryPermissions.insert(manperm);
+			if (m_pExeInfo->optionalPermissions.find(manperm) != m_pExeInfo->optionalPermissions.end())
+				m_pExeInfo->optionalPermissions.erase(manperm);
+		}
+		pModInfo->mandatoryPermissions.clear();
+		for (auto& optperm : pModInfo->optionalPermissions)
+		{
+			if (m_pExeInfo->mandatoryPermissions.find(optperm) == m_pExeInfo->mandatoryPermissions.end())
+				m_pExeInfo->optionalPermissions.insert(optperm);
+		}
+		pModInfo->optionalPermissions.clear();
+	}
+
 	void Linker::update(ModuleInfoRef pModInfo)
 	{
 		copySymbols(pModInfo);
 		copyReqMods(pModInfo);
+		copyPerms(pModInfo);
 	}
 
 	void Linker::resolveSymbols()
@@ -152,8 +170,8 @@ namespace MarC
 			for (uint64_t i = 0; i < mod->unresolvedSymbolRefs.size(); ++i)
 			{
 				auto& ref = mod->unresolvedSymbolRefs[i];
-				auto result = m_symbols.find(ref.name);
-				if (result == m_symbols.end())
+				auto result = m_pExeInfo->symbols.find(ref.name);
+				if (result == m_pExeInfo->symbols.end())
 					continue;
 
 				mod->codeMemory->write(&result->value, BC_DatatypeSize(ref.datatype), ref.offset);

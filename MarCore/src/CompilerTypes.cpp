@@ -14,6 +14,8 @@ namespace MarC
 		if (value == "func") return DirectiveID::Function;
 		if (value == "funx") return DirectiveID::FunctionExtern;
 		if (value == "local") return DirectiveID::Local;
+		if (value == "manperm") return DirectiveID::MandatoryPermission;
+		if (value == "optperm") return DirectiveID::OptionalPermission;
 
 		return DirectiveID::Unknown;
 	}
@@ -30,6 +32,8 @@ namespace MarC
 	void ModuleInfo::backup()
 	{
 		bud.requiredModulesSize = requiredModules.size();
+		bud.mandatoryPermissionsSize = mandatoryPermissions.size();
+		bud.optionalPermissionsSize = optionalPermissions.size();
 		bud.extensionRequired = extensionRequired;
 		bud.extensionLoaded = extensionLoaded;
 		bud.codeMemorySize = codeMemory->size();
@@ -41,6 +45,8 @@ namespace MarC
 	void ModuleInfo::recover()
 	{
 		requiredModules.resize(bud.requiredModulesSize);
+		mandatoryPermissions.resize(bud.mandatoryPermissionsSize);
+		optionalPermissions.resize(bud.optionalPermissionsSize);
 		extensionRequired = bud.extensionRequired;
 		extensionLoaded = bud.extensionLoaded;
 		codeMemory->resize(bud.codeMemorySize);

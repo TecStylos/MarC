@@ -3,6 +3,7 @@
 ## Options
 ### General
  * --help
+ * --grantall
 ### Modes
  * --livecode
  * --liveasm

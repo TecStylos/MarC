@@ -22,6 +22,7 @@ namespace MarC
 			WrongExtCallParamCount,
 			ExternalFunctionNotFound,
 			InvalidDatatype,
+			PermissionDenied,
 		};
 	public:
 		InterpreterError() = default;
@@ -51,6 +52,12 @@ namespace MarC
 		void addExtDir(const std::string& path);
 	public:
 		bool interpret(uint64_t nInstructinos = RunTillEOC);
+	public:
+		const std::set<std::string> getManPerms() const;
+		const std::set<std::string> getOptPerms() const;
+		void grantAllPerms();
+		void grantPerm(const std::string& name);
+		void grantPerms(const std::set<std::string>& names);
 	public:
 		void* hostAddress(BC_MemAddress clientAddr, bool deref = false);
 		template <typename T> T& hostObject(BC_MemAddress clientAddr, bool deref = false);
@@ -105,6 +112,8 @@ namespace MarC
 		void virt_pushFrame();
 		void virt_popFrame();
 	private:
+		ExternalFunctionPtr getExternalFunction(BC_MemAddress funcAddr);
+	private:
 		bool reachedEndOfCode() const;
 	public:
 		const InterpreterError& lastError() const;
@@ -113,6 +122,7 @@ namespace MarC
 		ExecutableInfoRef m_pExeInfo;
 		InterpreterMemory m_mem;
 		std::map<BC_MemAddress, ExternalFunctionPtr> m_extFuncs;
+		std::set<std::string> m_grantedPermissions;
 		std::set<std::string> m_extDirs;
 		InterpreterError m_lastErr;
 		uint64_t m_nInsExecuted = 0;

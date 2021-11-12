@@ -1,4 +1,6 @@
 #reqmod : "std"
+#manperm : >>std>>prints
+#manperm : >>std>>sleepms
 
 #alias : FRAME_TIME : 100
 #alias : MAIN_LOOP_COUNT : 13
@@ -30,10 +32,10 @@
 #end
 
 #func : INIT : addr.BASE
-    mov.addr : $ac : @BASE
-    add.addr : $ac : >>GRID_SIZE
-    sub.addr : $ac : 1
-    pushc.addr : @$ac
+    #local : END_ADDR : ^addr
+    mov.addr : END_ADDR : @BASE
+    add.addr : END_ADDR : >>GRID_SIZE
+    sub.addr : END_ADDR : 1
 
     mov.addr : $ac : @BASE
     call : >>COPY_STRING : addr.@$ac : addr.>>LINE_0
@@ -61,7 +63,7 @@
     #label : NEWLINE_LOOP_BEGIN
         add.addr : $ac : 11
         mov.i8 : @$ac : 10
-    jlt.addr : NEWLINE_LOOP_BEGIN : @$ac : @~8
+    jlt.addr : NEWLINE_LOOP_BEGIN : @$ac : @END_ADDR
     return
 #end
 

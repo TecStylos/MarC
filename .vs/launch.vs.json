@@ -11,6 +11,7 @@
       "args": [
         "--verbose",
         "--closeonexit",
+        "--grantall",
         "examples/GameOfLife.mca"
       ]
     }

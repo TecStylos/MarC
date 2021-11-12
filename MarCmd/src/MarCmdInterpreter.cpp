@@ -56,6 +56,18 @@ namespace MarCmd
 			return -1;
 		}
 
+		if (!interpreter.getManPerms().empty() ||
+			!interpreter.getOptPerms().empty()
+			)
+		{
+			if (!flags.hasFlag(CmdFlags::GrantAll))
+			{
+				std::cout << "Cannot grant permissions! Run with option '--grantall'!" << std::endl;
+				return -1;
+			}
+			interpreter.grantAllPerms();
+		}
+
 		if (flags.hasFlag(CmdFlags::Verbose))
 			std::cout << "Starting interpreter..." << std::endl;
 		timer.start();

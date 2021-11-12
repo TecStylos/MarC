@@ -29,7 +29,7 @@ namespace MarCmd
 
 	int LiveAsmInterpreter::run()
 	{
-		std::cout << "MarCmd Live MarCembly Interpreter" << std::endl;
+		std::cout << "MarCmd Live MarCembly Interpreter. Enter 'exit' to exit." << std::endl;
 
 		while (!m_pInterpreter->lastError())
 		{
@@ -104,6 +104,18 @@ namespace MarCmd
 				std::cout << "An error occured while running the linker!" << std::endl
 					<< "  " << m_pLinker->lastError().getMessage() << std::endl;
 				continue;
+			}
+
+			if (!m_pInterpreter->getManPerms().empty() ||
+				!m_pInterpreter->getOptPerms().empty()
+				)
+			{
+				if (!m_flags.hasFlag(CmdFlags::GrantAll))
+				{
+					std::cout << "Cannot grant permissions! Run with option '--grantall'!" << std::endl;
+					break;
+				}
+				m_pInterpreter->grantAllPerms();
 			}
 
 			if (!m_pInterpreter->interpret())

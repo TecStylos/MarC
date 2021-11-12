@@ -51,6 +51,11 @@ int main(int argc, const char** argv, const char** env)
 			mode = Mode::Help;
 			continue;
 		}
+		if (elem == "--grantall")
+		{
+			flags.setFlag(MarCmd::CmdFlags::GrantAll);
+			continue;
+		}
 		if (elem == "--verbose")
 		{
 			flags.setFlag(MarCmd::CmdFlags::Verbose);

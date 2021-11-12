@@ -149,8 +149,10 @@ namespace MarC
 	{
 		switch (ocx.opCode)
 		{
-		case BC_OC_CALL: compileSpecCall(ocx); return;
-		case BC_OC_CALL_EXTERN: compileSpecCallExtern(ocx); return;
+		case BC_OC_CALL:
+			return compileSpecCall(ocx);
+		case BC_OC_CALL_EXTERN:
+			return compileSpecCallExtern(ocx);
 		}
 
 		COMPILER_THROW_ERROR(CompErrCode::InternalError, "OpCode '" + BC_OpCodeToString(ocx.opCode) + "' is not specialized!");
@@ -446,6 +448,10 @@ namespace MarC
 			return compileDirFunctionExtern();
 		case DirectiveID::Local:
 			return compileDirLocal();
+		case DirectiveID::MandatoryPermission:
+			return compileDirMandatoryPermission();
+		case DirectiveID::OptionalPermission:
+			return compileDirOptionalPermission();
 		}
 
 		COMPILER_THROW_ERROR(CompErrCode::UnknownDirectiveID, "Unknown directive '" + currToken().value + "'!");
@@ -692,6 +698,30 @@ namespace MarC
 		addSymbol({ name, SymbolUsage::Address, mc });
 
 		m_scopeList.back().localSize += tc.cell.as_U_64;
+	}
+
+	void Compiler::compileDirMandatoryPermission()
+	{
+		removeNecessaryColon();
+
+		if (nextToken().type != AsmToken::Type::Name)
+			COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+
+		std::string name = currToken().value;
+
+		m_pModInfo->mandatoryPermissions.push_back(name);
+	}
+
+	void Compiler::compileDirOptionalPermission()
+	{
+		removeNecessaryColon();
+
+		if (nextToken().type != AsmToken::Type::Name)
+			COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+
+		std::string name = currToken().value;
+
+		m_pModInfo->optionalPermissions.push_back(name);
 	}
 
 	void Compiler::removeNecessaryColon()

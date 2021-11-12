@@ -22,6 +22,7 @@ namespace MarCmd
 	{
 		Verbose,
 		Debug,
-		Profile
+		Profile,
+		GrantAll,
 	};
 }

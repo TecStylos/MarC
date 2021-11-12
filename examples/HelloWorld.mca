@@ -1,5 +1,6 @@
 #reqmod : "std"
-/ #manperm : single : "prints"
+#manperm : >>std>>prints
+#manperm : >>std>>printt
 
 mov.i64 : $ac : 10
 #label : loopBegin

@@ -94,6 +94,8 @@ namespace MarC
 		void compileDirFunction();
 		void compileDirFunctionExtern();
 		void compileDirLocal();
+		void compileDirMandatoryPermission();
+		void compileDirOptionalPermission();
 	private:
 		void removeNecessaryColon();
 	private:

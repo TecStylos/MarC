@@ -54,6 +54,7 @@ namespace MarC
 		void update(ModuleInfoRef pModInfo);
 		void copySymbols(ModuleInfoRef pModInfo);
 		void copyReqMods(ModuleInfoRef pModInfo);
+		void copyPerms(ModuleInfoRef pModInfo);
 		void resolveSymbols();
 	private:
 		std::string misModListStr() const;
@@ -64,7 +65,6 @@ namespace MarC
 	private:
 		LinkerError m_lastErr;
 		ExecutableInfoRef m_pExeInfo;
-		std::set<Symbol> m_symbols;
 		std::set<std::string> m_missingModules;
 	};
 }

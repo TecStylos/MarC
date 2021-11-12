@@ -87,6 +87,33 @@ namespace MarC
 
 		return !lastError();
 	}
+	const std::set<std::string> Interpreter::getManPerms() const
+	{
+		return m_pExeInfo->mandatoryPermissions;
+	}
+	const std::set<std::string> Interpreter::getOptPerms() const
+	{
+		return m_pExeInfo->optionalPermissions;
+	}
+	void Interpreter::grantAllPerms()
+	{
+		grantPerms(getManPerms());
+		grantPerms(getOptPerms());
+	}
+	void Interpreter::grantPerm(const std::string& permission)
+	{
+		if (m_pExeInfo->mandatoryPermissions.find(permission) != m_pExeInfo->mandatoryPermissions.end() ||
+			m_pExeInfo->optionalPermissions.find(permission) != m_pExeInfo->optionalPermissions.end()
+			)
+		{
+			m_grantedPermissions.insert(permission);
+		}
+	}
+	void Interpreter::grantPerms(const std::set<std::string>& permissions)
+	{
+		for (auto& perm : permissions)
+			grantPerm(perm);
+	}
 
 	void* Interpreter::hostAddress(BC_MemAddress clientAddr, bool deref)
 	{
@@ -441,18 +468,7 @@ namespace MarC
 		BC_MemAddress funcNameAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[argIndex++]).as_ADDR;
 		auto& fcd = readDataAndMove<BC_FuncCallData>();
 
-		auto funcIt = m_extFuncs.find(funcNameAddr);
-		if (funcIt == m_extFuncs.end())
-		{
-			loadMissingExtensions();
-
-			std::string funcName = &hostObject<char>(funcNameAddr);
-			auto uid = PluS::PluginManager::get().findFeature(funcName);
-			if (!uid)
-				throw InterpreterError(IntErrCode::ExternalFunctionNotFound, "Unable to locate external function '" + funcName + "'!");
-			ExternalFunctionPtr exFunc = PluS::PluginManager::get().createFeature<ExternalFunction>(uid);
-			funcIt = m_extFuncs.insert({ funcNameAddr, exFunc }).first;
-		}
+		ExternalFunctionPtr func = getExternalFunction(funcNameAddr);
 
 		ExFuncData efd;
 		efd.retVal.datatype = ocx.datatype;
@@ -470,7 +486,6 @@ namespace MarC
 			efd.param[i].cell = readMemCellAndMove(dt, deref);
 		}
 
-		auto func = funcIt->second;
 		func->call(*this, efd);
 
 		if (retDest)
@@ -578,6 +593,28 @@ namespace MarC
 		auto& regFP = getRegister(BC_MEM_REG_FRAME_POINTER);
 		regSP.as_ADDR = regFP.as_ADDR;
 		virt_popStack(regFP, BC_DatatypeSize(BC_DT_U_64));
+	}
+
+	ExternalFunctionPtr Interpreter::getExternalFunction(BC_MemAddress funcAddr)
+	{
+		auto funcIt = m_extFuncs.find(funcAddr);
+		if (funcIt == m_extFuncs.end())
+		{
+			std::string funcName = &hostObject<char>(funcAddr);
+
+			if (m_grantedPermissions.find(funcName) == m_grantedPermissions.end())
+				throw InterpreterError(IntErrCode::PermissionDenied, "Insufficient permissions for external function '" + funcName + "'!");
+
+			loadMissingExtensions();
+
+			auto uid = PluS::PluginManager::get().findFeature(funcName);
+			if (!uid)
+				throw InterpreterError(IntErrCode::ExternalFunctionNotFound, "Unable to locate external function '" + funcName + "'!");
+			ExternalFunctionPtr exFunc = PluS::PluginManager::get().createFeature<ExternalFunction>(uid);
+			funcIt = m_extFuncs.insert({ funcAddr, exFunc }).first;
+		}
+
+		return funcIt->second;
 	}
 
 	bool Interpreter::reachedEndOfCode() const
