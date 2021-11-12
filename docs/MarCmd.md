@@ -32,7 +32,7 @@
 ```
 MarCmd --liveasm --closeonexit
 ```
-### Execute a code file with extra information and keep the console open after the module has exited:
+### Execute a code file with all needed permissions and keep the console open after the module has exited:
 ```
-MarCmd --verbose --keeponexit examples/GameOfLife.mca
+MarCmd --verbose --keeponexit --grantall examples/GameOfLife.mca
 ```

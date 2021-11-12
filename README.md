@@ -43,5 +43,6 @@ All examples requiring the standard library should be run from the root director
 ### Here the classic 'Hello world' example in MarCembly:
 ```MarCembly
 #reqmod : "std"
+#manperm : >>std>>prints
 calx : std>>prints : addr."Hello world!\n"
 ```
