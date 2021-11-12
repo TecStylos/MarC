@@ -188,6 +188,7 @@ namespace MarC
 
 			++fcd->nArgs;
 		}
+
 		prevToken();
 
 		if (ocx.datatype != BC_DT_NONE)
@@ -443,6 +444,8 @@ namespace MarC
 			return compileDirFunction();
 		case DirectiveID::FunctionExtern:
 			return compileDirFunctionExtern();
+		case DirectiveID::Local:
+			return compileDirLocal();
 		}
 
 		COMPILER_THROW_ERROR(CompErrCode::UnknownDirectiveID, "Unknown directive '" + currToken().value + "'!");
@@ -564,9 +567,7 @@ namespace MarC
 		if (m_scopeList.size() == 0)
 			COMPILER_THROW_ERROR(CompErrCode::AlreadyInGlobalScope, "Cannot end scope, already in global scope!");
 
-		addSymbol({ "SCOPE_END", SymbolUsage::Address, currCodeAddr() });
-
-		m_scopeList.pop_back();
+		removeScope();
 	}
 
 	void Compiler::compileDirFunction()
@@ -591,14 +592,17 @@ namespace MarC
 
 		removeNecessaryColon();
 
+		std::string funcName;
 		{
 			if (nextToken().type != AsmToken::Type::Name)
 				COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
-			std::string funcName = currToken().value;
+			funcName = currToken().value;
 
 			compileStatement("jmp : " + funcName + ">>SCOPE_END");
-			addScope(funcName);
+
+			addFuncScope(funcName);
+			compileStatement("pushn : SCOPE_FUNC_LOCAL_SIZE");
 		}
 
 		if (hasDatatype)
@@ -613,7 +617,7 @@ namespace MarC
 			compileStatement("#alias : " + retName + " : ~-" + std::to_string(2 * BC_DatatypeSize(BC_DT_U_64) + BC_DatatypeSize(dt)));
 		}
 
-		uint64_t offset = 0;
+		uint16_t paramOffset = 0;
 		while (nextToken().type == AsmToken::Type::Sep_Colon)
 		{
 			if (nextToken().type != AsmToken::Type::Name)
@@ -629,12 +633,14 @@ namespace MarC
 			if (nextToken().type != AsmToken::Type::Name)
 				COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
-			std::string retName = currToken().value;
+			std::string valName = currToken().value;
 
-			compileStatement("#alias : " + retName + " : ~+" + std::to_string(offset));
+			compileStatement("#alias : " + valName + " : ~+" + std::to_string(paramOffset));
 
-			offset += BC_DatatypeSize(dt);
+			paramOffset += (uint16_t)BC_DatatypeSize(dt);
 		}
+
+		m_scopeList.back().paramSize = paramOffset;
 
 		prevToken();
 	}
@@ -651,6 +657,41 @@ namespace MarC
 		compileStatement("#alias : " + name + " : \"" + getScopedName(name) + "\"");
 
 		m_pModInfo->extensionRequired = true;
+	}
+
+	void Compiler::compileDirLocal()
+	{
+		if (m_scopeList.empty())
+			COMPILER_THROW_ERROR(CompErrCode::InvalidScope, "The 'local' directive cannot be used in global scope!");
+		if (!m_scopeList.back().isFuncScope)
+			COMPILER_THROW_ERROR(CompErrCode::InvalidScope, "The 'local' directive cannot be used in normal scopes!");
+
+		removeNecessaryColon();
+
+		if (nextToken().type != AsmToken::Type::Name)
+			COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+
+		std::string name = currToken().value;
+
+		TypeCell tc;
+		tc.datatype = BC_DT_U_64;
+
+		removeNecessaryColon();
+		nextToken();
+
+		bool getsDereferenced;
+		generateTypeCell(tc, getsDereferenced);
+
+		if (getsDereferenced)
+			COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Usage of the deref operator is not allowed in the static directive!");
+
+		BC_MemCell mc;
+		mc.as_ADDR.base = BC_MEM_BASE_DYN_FRAME_ADD;
+		mc.as_ADDR.addr = m_scopeList.back().paramSize + m_scopeList.back().localSize;
+
+		addSymbol({ name, SymbolUsage::Address, mc });
+
+		m_scopeList.back().localSize += tc.cell.as_U_64;
 	}
 
 	void Compiler::removeNecessaryColon()
@@ -701,7 +742,27 @@ namespace MarC
 	{
 		addSymbol({ name, SymbolUsage::Address, currCodeAddr() });
 
-		m_scopeList.push_back(name);
+		m_scopeList.push_back({ name });
+	}
+
+	void Compiler::addFuncScope(const std::string& name)
+	{
+		addScope(name);
+		m_scopeList.back().isFuncScope = true;
+	}
+
+	void Compiler::removeScope()
+	{
+		addSymbol({ "SCOPE_END", SymbolUsage::Address, currCodeAddr() });
+
+		if (m_scopeList.back().isFuncScope)
+		{
+			BC_MemCell mc;
+			mc.as_U_64 = m_scopeList.back().localSize;
+			addSymbol({ "SCOPE_FUNC_LOCAL_SIZE", SymbolUsage::Value, mc });
+		}
+
+		m_scopeList.pop_back();
 	}
 
 	std::string Compiler::getScopedName(const std::string& name)
@@ -711,7 +772,7 @@ namespace MarC
 
 		std::string fullName = ">>";
 		for (auto& elem : m_scopeList)
-			fullName.append(elem + ">>");
+			fullName.append(elem.name + ">>");
 		fullName.append(name);
 
 		return fullName;

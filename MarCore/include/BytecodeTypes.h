@@ -39,6 +39,8 @@ namespace MarC
 
 		BC_OC_PUSH,
 		BC_OC_POP,
+		BC_OC_PUSH_N_BYTES,
+		BC_OC_POP_N_BYTES,
 		BC_OC_PUSH_COPY,
 		BC_OC_POP_COPY,
 

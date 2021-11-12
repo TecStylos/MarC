@@ -77,6 +77,8 @@ namespace MarC
 			{ "conv",    BC_OC_CONVERT },
 
 			{ "push",    BC_OC_PUSH },
+			{ "pushn",    BC_OC_PUSH_N_BYTES },
+			{ "popn",    BC_OC_POP_N_BYTES },
 			{ "pop",     BC_OC_POP },
 			{ "pushc",   BC_OC_PUSH_COPY },
 			{ "popc",    BC_OC_POP_COPY },
@@ -126,6 +128,8 @@ namespace MarC
 
 			{ BC_OC_PUSH, "push" },
 			{ BC_OC_POP, "pop" },
+			{ BC_OC_PUSH_N_BYTES, "pushn" },
+			{ BC_OC_POP_N_BYTES, "popn" },
 			{ BC_OC_PUSH_COPY, "pushc" },
 			{ BC_OC_POP_COPY, "popc" },
 

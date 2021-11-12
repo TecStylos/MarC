@@ -216,6 +216,8 @@ namespace MarC
 
 		case BC_OC_PUSH: Interpreter::exec_insPush(ocx); break;
 		case BC_OC_POP: Interpreter::exec_insPop(ocx); break;
+		case BC_OC_PUSH_N_BYTES: Interpreter::exec_insPushNBytes(ocx); break;
+		case BC_OC_POP_N_BYTES: Interpreter::exec_insPopNBytes(ocx); break;
 		case BC_OC_PUSH_COPY: Interpreter::exec_insPushCopy(ocx); break;
 		case BC_OC_POP_COPY: Interpreter::exec_insPopCopy(ocx); break;
 
@@ -299,6 +301,16 @@ namespace MarC
 	{
 		BC_MemCell mc;
 		virt_popStack(mc, BC_DatatypeSize(ocx.datatype));
+	}
+	void Interpreter::exec_insPushNBytes(BC_OpCodeEx ocx)
+	{
+		uint16_t nBytes = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[0]).as_U_16;
+		virt_pushStack(nBytes);
+	}
+	void Interpreter::exec_insPopNBytes(BC_OpCodeEx ocx)
+	{
+		uint16_t nBytes = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[0]).as_U_16;
+		virt_popStack(nBytes);
 	}
 	void Interpreter::exec_insPushCopy(BC_OpCodeEx ocx)
 	{
@@ -510,6 +522,16 @@ namespace MarC
 		throw InterpreterError(IntErrCode::AbortViaExit, "The program has been aborted with a call to exit!");
 	}
 
+	void Interpreter::virt_pushStack(uint64_t nBytes)
+	{
+		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
+
+		if (m_mem.dynamicStack->size() < regSP.as_ADDR.addr + nBytes)
+			m_mem.dynamicStack->resize(m_mem.dynamicStack->size() * 2);
+
+		regSP.as_ADDR.addr += nBytes;
+	}
+
 	void Interpreter::virt_pushStack(const BC_MemCell& mc, uint64_t nBytes)
 	{
 		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
@@ -522,6 +544,13 @@ namespace MarC
 		memcpy(dest, &mc, nBytes);
 
 		regSP.as_ADDR.addr += nBytes;
+	}
+
+	void Interpreter::virt_popStack(uint64_t nBytes)
+	{
+		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
+
+		regSP.as_ADDR.addr -= nBytes;
 	}
 
 	void Interpreter::virt_popStack(BC_MemCell& mc, uint64_t nBytes)

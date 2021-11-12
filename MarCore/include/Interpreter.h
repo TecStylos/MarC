@@ -78,6 +78,8 @@ namespace MarC
 		void exec_insConvert(BC_OpCodeEx ocx);
 		void exec_insPush(BC_OpCodeEx ocx);
 		void exec_insPop(BC_OpCodeEx ocx);
+		void exec_insPushNBytes(BC_OpCodeEx ocx);
+		void exec_insPopNBytes(BC_OpCodeEx ocx);
 		void exec_insPushCopy(BC_OpCodeEx ocx);
 		void exec_insPopCopy(BC_OpCodeEx ocx);
 		void exec_insPushFrame(BC_OpCodeEx ocx);
@@ -96,7 +98,9 @@ namespace MarC
 		void exec_insReturn(BC_OpCodeEx ocx);
 		void exec_insExit(BC_OpCodeEx ocx);
 	private:
+		void virt_pushStack(uint64_t nBytes);
 		void virt_pushStack(const BC_MemCell& mc, uint64_t nBytes);
+		void virt_popStack(uint64_t nBytes);
 		void virt_popStack(BC_MemCell& mc, uint64_t nBytes);
 		void virt_pushFrame();
 		void virt_popFrame();

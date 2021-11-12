@@ -134,7 +134,8 @@ namespace MarCmd
 			std::cout << "Adding module '" << compiler.getModuleInfo()->moduleName << "' to the linker..." << std::endl;
 		if (!linker.addModule(compiler.getModuleInfo()))
 		{
-			std::cout << "An error occurd while adding the module '" << compiler.getModuleInfo()->moduleName << "' to the linker!" << std::endl;
+			std::cout << "An error occurd while adding the module '" << compiler.getModuleInfo()->moduleName << "' to the linker!:" << std::endl
+				<< "  " << linker.lastError().getMessage() << std::endl;
 			return false;
 		}
 

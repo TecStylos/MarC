@@ -28,7 +28,7 @@ namespace MarC
 	{
 		None,
 		Optional,
-		Required
+		Required,
 	};
 
 	struct InstructionLayout
@@ -61,6 +61,8 @@ namespace MarC
 
 		{ BC_OC_PUSH, InsDt::Required, {} },
 		{ BC_OC_POP, InsDt::Required, {} },
+		{ BC_OC_PUSH_N_BYTES, InsDt::None, { { InsArgType::TypedValue, BC_DT_U_64 } } },
+		{ BC_OC_POP_N_BYTES, InsDt::None, { { InsArgType::TypedValue, BC_DT_U_64 } } },
 		{ BC_OC_PUSH_COPY, InsDt::Required, { { InsArgType::Value } } },
 		{ BC_OC_POP_COPY, InsDt::Required, { { InsArgType::Address } } },
 

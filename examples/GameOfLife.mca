@@ -181,10 +181,8 @@
 #end
 
 #func : EVOLVE_CELL : addr.FROM : addr.TO : u64.X : u64.Y
-    push.i8
-    push.i8
-    #alias : NAC : ~32
-    #alias : IA : ~33
+    #local : NAC : ^i8
+    #local : IA : ^i8
     call.i8 : >>NEIGHBOR_ALIVE_COUNT : NAC : addr.@FROM : u64.@X : u64.@Y
     call.i8 : >>IS_ALIVE : IA : addr.@FROM : u64.@X : u64.@Y
 
@@ -206,10 +204,8 @@
 #end
 
 #func : EVOLVE : addr.FROM : addr.TO
-    push.u64
-    push.u64
-    #alias : X : ~16
-    #alias : Y : ~24
+    #local : X : ^u64
+    #local : Y : ^u64
 
     mov.u64 : X : 0
     #label : X_LOOP_BEGIN

@@ -22,6 +22,7 @@ namespace MarC
 			SymbolAlreadyDefined,
 			AlreadyInGlobalScope,
 			InternalError,
+			InvalidScope,
 		};
 	public:
 		CompilerError() = default;
@@ -92,6 +93,7 @@ namespace MarC
 		void compileDirEnd();
 		void compileDirFunction();
 		void compileDirFunctionExtern();
+		void compileDirLocal();
 	private:
 		void removeNecessaryColon();
 	private:
@@ -99,6 +101,8 @@ namespace MarC
 	private:
 		void addSymbol(Symbol symbol);
 		void addScope(const std::string& name);
+		void addFuncScope(const std::string& name);
+		void removeScope();
 		std::string getScopedName(const std::string& name);
 	private:
 		bool isInstructionLike();
@@ -124,7 +128,7 @@ namespace MarC
 		AsmTokenListRef m_pTokenList;
 		CompilerError m_lastErr;
 		ModuleInfoRef m_pModInfo;
-		std::vector<std::string> m_scopeList;
+		std::vector<ScopeDesc> m_scopeList;
 		uint64_t m_nextTokenToCompile = 0;
 		uint64_t m_backupNextTokenToCompile = 0;
 	private:

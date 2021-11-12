@@ -21,6 +21,23 @@ namespace MarC
 		End,
 		Function,
 		FunctionExtern,
+		Local,
+	};
+
+	struct ScopeDesc
+	{
+		std::string name = "<undefined>";
+		bool isFuncScope = false;
+		uint64_t paramSize = 0;
+		uint64_t localSize = 0;
+	public:
+		ScopeDesc() = default;
+		ScopeDesc(const std::string& name)
+			: name(name)
+		{}
+		ScopeDesc(const std::string& name, uint64_t paramSize)
+			: name(name), isFuncScope(true), paramSize(paramSize)
+		{}
 	};
 
 	DirectiveID DirectiveIDFromString(const std::string& value);
