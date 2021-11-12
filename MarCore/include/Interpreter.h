@@ -53,6 +53,10 @@ namespace MarC
 	public:
 		bool interpret(uint64_t nInstructinos = RunTillEOC);
 	public:
+		bool isGrantedPerm(const std::string& name) const;
+		bool hasUngrantedPerms() const;
+		bool hasUngrantedPerms(const std::set<std::string> perms) const;
+		std::set<std::string> getUngrantedPerms(const std::set<std::string> perms) const;
 		const std::set<std::string> getManPerms() const;
 		const std::set<std::string> getOptPerms() const;
 		void grantAllPerms();

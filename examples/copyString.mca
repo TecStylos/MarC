@@ -10,4 +10,4 @@ pushc.addr : destBuff
     mov.u8 : @dest : @$ac
     add.addr : src : 1
     add.addr : dest : 1
-jne.u8 : copyLoopBegin : @$AC : 0
+jne.u8 : copyLoopBegin : @$ac : 0

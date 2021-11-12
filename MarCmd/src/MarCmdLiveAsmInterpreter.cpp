@@ -4,6 +4,8 @@
 #include <fstream>
 #include <cstring>
 
+#include "PermissionGrantPrompt.h"
+
 namespace MarCmd
 {
 	int LiveAsmInterpreter::run(const std::set<std::string>& modDirs, const std::set<std::string>& extDirs, Flags<CmdFlags> flags)
@@ -106,16 +108,32 @@ namespace MarCmd
 				continue;
 			}
 
-			if (!m_pInterpreter->getManPerms().empty() ||
-				!m_pInterpreter->getOptPerms().empty()
-				)
+			if (m_pInterpreter->hasUngrantedPerms())
 			{
-				if (!m_flags.hasFlag(CmdFlags::GrantAll))
+				if (m_flags.hasFlag(CmdFlags::GrantAll))
 				{
-					std::cout << "Cannot grant permissions! Run with option '--grantall'!" << std::endl;
-					break;
+					m_pInterpreter->grantAllPerms();
 				}
-				m_pInterpreter->grantAllPerms();
+				else
+				{
+					std::set<std::string> toGrant;
+
+					auto& manPerms = m_pInterpreter->getUngrantedPerms(m_pInterpreter->getManPerms());
+					if (!manPerms.empty())
+					{
+						std::cout << "  <!> The module requests the following MANDATORY permissions: " << std::endl;
+						permissionGrantPrompt(manPerms, toGrant);
+					}
+
+					auto& optPerms = m_pInterpreter->getUngrantedPerms(m_pInterpreter->getOptPerms());
+					if (!optPerms.empty())
+					{
+						std::cout << "  <!> The module requests the following OPTIONAL permissions: " << std::endl;
+						permissionGrantPrompt(optPerms, toGrant);
+					}
+
+					m_pInterpreter->grantPerms(toGrant);
+				}
 			}
 
 			if (!m_pInterpreter->interpret())

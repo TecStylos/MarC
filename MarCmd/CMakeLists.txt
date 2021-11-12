@@ -10,7 +10,7 @@ add_executable(
 	"src/EntryPoint.cpp"
 	"src/MarCmdInterpreter.cpp"
 	"src/MarCmdLiveAsmInterpreter.cpp"
-)
+ "include/PermissionGrantPrompt.h" "src/PermissionGrantPrompt.cpp")
 
 target_include_directories(
 	MarCmd PUBLIC 

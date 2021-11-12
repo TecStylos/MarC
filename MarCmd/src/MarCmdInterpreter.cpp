@@ -4,6 +4,7 @@
 #include <fstream>
 
 #include "MarCore.h"
+#include "PermissionGrantPrompt.h"
 
 namespace MarCmd
 {
@@ -56,16 +57,32 @@ namespace MarCmd
 			return -1;
 		}
 
-		if (!interpreter.getManPerms().empty() ||
-			!interpreter.getOptPerms().empty()
-			)
+		if (interpreter.hasUngrantedPerms())
 		{
-			if (!flags.hasFlag(CmdFlags::GrantAll))
+			if (flags.hasFlag(CmdFlags::GrantAll))
 			{
-				std::cout << "Cannot grant permissions! Run with option '--grantall'!" << std::endl;
-				return -1;
+				interpreter.grantAllPerms();
 			}
-			interpreter.grantAllPerms();
+			else
+			{
+				std::set<std::string> toGrant;
+
+				auto& manPerms = interpreter.getUngrantedPerms(interpreter.getManPerms());
+				if (!manPerms.empty())
+				{
+					std::cout << "  <!> The module requests the following MANDATORY permissions: " << std::endl;
+					permissionGrantPrompt(manPerms, toGrant);
+				}
+
+				auto& optPerms = interpreter.getUngrantedPerms(interpreter.getOptPerms());
+				if (!optPerms.empty())
+				{
+					std::cout << "  <!> The module requests the following OPTIONAL permissions: " << std::endl;
+					permissionGrantPrompt(optPerms, toGrant);
+				}
+
+				interpreter.grantPerms(toGrant);
+			}
 		}
 
 		if (flags.hasFlag(CmdFlags::Verbose))

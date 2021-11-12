@@ -87,6 +87,30 @@ namespace MarC
 
 		return !lastError();
 	}
+
+	bool Interpreter::isGrantedPerm(const std::string& name) const
+	{
+		return m_grantedPermissions.find(name) != m_grantedPermissions.end();
+	}
+	bool Interpreter::hasUngrantedPerms() const
+	{
+		return m_grantedPermissions.size() < getManPerms().size() + getOptPerms().size();
+	}
+	bool Interpreter::hasUngrantedPerms(const std::set<std::string> perms) const
+	{
+		for (auto& perm : perms)
+			if (!isGrantedPerm(perm))
+				return true;
+		return false;
+	}
+	std::set<std::string> Interpreter::getUngrantedPerms(const std::set<std::string> perms) const
+	{
+		std::set<std::string> ungrantedPerms;
+		for (auto& perm : perms)
+			if (!isGrantedPerm(perm))
+				ungrantedPerms.insert(perm);
+		return ungrantedPerms;
+	}
 	const std::set<std::string> Interpreter::getManPerms() const
 	{
 		return m_pExeInfo->mandatoryPermissions;
@@ -97,6 +121,8 @@ namespace MarC
 	}
 	void Interpreter::grantAllPerms()
 	{
+		if (!hasUngrantedPerms())
+			return;
 		grantPerms(getManPerms());
 		grantPerms(getOptPerms());
 	}
