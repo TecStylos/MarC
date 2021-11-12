@@ -77,4 +77,4 @@ scope | None | [name] | Begin a new scope.
 end | None | - | End a scope.
 func | Optional | [retName] : [args] | Define an internal function.
 funx | Optional | - | Tell the linker there's an external function with the specified name in an extension having the same name as the module.
-local | None | [name] : [size] | Create a local storage (frame offset automatically determined)
+local | None | [name] : [size] | Reserve local (frame relative) memory (frame offset automatically determined).
