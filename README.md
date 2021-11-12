@@ -15,6 +15,7 @@ For more info check the [MarCembly Documentation](./docs/MarCembly.md).
 MarCmd is the command line tool for compiling/interpreting/debugging MarC and MarCembly code.
 For more info check the [MarCmd Documentation](./docs/MarCmd.md)
 ***
+
 ## Getting Started
 ### Prerequisites
  * CMake
@@ -33,13 +34,14 @@ Configurations:
  * `Debug`
  * `RelWithDebInfo`
  * `Release`
+***
 
 ## Examples
 Examples for the MarCembly language can be found in the [./examples/](./examples/) folder.
-All examples requiring the standard library should be run from the root directory. Otherwise (without specifying a [module directory](./docs/MarCmd.md#ExtensionDirectory)) the interpreter won't find the appropriate module file.
+All examples requiring the standard library should be run from the root directory. Otherwise (without specifying a [module directory](./docs/MarCmd.md)) the interpreter won't find the appropriate module file.
 
 ### Here the classic 'Hello world' example in MarCembly:
 ```MarCembly
 #reqmod : "std"
-calx : std>>prints : addr."Hello world!"
+calx : std>>prints : addr."Hello world!\n"
 ```

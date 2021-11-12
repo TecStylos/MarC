@@ -1,8 +1,6 @@
 # MarCembly Language
 
-## Feature Set
-
-### Datatypes [dt]:
+## Datatypes [dt]:
 - i8
 - i16
 - i32
@@ -13,8 +11,9 @@
 - u64
 - f32
 - f64
+***
 
-### Registers [addr]:
+## Registers [addr]:
 Identifier | Definition
 -----------|-----------
 $cp | Code Pointer
@@ -24,15 +23,17 @@ $lc | Loop Counter
 $ac | Accumulator
 $td | Temporary Data
 $ec | Exit Code
+***
 
-### Operators:
+## Operators:
 Usage | Definition
 -----------|-----------
 @[addr] | Dereference address
 ^[dt] | Size of datatype
 ~[i64] | Address relative to current frame pointer
+***
 
-### Instructions:
+## Instructions:
 OpCode | Datatype | Arguments | Definition
 -------|----------|---------- | ----------
 mov | Required | [dest] : [val] | Copy [val] to [dest]
@@ -61,8 +62,9 @@ calx | Optional | [funxAddr] : [retAddr] : [args] | Call an external function
 call | Optional | [funcAddr] : [retAddr] : [args] | Call an internal function
 return | None | - | Return from the current function call
 exit | None | - | Stop the execution with the exit code stored at $ec (dt = i64)
+***
 
-### Directives
+## Directives:
 Name | Datatype | Arguments | Definition
 -----|----------|-----------|-----------
 label | None | [name] | Store the current code address in [name].
