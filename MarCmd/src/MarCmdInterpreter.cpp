@@ -67,14 +67,14 @@ namespace MarCmd
 			{
 				std::set<std::string> toGrant;
 
-				auto& manPerms = interpreter.getUngrantedPerms(interpreter.getManPerms());
+				auto manPerms = interpreter.getUngrantedPerms(interpreter.getManPerms());
 				if (!manPerms.empty())
 				{
 					std::cout << "  <!> The module requests the following MANDATORY permissions: " << std::endl;
 					permissionGrantPrompt(manPerms, toGrant);
 				}
 
-				auto& optPerms = interpreter.getUngrantedPerms(interpreter.getOptPerms());
+				auto optPerms = interpreter.getUngrantedPerms(interpreter.getOptPerms());
 				if (!optPerms.empty())
 				{
 					std::cout << "  <!> The module requests the following OPTIONAL permissions: " << std::endl;

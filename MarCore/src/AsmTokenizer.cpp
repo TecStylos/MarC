@@ -279,7 +279,7 @@ namespace MarC
 
 		m_nextCharToTokenize = m_asmCode.size();
 
-		m_pTokenList->push_back({ line + 1u, 1u, AsmToken::Type::END_OF_CODE, "<END_OF_CODE>" });
+		m_pTokenList->push_back({ uint16_t(line + 1u), 1u, AsmToken::Type::END_OF_CODE, "<END_OF_CODE>" });
 
 		return true;
 	}
