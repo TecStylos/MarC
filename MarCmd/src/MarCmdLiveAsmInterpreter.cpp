@@ -25,7 +25,7 @@ namespace MarCmd
 
 		for (auto& entry : extDirs)
 			m_pInterpreter->addExtDir(entry);
-	
+
 		m_pLinker->addModule(m_pCompiler->getModuleInfo());
 	}
 
@@ -121,14 +121,14 @@ namespace MarCmd
 					auto manPerms = m_pInterpreter->getUngrantedPerms(m_pInterpreter->getManPerms());
 					if (!manPerms.empty())
 					{
-						std::cout << "  <!> The module requests the following MANDATORY permissions: " << std::endl;
+						std::cout << "  <!> A module requests the following MANDATORY permissions: " << std::endl;
 						permissionGrantPrompt(manPerms, toGrant);
 					}
 
 					auto optPerms = m_pInterpreter->getUngrantedPerms(m_pInterpreter->getOptPerms());
 					if (!optPerms.empty())
 					{
-						std::cout << "  <!> The module requests the following OPTIONAL permissions: " << std::endl;
+						std::cout << "  <!> A module requests the following OPTIONAL permissions: " << std::endl;
 						permissionGrantPrompt(optPerms, toGrant);
 					}
 

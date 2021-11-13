@@ -26,9 +26,10 @@ For more info check the [MarCmd Documentation](./docs/MarCmd.md)
 Download the repo with `git clone --recursive https://github.com/TecStylos/MarC.git`
 
 ### Building
- 1. Create a directory `/bin/<configuration>`
- 2. Go into the created directory and run `cmake ../.. -DCMAKE_BUILD_TYPE=<configuration>`
- 3. Run `make`
+On Unix systems run the [./build.sh](./build.sh) script in the repo's root directory.
+The script prompts you for a configuration. Valid options are listed below.
+
+Windows does not have a build script yet.
 
 Configurations:
  * `Debug`
