@@ -29,12 +29,12 @@ Download the repo with `git clone --recursive https://github.com/TecStylos/MarC.
 On Unix systems run the [./build.sh](./build.sh) script in the repo's root directory.
 The script prompts you for a configuration. Valid options are listed below.
 
-Windows does not have a build script yet.
-
 Configurations:
  * `Debug`
  * `RelWithDebInfo`
  * `Release`
+
+On Windows use Visual Studio to build the projects.
 ***
 
 ## Examples
