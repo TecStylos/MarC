@@ -34,17 +34,61 @@ namespace MarC
 			BeginToken,
 			EndToken,
 			TokenizeString,
-			TokenizeStringEscapeSequence,
+			TokenizeStringEscapeCode,
 			TokenizeComment,
 			TokenizeInteger,
 			TokenizeFloat,
 			TokenizeName,
+			TokenizeChar,
+			TokenizeCharEscapeCode,
+			TokenizeCharDelim,
 		} currAction = CurrAction::BeginToken;
 
 		uint16_t line = 1;
 		uint64_t lineBegin = 0;
 
 		AsmToken currToken(line, 1);
+
+		auto tokenizeEscapeCode = [&](char c) {
+			switch (c)
+			{
+			case 'a':
+				currToken.value.push_back('\a');
+				break;
+			case 'b':
+				currToken.value.push_back('\b');
+				break;
+			case 't':
+				currToken.value.push_back('\t');
+				break;
+			case 'n':
+				currToken.value.push_back('\n');
+				break;
+			case 'v':
+				currToken.value.push_back('\v');
+				break;
+			case 'f':
+				currToken.value.push_back('\f');
+				break;
+			case 'r':
+				currToken.value.push_back('\r');
+				break;
+			case 'e':
+				currToken.value.push_back('\033');
+				break;
+			case '\'':
+				currToken.value.push_back(c);
+				break;
+			case '\"':
+				currToken.value.push_back(c);
+				break;
+			case '\\':
+				currToken.value.push_back(c);
+				break;
+			default:
+				ASM_TOKENIZER_THROW_ERROR(AsmTokErrCode::UnexpectedChar, std::string("Unexpected char '") + c + "' for escape sequence!");
+			}
+		};
 
 		if (m_pTokenList->size() > 0 && (*m_pTokenList)[m_pTokenList->size() - 1].type == AsmToken::Type::END_OF_CODE)
 			m_pTokenList->pop_back();
@@ -113,6 +157,10 @@ namespace MarC
 						currToken.type = AsmToken::Type::String;
 						currAction = CurrAction::TokenizeString;
 						break;
+					case '\'':
+						currToken.type = AsmToken::Type::Integer;
+						currAction = CurrAction::TokenizeChar;
+						break;
 					case '/':
 						currToken.type = AsmToken::Type::Comment;
 						currAction = CurrAction::TokenizeComment;
@@ -143,52 +191,38 @@ namespace MarC
 						currAction = CurrAction::EndToken;
 						break;
 					case '\\':
-						currAction = CurrAction::TokenizeStringEscapeSequence;
+						currAction = CurrAction::TokenizeStringEscapeCode;
 						break;
 					default:
 						currToken.value.push_back(c);
 					}
 					break;
-				case CurrAction::TokenizeStringEscapeSequence:
+				case CurrAction::TokenizeStringEscapeCode:
+					tokenizeEscapeCode(c);
+					currAction = CurrAction::TokenizeString;
+					break;
+				case CurrAction::TokenizeChar:
 					switch (c)
 					{
-					case 'a':
-						currToken.value.push_back('\a');
-						break;
-					case 'b':
-						currToken.value.push_back('\b');
-						break;
-					case 't':
-						currToken.value.push_back('\t');
-						break;
-					case 'n':
-						currToken.value.push_back('\n');
-						break;
-					case 'v':
-						currToken.value.push_back('\v');
-						break;
-					case 'f':
-						currToken.value.push_back('\f');
-						break;
-					case 'r':
-						currToken.value.push_back('\r');
-						break;
-					case 'e':
-						currToken.value.push_back('\033');
-						break;
 					case '\'':
-						currToken.value.push_back(c);
-						break;
-					case '\"':
-						currToken.value.push_back(c);
-						break;
+						ASM_TOKENIZER_THROW_ERROR(AsmTokErrCode::UnexpectedChar, "Missing character in char literal!");
 					case '\\':
-						currToken.value.push_back(c);
+						currAction = CurrAction::TokenizeCharEscapeCode;
 						break;
 					default:
-						ASM_TOKENIZER_THROW_ERROR(AsmTokErrCode::UnexpectedChar, std::string("Unexpected char '") + c + "' for escape sequence!");
+						currToken.value.push_back(c);
+						currAction = CurrAction::TokenizeCharDelim;
 					}
-					currAction = CurrAction::TokenizeString;
+					break;
+				case CurrAction::TokenizeCharEscapeCode:
+					tokenizeEscapeCode(c);
+					currAction = CurrAction::TokenizeCharDelim;
+					break;
+				case CurrAction::TokenizeCharDelim:
+					if (c != '\'')
+						ASM_TOKENIZER_THROW_ERROR(AsmTokErrCode::UnexpectedChar, "Expected delimiter for char literal!");
+					currToken.value = std::to_string((int)currToken.value[0]);
+					currAction = CurrAction::EndToken;
 					break;
 				case CurrAction::TokenizeComment:
 					if (c == '\n')
