@@ -47,7 +47,7 @@ namespace MarCmd
 					return -1;
 			}
 		}
-		
+
 		if (flags.hasFlag(CmdFlags::Verbose))
 			std::cout << "Linking the application..." << std::endl;
 		if (!linker.link())
@@ -70,14 +70,14 @@ namespace MarCmd
 				auto manPerms = interpreter.getUngrantedPerms(interpreter.getManPerms());
 				if (!manPerms.empty())
 				{
-					std::cout << "  <!> The module requests the following MANDATORY permissions: " << std::endl;
+					std::cout << "  <!> A module requests the following MANDATORY permissions: " << std::endl;
 					permissionGrantPrompt(manPerms, toGrant);
 				}
 
 				auto optPerms = interpreter.getUngrantedPerms(interpreter.getOptPerms());
 				if (!optPerms.empty())
 				{
-					std::cout << "  <!> The module requests the following OPTIONAL permissions: " << std::endl;
+					std::cout << "  <!> A module requests the following OPTIONAL permissions: " << std::endl;
 					permissionGrantPrompt(optPerms, toGrant);
 				}
 
