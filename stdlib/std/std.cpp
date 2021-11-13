@@ -16,7 +16,7 @@ public:
 		if (efd.nParams != 1)
 			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected 1 parameter! Got " + std::to_string(efd.nParams) + "!");
 		if (efd.param[0].datatype != MarC::BC_DT_U_64)
-			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected parameter of type 'BC_DT_U_64! Got '" + MarC::BC_DatatypeToString(efd.param[0].datatype) + "'!");
+			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected parameter of type 'u64! Got '" + MarC::BC_DatatypeToString(efd.param[0].datatype) + "'!");
 		const char* str = &interpreter.hostObject<char>(efd.param[0].cell.as_ADDR);
 		std::cout << str;
 	}
@@ -49,6 +49,25 @@ public:
 	}
 };
 
+class EF_ScanS : public MarC::ExternalFunction
+{
+public:
+	using MarC::ExternalFunction::ExternalFunction;
+	PLUS_FEATURE_GET_NAME(">>std>>scans");
+	virtual void call(MarC::Interpreter& interpreter, MarC::ExFuncData& efd) override
+	{
+		if (efd.nParams != 2)
+			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected 2 parameters! Got " + std::to_string(efd.nParams) + "!");
+		if (efd.param[0].datatype != MarC::BC_DT_U_64)
+			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected parameter of type 'u64! Got '" + MarC::BC_DatatypeToString(efd.param[0].datatype) + "'!");
+		if (efd.param[1].datatype != MarC::BC_DT_U_32)
+			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected parameter of type 'u32! Got '" + MarC::BC_DatatypeToString(efd.param[0].datatype) + "'!");
+
+		char* str = &interpreter.hostObject<char>(efd.param[0].cell.as_ADDR);
+		int ret = scanf_s("%s", str, efd.param[1].cell.as_U_32);
+	}
+};
+
 class EF_SleepMS : public MarC::ExternalFunction
 {
 public:
@@ -70,6 +89,7 @@ void PluS::PerPlugin::initPlugin()
 {
 	pPlugin->registerFeatureFactory(FeatureFactory::create<EF_PrintS>());
 	pPlugin->registerFeatureFactory(FeatureFactory::create<EF_PrintT>());
+	pPlugin->registerFeatureFactory(FeatureFactory::create<EF_ScanS>());
 	pPlugin->registerFeatureFactory(FeatureFactory::create<EF_SleepMS>());
 }
 
