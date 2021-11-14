@@ -1,0 +1,17 @@
+#reqmod : "std"
+#manperm : >>std>>prints
+#manperm : >>std>>scans
+
+#static : BUFF : 128
+
+calx : >>std>>prints : addr."What's your name?: "
+calx : >>std>>scans : addr.BUFF
+calx : >>std>>prints : addr."Hello "
+calx : >>std>>prints : addr.BUFF
+calx : >>std>>prints : addr."!\n"
+
+calx : >>std>>prints : addr."How old are you?: "
+calx : >>std>>scans : addr.BUFF
+calx : >>std>>prints : addr."Wow, you're already "
+calx : >>std>>prints : addr.BUFF
+calx : >>std>>prints : addr." years old!\n"
