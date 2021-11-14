@@ -100,13 +100,13 @@
 
 #func : SET_ALIVE : addr.BASE : u64.X : u64.Y
     call.addr : >>XY_TO_ADDR : $ac : addr.@BASE : u64.@X : u64.@Y
-    mov.i8 : @$ac : 35
+    mov.i8 : @$ac : '#'
     return
 #end
 
 #func : SET_DEAD : addr.BASE : u64.X : u64.Y
     call.addr : >>XY_TO_ADDR : $ac : addr.@BASE : u64.@X : u64.@Y
-    mov.i8 : @$ac : 32
+    mov.i8 : @$ac : ' '
     return
 #end
 
@@ -114,7 +114,7 @@
     call.addr : >>XY_TO_ADDR : $ac : addr.@BASE : u64.@X : u64.@Y
 
     drf : $ac : @$ac
-    jeq.i8 : IS_NOT_ALIVE : @$ac : 32
+    jeq.i8 : IS_NOT_ALIVE : @$ac : ' '
 
     mov.i8 : RET : 1
     return
