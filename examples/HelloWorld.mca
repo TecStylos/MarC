@@ -1,11 +1,11 @@
 #reqmod : "std"
-#manperm : >>std>>prints
-#manperm : >>std>>printt
+#manperm : >>std>>ext>>prints
+#manperm : >>std>>ext>>printt
 
 mov.i64 : $ac : 10
 #label : loopBegin
-    calx : std>>prints : addr."Hello world!"
-    calx : std>>printt : i64.@$ac
-    calx : std>>prints : addr."\n"
+    calx : std>>ext>>prints : addr."Hello world!"
+    calx : std>>ext>>printt : i64.@$ac
+    calx : std>>ext>>prints : addr."\n"
     sub.i64 : $ac : 1
 jne.i64 : loopBegin : @$ac : 0

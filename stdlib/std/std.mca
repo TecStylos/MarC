@@ -1,16 +1,28 @@
 #scope : std
-    / Print a string to the console
-    #funx : prints
+    #scope : ext
+        / Print a string to the console
+        #funx : prints
 
-    / Print value of specified type to the console
-    #funx : printt
+        / Print value of specified type to the console
+        #funx : printt
 
-    / Read a string from the console
-    #funx : scans
+        / Read a string from the console
+        #funx : scans
 
-    / Read a vale from the console
-    #funx : scant
+        / Read a vale from the console
+        #funx : scant
     
-    / Sleep n milliseconds
-    #funx : sleepms
+        / Sleep n milliseconds
+        #funx : sleepms
+    #end
+
+    #func : copyString : addr.DEST : addr.SRC
+        #label : LOOP_BEGIN
+            drf : $td : @SRC
+            mov.u8 : @DEST : @$td
+            add.addr : DEST : 1
+            add.addr : SRC : 1
+        jne.u8 : LOOP_BEGIN : @$td : 0
+        return
+    #end
 #end / std

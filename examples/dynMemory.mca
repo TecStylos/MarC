@@ -1,15 +1,5 @@
 #reqmod : "std"
-#manperm : >>std>>prints
-
-#func : COPY_STRING : addr.DEST : addr.SRC
-    #label : LOOP_BEGIN
-        drf : $td : @SRC
-        mov.u8 : @DEST : @$td
-        add.addr : DEST : 1
-        add.addr : SRC : 1
-    jne.u8 : LOOP_BEGIN : @$td : 0
-    return
-#end
+#manperm : >>std>>ext>>prints
 
         / Memory init
 #alias : BUFFSIZE : 14
@@ -17,11 +7,11 @@
 #static : dst : ^addr
 alloc : dst : BUFFSIZE
 
-call : COPY_STRING : addr.@dst : addr.src
+call : >>std>>copyString : addr.@dst : addr.src
 
-calx : >>std>>prints : addr."src: "
-calx : >>std>>prints : addr.src
-calx : >>std>>prints : addr."dst: "
-calx : >>std>>prints : addr.@dst
+calx : >>std>>ext>>prints : addr."src: "
+calx : >>std>>ext>>prints : addr.src
+calx : >>std>>ext>>prints : addr."dst: "
+calx : >>std>>ext>>prints : addr.@dst
 
 free : @dst

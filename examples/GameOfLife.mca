@@ -1,9 +1,9 @@
 #reqmod : "std"
-#manperm : >>std>>prints
-#manperm : >>std>>sleepms
+#manperm : >>std>>ext>>prints
+#manperm : >>std>>ext>>sleepms
 
-#alias : FRAME_TIME : 100
-#alias : MAIN_LOOP_COUNT : 13
+#alias : FRAME_TIME : 75
+#alias : MAIN_LOOP_COUNT : 16
 #alias : WIDTH : 10
 #alias : HEIGHT : 10
 #alias : GRID_SIZE : 111
@@ -21,16 +21,6 @@
 #alias : LINE_8 : "          "
 #alias : LINE_9 : "          "
 
-#func : COPY_STRING : addr.DEST : addr.SRC
-    #label : LOOP_BEGIN
-        drf : $td : @SRC
-        mov.u8 : @DEST : @$td
-        add.addr : DEST : 1
-        add.addr : SRC : 1
-    jne.u8 : LOOP_BEGIN : @$td : 0
-    return
-#end
-
 #func : INIT : addr.BASE
     #local : END_ADDR : ^addr
     mov.addr : END_ADDR : @BASE
@@ -38,25 +28,25 @@
     sub.addr : END_ADDR : 1
 
     mov.addr : $ac : @BASE
-    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_0
+    call : >>std>>copyString : addr.@$ac : addr.>>LINE_0
     add.addr : $ac : 11
-    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_1
+    call : >>std>>copyString : addr.@$ac : addr.>>LINE_1
     add.addr : $ac : 11
-    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_2
+    call : >>std>>copyString : addr.@$ac : addr.>>LINE_2
     add.addr : $ac : 11
-    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_3
+    call : >>std>>copyString : addr.@$ac : addr.>>LINE_3
     add.addr : $ac : 11
-    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_4
+    call : >>std>>copyString : addr.@$ac : addr.>>LINE_4
     add.addr : $ac : 11
-    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_5
+    call : >>std>>copyString : addr.@$ac : addr.>>LINE_5
     add.addr : $ac : 11
-    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_6
+    call : >>std>>copyString : addr.@$ac : addr.>>LINE_6
     add.addr : $ac : 11
-    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_7
+    call : >>std>>copyString : addr.@$ac : addr.>>LINE_7
     add.addr : $ac : 11
-    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_8
+    call : >>std>>copyString : addr.@$ac : addr.>>LINE_8
     add.addr : $ac : 11
-    call : >>COPY_STRING : addr.@$ac : addr.>>LINE_9
+    call : >>std>>copyString : addr.@$ac : addr.>>LINE_9
 
     mov.addr : $ac : @BASE
     sub.addr : $ac : 1
@@ -70,17 +60,17 @@
 #func : CLEAR
     mov.u64 : $ac : >>HEIGHT
     add.u64 : $ac : 1
-    calx : >>std>>prints : addr."\r"
+    calx : >>std>>ext>>prints : addr."\r"
     #label : LOOP_BEGIN
-        calx : >>std>>prints : addr."\e[1F"
+        calx : >>std>>ext>>prints : addr."\e[1F"
         sub.u64 : $ac : 1
     jne.u64 : LOOP_BEGIN : @$ac : 0
     return
 #end
 
 #func : RENDER : addr.BASE
-    calx : >>std>>prints : addr.@BASE
-    calx : >>std>>prints : addr."\n"
+    calx : >>std>>ext>>prints : addr.@BASE
+    calx : >>std>>ext>>prints : addr."\n"
     return
 #end
 
@@ -221,24 +211,27 @@
     return
 #end
 
+#func : MAIN
+    call : >>INIT : addr.>>GRID1
+    call : >>INIT : addr.>>GRID2
 
+    call : >>RENDER : addr.>>GRID1
 
-call : INIT : addr.GRID1
-call : INIT : addr.GRID2
+    mov.i64 : $lc : >>MAIN_LOOP_COUNT
+    #label : MAIN_LOOP
+        calx : >>std>>ext>>sleepms : u64.>>FRAME_TIME
+        call : >>EVOLVE : addr.>>GRID1 : addr.>>GRID2
+        call : >>CLEAR
+        call : >>RENDER : addr.>>GRID2
 
-call : RENDER : addr.GRID1
+        calx : >>std>>ext>>sleepms : u64.>>FRAME_TIME
+        call : >>EVOLVE : addr.>>GRID2 : addr.>>GRID1
+        call : >>CLEAR
+        call : >>RENDER : addr.>>GRID1
 
-mov.i64 : $lc : MAIN_LOOP_COUNT
-#label : MAIN_LOOP
-    calx : >>std>>sleepms : u64.FRAME_TIME
-    call : EVOLVE : addr.GRID1 : addr.GRID2
-    call : CLEAR
-    call : RENDER : addr.GRID2
+        sub.i64 : $lc : 1
+    jne.i64 : MAIN_LOOP : @$lc : 0
+    return
+#end
 
-    calx : >>std>>sleepms : u64.FRAME_TIME
-    call : EVOLVE : addr.GRID2 : addr.GRID1
-    call : CLEAR
-    call : RENDER : addr.GRID1
-
-    sub.i64 : $lc : 1
-jne.i64 : MAIN_LOOP : @$lc : 0
+call : MAIN

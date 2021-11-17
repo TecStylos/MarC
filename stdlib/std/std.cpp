@@ -10,7 +10,7 @@ class EF_PrintS : public MarC::ExternalFunction
 {
 public:
 	using MarC::ExternalFunction::ExternalFunction;
-	PLUS_FEATURE_GET_NAME(">>std>>prints");
+	PLUS_FEATURE_GET_NAME(">>std>>ext>>prints");
 	virtual void call(MarC::Interpreter& interpreter, MarC::ExFuncData& efd) override
 	{
 		if (efd.nParams != 1)
@@ -26,7 +26,7 @@ class EF_PrintT : public MarC::ExternalFunction
 {
 public:
 	using MarC::ExternalFunction::ExternalFunction;
-	PLUS_FEATURE_GET_NAME(">>std>>printt");
+	PLUS_FEATURE_GET_NAME(">>std>>ext>>printt");
 	virtual void call(MarC::Interpreter& interpreter, MarC::ExFuncData& efd) override
 	{
 		if (efd.nParams != 1)
@@ -53,7 +53,7 @@ class EF_ScanS : public MarC::ExternalFunction
 {
 public:
 	using MarC::ExternalFunction::ExternalFunction;
-	PLUS_FEATURE_GET_NAME(">>std>>scans");
+	PLUS_FEATURE_GET_NAME(">>std>>ext>>scans");
 	virtual void call(MarC::Interpreter& interpreter, MarC::ExFuncData& efd) override
 	{
 		if (efd.nParams != 2)
@@ -72,7 +72,7 @@ class EF_SleepMS : public MarC::ExternalFunction
 {
 public:
 	using MarC::ExternalFunction::ExternalFunction;
-	PLUS_FEATURE_GET_NAME(">>std>>sleepms");
+	PLUS_FEATURE_GET_NAME(">>std>>ext>>sleepms");
 	virtual void call(MarC::Interpreter& interpreter, MarC::ExFuncData& efd) override
 	{
 		if (efd.nParams != 1)

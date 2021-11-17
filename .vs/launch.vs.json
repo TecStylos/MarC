@@ -11,8 +11,8 @@
       "args": [
         "--verbose",
         "--closeonexit",
-        "--liveasm",
-        //"examples/dynMemory.mca"
+        "--grantall",
+        "examples/GameOfLife.mca"
       ]
     }
   ]
