@@ -56,15 +56,13 @@ public:
 	PLUS_FEATURE_GET_NAME(">>std>>ext>>scans");
 	virtual void call(MarC::Interpreter& interpreter, MarC::ExFuncData& efd) override
 	{
-		if (efd.nParams != 2)
+		if (efd.nParams != 1)
 			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected 2 parameters! Got " + std::to_string(efd.nParams) + "!");
 		if (efd.param[0].datatype != MarC::BC_DT_U_64)
-			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected parameter of type 'u64! Got '" + MarC::BC_DatatypeToString(efd.param[0].datatype) + "'!");
-		if (efd.param[1].datatype != MarC::BC_DT_U_32)
-			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected parameter of type 'u32! Got '" + MarC::BC_DatatypeToString(efd.param[0].datatype) + "'!");
+			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected parameter of type 'addr! Got '" + MarC::BC_DatatypeToString(efd.param[0].datatype) + "'!");
 
 		char* str = &interpreter.hostObject<char>(efd.param[0].cell.as_ADDR);
-		int ret = scanf_s("%s", str, efd.param[1].cell.as_U_32);
+		int ret = scanf("%s", str);
 	}
 };
 
