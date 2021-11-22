@@ -20,7 +20,7 @@ add_library(
 	"src/ModuleLocator.cpp"
 	"src/VirtualAsmTokenList.cpp"
 	"src/AsmTokenizerTypes.cpp"
-	"src/ExtensionLocator.cpp")
+	"src/ExtensionLocator.cpp" "include/Disassembler.h")
 
 target_include_directories(
 	MarCore PUBLIC
