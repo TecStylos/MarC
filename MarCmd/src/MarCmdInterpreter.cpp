@@ -139,7 +139,7 @@ namespace MarCmd
 	{
 		std::string codeStr = readFile(modPath);
 		MarC::AsmTokenizer tokenizer(codeStr);
-		MarC::Compiler compiler(tokenizer.getTokenList(), modName);
+		MarC::Assembler assembler(tokenizer.getTokenList(), modName);
 
 		if (verbose)
 			std::cout << "Tokenizing module '" << modName << "'..." << std::endl;
@@ -152,18 +152,18 @@ namespace MarCmd
 
 		if (verbose)
 			std::cout << "Compiling module '" << modName << "'..." << std::endl;
-		if (!compiler.compile())
+		if (!assembler.assemble())
 		{
-			std::cout << "An error occured while running the compiler!:" << std::endl
-				<< "  " << compiler.lastError().getMessage() << std::endl;
+			std::cout << "An error occured while running the assembler!:" << std::endl
+				<< "  " << assembler.lastError().getMessage() << std::endl;
 			return false;
 		}
 
 		if (verbose)
-			std::cout << "Adding module '" << compiler.getModuleInfo()->moduleName << "' to the linker..." << std::endl;
-		if (!linker.addModule(compiler.getModuleInfo()))
+			std::cout << "Adding module '" << assembler.getModuleInfo()->moduleName << "' to the linker..." << std::endl;
+		if (!linker.addModule(assembler.getModuleInfo()))
 		{
-			std::cout << "An error occurd while adding the module '" << compiler.getModuleInfo()->moduleName << "' to the linker!:" << std::endl
+			std::cout << "An error occurd while adding the module '" << assembler.getModuleInfo()->moduleName << "' to the linker!:" << std::endl
 				<< "  " << linker.lastError().getMessage() << std::endl;
 			return false;
 		}

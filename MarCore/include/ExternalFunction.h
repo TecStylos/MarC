@@ -2,7 +2,7 @@
 
 #include <PluS.h>
 
-#include "CompilerTypes.h"
+#include "AssemblerTypes.h"
 
 namespace MarC
 {

@@ -19,14 +19,14 @@ namespace MarCmd
 	{
 		m_codeStr = "";
 		m_pTokenizer = std::make_shared<MarC::AsmTokenizer>(m_codeStr);
-		m_pCompiler = std::make_shared<MarC::Compiler>(m_pTokenizer->getTokenList(), "<cin>");
+		m_pAssembler = std::make_shared<MarC::Assembler>(m_pTokenizer->getTokenList(), "<cin>");
 		m_pLinker = std::make_shared<MarC::Linker>();
 		m_pInterpreter = std::make_shared<MarC::Interpreter>(m_pLinker->getExeInfo());
 
 		for (auto& entry : extDirs)
 			m_pInterpreter->addExtDir(entry);
 
-		m_pLinker->addModule(m_pCompiler->getModuleInfo());
+		m_pLinker->addModule(m_pAssembler->getModuleInfo());
 	}
 
 	int LiveAsmInterpreter::run()
@@ -47,11 +47,11 @@ namespace MarCmd
 				continue;
 			}
 
-			if (!m_pCompiler->compile())
+			if (!m_pAssembler->assemble())
 			{
-				recover(RecoverBegin::Compiler);
+				recover(RecoverBegin::Assembler);
 				std::cout << "An error occured while running the compiler!:" << std::endl
-					<< "  " << m_pCompiler->lastError().getMessage() << std::endl;
+					<< "  " << m_pAssembler->lastError().getMessage() << std::endl;
 				continue;
 			}
 
@@ -170,9 +170,9 @@ namespace MarCmd
 			//__fallthrough
 		case RecoverBegin::Linker:
 			std::cout << "CANNOT RECOVER FROM LINKER ERRORS! IT IS RECOMMENDED RESTARTING THE PROGRAM." << std::endl;
-			m_pCompiler->recover();
+			m_pAssembler->recover();
 			//__fallthrough
-		case RecoverBegin::Compiler:
+		case RecoverBegin::Assembler:
 			m_pTokenizer->recover();
 			//__fallthrough
 		case RecoverBegin::Tokenizer:
@@ -239,7 +239,7 @@ namespace MarCmd
 	{
 		std::string codeStr = readFile(modPath);
 		MarC::AsmTokenizer tokenizer(codeStr);
-		MarC::Compiler compiler(tokenizer.getTokenList(), modName);
+		MarC::Assembler assembler(tokenizer.getTokenList(), modName);
 
 		if (verbose)
 			std::cout << "Tokenizing module '" << modName << "'..." << std::endl;
@@ -252,18 +252,18 @@ namespace MarCmd
 
 		if (verbose)
 			std::cout << "Compiling module '" << modName << "'..." << std::endl;
-		if (!compiler.compile())
+		if (!assembler.assemble())
 		{
-			std::cout << "An error occured while running the compiler!:" << std::endl
-				<< "  " << compiler.lastError().getMessage() << std::endl;
+			std::cout << "An error occured while running the assembler!:" << std::endl
+				<< "  " << assembler.lastError().getMessage() << std::endl;
 			return false;
 		}
 
 		if (verbose)
-			std::cout << "Adding module '" << compiler.getModuleInfo()->moduleName << "' to the linker..." << std::endl;
-		if (!linker.addModule(compiler.getModuleInfo()))
+			std::cout << "Adding module '" << assembler.getModuleInfo()->moduleName << "' to the linker..." << std::endl;
+		if (!linker.addModule(assembler.getModuleInfo()))
 		{
-			std::cout << "An error occurd while adding the module '" << compiler.getModuleInfo()->moduleName << "' to the linker!" << std::endl;
+			std::cout << "An error occurd while adding the module '" << assembler.getModuleInfo()->moduleName << "' to the linker!" << std::endl;
 			return false;
 		}
 

@@ -2,13 +2,13 @@
 
 #include <string>
 #include "Memory.h"
-#include "CompilerTypes.h"
+#include "AssemblerTypes.h"
 #include "AsmInstructions.h"
 #include "AsmTokenizerTypes.h"
 
 namespace MarC
 {
-	class CompilerError
+	class AssemblerError
 	{
 	public:
 		enum class Code
@@ -25,8 +25,8 @@ namespace MarC
 			InvalidScope,
 		};
 	public:
-		CompilerError() = default;
-		CompilerError(Code code, const AsmToken& errToken, const std::string& errText, uint64_t sysErrLine, const std::string& sysErrFile)
+		AssemblerError() = default;
+		AssemblerError(Code code, const AsmToken& errToken, const std::string& errText, uint64_t sysErrLine, const std::string& sysErrFile)
 			: m_code(code), m_line(errToken.line), m_column(errToken.column), m_errText(errText), m_sysErrLine(sysErrLine), m_sysErrFile(sysErrFile)
 		{}
 	public:
@@ -42,38 +42,38 @@ namespace MarC
 		std::string m_sysErrFile = "<unspecified>";
 	};
 
-	typedef CompilerError::Code CompErrCode;
+	typedef AssemblerError::Code AsmErrCode;
 
-	#define COMPILER_THROW_ERROR(errCode, errText) throw CompilerError(errCode, currToken(), errText, __LINE__, __FILE__)
-	#define COMPILER_THROW_ERROR_UNEXPECTED_TOKEN(expectedType, token) \
-	COMPILER_THROW_ERROR(CompErrCode::UnexpectedToken, "Expected token of type '" + AsmTokenTypeToString(expectedType) + "'! Got '" + AsmTokenTypeToString(token.type) + "' with value '" + token.value + "'!")
+	#define ASSEMBLER_THROW_ERROR(errCode, errText) throw AssemblerError(errCode, currToken(), errText, __LINE__, __FILE__)
+	#define ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(expectedType, token) \
+	ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Expected token of type '" + AsmTokenTypeToString(expectedType) + "'! Got '" + AsmTokenTypeToString(token.type) + "' with value '" + token.value + "'!")
 	
-	class Compiler
+	class Assembler
 	{
 	public:
-		Compiler(const AsmTokenListRef tokenList, const std::string& moduleName = "<unnamed>");
+		Assembler(const AsmTokenListRef tokenList, const std::string& moduleName = "<unnamed>");
 	public:
-		bool compile();
+		bool assemble();
 	public:
 		ModuleInfoRef getModuleInfo();
 	public:
-		const CompilerError& lastError() const;
+		const AssemblerError& lastError() const;
 		void resetError();
 	public:
 		void backup();
 		void recover();
 	private:
-		void compileStatement();
-		void compileStatement(const std::string& statement);
-		void compileInstruction();
+		void assembleStatement();
+		void assembleStatement(const std::string& statement);
+		void assembleInstruction();
 	private:
-		void compileSpecializedInstruction(BC_OpCodeEx& ocx);
-		void compileSpecCall(BC_OpCodeEx& ocx);
-		void compileSpecCallExtern(BC_OpCodeEx& ocx);
+		void assembleSpecializedInstruction(BC_OpCodeEx& ocx);
+		void assembleSpecCall(BC_OpCodeEx& ocx);
+		void assembleSpecCallExtern(BC_OpCodeEx& ocx);
 	private:
-		void compileArgument(BC_OpCodeEx& ocx, const InsArgument& arg);
-		void compileArgAddress(BC_OpCodeEx& ocx, const InsArgument& arg);
-		void compileArgValue(BC_OpCodeEx& ocx, const InsArgument& arg);
+		void assembleArgument(BC_OpCodeEx& ocx, const InsArgument& arg);
+		void assembleArgAddress(BC_OpCodeEx& ocx, const InsArgument& arg);
+		void assembleArgValue(BC_OpCodeEx& ocx, const InsArgument& arg);
 		void generateTypeCell(TypeCell& tc, bool& getsDereferenced);
 		void generateTypeCellRegister(TypeCell& tc);
 		void generateTypeCellFPRelative(TypeCell& tc);
@@ -82,20 +82,20 @@ namespace MarC
 		void generateTypeCellString(TypeCell& tc);
 		void generateTypeCellFloat(TypeCell& tc, bool getsDereferenced);
 		void generateTypeCellInteger(TypeCell& tc, bool getsDereferenced);
-		void compileArgDatatype(BC_OpCodeEx& ocx, const InsArgument& arg);
+		void assembleArgDatatype(BC_OpCodeEx& ocx, const InsArgument& arg);
 	private:
-		void compileDirective();
-		void compileDirLabel();
-		void compileDirAlias();
-		void compileDirStatic();
-		void compileDirRequestModule();
-		void compileDirScope();
-		void compileDirEnd();
-		void compileDirFunction();
-		void compileDirFunctionExtern();
-		void compileDirLocal();
-		void compileDirMandatoryPermission();
-		void compileDirOptionalPermission();
+		void assembleDirective();
+		void assembleDirLabel();
+		void assembleDirAlias();
+		void assembleDirStatic();
+		void assembleDirRequestModule();
+		void assembleDirScope();
+		void assembleDirEnd();
+		void assembleDirFunction();
+		void assembleDirFunctionExtern();
+		void assembleDirLocal();
+		void assembleDirMandatoryPermission();
+		void assembleDirOptionalPermission();
 	private:
 		void removeNecessaryColon();
 	private:
@@ -128,7 +128,7 @@ namespace MarC
 		BC_MemAddress currStaticStackAddr() const;
 	private:
 		AsmTokenListRef m_pTokenList;
-		CompilerError m_lastErr;
+		AssemblerError m_lastErr;
 		ModuleInfoRef m_pModInfo;
 		std::vector<ScopeDesc> m_scopeList;
 		uint64_t m_nextTokenToCompile = 0;
@@ -140,15 +140,15 @@ namespace MarC
 		class DelayedPush
 		{
 		public:
-			DelayedPush(Compiler& compiler)
-				: DelayedPush(compiler, new T(), true)
+			DelayedPush(Assembler& assembler)
+				: DelayedPush(assembler, new T(), true)
 			{}
-			DelayedPush(Compiler& compiler, T& obj)
-				: DelayedPush(compiler, &obj, false)
+			DelayedPush(Assembler& assembler, T& obj)
+				: DelayedPush(assembler, &obj, false)
 			{}
 			~DelayedPush()
 			{
-				m_comp.writeCode(*m_pObj, m_codeOffset);
+				m_asm.writeCode(*m_pObj, m_codeOffset);
 				if (m_destroyObjOnDestruct && m_pObj)
 					delete m_pObj;
 			}
@@ -161,17 +161,17 @@ namespace MarC
 				return *m_pObj;
 			}
 		private:
-			DelayedPush(Compiler& compiler, T* pObj, bool destroyObjOnDestruct)
-				: m_comp(compiler), m_pObj(pObj), m_destroyObjOnDestruct(destroyObjOnDestruct)
+			DelayedPush(Assembler& assembler, T* pObj, bool destroyObjOnDestruct)
+				: m_asm(assembler), m_pObj(pObj), m_destroyObjOnDestruct(destroyObjOnDestruct)
 			{
-				m_codeOffset = compiler.currCodeOffset();
-				m_comp.pushCode(*m_pObj);
+				m_codeOffset = assembler.currCodeOffset();
+				m_asm.pushCode(*m_pObj);
 			}
 			DelayedPush() = delete;
 			DelayedPush(const DelayedPush&) = delete;
 			DelayedPush(DelayedPush&&) = delete;
 		private:
-			Compiler& m_comp;
+			Assembler& m_asm;
 			T* m_pObj = nullptr;
 			uint64_t m_codeOffset = -1;
 			bool m_destroyObjOnDestruct = false;
@@ -182,13 +182,13 @@ namespace MarC
 	std::string positiveString(const std::string& value);
 
 	template <typename T>
-	void Compiler::pushCode(const T& data)
+	void Assembler::pushCode(const T& data)
 	{
 		m_pModInfo->codeMemory->push(data);
 	}
 
 	template <typename T>
-	void Compiler::writeCode(const T& data, uint64_t offset)
+	void Assembler::writeCode(const T& data, uint64_t offset)
 	{
 		m_pModInfo->codeMemory->write(data, offset);
 	}

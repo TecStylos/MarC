@@ -2,7 +2,7 @@
 
 namespace MarC
 {
-	VirtualAsmTokenList::VirtualAsmTokenList(Compiler& comp, AsmTokenListRef tokens)
+	VirtualAsmTokenList::VirtualAsmTokenList(Assembler& comp, AsmTokenListRef tokens)
 		: m_comp(comp)
 	{
 		m_pTokenListBackup = m_comp.m_pTokenList;
