@@ -2,7 +2,7 @@
 
 #include <string>
 #include "Memory.h"
-#include "AssemblerTypes.h"
+#include "ModuleInfo.h"
 #include "AsmInstructions.h"
 #include "AsmTokenizerTypes.h"
 

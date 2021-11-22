@@ -11,7 +11,7 @@ add_library(
 	"src/Memory.cpp"
 	"src/Interpreter.cpp"
 	"src/Linker.cpp"
-	"src/LinkerOutput.cpp"
+	"src/ModuleInfo.cpp"
 	"src/BytecodeTypes.cpp"
 	"src/AssemblerTypes.cpp"
 	"src/Assembler.cpp"
@@ -20,7 +20,8 @@ add_library(
 	"src/ModuleLocator.cpp"
 	"src/VirtualAsmTokenList.cpp"
 	"src/AsmTokenizerTypes.cpp"
-	"src/ExtensionLocator.cpp" "include/Disassembler.h")
+	"src/ExtensionLocator.cpp"
+)
 
 target_include_directories(
 	MarCore PUBLIC

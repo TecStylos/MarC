@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LinkerOutput.h"
+#include "ExecutableInfo.h"
 
 #include <set>
 

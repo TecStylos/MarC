@@ -1,7 +1,7 @@
 #pragma once
 
 #include "InterpreterMemory.h"
-#include "LinkerOutput.h"
+#include "ExecutableInfo.h"
 
 #include "ExternalFunction.h"
 
