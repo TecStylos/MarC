@@ -99,7 +99,7 @@ namespace MarCmd
 
 		int64_t exitCode = interpreter.getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_64;
 
-		std::cout << "Module '" << inMod << "' exited with code " << exitCode << "." << std::endl;
+		std::cout << std::endl << "Module '" << inMod << "' exited with code " << exitCode << "." << std::endl;
 
 		if (flags.hasFlag(CmdFlags::Verbose))
 			std::cout << "  Reason: '" << interpreter.lastError().getCodeStr() << "'" << std::endl;
