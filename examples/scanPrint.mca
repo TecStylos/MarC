@@ -1,17 +1,20 @@
 #reqmod : "std"
 #manperm : >>std>>ext>>prints
 #manperm : >>std>>ext>>scans
+#manperm : >>std>>ext>>printt
+#manperm : >>std>>ext>>scant
 
-#static : BUFF : 128
+#static : USER_NAME : 128
+#static : USER_AGE : ^u16
 
 calx : >>std>>ext>>prints : addr."What's your name?: "
-calx : >>std>>ext>>scans : addr.BUFF
+calx : >>std>>ext>>scans : addr.USER_NAME
 calx : >>std>>ext>>prints : addr."Hello "
-calx : >>std>>ext>>prints : addr.BUFF
+calx : >>std>>ext>>prints : addr.USER_NAME
 calx : >>std>>ext>>prints : addr."!\n"
 
 calx : >>std>>ext>>prints : addr."How old are you?: "
-calx : >>std>>ext>>scans : addr.BUFF
+calx.u16 : >>std>>ext>>scant : USER_AGE
 calx : >>std>>ext>>prints : addr."Wow, you're already "
-calx : >>std>>ext>>prints : addr.BUFF
+calx : >>std>>ext>>printt : u16.@USER_AGE
 calx : >>std>>ext>>prints : addr." years old!\n"

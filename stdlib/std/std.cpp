@@ -57,12 +57,37 @@ public:
 	virtual void call(MarC::Interpreter& interpreter, MarC::ExFuncData& efd) override
 	{
 		if (efd.nParams != 1)
-			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected 2 parameters! Got " + std::to_string(efd.nParams) + "!");
+			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected 1 parameter! Got " + std::to_string(efd.nParams) + "!");
 		if (efd.param[0].datatype != MarC::BC_DT_U_64)
 			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected parameter of type 'addr! Got '" + MarC::BC_DatatypeToString(efd.param[0].datatype) + "'!");
 
 		char* str = &interpreter.hostObject<char>(efd.param[0].cell.as_ADDR);
 		int ret = scanf("%s", str);
+	}
+};
+
+class EF_ScanT : public MarC::ExternalFunction
+{
+public:
+	using MarC::ExternalFunction::ExternalFunction;
+	PLUS_FEATURE_GET_NAME(">>std>>ext>>scant");
+	virtual void call(MarC::Interpreter& interpreter, MarC::ExFuncData& efd) override
+	{
+		if (efd.nParams != 0)
+			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected 0 parameters! Got " + std::to_string(efd.nParams) + "!");
+		switch (efd.retVal.datatype)
+		{
+		case MarC::BC_DT_U_8:  std::cin >> efd.retVal.cell.as_U_8;  break;
+		case MarC::BC_DT_U_16: std::cin >> efd.retVal.cell.as_U_16; break;
+		case MarC::BC_DT_U_32: std::cin >> efd.retVal.cell.as_U_32; break;
+		case MarC::BC_DT_U_64: std::cin >> efd.retVal.cell.as_U_64; break;
+		case MarC::BC_DT_I_8:  std::cin >> efd.retVal.cell.as_I_8;  break;
+		case MarC::BC_DT_I_16: std::cin >> efd.retVal.cell.as_I_16; break;
+		case MarC::BC_DT_I_32: std::cin >> efd.retVal.cell.as_I_32; break;
+		case MarC::BC_DT_I_64: std::cin >> efd.retVal.cell.as_I_64; break;
+		case MarC::BC_DT_F_32: std::cin >> efd.retVal.cell.as_F_32;  break;
+		case MarC::BC_DT_F_64: std::cin >> efd.retVal.cell.as_F_64;  break;
+		}
 	}
 };
 
@@ -88,6 +113,7 @@ void PluS::PerPlugin::initPlugin()
 	pPlugin->registerFeatureFactory(FeatureFactory::create<EF_PrintS>());
 	pPlugin->registerFeatureFactory(FeatureFactory::create<EF_PrintT>());
 	pPlugin->registerFeatureFactory(FeatureFactory::create<EF_ScanS>());
+	pPlugin->registerFeatureFactory(FeatureFactory::create<EF_ScanT>());
 	pPlugin->registerFeatureFactory(FeatureFactory::create<EF_SleepMS>());
 }
 
