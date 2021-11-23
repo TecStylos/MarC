@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include "AssemblerTypes.h"
 
 namespace MarC
@@ -12,22 +14,20 @@ namespace MarC
 	{
 	public:
 		std::string moduleName;
+		bool extensionRequired;
 		std::vector<std::string> requiredModules;
 		std::vector<std::string> mandatoryPermissions;
 		std::vector<std::string> optionalPermissions;
-		bool extensionRequired;
-		bool extensionLoaded;
-		MemoryRef codeMemory;
-		MemoryRef staticStack;
 		std::vector<Symbol> definedSymbols;
 		std::vector<SymbolRef> unresolvedSymbolRefs;
+		MemoryRef codeMemory;
+		MemoryRef staticStack;
+		bool extensionLoaded;
 	public:
 		ModuleInfo();
 	public:
 		void backup();
 		void recover();
-	public:
-		static ModuleInfoRef loadFromFile(const std::string& path); // TODO: Implement
 	private:
 		struct BackupData
 		{
@@ -42,4 +42,7 @@ namespace MarC
 			uint64_t unresolvedSymbolRefsSize = 0;
 		} bud;
 	};
+
+	std::ostream& operator<<(std::ostream& outStream, const ModuleInfo& mInfo);
+	std::istream& operator>>(std::istream& inStream, ModuleInfo& mInfo);
 }

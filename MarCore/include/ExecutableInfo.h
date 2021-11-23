@@ -1,6 +1,7 @@
 #pragma once
 
 #include <set>
+#include <iostream>
 
 #include "ModuleInfo.h"
 
@@ -12,12 +13,13 @@ namespace MarC
 
 	struct ExecutableInfo
 	{
-		std::map<std::string, uint64_t> moduleNameMap;
-		std::vector<ModuleInfoRef> modules;
 		std::set<Symbol> symbols;
 		std::set<std::string> mandatoryPermissions;
 		std::set<std::string> optionalPermissions;
-	public:
-		static ExecutableInfoRef loadFromFile(const std::string& path); // TODO: Implement
+		std::vector<ModuleInfoRef> modules;
+		std::map<std::string, uint64_t> moduleNameMap;
 	};
+
+	std::ostream& operator<<(std::ostream& outStream, const ExecutableInfo& eInfo);
+	std::istream& operator>>(std::istream& inStream, ExecutableInfo& eInfo);
 }

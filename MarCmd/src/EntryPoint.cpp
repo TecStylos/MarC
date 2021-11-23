@@ -71,9 +71,9 @@ int main(int argc, const char** argv, const char** env)
 			mode = Mode::LiveAsm;
 			continue;
 		}
-		if (elem == "--execute")
+		if (elem == "--compile")
 		{
-			mode = Mode::Execute;
+			mode = Mode::Compile;
 			continue;
 		}
 		if (elem == "--assemble")
@@ -81,14 +81,14 @@ int main(int argc, const char** argv, const char** env)
 			mode = Mode::Assemble;
 			continue;
 		}
-		if (elem == "--compile")
-		{
-			mode = Mode::Compile;
-			continue;
-		}
 		if (elem == "--link")
 		{
 			mode = Mode::Link;
+			continue;
+		}
+		if (elem == "--execute")
+		{
+			mode = Mode::Execute;
 			continue;
 		}
 		if (elem == "-i")
@@ -181,21 +181,21 @@ int main(int argc, const char** argv, const char** env)
 	case Mode::LiveAsm:
 		exitCode = MarCmd::LiveAsmInterpreter::run(modDirs, extDirs, flags);
 		break;
-	case Mode::Execute:
-		std::cout << "Mode 'execute' has not been implemented yet!" << std::endl;
+	case Mode::Compile:
+		std::cout << "Mode 'compile' has not been implemented yet!" << std::endl;
 		exitCode = -1;
 		break;
 	case Mode::Assemble:
 		std::cout << "Mode 'assemble' has not been implemented yet!" << std::endl;
 		exitCode = -1;
 		break;
-	case Mode::Compile:
-		std::cout << "Mode 'compile' has not been implemented yet!" << std::endl;
-		exitCode = -1;
-		break;
 	case Mode::Link:
 		std::cout << "Mode 'link' has not been implemented yet!" << std::endl;
 		exitCode =  -1;
+		break;
+	case Mode::Execute:
+		std::cout << "Mode 'execute' has not been implemented yet!" << std::endl;
+		exitCode = -1;
 		break;
 	case Mode::Interpret:
 		exitCode = MarCmd::Interpreter::run(runFile, modDirs, extDirs, flags);
