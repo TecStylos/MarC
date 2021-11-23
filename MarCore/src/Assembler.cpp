@@ -25,7 +25,7 @@ namespace MarC
 	Assembler::Assembler(const AsmTokenListRef tokenList, const std::string& moduleName)
 		: m_pTokenList(tokenList)
 	{
-		m_pModInfo = std::make_shared<ModuleInfo>();
+		m_pModInfo = ModuleInfo::create();
 		m_pModInfo->moduleName = moduleName;
 	}
 

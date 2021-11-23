@@ -92,6 +92,13 @@ namespace MarC
 		serialize(symbol.usage, oStream);
 		serialize(symbol.value, oStream);
 	}
+	template <>
+	inline void deserialize(Symbol& symbol, std::istream& iStream)
+	{
+		deserialize(symbol.name, iStream);
+		deserialize(symbol.usage, iStream);
+		deserialize(symbol.value, iStream);
+	}
 
 	template <>
 	inline void serialize(const SymbolRef& symRef, std::ostream& oStream)
@@ -99,5 +106,12 @@ namespace MarC
 		serialize(symRef.name, oStream);
 		serialize(symRef.datatype, oStream);
 		serialize(symRef.offset, oStream);
+	}
+	template <>
+	inline void deserialize(SymbolRef& symRef, std::istream& iStream)
+	{
+		deserialize(symRef.name, iStream);
+		deserialize(symRef.datatype, iStream);
+		deserialize(symRef.offset, iStream);
 	}
 }

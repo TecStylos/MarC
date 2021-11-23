@@ -7,8 +7,8 @@ namespace MarC
 		moduleName = "<unnamed>";
 		extensionRequired = false;
 		extensionLoaded = false;
-		codeMemory = std::make_shared<Memory>();
-		staticStack = std::make_shared<Memory>();
+		codeMemory = Memory::create();
+		staticStack = Memory::create();
 	}
 
 	void ModuleInfo::backup()
@@ -35,5 +35,10 @@ namespace MarC
 		staticStack->resize(bud.staticStackSize);
 		definedSymbols.resize(bud.definedSymbolsSize);
 		unresolvedSymbolRefs.resize(bud.unresolvedSymbolRefsSize);
+	}
+
+	ModuleInfoRef ModuleInfo::create()
+	{
+		return std::make_shared<ModuleInfo>();
 	}
 }

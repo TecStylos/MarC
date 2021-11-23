@@ -83,4 +83,14 @@ namespace MarC
 	{
 		return m_data.size();
 	}
+
+	MemoryRef Memory::create()
+	{
+		return std::make_shared<Memory>();
+	}
+
+	MemoryRef Memory::create(uint64_t initSize, bool resizable)
+	{
+		return std::make_shared<Memory>(initSize, resizable);
+	}
 }

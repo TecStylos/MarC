@@ -22,7 +22,7 @@ add_library(
 	"src/AsmTokenizerTypes.cpp"
 	"src/ExtensionLocator.cpp"
 	
- "include/Serializer.h")
+ "include/Serializer.h" "src/ExecutableInfo.cpp")
 
 target_include_directories(
 	MarCore PUBLIC

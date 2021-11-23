@@ -8,6 +8,9 @@
 
 namespace MarC
 {
+	class Memory;
+	typedef std::shared_ptr<Memory> MemoryRef;
+
 	class Memory
 	{
 	public:
@@ -32,12 +35,13 @@ namespace MarC
 	public:
 		void* getBaseAddress();
 		uint64_t size() const;
+	public:
+		static MemoryRef create();
+		static MemoryRef create(uint64_t initSize, bool resizable = true);
 	private:
 		std::vector<char> m_data;
 		bool m_resizable;
 	};
-
-	typedef std::shared_ptr<Memory> MemoryRef;
 
 	template <typename T>
 	bool Memory::read(T& data, uint64_t offset)

@@ -5,10 +5,10 @@
 
 #define MARC_SERIALIZER_ENABLE_FIXED(Type) \
 template <> \
-inline void serialize(const Type& obj, std::ostream& oStream) \
+inline void serialize(const Type& obj, ::std::ostream& oStream) \
 { serializeStaticSized(obj, oStream); } \
 template <> \
-inline void deserialize(Type& obj, std::istream& iStream) \
+inline void deserialize(Type& obj, ::std::istream& iStream) \
 { deserializeStaticSized(obj, iStream); }
 
 namespace MarC

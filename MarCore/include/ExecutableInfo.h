@@ -8,7 +8,6 @@
 namespace MarC
 {
 	struct ExecutableInfo;
-
 	typedef std::shared_ptr<ExecutableInfo> ExecutableInfoRef;
 
 	struct ExecutableInfo
@@ -18,6 +17,8 @@ namespace MarC
 		std::set<std::string> optionalPermissions;
 		std::vector<ModuleInfoRef> modules;
 		std::map<std::string, uint64_t> moduleNameMap;
+	public:
+		static ExecutableInfoRef create();
 	};
 
 	struct ExeInfoHeader
@@ -57,6 +58,35 @@ namespace MarC
 	inline void deserialize(ExecutableInfo& exeInfo, std::istream& iStream)
 	{
 		exeInfo = ExecutableInfo();
-		// TODO: Implement deserialization
+		ExeInfoHeader header;
+		deserialize(header, iStream);
+
+		std::string temp;
+
+		for (uint64_t i = 0; i < header.nSymbols; ++i)
+		{
+			deserialize(temp, iStream);
+			exeInfo.symbols.insert(temp);
+		}
+
+		for (uint64_t i = 0; i < header.nManPerms; ++i)
+		{
+			deserialize(temp, iStream);
+			exeInfo.mandatoryPermissions.insert(temp);
+		}
+
+		for (uint64_t i = 0; i < header.nOptPerms; ++i)
+		{
+			deserialize(temp, iStream);
+			exeInfo.optionalPermissions.insert(temp);
+		}
+
+		for (uint64_t i = 0; i < header.nModules; ++i)
+		{
+			auto mod = ModuleInfo::create();
+			deserialize(*mod, iStream);
+			exeInfo.modules.push_back(mod);
+			exeInfo.moduleNameMap.insert({ mod->moduleName, i });
+		}
 	}
 }

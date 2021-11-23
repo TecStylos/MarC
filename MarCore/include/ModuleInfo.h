@@ -29,6 +29,8 @@ namespace MarC
 	public:
 		void backup();
 		void recover();
+	public:
+		static ModuleInfoRef create();
 	private:
 		struct BackupData
 		{
@@ -97,6 +99,47 @@ namespace MarC
 	inline void deserialize(ModuleInfo& modInfo, std::istream& iStream)
 	{
 		modInfo = ModuleInfo();
-		// TODO: Implement deserialization
+		ModInfoHeader header;
+		deserialize(header, iStream);
+		deserialize(modInfo.moduleName, iStream);
+
+		std::string temp;
+
+		for (uint64_t i = 0; i < header.nReqMods; ++i)
+		{
+			deserialize(temp, iStream);
+			modInfo.requiredModules.push_back(temp);
+		}
+
+		for (uint64_t i = 0; i < header.nManPerms; ++i)
+		{
+			deserialize(temp, iStream);
+			modInfo.mandatoryPermissions.push_back(temp);
+		}
+
+		for (uint64_t i = 0; i < header.nOptPerms; ++i)
+		{
+			deserialize(temp, iStream);
+			modInfo.optionalPermissions.push_back(temp);
+		}
+
+		for (uint64_t i = 0; i < header.nDefSymbols; ++i)
+		{
+			Symbol symbol;
+			deserialize(symbol, iStream);
+			modInfo.definedSymbols.push_back(symbol);
+		}
+
+		for (uint64_t i = 0; i < header.nUnresSymbolRefs; ++i)
+		{
+			SymbolRef symRef;
+			deserialize(symRef, iStream);
+			modInfo.unresolvedSymbolRefs.push_back(symRef);
+		}
+
+		modInfo.codeMemory = Memory::create();
+		deserialize(*modInfo.codeMemory, iStream);
+		modInfo.staticStack = Memory::create();
+		deserialize(*modInfo.staticStack, iStream);
 	}
 }

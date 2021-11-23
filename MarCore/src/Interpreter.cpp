@@ -202,7 +202,7 @@ namespace MarC
 
 	void Interpreter::initMemory(uint64_t dynStackSize)
 	{
-		m_mem.dynamicStack = std::make_shared<Memory>(dynStackSize);
+		m_mem.dynamicStack = Memory::create(dynStackSize);
 
 		getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR = BC_MemAddress(BC_MEM_BASE_CODE_MEMORY, 0);
 		getRegister(BC_MEM_REG_STACK_POINTER).as_ADDR = BC_MemAddress(BC_MEM_BASE_DYNAMIC_STACK, 0);

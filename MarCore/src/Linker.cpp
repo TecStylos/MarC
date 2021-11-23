@@ -20,7 +20,7 @@ namespace MarC
 
 	Linker::Linker()
 	{
-		m_pExeInfo = std::make_shared<ExecutableInfo>();
+		m_pExeInfo = ExecutableInfo::create();
 	}
 
 	bool Linker::addModule(ModuleInfoRef pModInfo)
