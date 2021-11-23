@@ -49,9 +49,6 @@ namespace MarC
 	struct ModInfoHeader
 	{
 		bool extRequired;
-		uint64_t nReqMods;
-		uint64_t nManPerms;
-		uint64_t nOptPerms;
 		uint64_t nDefSymbols;
 		uint64_t nUnresSymbolRefs;
 		uint64_t codeMemSize;
@@ -65,9 +62,6 @@ namespace MarC
 	{
 		ModInfoHeader header;
 		header.extRequired = modInfo.extensionRequired;
-		header.nReqMods = modInfo.requiredModules.size();
-		header.nManPerms = modInfo.mandatoryPermissions.size();
-		header.nOptPerms = modInfo.optionalPermissions.size();
 		header.nDefSymbols = modInfo.definedSymbols.size();
 		header.nUnresSymbolRefs = modInfo.unresolvedSymbolRefs.size();
 		header.codeMemSize = modInfo.codeMemory->size();
@@ -76,14 +70,9 @@ namespace MarC
 		serialize(header, oStream);
 		serialize(modInfo.moduleName, oStream);
 
-		for (auto& reqMod : modInfo.requiredModules)
-			serialize(reqMod, oStream);
-
-		for (auto& perm : modInfo.mandatoryPermissions)
-			serialize(perm, oStream);
-
-		for (auto& perm : modInfo.optionalPermissions)
-			serialize(perm, oStream);
+		serialize(modInfo.requiredModules, oStream);
+		serialize(modInfo.mandatoryPermissions, oStream);
+		serialize(modInfo.optionalPermissions, oStream);
 
 		for (auto& symbol : modInfo.definedSymbols)
 			serialize(symbol, oStream);
@@ -103,25 +92,9 @@ namespace MarC
 		deserialize(header, iStream);
 		deserialize(modInfo.moduleName, iStream);
 
-		std::string temp;
-
-		for (uint64_t i = 0; i < header.nReqMods; ++i)
-		{
-			deserialize(temp, iStream);
-			modInfo.requiredModules.push_back(temp);
-		}
-
-		for (uint64_t i = 0; i < header.nManPerms; ++i)
-		{
-			deserialize(temp, iStream);
-			modInfo.mandatoryPermissions.push_back(temp);
-		}
-
-		for (uint64_t i = 0; i < header.nOptPerms; ++i)
-		{
-			deserialize(temp, iStream);
-			modInfo.optionalPermissions.push_back(temp);
-		}
+		deserialize(modInfo.requiredModules, iStream);
+		deserialize(modInfo.mandatoryPermissions, iStream);
+		deserialize(modInfo.optionalPermissions, iStream);
 
 		for (uint64_t i = 0; i < header.nDefSymbols; ++i)
 		{

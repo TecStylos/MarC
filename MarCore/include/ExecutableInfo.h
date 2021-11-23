@@ -24,8 +24,6 @@ namespace MarC
 	struct ExeInfoHeader
 	{
 		uint64_t nSymbols;
-		uint64_t nManPerms;
-		uint64_t nOptPerms;
 		uint64_t nModules;
 	};
 	MARC_SERIALIZER_ENABLE_FIXED(ExeInfoHeader);
@@ -35,8 +33,6 @@ namespace MarC
 	{
 		ExeInfoHeader header;
 		header.nSymbols = exeInfo.symbols.size();
-		header.nManPerms = exeInfo.mandatoryPermissions.size();
-		header.nOptPerms = exeInfo.optionalPermissions.size();
 		header.nModules = exeInfo.modules.size();
 
 		serialize(header, oStream);
@@ -44,11 +40,8 @@ namespace MarC
 		for (auto& symbol : exeInfo.symbols)
 			serialize(symbol, oStream);
 
-		for (auto& perm : exeInfo.mandatoryPermissions)
-			serialize(perm, oStream);
-
-		for (auto& perm : exeInfo.optionalPermissions)
-			serialize(perm, oStream);
+		serialize(exeInfo.mandatoryPermissions, oStream);
+		serialize(exeInfo.optionalPermissions, oStream);
 
 		for (auto& mod : exeInfo.modules)
 			serialize(*mod, oStream);
@@ -61,25 +54,15 @@ namespace MarC
 		ExeInfoHeader header;
 		deserialize(header, iStream);
 
-		std::string temp;
-
 		for (uint64_t i = 0; i < header.nSymbols; ++i)
 		{
-			deserialize(temp, iStream);
-			exeInfo.symbols.insert(temp);
+			std::string symbol;
+			deserialize(symbol, iStream);
+			exeInfo.symbols.insert(symbol);
 		}
 
-		for (uint64_t i = 0; i < header.nManPerms; ++i)
-		{
-			deserialize(temp, iStream);
-			exeInfo.mandatoryPermissions.insert(temp);
-		}
-
-		for (uint64_t i = 0; i < header.nOptPerms; ++i)
-		{
-			deserialize(temp, iStream);
-			exeInfo.optionalPermissions.insert(temp);
-		}
+		deserialize(exeInfo.mandatoryPermissions, iStream);
+		deserialize(exeInfo.optionalPermissions, iStream);
 
 		for (uint64_t i = 0; i < header.nModules; ++i)
 		{
