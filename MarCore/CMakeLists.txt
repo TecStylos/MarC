@@ -21,8 +21,8 @@ add_library(
 	"src/VirtualAsmTokenList.cpp"
 	"src/AsmTokenizerTypes.cpp"
 	"src/ExtensionLocator.cpp"
-	"src/ExecutableInfo.cpp"
-)
+	
+ "include/Serializer.h")
 
 target_include_directories(
 	MarCore PUBLIC

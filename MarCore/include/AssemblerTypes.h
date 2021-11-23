@@ -58,6 +58,7 @@ namespace MarC
 		Value,
 		Address,
 	};
+	MARC_SERIALIZER_ENABLE_FIXED(SymbolUsage);
 
 	struct Symbol
 	{
@@ -83,4 +84,20 @@ namespace MarC
 		uint64_t offset = -1;
 		BC_Datatype datatype = BC_DT_NONE;
 	};
+
+	template <>
+	inline void serialize(const Symbol& symbol, std::ostream& oStream)
+	{
+		serialize(symbol.name, oStream);
+		serialize(symbol.usage, oStream);
+		serialize(symbol.value, oStream);
+	}
+
+	template <>
+	inline void serialize(const SymbolRef& symRef, std::ostream& oStream)
+	{
+		serialize(symRef.name, oStream);
+		serialize(symRef.datatype, oStream);
+		serialize(symRef.offset, oStream);
+	}
 }

@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <string>
 
+#include "Serializer.h"
+
 namespace MarC
 {
 	enum BC_Datatype : uint8_t
@@ -21,6 +23,7 @@ namespace MarC
 		BC_DT_F_32,
 		BC_DT_F_64,
 	};
+	MARC_SERIALIZER_ENABLE_FIXED(BC_Datatype);
 	enum BC_OpCode : uint8_t
 	{
 		BC_OC_NONE = 0,
@@ -152,6 +155,7 @@ namespace MarC
 		BC_MemCell() { as_U_64 = 0; };
 		BC_MemCell(BC_MemAddress val) : as_ADDR(val) {}
 	};
+	MARC_SERIALIZER_ENABLE_FIXED(BC_MemCell);
 
 	struct BC_FuncCallData
 	{

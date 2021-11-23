@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <memory>
 
+#include "Serializer.h"
+
 namespace MarC
 {
 	class Memory
@@ -54,4 +56,6 @@ namespace MarC
 	{
 		return push(&data, sizeof(T));
 	}
+
+	MARC_SERIALIZER_ENABLE_FIXED(Memory);
 }

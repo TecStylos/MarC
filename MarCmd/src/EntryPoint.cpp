@@ -205,7 +205,8 @@ int main(int argc, const char** argv, const char** env)
 	if (
 		exitBehavior == ExitBehavior::KeepOnExit ||
 		(
-			exitBehavior == ExitBehavior::CloseWhenZero && exitCode != 0
+			exitBehavior == ExitBehavior::CloseWhenZero &&
+			exitCode != 0
 			)
 		)
 	{

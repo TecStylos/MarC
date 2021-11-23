@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "Serializer.h"
 #include "AssemblerTypes.h"
 
 namespace MarC
@@ -43,6 +44,59 @@ namespace MarC
 		} bud;
 	};
 
-	std::ostream& operator<<(std::ostream& outStream, const ModuleInfo& mInfo);
-	std::istream& operator>>(std::istream& inStream, ModuleInfo& mInfo);
+	struct ModInfoHeader
+	{
+		bool extRequired;
+		uint64_t nReqMods;
+		uint64_t nManPerms;
+		uint64_t nOptPerms;
+		uint64_t nDefSymbols;
+		uint64_t nUnresSymbolRefs;
+		uint64_t codeMemSize;
+		uint64_t staticStackSize;
+	};
+
+	MARC_SERIALIZER_ENABLE_FIXED(ModInfoHeader);
+
+	template<>
+	inline void serialize(const ModuleInfo& modInfo, std::ostream& oStream)
+	{
+		ModInfoHeader header;
+		header.extRequired = modInfo.extensionRequired;
+		header.nReqMods = modInfo.requiredModules.size();
+		header.nManPerms = modInfo.mandatoryPermissions.size();
+		header.nOptPerms = modInfo.optionalPermissions.size();
+		header.nDefSymbols = modInfo.definedSymbols.size();
+		header.nUnresSymbolRefs = modInfo.unresolvedSymbolRefs.size();
+		header.codeMemSize = modInfo.codeMemory->size();
+		header.staticStackSize = modInfo.staticStack->size();
+
+		serialize(header, oStream);
+		serialize(modInfo.moduleName, oStream);
+
+		for (auto& reqMod : modInfo.requiredModules)
+			serialize(reqMod, oStream);
+
+		for (auto& perm : modInfo.mandatoryPermissions)
+			serialize(perm, oStream);
+
+		for (auto& perm : modInfo.optionalPermissions)
+			serialize(perm, oStream);
+
+		for (auto& symbol : modInfo.definedSymbols)
+			serialize(symbol, oStream);
+
+		for (auto& symRef : modInfo.unresolvedSymbolRefs)
+			serialize(symRef, oStream);
+
+		serialize(*modInfo.codeMemory, oStream);
+		serialize(*modInfo.staticStack, oStream);
+	}
+
+	template <>
+	inline void deserialize(ModuleInfo& modInfo, std::istream& iStream)
+	{
+		modInfo = ModuleInfo();
+		// TODO: Implement deserialization
+	}
 }
