@@ -12,8 +12,7 @@
         "--verbose",
         "--closeonexit",
         "--grantall",
-        //"--build",
-        "examples/GameOfLife.mce"
+        "examples/GameOfLife.mca"
       ]
     }
   ]

@@ -11,6 +11,8 @@ namespace MarCmd
 {
 	int Interpreter::run(const Settings& settings)
 	{
+		bool verbose = settings.flags.hasFlag(CmdFlags::Verbose);
+
 		MarC::ExecutableInfoRef exeInfo;
 		std::string inMod = modNameFromPath(settings.inFile);
 		auto extension = std::filesystem::path(settings.inFile).extension().string();
@@ -19,6 +21,7 @@ namespace MarCmd
 			throw std::runtime_error("Interpreting *.mcc files is not supported at the moment!");
 		else if (extension == ".mce")
 		{
+			
 			std::ifstream iStream(settings.inFile, std::ios::binary | std::ios::in);
 			if (!iStream.is_open())
 			{
@@ -26,6 +29,9 @@ namespace MarCmd
 				return -1;
 			}
 			exeInfo = MarC::ExecutableInfo::create();
+
+			if (verbose)
+				std::cout << "Loading input file from disk..." << std::endl;
 			MarC::deserialize(*exeInfo, iStream);
 
 			if (!iStream.good())
@@ -38,7 +44,6 @@ namespace MarCmd
 		{
 			MarC::Linker linker;
 
-			bool verbose = settings.flags.hasFlag(CmdFlags::Verbose);
 			try
 			{
 				addModule(linker, settings.inFile, inMod, &verbose);
@@ -47,7 +52,7 @@ namespace MarCmd
 			{
 				std::cout << "An error occured while running the tokenizer!:" << std::endl
 					<< "  " << err.getMessage() << std::endl;
-				return -1;
+				return -1;\
 			}
 			catch (const MarC::AssemblerError& err)
 			{
@@ -125,7 +130,7 @@ namespace MarCmd
 		}
 
 		Timer timer;
-		if (settings.flags.hasFlag(CmdFlags::Verbose))
+		if (verbose)
 			std::cout << "Starting interpreter..." << std::endl;
 		timer.start();
 		bool intResult = interpreter.interpret();
@@ -141,10 +146,10 @@ namespace MarCmd
 
 		std::cout << std::endl << "Module '" << inMod << "' exited with code " << exitCode << "." << std::endl;
 
-		if (settings.flags.hasFlag(CmdFlags::Verbose))
+		if (verbose)
 			std::cout << "  Reason: '" << interpreter.lastError().getCodeStr() << "'" << std::endl;
 
-		if (settings.flags.hasFlag(CmdFlags::Verbose))
+		if (verbose)
 			std::cout << "Executed " << interpreter.nInsExecuted() << " instructions in " << timer.microseconds() << " microseconds" << std::endl;
 
 		return (int)exitCode;
