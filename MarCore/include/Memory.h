@@ -34,6 +34,7 @@ namespace MarC
 		void resizable(bool state);
 	public:
 		void* getBaseAddress();
+		const void* getBaseAddress() const;
 		uint64_t size() const;
 	public:
 		static MemoryRef create();
@@ -61,5 +62,21 @@ namespace MarC
 		return push(&data, sizeof(T));
 	}
 
-	MARC_SERIALIZER_ENABLE_FIXED(Memory);
+	template <>
+	inline void serialize(const Memory& mem, std::ostream& oStream)
+	{
+		serialize<uint64_t>(mem.size(), oStream);
+
+		oStream.write((const char*)mem.getBaseAddress(), mem.size());
+	}
+
+	template <>
+	inline void deserialize(Memory& mem, std::istream& iStream)
+	{
+		uint64_t memSize;
+		deserialize(memSize, iStream);
+
+		mem.resize(memSize);
+		iStream.read((char*)mem.getBaseAddress(), mem.size());
+	}
 }

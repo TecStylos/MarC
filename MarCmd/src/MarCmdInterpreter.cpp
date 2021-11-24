@@ -5,40 +5,96 @@
 
 #include "MarCore.h"
 #include "PermissionGrantPrompt.h"
+#include "MarCmdModuleAdder.h"
 
 namespace MarCmd
 {
 	int Interpreter::run(const Settings& settings)
 	{
+		MarC::ExecutableInfoRef exeInfo;
 		std::string inMod = modNameFromPath(settings.inFile);
+		auto extension = std::filesystem::path(settings.inFile).extension().string();
 
-		Timer timer;
+		if (extension == ".mcc")
+			throw std::runtime_error("Interpreting *.mcc files is not supported at the moment!");
+		else if (extension == ".mce")
+		{
+			std::ifstream iStream(settings.inFile, std::ios::binary | std::ios::in);
+			if (!iStream.is_open())
+			{
+				std::cout << "Unable to open input file!" << std::endl;
+				return -1;
+			}
+			exeInfo = MarC::ExecutableInfo::create();
+			MarC::deserialize(*exeInfo, iStream);
 
-		MarC::Linker linker;
-		MarC::Interpreter interpreter(linker.getExeInfo());
+			if (!iStream.good())
+			{
+				std::cout << "An error occured while reading the application from disk!" << std::endl;
+				return -1;
+			}
+		}
+		else if (extension == ".mca")
+		{
+			MarC::Linker linker;
 
+			bool verbose = settings.flags.hasFlag(CmdFlags::Verbose);
+			try
+			{
+				addModule(linker, settings.inFile, inMod, &verbose);
+			}
+			catch (const MarC::AsmTokenizerError& err)
+			{
+				std::cout << "An error occured while running the tokenizer!:" << std::endl
+					<< "  " << err.getMessage() << std::endl;
+				return -1;
+			}
+			catch (const MarC::AssemblerError& err)
+			{
+				std::cout << "An error occured while runing the assembler!" << std::endl
+					<< "  " << err.getMessage() << std::endl;
+				return -1;
+			}
+			catch (const MarC::LinkerError& err)
+			{
+				std::cout << "An error occured while running the linker!:" << std::endl
+					<< "  " << err.getMessage() << std::endl;
+				return -1;
+			}
+			catch (const std::runtime_error& err)
+			{
+				std::cout << "An unexpected error occured!:" << std::endl
+					<< "  " << err.what() << std::endl;
+				return -1;
+			}
+
+			if (!linker.autoAddMissingModules(settings.modDirs, &addModule, &verbose))
+			{
+				std::cout << "An error occured while auto adding the required modules!:" << std::endl
+					<< "  " << linker.lastError().getMessage() << std::endl;
+				return -1;
+			}
+
+			if (settings.flags.hasFlag(CmdFlags::Verbose))
+				std::cout << "Linking the application..." << std::endl;
+			if (!linker.link())
+			{
+				std::cout << "An error occured while running the linker!" << std::endl
+					<< "  " << linker.lastError().getMessage() << std::endl;
+				return -1;
+			}
+
+			exeInfo = linker.getExeInfo();
+		}
+		else
+		{
+			std::cout << "Unsupported input file!" << std::endl;
+			return -1;
+		}
+
+		MarC::Interpreter interpreter(exeInfo);
 		for (auto& entry : settings.extDirs)
 			interpreter.addExtDir(entry);
-
-		bool verbose = settings.flags.hasFlag(CmdFlags::Verbose);
-		if (!addModule(linker, settings.inFile, inMod, &verbose))
-			return -1;
-
-		if (!linker.autoAddMissingModules(settings.modDirs, &addModule, &verbose))
-		{
-			std::cout << "An error occured while auto adding the required modules!:" << std::endl
-				<< "  " << linker.lastError().getMessage() << std::endl;
-			return -1;
-		}
-
-		if (settings.flags.hasFlag(CmdFlags::Verbose))
-			std::cout << "Linking the application..." << std::endl;
-		if (!linker.link())
-		{
-			std::cout << "An error occured while running the linker!" << std::endl
-				<< "  " << linker.lastError().getMessage() << std::endl;
-			return -1;
-		}
 
 		if (interpreter.hasUngrantedPerms())
 		{
@@ -68,6 +124,7 @@ namespace MarCmd
 			}
 		}
 
+		Timer timer;
 		if (settings.flags.hasFlag(CmdFlags::Verbose))
 			std::cout << "Starting interpreter..." << std::endl;
 		timer.start();
@@ -91,67 +148,5 @@ namespace MarCmd
 			std::cout << "Executed " << interpreter.nInsExecuted() << " instructions in " << timer.microseconds() << " microseconds" << std::endl;
 
 		return (int)exitCode;
-	}
-
-	std::string Interpreter::modNameFromPath(const std::string& filepath)
-	{
-		return std::filesystem::path(filepath).stem().string();
-	}
-
-	std::string Interpreter::readFile(const std::string& filepath)
-	{
-		std::ifstream f(filepath);
-		if (!f.good())
-			return "";
-
-		std::string result;
-		while (!f.eof())
-		{
-			std::string line;
-			std::getline(f, line);
-			result.append(line);
-			result.push_back('\n');
-		}
-		if (!result.empty())
-			result.pop_back();
-
-		return result;
-	}
-
-	bool Interpreter::addModule(MarC::Linker& linker, const std::string& modPath, const std::string& modName, void* pParam)
-	{
-		bool verbose = *(bool*)pParam;
-		std::string codeStr = readFile(modPath);
-		MarC::AsmTokenizer tokenizer(codeStr);
-		MarC::Assembler assembler(tokenizer.getTokenList(), modName);
-
-		if (verbose)
-			std::cout << "Tokenizing module '" << modName << "'..." << std::endl;
-		if (!tokenizer.tokenize())
-		{
-			std::cout << "An error occured while running the tokenizer!" << std::endl
-				<< "  " << tokenizer.lastError().getMessage() << std::endl;
-			return false;
-		}
-
-		if (verbose)
-			std::cout << "Assembling module '" << modName << "'..." << std::endl;
-		if (!assembler.assemble())
-		{
-			std::cout << "An error occured while running the assembler!:" << std::endl
-				<< "  " << assembler.lastError().getMessage() << std::endl;
-			return false;
-		}
-
-		if (verbose)
-			std::cout << "Adding module '" << assembler.getModuleInfo()->moduleName << "' to the linker..." << std::endl;
-		if (!linker.addModule(assembler.getModuleInfo()))
-		{
-			std::cout << "An error occurd while adding the module '" << assembler.getModuleInfo()->moduleName << "' to the linker!:" << std::endl
-				<< "  " << linker.lastError().getMessage() << std::endl;
-			return false;
-		}
-
-		return true;
 	}
 }

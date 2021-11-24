@@ -38,7 +38,7 @@ namespace MarC
 
 	class Linker;
 
-	typedef bool (*AddModuleCallback)(Linker&, const std::string&, const std::string&, void*);
+	typedef void (*AddModuleCallback)(Linker&, const std::string&, const std::string&, void*);
 
 	class Linker
 	{

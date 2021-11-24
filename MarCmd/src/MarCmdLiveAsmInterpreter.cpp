@@ -5,6 +5,7 @@
 #include <cstring>
 
 #include "PermissionGrantPrompt.h"
+#include "MarCmdModuleAdder.h"
 
 namespace MarCmd
 {
@@ -186,61 +187,5 @@ namespace MarCmd
 		} while (line != "%");
 
 		return code;
-	}
-
-	std::string LiveAsmInterpreter::readFile(const std::string& filepath)
-	{
-		std::ifstream f(filepath);
-		if (!f.good())
-			return "";
-
-		std::string result;
-		while (!f.eof())
-		{
-			std::string line;
-			std::getline(f, line);
-			result.append(line);
-			result.push_back('\n');
-		}
-		if (!result.empty())
-			result.pop_back();
-
-		return result;
-	}
-
-	bool LiveAsmInterpreter::addModule(MarC::Linker& linker, const std::string& modPath, const std::string& modName, void* pParam)
-	{
-		bool verbose = *(bool*)pParam;
-		std::string codeStr = readFile(modPath);
-		MarC::AsmTokenizer tokenizer(codeStr);
-		MarC::Assembler assembler(tokenizer.getTokenList(), modName);
-
-		if (verbose)
-			std::cout << "Tokenizing module '" << modName << "'..." << std::endl;
-		if (!tokenizer.tokenize())
-		{
-			std::cout << "An error occured while running the tokenizer!" << std::endl
-				<< "  " << tokenizer.lastError().getMessage() << std::endl;
-			return false;
-		}
-
-		if (verbose)
-			std::cout << "Compiling module '" << modName << "'..." << std::endl;
-		if (!assembler.assemble())
-		{
-			std::cout << "An error occured while running the assembler!:" << std::endl
-				<< "  " << assembler.lastError().getMessage() << std::endl;
-			return false;
-		}
-
-		if (verbose)
-			std::cout << "Adding module '" << assembler.getModuleInfo()->moduleName << "' to the linker..." << std::endl;
-		if (!linker.addModule(assembler.getModuleInfo()))
-		{
-			std::cout << "An error occurd while adding the module '" << assembler.getModuleInfo()->moduleName << "' to the linker!" << std::endl;
-			return false;
-		}
-
-		return true;
 	}
 }

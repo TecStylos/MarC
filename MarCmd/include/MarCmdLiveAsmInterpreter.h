@@ -29,7 +29,6 @@ namespace MarCmd
 		void recover(RecoverBegin rs);
 		std::string readCodeFromConsole();
 		static std::string readFile(const std::string& filepath);
-		static bool addModule(MarC::Linker& linker, const std::string& modPath, const std::string& modName, void* pParam);
 	private:
 		Settings m_settings;
 	private:

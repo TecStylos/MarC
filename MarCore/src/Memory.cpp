@@ -79,6 +79,11 @@ namespace MarC
 		return m_data.data();
 	}
 
+	const void* Memory::getBaseAddress() const
+	{
+		return m_data.data();
+	}
+
 	uint64_t Memory::size() const
 	{
 		return m_data.size();

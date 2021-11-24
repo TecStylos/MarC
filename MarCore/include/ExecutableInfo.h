@@ -12,6 +12,7 @@ namespace MarC
 
 	struct ExecutableInfo
 	{
+		bool hasDebugInfo = false;
 		std::set<Symbol> symbols;
 		std::set<std::string> mandatoryPermissions;
 		std::set<std::string> optionalPermissions;
@@ -23,6 +24,7 @@ namespace MarC
 
 	struct ExeInfoHeader
 	{
+		bool hasDebugInfo;
 		uint64_t nSymbols;
 		uint64_t nModules;
 	};
@@ -32,19 +34,23 @@ namespace MarC
 	inline void serialize(const ExecutableInfo& exeInfo, std::ostream& oStream)
 	{
 		ExeInfoHeader header;
-		header.nSymbols = exeInfo.symbols.size();
 		header.nModules = exeInfo.modules.size();
+		header.hasDebugInfo = exeInfo.hasDebugInfo;
+		header.nSymbols = exeInfo.symbols.size();
 
 		serialize(header, oStream);
-
-		for (auto& symbol : exeInfo.symbols)
-			serialize(symbol, oStream);
 
 		serialize(exeInfo.mandatoryPermissions, oStream);
 		serialize(exeInfo.optionalPermissions, oStream);
 
 		for (auto& mod : exeInfo.modules)
 			serialize(*mod, oStream);
+
+		if (header.hasDebugInfo)
+		{
+			for (auto& symbol : exeInfo.symbols)
+				serialize(symbol, oStream);
+		}
 	}
 
 	template <>
@@ -53,13 +59,6 @@ namespace MarC
 		exeInfo = ExecutableInfo();
 		ExeInfoHeader header;
 		deserialize(header, iStream);
-
-		for (uint64_t i = 0; i < header.nSymbols; ++i)
-		{
-			std::string symbol;
-			deserialize(symbol, iStream);
-			exeInfo.symbols.insert(symbol);
-		}
 
 		deserialize(exeInfo.mandatoryPermissions, iStream);
 		deserialize(exeInfo.optionalPermissions, iStream);
@@ -70,6 +69,16 @@ namespace MarC
 			deserialize(*mod, iStream);
 			exeInfo.modules.push_back(mod);
 			exeInfo.moduleNameMap.insert({ mod->moduleName, i });
+		}
+
+		if (header.hasDebugInfo)
+		{
+			for (uint64_t i = 0; i < header.nSymbols; ++i)
+			{
+				std::string symbol;
+				deserialize(symbol, iStream);
+				exeInfo.symbols.insert(symbol);
+			}
 		}
 	}
 }

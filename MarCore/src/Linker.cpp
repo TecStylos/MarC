@@ -184,8 +184,7 @@ namespace MarC
 							errStr.append("  " + p + "\n");
 						throw LinkerError(LinkErrCode::AmbigiousModule, errStr);
 					}
-					if (!amc(*this, *pair.second.begin(), pair.first, pParam))
-						throw LinkerError(LinkErrCode::CallbackError, "Unable to add module '" + pair.first + "'!");
+					amc(*this, *pair.second.begin(), pair.first, pParam);
 				}
 			}
 		}

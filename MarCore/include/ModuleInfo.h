@@ -51,8 +51,6 @@ namespace MarC
 		bool extRequired;
 		uint64_t nDefSymbols;
 		uint64_t nUnresSymbolRefs;
-		uint64_t codeMemSize;
-		uint64_t staticStackSize;
 	};
 
 	MARC_SERIALIZER_ENABLE_FIXED(ModInfoHeader);
@@ -64,8 +62,6 @@ namespace MarC
 		header.extRequired = modInfo.extensionRequired;
 		header.nDefSymbols = modInfo.definedSymbols.size();
 		header.nUnresSymbolRefs = modInfo.unresolvedSymbolRefs.size();
-		header.codeMemSize = modInfo.codeMemory->size();
-		header.staticStackSize = modInfo.staticStack->size();
 
 		serialize(header, oStream);
 		serialize(modInfo.moduleName, oStream);
@@ -95,6 +91,8 @@ namespace MarC
 		deserialize(modInfo.requiredModules, iStream);
 		deserialize(modInfo.mandatoryPermissions, iStream);
 		deserialize(modInfo.optionalPermissions, iStream);
+
+		modInfo.extensionRequired = header.extRequired;
 
 		for (uint64_t i = 0; i < header.nDefSymbols; ++i)
 		{
