@@ -62,39 +62,12 @@ namespace MarCmd
 				continue;
 			}
 
-			bool foundAllMissingModules = true;
-
-			while (foundAllMissingModules && m_pLinker->hasMissingModules())
+			try
 			{
-				auto& misMods = m_pLinker->getMissingModules();
-				auto modPaths = MarC::locateModules(m_settings.modDirs, misMods);
-
-				for (auto& pair : modPaths)
-				{
-					if (pair.second.empty())
-					{
-						std::cout << "Unable to find module '" << pair.first << "'!" << std::endl;
-						foundAllMissingModules = false;
-						break;
-					}
-					if (pair.second.size() > 1)
-					{
-						std::cout << "Module name '" << pair.first << "' is ambigious! Found " << pair.second.size() << " matching modules!" << std::endl;
-						for (auto& p : pair.second)
-							std::cout << "  " << p << std::endl;
-						foundAllMissingModules = false;
-						break;
-					}
-
-					if (!addModule(*m_pLinker, *pair.second.begin(), pair.first, m_settings.flags.hasFlag(CmdFlags::Verbose)))
-					{
-						foundAllMissingModules = false;
-						break;
-					}
-				}
+				bool verbose = m_settings.flags.hasFlag(CmdFlags::Verbose);
+				m_pLinker->autoAddMissingModules(m_settings.modDirs, &addModule, &verbose);
 			}
-
-			if (!foundAllMissingModules)
+			catch (const MarC::LinkerError& linkErr)
 			{
 				recover(RecoverBegin::Linker);
 				continue;
@@ -235,8 +208,9 @@ namespace MarCmd
 		return result;
 	}
 
-	bool LiveAsmInterpreter::addModule(MarC::Linker& linker, const std::string& modPath, const std::string& modName, bool verbose)
+	bool LiveAsmInterpreter::addModule(MarC::Linker& linker, const std::string& modPath, const std::string& modName, void* pParam)
 	{
+		bool verbose = *(bool*)pParam;
 		std::string codeStr = readFile(modPath);
 		MarC::AsmTokenizer tokenizer(codeStr);
 		MarC::Assembler assembler(tokenizer.getTokenList(), modName);

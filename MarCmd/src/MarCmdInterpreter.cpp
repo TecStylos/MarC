@@ -20,32 +20,15 @@ namespace MarCmd
 		for (auto& entry : settings.extDirs)
 			interpreter.addExtDir(entry);
 
-		if (!addModule(linker, settings.inFile, inMod, settings.flags.hasFlag(CmdFlags::Verbose)))
+		bool verbose = settings.flags.hasFlag(CmdFlags::Verbose);
+		if (!addModule(linker, settings.inFile, inMod, &verbose))
 			return -1;
 
-		while (linker.hasMissingModules())
+		if (!linker.autoAddMissingModules(settings.modDirs, &addModule, &verbose))
 		{
-			auto& misMods = linker.getMissingModules();
-			auto modPaths = MarC::locateModules(settings.modDirs, misMods);
-
-			for (auto& pair : modPaths)
-			{
-				if (pair.second.empty())
-				{
-					std::cout << "Unable to find module '" << pair.first << "'!" << std::endl;
-					return -1;
-				}
-				if (pair.second.size() > 1)
-				{
-					std::cout << "Module name '" << pair.first << "' is ambigious! Found " << pair.second.size() << " matching modules!" << std::endl;
-					for (auto& p : pair.second)
-						std::cout << "  " << p << std::endl;
-					return -1;
-				}
-
-				if (!addModule(linker, *pair.second.begin(), pair.first, settings.flags.hasFlag(CmdFlags::Verbose)))
-					return -1;
-			}
+			std::cout << "An error occured while auto adding the required modules!:" << std::endl
+				<< "  " << linker.lastError().getMessage() << std::endl;
+			return -1;
 		}
 
 		if (settings.flags.hasFlag(CmdFlags::Verbose))
@@ -135,8 +118,9 @@ namespace MarCmd
 		return result;
 	}
 
-	bool Interpreter::addModule(MarC::Linker& linker, const std::string& modPath, const std::string& modName, bool verbose)
+	bool Interpreter::addModule(MarC::Linker& linker, const std::string& modPath, const std::string& modName, void* pParam)
 	{
+		bool verbose = *(bool*)pParam;
 		std::string codeStr = readFile(modPath);
 		MarC::AsmTokenizer tokenizer(codeStr);
 		MarC::Assembler assembler(tokenizer.getTokenList(), modName);
@@ -151,7 +135,7 @@ namespace MarCmd
 		}
 
 		if (verbose)
-			std::cout << "Compiling module '" << modName << "'..." << std::endl;
+			std::cout << "Assembling module '" << modName << "'..." << std::endl;
 		if (!assembler.assemble())
 		{
 			std::cout << "An error occured while running the assembler!:" << std::endl

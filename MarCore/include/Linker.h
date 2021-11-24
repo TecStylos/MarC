@@ -16,6 +16,9 @@ namespace MarC
 			MissingModules,
 			SymbolAlreadyDefined,
 			UnresolvedSymbols,
+			ModuleNotFound,
+			AmbigiousModule,
+			CallbackError,
 		};
 	public:
 		LinkerError() = default;
@@ -33,7 +36,9 @@ namespace MarC
 
 	typedef LinkerError::Code LinkErrCode;
 
-	#define LINKER_RETURN_WITH_ERROR(errCode, errText) { m_lastErr = LinkerError(errCode, errText, __LINE__, __FILE__); return false; }
+	class Linker;
+
+	typedef bool (*AddModuleCallback)(Linker&, const std::string&, const std::string&, void*);
 
 	class Linker
 	{
@@ -50,6 +55,8 @@ namespace MarC
 		bool hasModule(const std::string& name) const;
 		bool hasMissingModules() const;
 		const std::set<std::string>& getMissingModules() const;
+	public:
+		bool autoAddMissingModules(const std::set<std::string>& modDirs, AddModuleCallback amc, void* pPaam);
 	private:
 		void update(ModuleInfoRef pModInfo);
 		void copySymbols(ModuleInfoRef pModInfo);

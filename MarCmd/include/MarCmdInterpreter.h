@@ -15,7 +15,7 @@ namespace MarCmd
 	private:
 		static std::string modNameFromPath(const std::string& filepath);
 		static std::string readFile(const std::string& filepath);
-		static bool addModule(MarC::Linker& linker, const std::string& modPath, const std::string& modName, bool verbose);
+		static bool addModule(MarC::Linker& linker, const std::string& modPath, const std::string& modName, void* pParam);
 	private:
 		class Timer
 		{

@@ -1,5 +1,7 @@
 #include "Linker.h"
 
+#include "ModuleLocator.h"
+
 namespace MarC
 {
 	LinkerError::operator bool() const
@@ -41,7 +43,7 @@ namespace MarC
 
 			copySymbols(pModInfo);
 		}
-		catch (LinkerError& err)
+		catch (const LinkerError& err)
 		{
 			m_lastErr = err;
 		}
@@ -58,7 +60,7 @@ namespace MarC
 			for (auto& pModInfo : m_pExeInfo->modules)
 				update(pModInfo);
 		}
-		catch (LinkerError& err)
+		catch (const LinkerError& err)
 		{
 			m_lastErr = err;
 		}
@@ -159,6 +161,40 @@ namespace MarC
 		copySymbols(pModInfo);
 		copyReqMods(pModInfo);
 		copyPerms(pModInfo);
+	}
+
+	bool Linker::autoAddMissingModules(const std::set<std::string>& modDirs, AddModuleCallback amc, void* pParam)
+	{
+		try
+		{
+			while (hasMissingModules())
+			{
+				auto& misMods = getMissingModules();
+				auto modPaths = MarC::locateModules(modDirs, misMods);
+
+				for (auto& pair : modPaths)
+				{
+					if (pair.second.empty())
+						throw LinkerError(LinkErrCode::ModuleNotFound, "Unable to find module '" + pair.first + "!");
+
+					if (pair.second.size() > 1)
+					{
+						std::string errStr = "Module name '" + pair.first + "' is ambigious! Found " + std::to_string(pair.second.size()) + " matching modules!\n";
+						for (auto& p : pair.second)
+							errStr.append("  " + p + "\n");
+						throw LinkerError(LinkErrCode::AmbigiousModule, errStr);
+					}
+					if (!amc(*this, *pair.second.begin(), pair.first, pParam))
+						throw LinkerError(LinkErrCode::CallbackError, "Unable to add module '" + pair.first + "'!");
+				}
+			}
+		}
+		catch (const LinkerError& err)
+		{
+			m_lastErr = err;
+		}
+
+		return !m_lastErr;
 	}
 
 	void Linker::resolveSymbols()

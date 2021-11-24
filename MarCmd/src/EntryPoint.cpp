@@ -5,7 +5,7 @@
 #include "CmdArgParser.h"
 
 #include "MarCmdHelp.h"
-#include "MarCmdSettings.h"
+#include "MarCmdBuilder.h"
 #include "MarCmdInterpreter.h"
 #include "MarCmdLiveAsmInterpreter.h"
 
@@ -24,6 +24,8 @@ int main(int argc, const char** argv, const char** env)
 	using Mode = MarCmd::Mode;
 
 	MarCmd::Settings settings;
+	settings.modDirs.insert(std::filesystem::current_path().string());
+	settings.extDirs.insert(std::filesystem::current_path().string());
 
 	MarCmd::CmdArgParser cmd(argc, argv);
 
@@ -135,11 +137,6 @@ int main(int argc, const char** argv, const char** env)
 		settings.mode = Mode::Interpret;
 	}
 
-	if (settings.modDirs.empty())
-		settings.modDirs.insert(std::filesystem::current_path().string());
-	if (settings.extDirs.empty())
-		settings.extDirs.insert(std::filesystem::current_path().string());
-
 	int exitCode = 0;
 
 	{
@@ -157,8 +154,7 @@ int main(int argc, const char** argv, const char** env)
 			exitCode = MarCmd::LiveAsmInterpreter::run(settings);
 			break;
 		case Mode::Build:
-			std::cout << "Mode 'link' has not been implemented yet!" << std::endl;
-			exitCode = -1;
+			exitCode = MarCmd::Builder::build(settings);
 			break;
 		case Mode::Interpret:
 			exitCode = MarCmd::Interpreter::run(settings);
