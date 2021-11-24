@@ -7,15 +7,12 @@
 ### Modes
  * --livecode
  * --liveasm
- * --execute
- * --assemble
- * --compile
- * --link
+ * --build
+ * --interpret
 ### I/O
- * -i [file]
- * -o [file]
- * -m [directory]
- * -e [directory]
+ * -o _outputFile_
+ * -m _moduleDirectory_
+ * -e _extensionDirectory_
 ### Exit behavior
  * --keeponexit
  * --closeonexit

@@ -5,16 +5,16 @@
 
 #include "MarCore.h"
 
-#include "MarCmdFlags.h"
+#include "MarCmdSettings.h"
 
 namespace MarCmd
 {
 	class LiveAsmInterpreter
 	{
 	public:
-		static int run(const std::set<std::string>& modDirs, const std::set<std::string>& extDirs, Flags<CmdFlags> flags);
+		static int run(const Settings& settings);
 	private:
-		LiveAsmInterpreter(const std::set<std::string>& modDirs, const std::set<std::string>& extDirs, Flags<CmdFlags> flags);
+		LiveAsmInterpreter(const Settings& settings);
 	private:
 		int run();
 	private:
@@ -31,8 +31,7 @@ namespace MarCmd
 		static std::string readFile(const std::string& filepath);
 		static bool addModule(MarC::Linker& linker, const std::string& modPath, const std::string& modName, bool verbose);
 	private:
-		std::set<std::string> m_modDirs;
-		Flags<CmdFlags> m_flags;
+		Settings m_settings;
 	private:
 		uint64_t m_backupCodeStrSize = 0;
 		std::string m_codeStr;

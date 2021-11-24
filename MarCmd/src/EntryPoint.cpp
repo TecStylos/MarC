@@ -3,19 +3,11 @@
 #include <set>
 
 #include "CmdArgParser.h"
-#include "MarCmdMode.h"
 
 #include "MarCmdHelp.h"
-#include "MarCmdFlags.h"
+#include "MarCmdSettings.h"
 #include "MarCmdInterpreter.h"
 #include "MarCmdLiveAsmInterpreter.h"
-
-enum class ExitBehavior
-{
-	CloseWhenZero,
-	CloseOnExit,
-	KeepOnExit,
-};
 
 int main(int argc, const char** argv, const char** env)
 {
@@ -31,14 +23,7 @@ int main(int argc, const char** argv, const char** env)
 
 	using Mode = MarCmd::Mode;
 
-	MarCmd::Flags<MarCmd::CmdFlags> flags;
-	Mode mode = Mode::None;
-	std::string inFile = "";
-	std::string outFile = "";
-	std::set<std::string> modDirs = { std::filesystem::current_path().string() };
-	std::set<std::string> extDirs = { std::filesystem::current_path().string() };
-	std::string runFile = "";
-	ExitBehavior exitBehavior = ExitBehavior::CloseWhenZero;
+	MarCmd::Settings settings;
 
 	MarCmd::CmdArgParser cmd(argc, argv);
 
@@ -48,57 +33,37 @@ int main(int argc, const char** argv, const char** env)
 
 		if (elem == "--help")
 		{
-			mode = Mode::Help;
+			settings.mode = Mode::Help;
 			continue;
 		}
 		if (elem == "--grantall")
 		{
-			flags.setFlag(MarCmd::CmdFlags::GrantAll);
+			settings.flags.setFlag(MarCmd::CmdFlags::GrantAll);
 			continue;
 		}
 		if (elem == "--verbose")
 		{
-			flags.setFlag(MarCmd::CmdFlags::Verbose);
+			settings.flags.setFlag(MarCmd::CmdFlags::Verbose);
 			continue;
 		}
 		if (elem == "--livecode")
 		{
-			mode = Mode::LiveCode;
+			settings.mode = Mode::LiveCode;
 			continue;
 		}
 		if (elem == "--liveasm")
 		{
-			mode = Mode::LiveAsm;
+			settings.mode = Mode::LiveAsm;
 			continue;
 		}
-		if (elem == "--compile")
+		if (elem == "--build")
 		{
-			mode = Mode::Compile;
+			settings.mode = Mode::Build;
 			continue;
 		}
-		if (elem == "--assemble")
+		if (elem == "--interpret")
 		{
-			mode = Mode::Assemble;
-			continue;
-		}
-		if (elem == "--link")
-		{
-			mode = Mode::Link;
-			continue;
-		}
-		if (elem == "--execute")
-		{
-			mode = Mode::Execute;
-			continue;
-		}
-		if (elem == "-i")
-		{
-			if (!cmd.hasNext())
-			{
-				std::cout << "Missing input file!" << std::endl;
-				return -1;
-			}
-			inFile = cmd.getNext();
+			settings.mode = Mode::Interpret;
 			continue;
 		}
 		if (elem == "-o")
@@ -108,7 +73,7 @@ int main(int argc, const char** argv, const char** env)
 				std::cout << "Missing output file!" << std::endl;
 				return -1;
 			}
-			outFile = cmd.getNext();
+			settings.outFile = cmd.getNext();
 			continue;
 		}
 		if (elem == "-m")
@@ -118,7 +83,7 @@ int main(int argc, const char** argv, const char** env)
 				std::cout << "Missing module directory!" << std::endl;
 				return -1;
 			}
-			modDirs.insert(cmd.getNext());
+			settings.modDirs.insert(cmd.getNext());
 			continue;
 		}
 		if (elem == "-e")
@@ -128,84 +93,83 @@ int main(int argc, const char** argv, const char** env)
 				std::cout << "Missing extension directory!" << std::endl;
 				return -1;
 			}
-			extDirs.insert(cmd.getNext());
+			settings.extDirs.insert(cmd.getNext());
 			continue;
 		}
 		if (elem == "--keeponexit")
 		{
-			exitBehavior = ExitBehavior::KeepOnExit;
+			settings.exitBehavior = MarCmd::ExitBehavior::KeepOnExit;
 			continue;
 		}
 		if (elem == "--closeonexit")
 		{
-			exitBehavior = ExitBehavior::CloseOnExit;
+			settings.exitBehavior = MarCmd::ExitBehavior::CloseOnExit;
 			continue;
 		}
 		if (elem == "--debug")
 		{
-			flags.setFlag(MarCmd::CmdFlags::Debug);
+			settings.flags.setFlag(MarCmd::CmdFlags::Debug);
 			continue;
 		}
 		if (elem == "--profile")
 		{
-			flags.setFlag(MarCmd::CmdFlags::Profile);
+			settings.flags.setFlag(MarCmd::CmdFlags::Profile);
 			continue;
 		}
 
-		runFile = elem;
-		modDirs.insert(std::filesystem::path(runFile).parent_path().string());
-		mode = Mode::Interpret;
+		settings.inFile = elem;
+		settings.modDirs.insert(std::filesystem::path(settings.inFile).parent_path().string());
 	}
 
-	if (mode == Mode::None)
+	if (settings.mode == Mode::None)
 	{
-		std::cout <<
-			"MarCmd" << std::endl <<
-			"  No mode selected!" << std::endl <<
-			"  For help type 'MarCmd --help'" << std::endl;
-		return -1;
+		if (settings.inFile.empty())
+		{
+			std::cout <<
+				"MarCmd" << std::endl <<
+				"  No mode selected!" << std::endl <<
+				"  For help type 'MarCmd --help'" << std::endl;
+			return -1;
+		}
+
+		settings.mode = Mode::Interpret;
 	}
+
+	if (settings.modDirs.empty())
+		settings.modDirs.insert(std::filesystem::current_path().string());
+	if (settings.extDirs.empty())
+		settings.extDirs.insert(std::filesystem::current_path().string());
 
 	int exitCode = 0;
 
-	switch (mode)
 	{
-	case Mode::Help:
-		std::cout << MarCmd::HelpText << std::endl;
-		exitCode = 0;
-		break;
-	case Mode::LiveCode:
-		std::cout << "Mode 'livecode' has not been implemented yet!" << std::endl;
-		exitCode = -1;
-		break;
-	case Mode::LiveAsm:
-		exitCode = MarCmd::LiveAsmInterpreter::run(modDirs, extDirs, flags);
-		break;
-	case Mode::Compile:
-		std::cout << "Mode 'compile' has not been implemented yet!" << std::endl;
-		exitCode = -1;
-		break;
-	case Mode::Assemble:
-		std::cout << "Mode 'assemble' has not been implemented yet!" << std::endl;
-		exitCode = -1;
-		break;
-	case Mode::Link:
-		std::cout << "Mode 'link' has not been implemented yet!" << std::endl;
-		exitCode =  -1;
-		break;
-	case Mode::Execute:
-		std::cout << "Mode 'execute' has not been implemented yet!" << std::endl;
-		exitCode = -1;
-		break;
-	case Mode::Interpret:
-		exitCode = MarCmd::Interpreter::run(runFile, modDirs, extDirs, flags);
-		break;
+		switch (settings.mode)
+		{
+		case Mode::Help:
+			std::cout << MarCmd::HelpText << std::endl;
+			exitCode = 0;
+			break;
+		case Mode::LiveCode:
+			std::cout << "Mode 'livecode' has not been implemented yet!" << std::endl;
+			exitCode = -1;
+			break;
+		case Mode::LiveAsm:
+			exitCode = MarCmd::LiveAsmInterpreter::run(settings);
+			break;
+		case Mode::Build:
+			std::cout << "Mode 'link' has not been implemented yet!" << std::endl;
+			exitCode = -1;
+			break;
+		case Mode::Interpret:
+			exitCode = MarCmd::Interpreter::run(settings);
+			break;
+		}
 	}
 
 	if (
-		exitBehavior == ExitBehavior::KeepOnExit ||
+		settings.exitBehavior == MarCmd::ExitBehavior::KeepOnExit ||
 		(
-			exitBehavior == ExitBehavior::CloseWhenZero &&
+			settings.exitBehavior == MarCmd::ExitBehavior::CloseWhenZero &&
 			exitCode != 0
 			)
 		)

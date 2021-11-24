@@ -8,25 +8,25 @@
 
 namespace MarCmd
 {
-	int Interpreter::run(const std::string& inFile, const std::set<std::string>& modDirs, const std::set<std::string>& extDirs, Flags<CmdFlags> flags)
+	int Interpreter::run(const Settings& settings)
 	{
-		std::string inMod = modNameFromPath(inFile);
+		std::string inMod = modNameFromPath(settings.inFile);
 
 		Timer timer;
 
 		MarC::Linker linker;
 		MarC::Interpreter interpreter(linker.getExeInfo());
 
-		for (auto& entry : extDirs)
+		for (auto& entry : settings.extDirs)
 			interpreter.addExtDir(entry);
 
-		if (!addModule(linker, inFile, inMod, flags.hasFlag(CmdFlags::Verbose)))
+		if (!addModule(linker, settings.inFile, inMod, settings.flags.hasFlag(CmdFlags::Verbose)))
 			return -1;
 
 		while (linker.hasMissingModules())
 		{
 			auto& misMods = linker.getMissingModules();
-			auto modPaths = MarC::locateModules(modDirs, misMods);
+			auto modPaths = MarC::locateModules(settings.modDirs, misMods);
 
 			for (auto& pair : modPaths)
 			{
@@ -43,12 +43,12 @@ namespace MarCmd
 					return -1;
 				}
 
-				if (!addModule(linker, *pair.second.begin(), pair.first, flags.hasFlag(CmdFlags::Verbose)))
+				if (!addModule(linker, *pair.second.begin(), pair.first, settings.flags.hasFlag(CmdFlags::Verbose)))
 					return -1;
 			}
 		}
 
-		if (flags.hasFlag(CmdFlags::Verbose))
+		if (settings.flags.hasFlag(CmdFlags::Verbose))
 			std::cout << "Linking the application..." << std::endl;
 		if (!linker.link())
 		{
@@ -59,7 +59,7 @@ namespace MarCmd
 
 		if (interpreter.hasUngrantedPerms())
 		{
-			if (flags.hasFlag(CmdFlags::GrantAll))
+			if (settings.flags.hasFlag(CmdFlags::GrantAll))
 			{
 				interpreter.grantAllPerms();
 			}
@@ -85,7 +85,7 @@ namespace MarCmd
 			}
 		}
 
-		if (flags.hasFlag(CmdFlags::Verbose))
+		if (settings.flags.hasFlag(CmdFlags::Verbose))
 			std::cout << "Starting interpreter..." << std::endl;
 		timer.start();
 		bool intResult = interpreter.interpret();
@@ -101,10 +101,10 @@ namespace MarCmd
 
 		std::cout << std::endl << "Module '" << inMod << "' exited with code " << exitCode << "." << std::endl;
 
-		if (flags.hasFlag(CmdFlags::Verbose))
+		if (settings.flags.hasFlag(CmdFlags::Verbose))
 			std::cout << "  Reason: '" << interpreter.lastError().getCodeStr() << "'" << std::endl;
 
-		if (flags.hasFlag(CmdFlags::Verbose))
+		if (settings.flags.hasFlag(CmdFlags::Verbose))
 			std::cout << "Executed " << interpreter.nInsExecuted() << " instructions in " << timer.microseconds() << " microseconds" << std::endl;
 
 		return (int)exitCode;

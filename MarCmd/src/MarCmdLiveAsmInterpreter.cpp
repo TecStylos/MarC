@@ -8,14 +8,14 @@
 
 namespace MarCmd
 {
-	int LiveAsmInterpreter::run(const std::set<std::string>& modDirs, const std::set<std::string>& extDirs, Flags<CmdFlags> flags)
+	int LiveAsmInterpreter::run(const Settings& settings)
 	{
-		LiveAsmInterpreter lai(modDirs, extDirs, flags);
+		LiveAsmInterpreter lai(settings);
 		return lai.run();
 	}
 
-	LiveAsmInterpreter::LiveAsmInterpreter(const std::set<std::string>& modDirs, const std::set<std::string>& extDirs, Flags<CmdFlags> flags)
-		: m_modDirs(modDirs), m_flags(flags)
+	LiveAsmInterpreter::LiveAsmInterpreter(const Settings& settings)
+		: m_settings(settings)
 	{
 		m_codeStr = "";
 		m_pTokenizer = std::make_shared<MarC::AsmTokenizer>(m_codeStr);
@@ -23,7 +23,7 @@ namespace MarCmd
 		m_pLinker = std::make_shared<MarC::Linker>();
 		m_pInterpreter = std::make_shared<MarC::Interpreter>(m_pLinker->getExeInfo());
 
-		for (auto& entry : extDirs)
+		for (auto& entry : m_settings.extDirs)
 			m_pInterpreter->addExtDir(entry);
 
 		m_pLinker->addModule(m_pAssembler->getModuleInfo());
@@ -67,7 +67,7 @@ namespace MarCmd
 			while (foundAllMissingModules && m_pLinker->hasMissingModules())
 			{
 				auto& misMods = m_pLinker->getMissingModules();
-				auto modPaths = MarC::locateModules(m_modDirs, misMods);
+				auto modPaths = MarC::locateModules(m_settings.modDirs, misMods);
 
 				for (auto& pair : modPaths)
 				{
@@ -86,7 +86,7 @@ namespace MarCmd
 						break;
 					}
 
-					if (!addModule(*m_pLinker, *pair.second.begin(), pair.first, m_flags.hasFlag(CmdFlags::Verbose)))
+					if (!addModule(*m_pLinker, *pair.second.begin(), pair.first, m_settings.flags.hasFlag(CmdFlags::Verbose)))
 					{
 						foundAllMissingModules = false;
 						break;
@@ -110,7 +110,7 @@ namespace MarCmd
 
 			if (m_pInterpreter->hasUngrantedPerms())
 			{
-				if (m_flags.hasFlag(CmdFlags::GrantAll))
+				if (m_settings.flags.hasFlag(CmdFlags::GrantAll))
 				{
 					m_pInterpreter->grantAllPerms();
 				}
@@ -155,7 +155,7 @@ namespace MarCmd
 
 		std::cout << "Module '<cin>' exited with code " << exitCode << "." << std::endl;
 
-		if (m_flags.hasFlag(CmdFlags::Verbose))
+		if (m_settings.flags.hasFlag(CmdFlags::Verbose))
 			std::cout << "  Reason: '" << m_pInterpreter->lastError().getCodeStr() << "'" << std::endl;
 
 		return m_pInterpreter->getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_32;
@@ -195,7 +195,7 @@ namespace MarCmd
 			if (line.find("%moddir ") == 0)
 			{
 				line = line.substr(strlen("%moddir "));
-				m_modDirs.insert(line);
+				m_settings.modDirs.insert(line);
 				return "";
 			}
 			std::cout << "Unknown live interpreter command!" << std::endl;

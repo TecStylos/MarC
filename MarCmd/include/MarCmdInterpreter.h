@@ -4,14 +4,14 @@
 #include <string>
 
 #include "Linker.h"
-#include "MarCmdFlags.h"
+#include "MarCmdSettings.h"
 
 namespace MarCmd
 {
 	class Interpreter
 	{
 	public:
-		static int run(const std::string& inFile, const std::set<std::string>& modDirs, const std::set<std::string>& extDirs, Flags<CmdFlags> flags);
+		static int run(const Settings& settings);
 	private:
 		static std::string modNameFromPath(const std::string& filepath);
 		static std::string readFile(const std::string& filepath);
