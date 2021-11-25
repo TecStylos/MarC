@@ -39,7 +39,7 @@ On Windows use Visual Studio to build the projects.
 
 ## Examples
 Examples for the MarCembly language can be found in the [./examples/](./examples/) folder.
-All examples requiring the standard library should be run from the root directory. Otherwise (without specifying a [module directory](./docs/MarCmd.md)) the interpreter won't find the appropriate module file.
+All examples requiring the standard library should be run from the root directory. Otherwise (without [specifying a module directory](./docs/MarCmd.md)) the interpreter won't find the appropriate module file.
 
 ### Here the classic 'Hello world' example in MarCembly:
 ```MarCembly

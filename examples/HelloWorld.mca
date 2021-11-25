@@ -4,7 +4,7 @@
 
 mov.i64 : $ac : 10
 #label : loopBegin
-    calx : std>>ext>>prints : addr."Hello world!"
+    calx : std>>ext>>prints : addr."Hello world! "
     calx : std>>ext>>printt : i64.@$ac
     calx : std>>ext>>prints : addr."\n"
     sub.i64 : $ac : 1
