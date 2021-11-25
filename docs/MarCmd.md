@@ -3,25 +3,41 @@
 ## Options
 ### General
  * --help
+   - Show the MarCmd help.
  * --grantall
+   - Grant all permissions without asking.
 ### Modes
  * --livecode
+   - Run the MarC live interpreter.
  * --liveasm
+   - Run the MarCembly live interpreter.
  * --build
+   - Build a `*.mcc/*.mca` file and store the binary in a `*.mce` file.
  * --interpret
+   - Interpret a `*.mcc/*.mca/*.mce` file.
 ### I/O
  * -o _outputFile_
+   - Specify the name of the output file (Ignored without `build` switch)
  * -m _moduleDirectory_
+   - Specify a directory to search modules in (Can be used multiple times)
  * -e _extensionDirectory_
-### Exit behavior
+   - Specify a directory to search extensions in (Can be used multiple times)
+### Exit behavior (Default: Keeps the interpreter open when exitCode is zero.)
  * --keeponexit
+   - Keep the interpreter open after the application returned.
  * --closeonexit
+   - Close the interpreter after the application returned.
 ### Debugging
  * --profile
+   - Profile the interpreter (func/funx/instruction call counts/timings, execution time, ...)
  * --debug
+   - With `build` switch: Generate debug information for the application.
+   - With `interpret` switch: Run the debugger. (Works only on `*.mce` files built with the `debug` switch)
  * --verbose
+   - Show more details when building/running code.
 ### Miscellaneous
- * [file]
+ * _file_
+   - Any unknown argument gets interpreted as the input file.
 ***
 
 ## Examples

@@ -1,17 +1,17 @@
-# <a name="MarC"></a> MarC
+# MarC
 
-## <a name="MarCLang"></a> MarC Language
+## MarC Language
 MarC is going to be an interpreted C-like language.
 Currently there is only the [MarCembly](#MarCemblyLang) language (MarC Assembly) available.
 For more info check the [MarC Documentation](./docs/MarC.md).
 ***
-## <a name="MarCemblyLang"></a> MarCembly Language
+## MarCembly Language
 
 MarCembly is the underlying implementation of the MarC language.
 For more info check the [MarCembly Documentation](./docs/MarCembly.md).
 ***
 
-## <a name="MarCmdCLI"></a> MarCmd CLI
+## MarCmd CLI
 MarCmd is the command line tool for compiling/interpreting/debugging MarC and MarCembly code.
 For more info check the [MarCmd Documentation](./docs/MarCmd.md)
 ***
