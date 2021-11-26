@@ -67,18 +67,14 @@ namespace MarCmd
 			{
 				bool verbose = m_settings.flags.hasFlag(CmdFlags::Verbose);
 				m_pLinker->autoAddMissingModules(m_settings.modDirs, &addModule, &verbose);
+				if (!m_pLinker->link())
+					throw m_pLinker->lastError();
 			}
 			catch (const MarC::LinkerError& linkErr)
 			{
 				recover(RecoverBegin::Linker);
-				continue;
-			}
-
-			if (!m_pLinker->link())
-			{
-				recover(RecoverBegin::Linker);
-				std::cout << "An error occured while running the linker!" << std::endl
-					<< "  " << m_pLinker->lastError().getMessage() << std::endl;
+				std::cout << "An error occured while running the linker!:" << std::endl
+					<< "  " << linkErr.getMessage() << std::endl;
 				continue;
 			}
 

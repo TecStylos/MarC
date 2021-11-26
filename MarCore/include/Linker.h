@@ -60,9 +60,13 @@ namespace MarC
 	private:
 		void update(ModuleInfoRef pModInfo);
 		void copySymbols(ModuleInfoRef pModInfo);
+		void copyUnresolvedSymbols(ModuleInfoRef pModInfo);
 		void copyReqMods(ModuleInfoRef pModInfo);
 		void copyPerms(ModuleInfoRef pModInfo);
-		void resolveSymbols();
+		void resolveUnresolvedSymbols();
+		void resolveUnresolvedSymbolRefs();
+	private:
+		bool symbolNameExists(const std::string& name);
 	private:
 		std::string misModListStr() const;
 		std::string unresSymRefsListStr() const;

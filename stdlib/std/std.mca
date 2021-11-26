@@ -16,6 +16,12 @@
 		#funx : sleepms
 	#end
 
+	#alias : exPrints : ext>>prints
+	#alias : exPrintt : ext>>printt
+	#alias : exScans : ext>>scans
+	#alias : exScant : ext>>scant
+	#alias : exSleepms : ext>>sleepms
+
 	#func : copyString : addr.DEST : addr.SRC
 		#label : LOOP_BEGIN
 			drf : $td : @SRC

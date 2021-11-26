@@ -41,6 +41,7 @@ namespace MarC
 
 			copyReqMods(pModInfo);
 
+			copyUnresolvedSymbols(pModInfo);
 			copySymbols(pModInfo);
 		}
 		catch (const LinkerError& err)
@@ -80,7 +81,8 @@ namespace MarC
 			if (hasMissingModules())
 				throw LinkerError(LinkErrCode::MissingModules, "Cannot link with missing modules! (" + misModListStr() + ")");
 
-			resolveSymbols();
+			resolveUnresolvedSymbols();
+			resolveUnresolvedSymbolRefs();
 		}
 		catch (LinkerError& err)
 		{
@@ -114,7 +116,7 @@ namespace MarC
 	{
 		for (auto& symbol : pModInfo->definedSymbols)
 		{
-			if (m_pExeInfo->symbols.find(symbol) != m_pExeInfo->symbols.end())
+			if (symbolNameExists(symbol.name))
 				throw LinkerError(LinkErrCode::SymbolAlreadyDefined, "A symbol with name '" + symbol.name + "' has already been defined!");
 
 			if (symbol.usage == SymbolUsage::Address &&
@@ -127,6 +129,17 @@ namespace MarC
 			m_pExeInfo->symbols.insert(symbol);
 		}
 		pModInfo->definedSymbols.clear();
+	}
+
+	void Linker::copyUnresolvedSymbols(ModuleInfoRef pModInfo)
+	{
+		for (auto& unresSym : pModInfo->unresolvedSymbols)
+		{
+			if (symbolNameExists(unresSym.name))
+				throw LinkerError(LinkErrCode::SymbolAlreadyDefined, "A symbol with name '" + unresSym.name + "' has already been defined!");
+			m_pExeInfo->unresolvedSymbols.insert(unresSym);
+		}
+		pModInfo->unresolvedSymbols.clear();
 	}
 
 	void Linker::copyReqMods(ModuleInfoRef pModInfo)
@@ -196,7 +209,40 @@ namespace MarC
 		return !m_lastErr;
 	}
 
-	void Linker::resolveSymbols()
+	void Linker::resolveUnresolvedSymbols()
+	{
+		uint64_t nResolved;
+
+		do
+		{
+			nResolved = 0;
+
+			auto it = m_pExeInfo->unresolvedSymbols.begin();
+
+			while (it != m_pExeInfo->unresolvedSymbols.end())
+			{
+				auto current = it++;
+
+				auto itRef = m_pExeInfo->symbols.find(current->refName);
+				if (itRef == m_pExeInfo->symbols.end())
+					continue;
+
+				Symbol sym;
+				sym.name = current->name;
+				sym.usage = itRef->usage;
+				sym.value = itRef->value;
+
+				m_pExeInfo->symbols.insert(sym);
+
+				m_pExeInfo->unresolvedSymbols.erase(current);
+
+				++nResolved;
+			}
+		}
+		while (nResolved != 0);
+	}
+
+	void Linker::resolveUnresolvedSymbolRefs()
 	{
 		bool resolvedAll = true;
 
@@ -221,6 +267,15 @@ namespace MarC
 
 		if (!resolvedAll)
 			throw LinkerError(LinkErrCode::UnresolvedSymbols, "Cannot resolve all symbol references! (" + unresSymRefsListStr() + ")");
+	}
+
+	bool Linker::symbolNameExists(const std::string& name)
+	{
+		if (m_pExeInfo->symbols.find(Symbol(name)) != m_pExeInfo->symbols.end())
+			return true;
+		if (m_pExeInfo->unresolvedSymbols.find(UnresolvedSymbol(name, "")) != m_pExeInfo->unresolvedSymbols.end())
+			return true;
+		return false;
 	}
 
 	std::string Linker::misModListStr() const

@@ -73,7 +73,7 @@ exit | None | - | Stop the execution and return the exit code @$ec (dt == i64)
 Name | Datatype | Arguments | Explanation
 -----|----------|-----------|-----------
 label | None | [name] | Store the current code address in [name].
-alias | None |  [name] : [literal] | Give a literal an alias (No stack allocation).
+alias | None |  [name] : [literal] | Give a literal an alias (No stack allocation). (Literals can be other aliases, labels, names for static allocations, scopes, (extern) function names, local variables, ...)
 static | None | [name] : [size] | Reserve n bytes on the static stack and store the address in [name].
 reqmod | None | [string] | Request/Require a module.
 manperm | None | [funcName] | Request a mandatory permission for an external function.

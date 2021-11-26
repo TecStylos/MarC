@@ -21,6 +21,7 @@ namespace MarC
 		bud.codeMemorySize = codeMemory->size();
 		bud.staticStackSize = staticStack->size();
 		bud.definedSymbolsSize = definedSymbols.size();
+		bud.unresolvedSymbolsSize = unresolvedSymbols.size();
 		bud.unresolvedSymbolRefsSize = unresolvedSymbolRefs.size();
 	}
 
@@ -34,6 +35,7 @@ namespace MarC
 		codeMemory->resize(bud.codeMemorySize);
 		staticStack->resize(bud.staticStackSize);
 		definedSymbols.resize(bud.definedSymbolsSize);
+		unresolvedSymbols.resize(bud.unresolvedSymbolsSize);
 		unresolvedSymbolRefs.resize(bud.unresolvedSymbolRefsSize);
 	}
 

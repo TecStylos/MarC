@@ -20,6 +20,7 @@ namespace MarC
 		std::vector<std::string> mandatoryPermissions;
 		std::vector<std::string> optionalPermissions;
 		std::vector<Symbol> definedSymbols;
+		std::vector<UnresolvedSymbol> unresolvedSymbols;
 		std::vector<SymbolRef> unresolvedSymbolRefs;
 		MemoryRef codeMemory;
 		MemoryRef staticStack;
@@ -34,15 +35,16 @@ namespace MarC
 	private:
 		struct BackupData
 		{
+			bool extensionRequired = false;
+			bool extensionLoaded = false;
 			uint64_t requiredModulesSize = 0;
 			uint64_t mandatoryPermissionsSize = 0;
 			uint64_t optionalPermissionsSize = 0;
-			bool extensionRequired = false;
-			bool extensionLoaded = false;
+			uint64_t definedSymbolsSize = 0;
+			uint64_t unresolvedSymbolsSize = 0;
+			uint64_t unresolvedSymbolRefsSize = 0;
 			uint64_t codeMemorySize = 0;
 			uint64_t staticStackSize = 0;
-			uint64_t definedSymbolsSize = 0;
-			uint64_t unresolvedSymbolRefsSize = 0;
 		} bud;
 	};
 
@@ -50,6 +52,7 @@ namespace MarC
 	{
 		bool extRequired;
 		uint64_t nDefSymbols;
+		uint64_t nUnresSymbols;
 		uint64_t nUnresSymbolRefs;
 	};
 
@@ -61,6 +64,7 @@ namespace MarC
 		ModInfoHeader header;
 		header.extRequired = modInfo.extensionRequired;
 		header.nDefSymbols = modInfo.definedSymbols.size();
+		header.nUnresSymbols = modInfo.unresolvedSymbols.size();
 		header.nUnresSymbolRefs = modInfo.unresolvedSymbolRefs.size();
 
 		serialize(header, oStream);
@@ -75,6 +79,9 @@ namespace MarC
 
 		for (auto& symRef : modInfo.unresolvedSymbolRefs)
 			serialize(symRef, oStream);
+
+		for (auto& unresSym : modInfo.unresolvedSymbols)
+			serialize(unresSym, oStream);
 
 		serialize(*modInfo.codeMemory, oStream);
 		serialize(*modInfo.staticStack, oStream);
@@ -106,6 +113,13 @@ namespace MarC
 			SymbolRef symRef;
 			deserialize(symRef, iStream);
 			modInfo.unresolvedSymbolRefs.push_back(symRef);
+		}
+
+		for (uint64_t i = 0; i < header.nUnresSymbols; ++i)
+		{
+			UnresolvedSymbol unresSym;
+			deserialize(unresSym, iStream);
+			modInfo.unresolvedSymbols.push_back(unresSym);
 		}
 
 		modInfo.codeMemory = Memory::create();

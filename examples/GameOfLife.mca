@@ -60,17 +60,17 @@
 #func : CLEAR
     mov.u64 : $ac : >>HEIGHT
     add.u64 : $ac : 1
-    calx : >>std>>ext>>prints : addr."\r"
+    calx : >>std>>exPrints : addr."\r"
     #label : LOOP_BEGIN
-        calx : >>std>>ext>>prints : addr."\e[1F"
+        calx : >>std>>exPrints : addr."\e[1F"
         sub.u64 : $ac : 1
     jne.u64 : LOOP_BEGIN : @$ac : 0
     return
 #end
 
 #func : RENDER : addr.BASE
-    calx : >>std>>ext>>prints : addr.@BASE
-    calx : >>std>>ext>>prints : addr."\n"
+    calx : >>std>>exPrints : addr.@BASE
+    calx : >>std>>exPrints : addr."\n"
     return
 #end
 
@@ -219,12 +219,12 @@
 
     mov.i64 : $lc : >>MAIN_LOOP_COUNT
     #label : MAIN_LOOP
-        calx : >>std>>ext>>sleepms : u64.>>FRAME_TIME
+        calx : >>std>>exSleepms : u64.>>FRAME_TIME
         call : >>EVOLVE : addr.>>GRID1 : addr.>>GRID2
         call : >>CLEAR
         call : >>RENDER : addr.>>GRID2
 
-        calx : >>std>>ext>>sleepms : u64.>>FRAME_TIME
+        calx : >>std>>exSleepms : u64.>>FRAME_TIME
         call : >>EVOLVE : addr.>>GRID2 : addr.>>GRID1
         call : >>CLEAR
         call : >>RENDER : addr.>>GRID1

@@ -502,6 +502,9 @@ namespace MarC
 			tc.datatype = BC_DT_U_64;
 			symbol.usage = SymbolUsage::Value;
 			break;
+		case AsmToken::Type::Name:
+			addUnresolvedSymbol({ symbol.name, currToken().value });
+			return;
 		default:
 			ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Unexpected token'" + currToken().value + "' for alias value!");
 		}
@@ -806,6 +809,13 @@ namespace MarC
 		fullName.append(name);
 
 		return fullName;
+	}
+
+	void Assembler::addUnresolvedSymbol(UnresolvedSymbol unresSymbol)
+	{
+		unresSymbol.name = getScopedName(unresSymbol.name);
+		unresSymbol.refName = getScopedName(unresSymbol.refName);
+		m_pModInfo->unresolvedSymbols.push_back(unresSymbol);
 	}
 
 	bool Assembler::isInstructionLike()

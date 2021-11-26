@@ -14,6 +14,7 @@ namespace MarC
 	{
 		bool hasDebugInfo = false;
 		std::set<Symbol> symbols;
+		std::set<UnresolvedSymbol> unresolvedSymbols;
 		std::set<std::string> mandatoryPermissions;
 		std::set<std::string> optionalPermissions;
 		std::vector<ModuleInfoRef> modules;
@@ -26,6 +27,7 @@ namespace MarC
 	{
 		bool hasDebugInfo;
 		uint64_t nSymbols;
+		uint64_t nUnresolvedSymbols;
 		uint64_t nModules;
 	};
 	MARC_SERIALIZER_ENABLE_FIXED(ExeInfoHeader);
@@ -37,6 +39,7 @@ namespace MarC
 		header.nModules = exeInfo.modules.size();
 		header.hasDebugInfo = exeInfo.hasDebugInfo;
 		header.nSymbols = exeInfo.symbols.size();
+		header.nUnresolvedSymbols = exeInfo.unresolvedSymbols.size();
 
 		serialize(header, oStream);
 
@@ -50,6 +53,9 @@ namespace MarC
 		{
 			for (auto& symbol : exeInfo.symbols)
 				serialize(symbol, oStream);
+
+			for (auto& unresSym : exeInfo.unresolvedSymbols)
+				serialize(unresSym, oStream);
 		}
 	}
 
@@ -75,9 +81,16 @@ namespace MarC
 		{
 			for (uint64_t i = 0; i < header.nSymbols; ++i)
 			{
-				std::string symbol;
+				Symbol symbol;
 				deserialize(symbol, iStream);
 				exeInfo.symbols.insert(symbol);
+			}
+
+			for (uint64_t i = 0; i < header.nUnresolvedSymbols; ++i)
+			{
+				UnresolvedSymbol unresSym;
+				deserialize(unresSym, iStream);
+				exeInfo.unresolvedSymbols.insert(unresSym);
 			}
 		}
 	}

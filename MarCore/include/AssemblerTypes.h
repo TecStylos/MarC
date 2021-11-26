@@ -85,6 +85,17 @@ namespace MarC
 		BC_Datatype datatype = BC_DT_NONE;
 	};
 
+	struct UnresolvedSymbol
+	{
+		std::string name = "<unnamed>";
+		std::string refName = "<unknown>";
+	public:
+		UnresolvedSymbol() = default;
+		UnresolvedSymbol(const std::string& name, const std::string& refName) : name(name), refName(refName) {}
+	public:
+		bool operator<(const UnresolvedSymbol& other) const { return name < other.name; }
+	};
+
 	template <>
 	inline void serialize(const Symbol& symbol, std::ostream& oStream)
 	{
@@ -113,5 +124,18 @@ namespace MarC
 		deserialize(symRef.name, iStream);
 		deserialize(symRef.datatype, iStream);
 		deserialize(symRef.offset, iStream);
+	}
+
+	template <>
+	inline void serialize(const UnresolvedSymbol& unresSymbol, std::ostream& oStream)
+	{
+		serialize(unresSymbol.name, oStream);
+		serialize(unresSymbol.refName, oStream);
+	}
+	template <>
+	inline void deserialize(UnresolvedSymbol& unresSymbol, std::istream& iStream)
+	{
+		deserialize(unresSymbol.name, iStream);
+		deserialize(unresSymbol.refName, iStream);
 	}
 }
