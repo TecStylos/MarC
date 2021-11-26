@@ -36,39 +36,32 @@ int main(int argc, const char** argv, const char** env)
 		if (elem == "--help")
 		{
 			settings.mode = Mode::Help;
-			continue;
 		}
-		if (elem == "--grantall")
+		else if (elem == "--grantall")
 		{
 			settings.flags.setFlag(MarCmd::CmdFlags::GrantAll);
-			continue;
 		}
-		if (elem == "--verbose")
+		else if (elem == "--verbose")
 		{
 			settings.flags.setFlag(MarCmd::CmdFlags::Verbose);
-			continue;
 		}
-		if (elem == "--livecode")
+		else if (elem == "--livecode")
 		{
 			settings.mode = Mode::LiveCode;
-			continue;
 		}
-		if (elem == "--liveasm")
+		else if (elem == "--liveasm")
 		{
 			settings.mode = Mode::LiveAsm;
-			continue;
 		}
-		if (elem == "--build")
+		else if (elem == "--build")
 		{
 			settings.mode = Mode::Build;
-			continue;
 		}
-		if (elem == "--interpret")
+		else if (elem == "--interpret")
 		{
 			settings.mode = Mode::Interpret;
-			continue;
 		}
-		if (elem == "-o")
+		else if (elem == "-o")
 		{
 			if (!cmd.hasNext())
 			{
@@ -76,9 +69,8 @@ int main(int argc, const char** argv, const char** env)
 				return -1;
 			}
 			settings.outFile = cmd.getNext();
-			continue;
 		}
-		if (elem == "-m")
+		else if (elem == "-m")
 		{
 			if (!cmd.hasNext())
 			{
@@ -86,9 +78,8 @@ int main(int argc, const char** argv, const char** env)
 				return -1;
 			}
 			settings.modDirs.insert(cmd.getNext());
-			continue;
 		}
-		if (elem == "-e")
+		else if (elem == "-e")
 		{
 			if (!cmd.hasNext())
 			{
@@ -96,31 +87,32 @@ int main(int argc, const char** argv, const char** env)
 				return -1;
 			}
 			settings.extDirs.insert(cmd.getNext());
-			continue;
 		}
-		if (elem == "--keeponexit")
+		else if (elem == "--keeponexit")
 		{
 			settings.exitBehavior = MarCmd::ExitBehavior::KeepOnExit;
-			continue;
 		}
-		if (elem == "--closeonexit")
+		else if (elem == "--closeonexit")
 		{
 			settings.exitBehavior = MarCmd::ExitBehavior::CloseOnExit;
-			continue;
 		}
-		if (elem == "--debug")
+		else if (elem == "--noexitinfo")
+		{
+			settings.flags.setFlag(MarCmd::CmdFlags::NoExitInfo);
+		}
+		else if (elem == "--debug")
 		{
 			settings.flags.setFlag(MarCmd::CmdFlags::Debug);
-			continue;
 		}
-		if (elem == "--profile")
+		else if (elem == "--profile")
 		{
 			settings.flags.setFlag(MarCmd::CmdFlags::Profile);
-			continue;
 		}
-
-		settings.inFile = elem;
-		settings.modDirs.insert(std::filesystem::path(settings.inFile).parent_path().string());
+		else
+		{
+			settings.inFile = elem;
+			settings.modDirs.insert(std::filesystem::path(settings.inFile).parent_path().string());
+		}
 	}
 
 	if (settings.mode == Mode::None)

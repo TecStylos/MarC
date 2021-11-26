@@ -24,5 +24,6 @@ namespace MarCmd
 		Debug,
 		Profile,
 		GrantAll,
+		NoExitInfo,
 	};
 }

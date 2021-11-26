@@ -123,10 +123,13 @@ namespace MarCmd
 
 		int64_t exitCode = m_pInterpreter->getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_64;
 
-		std::cout << "Module '<cin>' exited with code " << exitCode << "." << std::endl;
+		if (!m_settings.flags.hasFlag(CmdFlags::NoExitInfo))
+		{
+			std::cout << "Module '<cin>' exited with code " << exitCode << "." << std::endl;
 
-		if (m_settings.flags.hasFlag(CmdFlags::Verbose))
-			std::cout << "  Reason: '" << m_pInterpreter->lastError().getCodeStr() << "'" << std::endl;
+			if (m_settings.flags.hasFlag(CmdFlags::Verbose))
+				std::cout << "  Reason: '" << m_pInterpreter->lastError().getCodeStr() << "'" << std::endl;
+		}
 
 		return m_pInterpreter->getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_32;
 	}
