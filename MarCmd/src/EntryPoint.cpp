@@ -6,6 +6,7 @@
 
 #include "MarCmdHelp.h"
 #include "MarCmdBuilder.h"
+#include "MarCmdDisassembler.h"
 #include "MarCmdInterpreter.h"
 #include "MarCmdLiveAsmInterpreter.h"
 
@@ -56,6 +57,10 @@ int main(int argc, const char** argv, const char** env)
 		else if (elem == "--build")
 		{
 			settings.mode = Mode::Build;
+		}
+		else if (elem == "--disasm")
+		{
+			settings.mode = Mode::Disassemble;
 		}
 		else if (elem == "--interpret")
 		{
@@ -147,6 +152,9 @@ int main(int argc, const char** argv, const char** env)
 			break;
 		case Mode::Build:
 			exitCode = MarCmd::Builder::build(settings);
+			break;
+		case Mode::Disassemble:
+			exitCode = MarCmd::Disassembler::disassemble(settings);
 			break;
 		case Mode::Interpret:
 			exitCode = MarCmd::Interpreter::run(settings);

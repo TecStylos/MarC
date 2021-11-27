@@ -13,7 +13,7 @@ add_executable(
     "src/PermissionGrantPrompt.cpp"
     "src/MarCmdBuilder.cpp"
     "src/MarCmdModuleAdder.cpp"
-)
+ "include/MarCmdDisassembler.h" "src/MarCmdDisassembler.cpp")
 
 target_include_directories(
 	MarCmd PUBLIC 

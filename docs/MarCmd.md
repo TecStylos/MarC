@@ -13,6 +13,8 @@
    - Run the MarCembly live interpreter.
  * --build
    - Build a `*.mcc/*.mca` file and store the binary in a `*.mce` file.
+ * --disasm
+   - Disassemble a `*.mce` file and store the MarCembly code of each module in a separate `*.mcd` file in either a specified folder or a folder with the name of the input file.
  * --interpret
    - Interpret a `*.mcc/*.mca/*.mce` file.
 ### I/O

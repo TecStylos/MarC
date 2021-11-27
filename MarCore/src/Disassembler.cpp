@@ -61,6 +61,7 @@ namespace MarC
 	DisAsmArg Disassembler::disassembleArgValue(DisAsmInsInfo& daii, InstructionParser& ip, const InsArgument& arg)
 	{
 		DisAsmArg daa;
+		daa.argType = arg.type;
 		daa.getsDereferenced = daii.ocx.derefArg.get(arg.index);
 
 		switch (arg.type)

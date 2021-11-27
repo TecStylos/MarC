@@ -11,6 +11,7 @@ namespace MarC
 	{
 		bool getsDereferenced = false;
 		TypeCell value;
+		InsArgType argType;
 	};
 
 	struct DisAsmInsInfo
@@ -19,4 +20,6 @@ namespace MarC
 		std::vector<DisAsmArg> args;
 		std::vector<char> rawData;
 	};
+
+	std::string DisAsmInsInfoToString(const DisAsmInsInfo& daii);
 }

@@ -243,6 +243,60 @@ namespace MarC
 		return it->second;
 	}
 
+	std::string BC_MemAddressToString(BC_MemAddress addr)
+	{
+		std::string str;
+		switch (addr.base)
+		{
+		case BC_MEM_BASE_STATIC_STACK:
+			str.append("[");
+			str.append("S; ");
+			str.append("M: ");
+			str.append(std::to_string(addr.asCode.page));
+			str.append(", ");
+			str.append("A: ");
+			str.append(std::to_string(addr.asCode.addr));
+			break;
+		case BC_MEM_BASE_DYNAMIC_STACK:
+			str.append("[");
+			str.append("D; ");
+			str.append("A: ");
+			str.append(std::to_string(addr.addr));
+			break;
+		case BC_MEM_BASE_DYN_FRAME_ADD:
+			str.append("~+");
+			str.append(std::to_string(addr.addr));
+			break;
+		case BC_MEM_BASE_DYN_FRAME_SUB:
+			str.append("~-");
+			str.append(std::to_string(addr.addr));
+			break;
+		case BC_MEM_BASE_CODE_MEMORY:
+			str.append("[");
+			str.append("C; ");
+			str.append("M: ");
+			str.append(std::to_string(addr.asCode.page));
+			str.append(", ");
+			str.append("A: ");
+			str.append(std::to_string(addr.asCode.addr));
+			break;
+		case BC_MEM_BASE_REGISTER:
+			str.append("$");
+			str.append(BC_RegisterToString((BC_MemRegister)addr.addr));
+			break;
+		case BC_MEM_BASE_EXTERN:
+			str.append("[");
+			str.append("E; ");
+			str.append("A: ");
+			str.append(std::to_string(addr.addr));
+			break;
+		}
+
+		if (!str.empty() && str[0] == '[')
+			str.append("]");
+		return str;
+	}
+
 	uint64_t BC_DatatypeSize(BC_Datatype dt)
 	{
 		switch (dt)
