@@ -3,6 +3,8 @@
 #if defined MARCMD_PLATFORM_WINDOWS
 #include <conio.h>
 #elif defined MARCMD_PLATFORM_UNIX
+#include <unistd.h>
+#include <termios.h>
 #endif
 
 namespace MarCmd

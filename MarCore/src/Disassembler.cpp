@@ -1,5 +1,7 @@
 #include "Disassembler.h"
 
+#include <cstring>
+
 namespace MarC
 {
 	Disassembler::InstructionParser::InstructionParser(const void* pInstruction)
