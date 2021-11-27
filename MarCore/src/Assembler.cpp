@@ -252,7 +252,7 @@ namespace MarC
 		TypeCell tc;
 		switch (arg.type)
 		{
-		case InsArgType::Address: tc.datatype = BC_DT_U_64; break;
+		case InsArgType::Address: tc.datatype = BC_DT_ADDR; break;
 		case InsArgType::TypedValue: tc.datatype = arg.datatype; break;
 		case InsArgType::Value: tc.datatype = ocx.datatype; break;
 		case InsArgType::Datatype: tc.datatype = BC_DT_DATATYPE; break;
@@ -272,7 +272,7 @@ namespace MarC
 		getsDereferenced = false;
 		if (currToken().type == AsmToken::Type::Op_Deref)
 		{
-			tc.datatype = BC_DT_U_64;
+			tc.datatype = BC_DT_ADDR;
 			getsDereferenced = true;
 			nextToken();
 		}

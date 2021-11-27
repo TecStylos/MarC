@@ -24,7 +24,6 @@ namespace MarC
 		static DisAsmInsInfo disassemble(const void* pInstruction);
 	private:
 		static void disassembleArgument(DisAsmInsInfo& daii, InstructionParser& ip, const InsArgument& arg);
-		static DisAsmArg disassembleArgAddress(DisAsmInsInfo& daii, InstructionParser& ip, const InsArgument& arg);
 		static DisAsmArg disassembleArgValue(DisAsmInsInfo& daii, InstructionParser& ip, const InsArgument& arg);
 		static void disassembleSpecializedInstruction(DisAsmInsInfo& daii, InstructionParser& ip);
 		static void disassembleSpecCall(DisAsmInsInfo& daii, InstructionParser& ip);

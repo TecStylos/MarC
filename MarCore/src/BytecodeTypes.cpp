@@ -328,6 +328,9 @@ namespace MarC
 			str.append("A: ");
 			str.append(std::to_string(addr.addr));
 			break;
+		default:
+			//str.append("[");
+			str.append(std::to_string(addr._raw));
 		}
 
 		if (!str.empty() && str[0] == '[')

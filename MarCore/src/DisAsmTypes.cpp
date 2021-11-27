@@ -44,6 +44,7 @@ namespace MarC
 					case BC_DT_U_64: insStr.append(std::to_string(arg.value.cell.as_U_64)); break;
 					case BC_DT_F_32: insStr.append(std::to_string(arg.value.cell.as_F_32)); break;
 					case BC_DT_F_64: insStr.append(std::to_string(arg.value.cell.as_F_64)); break;
+					case BC_DT_ADDR: insStr.append(BC_MemAddressToString(arg.value.cell.as_ADDR)); break;
 					}
 					break;
 				}

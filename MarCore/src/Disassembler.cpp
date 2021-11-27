@@ -43,7 +43,6 @@ namespace MarC
 		switch (arg.type)
 		{
 		case InsArgType::Address:
-			daa = disassembleArgAddress(daii, ip, arg); break;
 		case InsArgType::Value:
 		case InsArgType::TypedValue:
 		case InsArgType::Datatype:
@@ -51,11 +50,6 @@ namespace MarC
 		}
 
 		daii.args.push_back(daa);
-	}
-
-	DisAsmArg Disassembler::disassembleArgAddress(DisAsmInsInfo& daii, InstructionParser& ip, const InsArgument& arg)
-	{
-		return disassembleArgValue(daii, ip, arg);
 	}
 
 	DisAsmArg Disassembler::disassembleArgValue(DisAsmInsInfo& daii, InstructionParser& ip, const InsArgument& arg)
@@ -66,24 +60,25 @@ namespace MarC
 
 		switch (arg.type)
 		{
-		case InsArgType::Address: daa.value.datatype = BC_DT_U_64; break;
+		case InsArgType::Address: daa.value.datatype = BC_DT_ADDR; break;
 		case InsArgType::TypedValue: daa.value.datatype = arg.datatype; break;
 		case InsArgType::Value: daa.value.datatype = daii.ocx.datatype; break;
 		case InsArgType::Datatype: daa.value.datatype = BC_DT_DATATYPE; break;
 		}
 
-		switch (daa.getsDereferenced ? BC_DT_U_64 : daa.value.datatype)
+		switch (daa.getsDereferenced ? BC_DT_ADDR : daa.value.datatype)
 		{
-		case BC_DT_I_8: daa.value.cell.as_I_8 = ip.read<int8_t>(); break;
+		case BC_DT_I_8:  daa.value.cell.as_I_8 =  ip.read<int8_t>(); break;
 		case BC_DT_I_16: daa.value.cell.as_I_16 = ip.read<int16_t>(); break;
 		case BC_DT_I_32: daa.value.cell.as_I_32 = ip.read<int32_t>(); break;
 		case BC_DT_I_64: daa.value.cell.as_I_64 = ip.read<int64_t>(); break;
-		case BC_DT_U_8: daa.value.cell.as_U_8 = ip.read<uint8_t>(); break;
+		case BC_DT_U_8:  daa.value.cell.as_U_8 =  ip.read<uint8_t>(); break;
 		case BC_DT_U_16: daa.value.cell.as_U_16 = ip.read<uint16_t>(); break;
 		case BC_DT_U_32: daa.value.cell.as_U_32 = ip.read<uint32_t>(); break;
 		case BC_DT_U_64: daa.value.cell.as_U_64 = ip.read<uint64_t>(); break;
 		case BC_DT_F_32: daa.value.cell.as_F_32 = ip.read<float>(); break;
 		case BC_DT_F_64: daa.value.cell.as_F_64 = ip.read<double>(); break;
+		case BC_DT_ADDR: daa.value.cell.as_ADDR = ip.read<BC_MemAddress>(); break;
 		case BC_DT_DATATYPE: daa.value.cell.as_Datatype = ip.read<BC_Datatype>(); break;
 		}
 
@@ -103,7 +98,7 @@ namespace MarC
 
 	void Disassembler::disassembleSpecCall(DisAsmInsInfo& daii, InstructionParser& ip)
 	{
-		daii.args.push_back(disassembleArgAddress(daii, ip, { InsArgType::Address, BC_DT_NONE, 0 }));
+		daii.args.push_back(disassembleArgValue(daii, ip, { InsArgType::Address, BC_DT_NONE, 0 }));
 
 		const BC_FuncCallData& fcd = ip.read<BC_FuncCallData>();
 
@@ -114,7 +109,7 @@ namespace MarC
 	void Disassembler::disassembleSpecCallExtern(DisAsmInsInfo& daii, InstructionParser& ip)
 	{
 		uint64_t argIndex = 0;
-		daii.args.push_back(disassembleArgAddress(daii, ip, { InsArgType::Address, BC_DT_NONE, argIndex++ }));
+		daii.args.push_back(disassembleArgValue(daii, ip, { InsArgType::Address, BC_DT_NONE, argIndex++ }));
 
 		if (daii.ocx.datatype != BC_DT_NONE)
 			disassembleArgument(daii, ip, { InsArgType::Address, daii.ocx.datatype, argIndex++ });
