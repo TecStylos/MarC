@@ -53,5 +53,14 @@ namespace MarCmd
 			perror("tcsetattr ~ICANON");
 		return buf;
 	}
+	inline ConsoleDimensions getConsoleDimensions()
+	{
+		struct winsize ws;
+		ioctl(0, TIOCGWINSZ, &ws);
+		ConsoleDimensions cd;
+		cd.width = ws.ws_row;
+		cd.height = ws.ws_col;
+		return cd;
+	}
 	#endif
 }
