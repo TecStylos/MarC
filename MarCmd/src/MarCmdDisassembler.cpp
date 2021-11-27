@@ -17,6 +17,9 @@ namespace MarCmd
 				std::cout << "Unable to open input file!" << std::endl;
 				return -1;
 			}
+
+			if (verbose)
+				std::cout << "Loading input file from disk..." << std::endl;
 			MarC::deserialize(*exeInfo, iStream);
 
 			if (!iStream.good())
@@ -26,6 +29,8 @@ namespace MarCmd
 			}
 		}
 
+		if (verbose)
+			std::cout << "Creating the output directory..." << std::endl;
 		std::string outDir;
 		if (!settings.outFile.empty())
 			outDir = settings.outFile;
@@ -44,6 +49,9 @@ namespace MarCmd
 
 		for (uint64_t i = 0; i < exeInfo->modules.size(); ++i)
 		{
+			if (verbose)
+				std::cout << "Disassembling module " << (i + 1) << "/" << exeInfo->modules.size() << "..." << std::endl;
+
 			std::string source;
 
 			auto& codeMem = *(exeInfo->modules[i]->codeMemory);
@@ -72,6 +80,7 @@ namespace MarCmd
 			oStream.write(source.c_str(), source.size());
 		}
 
+		std::cout << "Successfully disassembled the executable!" << std::endl;
 		
 		return 0;
 	}

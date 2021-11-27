@@ -84,8 +84,7 @@ namespace MarCmd
 
 		oStream.close();
 
-		if (verbose)
-			std::cout << "Successfully built the application!" << std::endl;
+		std::cout << "Successfully built the application!" << std::endl;
 
 		return 0;
 	}
