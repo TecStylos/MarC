@@ -60,8 +60,8 @@ namespace MarCmd
 		struct winsize ws;
 		ioctl(0, TIOCGWINSZ, &ws);
 		ConsoleDimensions cd;
-		cd.width = ws.ws_row;
-		cd.height = ws.ws_col;
+		cd.width = ws.ws_col;
+		cd.height = ws.ws_row;
 		return cd;
 	}
 	#endif
