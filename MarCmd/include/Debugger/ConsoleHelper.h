@@ -1,6 +1,7 @@
 #pragma once
 
 #if defined MARCMD_PLATFORM_WINDOWS
+#include <Windows.h>
 #include <conio.h>
 #elif defined MARCMD_PLATFORM_UNIX
 #include <unistd.h>
@@ -9,10 +10,26 @@
 
 namespace MarCmd
 {
+	struct ConsoleDimensions
+	{
+		uint64_t width = 0;
+		uint64_t height = 0;
+	};
+
 	#if defined MARCMD_PLATFORM_WINDOWS
 	inline char getChar()
 	{
 		return _getch();
+	}
+	inline ConsoleDimensions getConsoleDimensions()
+	{
+		CONSOLE_SCREEN_BUFFER_INFO csbi;
+		GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+		ConsoleDimensions cd;
+		cd.width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+		cd.height = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+
+		return cd;
 	}
 	#elif defined MARCMD_PLATFORM_UNIX
 	inline char getChar()

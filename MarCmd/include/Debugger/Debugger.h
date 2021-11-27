@@ -2,8 +2,6 @@
 
 #include "MarCmdSettings.h"
 
-#include "ConsoleGetChar.h"
-
 namespace MarCmd
 {
 	class Debugger
