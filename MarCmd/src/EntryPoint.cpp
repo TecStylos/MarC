@@ -156,10 +156,10 @@ int main(int argc, const char** argv, const char** env)
 			exitCode = MarCmd::LiveAsmInterpreter::run(settings);
 			break;
 		case Mode::Build:
-			exitCode = MarCmd::Builder::build(settings);
+			exitCode = MarCmd::Builder::run(settings);
 			break;
 		case Mode::Disassemble:
-			exitCode = MarCmd::Disassembler::disassemble(settings);
+			exitCode = MarCmd::Disassembler::run(settings);
 			break;
 		case Mode::Debug:
 			exitCode = MarCmd::Debugger::run(settings);

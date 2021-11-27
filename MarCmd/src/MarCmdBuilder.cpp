@@ -8,7 +8,7 @@
 
 namespace MarCmd
 {
-	int Builder::build(const Settings& settings)
+	int Builder::run(const Settings& settings)
 	{
 		MarC::Linker linker;
 

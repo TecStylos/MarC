@@ -5,7 +5,7 @@
 
 namespace MarCmd
 {
-	int Disassembler::disassemble(const Settings& settings)
+	int Disassembler::run(const Settings& settings)
 	{
 		bool verbose = settings.flags.hasFlag(CmdFlags::Verbose);
 

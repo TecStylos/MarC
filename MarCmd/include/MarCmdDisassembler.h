@@ -7,6 +7,6 @@ namespace MarCmd
 	class Disassembler
 	{
 	public:
-		static int disassemble(const Settings& settings);
+		static int run(const Settings& settings);
 	};
 }
