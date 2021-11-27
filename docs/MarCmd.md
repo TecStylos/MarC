@@ -32,7 +32,7 @@
  * --closeonexit
    - Close the interpreter after the application returned.
  * --noexitinfo
-   - Don't view "Module '...' exited with code x." message.
+   - Don't view the "Module '...' exited with code x." message.
 ### Debugging
  * --profile
    - Profile the interpreter (func/funx/instruction call counts/timings, execution time, ...)

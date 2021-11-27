@@ -2,7 +2,22 @@
 
 namespace MarC
 {
-	std::string DisAsmInsInfoToString(const DisAsmInsInfo& daii)
+	std::set<Symbol>::const_iterator getSymbolForAddress(BC_MemAddress addr, const std::set<Symbol>& symbols)
+	{
+		auto it = symbols.begin();
+		while (it != symbols.end())
+		{
+			if (it->usage == SymbolUsage::Address &&
+				it->value.as_ADDR == addr)
+				break;
+
+			++it;
+		}
+
+		return it;
+	}
+
+	std::string DisAsmInsInfoToString(const DisAsmInsInfo& daii, const std::set<Symbol>& symbols)
 	{
 		std::string insStr;
 
@@ -47,12 +62,22 @@ namespace MarC
 					case BC_DT_U_64: insStr.append(std::to_string(arg.value.cell.as_U_64)); break;
 					case BC_DT_F_32: insStr.append(std::to_string(arg.value.cell.as_F_32)); break;
 					case BC_DT_F_64: insStr.append(std::to_string(arg.value.cell.as_F_64)); break;
-					case BC_DT_ADDR: insStr.append(BC_MemAddressToString(arg.value.cell.as_ADDR)); break;
+					case BC_DT_ADDR:
+						auto it = getSymbolForAddress(arg.value.cell.as_ADDR, symbols);
+						if (it != symbols.end())
+							insStr.append(it->name);
+						else
+							insStr.append(BC_MemAddressToString(arg.value.cell.as_ADDR));
+						break;
 					}
 					break;
 				}
 			case InsArgType::Address:
-				insStr.append(BC_MemAddressToString(arg.value.cell.as_ADDR));
+				auto it = getSymbolForAddress(arg.value.cell.as_ADDR, symbols);
+				if (it != symbols.end())
+					insStr.append(it->name);
+				else
+					insStr.append(BC_MemAddressToString(arg.value.cell.as_ADDR));
 				break;
 			}
 

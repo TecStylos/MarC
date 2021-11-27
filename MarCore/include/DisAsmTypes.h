@@ -21,5 +21,5 @@ namespace MarC
 		std::vector<char> rawData;
 	};
 
-	std::string DisAsmInsInfoToString(const DisAsmInsInfo& daii);
+	std::string DisAsmInsInfoToString(const DisAsmInsInfo& daii, const std::set<Symbol>& symbols);
 }

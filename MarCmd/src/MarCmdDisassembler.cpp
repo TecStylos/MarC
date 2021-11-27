@@ -54,14 +54,15 @@ namespace MarCmd
 
 			std::string source;
 
-			auto& codeMem = *(exeInfo->modules[i]->codeMemory);
+			auto& mod = *(exeInfo->modules[i]);
+			auto& codeMem = *(mod.codeMemory);
 
 			uint64_t nDisassembled = 0;
 			while (nDisassembled < codeMem.size())
 			{
 				auto daii = MarC::Disassembler::disassemble((char*)codeMem.getBaseAddress() + nDisassembled);
-				
-				source.append(MarC::DisAsmInsInfoToString(daii));
+
+				source.append(MarC::DisAsmInsInfoToString(daii, exeInfo->symbols));
 
 				nDisassembled += daii.rawData.size();
 				

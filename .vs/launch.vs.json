@@ -12,7 +12,7 @@
         "--verbose",
         "--closeonexit",
         "--grantall",
-        "--debug",
+        "--disasm",
         "--dbginfo",
         "examples/GameOfLife.mce"
       ]
