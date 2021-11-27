@@ -12,6 +12,7 @@ namespace MarCmd
 		LiveAsm,         // Live interpret MarCembly code from commandline
 		Build,           // *.mcc/*.mca -> *.mce
 		Disassemble,     // *.mcc -> *.mcd
-		Interpret        // Run ([compile,] assenmble, link) any file asscociated with the MarC/MarCembly languages
+		Debug,           // Debug a *.mcc/*.mca/*.mcc file
+		Interpret        // Run ([compile,] assemble, link) any file asscociated with the MarC/MarCembly languages
 	};
 }

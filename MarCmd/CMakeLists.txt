@@ -13,7 +13,9 @@ add_executable(
     "src/PermissionGrantPrompt.cpp"
     "src/MarCmdBuilder.cpp"
     "src/MarCmdModuleAdder.cpp"
- "include/MarCmdDisassembler.h" "src/MarCmdDisassembler.cpp")
+    "src/MarCmdDisassembler.cpp"
+    "src/Debugger/Debugger.cpp"
+)
 
 target_include_directories(
 	MarCmd PUBLIC 
@@ -24,6 +26,28 @@ target_include_directories(
 target_link_libraries(
 	MarCmd PUBLIC
 	MarCore
+)
+
+set(
+    MARCMD_COMPILE_DEFINITIONS
+)
+if (WIN32)
+    set(
+        MARCMD_COMPILE_DEFINITIONS
+        ${MARCMD_COMPILE_DEFINITIONS}
+        "MARCMD_PLATFORM_WINDOWS"
+    )
+elseif (UNIX)
+    set(
+        MARCMD_COMPILE_DEFINITIONS
+        ${MARCMD_COMPILE_DEFINITIONS}
+        "MARCMD_PLATFORM_UNIX"
+    )
+endif()
+
+target_compile_definitions(
+    MarCmd PUBLIC
+    ${MARCMD_COMPILE_DEFINITIONS}
 )
 
 if (MSVC) 

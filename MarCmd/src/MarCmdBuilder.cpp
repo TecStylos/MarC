@@ -70,7 +70,7 @@ namespace MarCmd
 		}
 
 		auto exeInfo = linker.getExeInfo();
-		exeInfo->hasDebugInfo = settings.flags.hasFlag(CmdFlags::Debug);
+		exeInfo->hasDebugInfo = settings.flags.hasFlag(CmdFlags::DebugInfo);
 
 		if (verbose)
 			std::cout << "Writing executable to disk..." << std::endl;

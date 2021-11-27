@@ -21,7 +21,7 @@ namespace MarCmd
 	enum class CmdFlags
 	{
 		Verbose,
-		Debug,
+		DebugInfo,
 		Profile,
 		GrantAll,
 		NoExitInfo,

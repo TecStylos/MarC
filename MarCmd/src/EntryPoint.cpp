@@ -8,6 +8,7 @@
 #include "MarCmdBuilder.h"
 #include "MarCmdDisassembler.h"
 #include "MarCmdInterpreter.h"
+#include "Debugger/Debugger.h"
 #include "MarCmdLiveAsmInterpreter.h"
 
 int main(int argc, const char** argv, const char** env)
@@ -62,6 +63,10 @@ int main(int argc, const char** argv, const char** env)
 		{
 			settings.mode = Mode::Disassemble;
 		}
+		else if (elem == "--debug")
+		{
+			settings.mode = Mode::Debug;
+		}
 		else if (elem == "--interpret")
 		{
 			settings.mode = Mode::Interpret;
@@ -105,9 +110,9 @@ int main(int argc, const char** argv, const char** env)
 		{
 			settings.flags.setFlag(MarCmd::CmdFlags::NoExitInfo);
 		}
-		else if (elem == "--debug")
+		else if (elem == "--dbginfo")
 		{
-			settings.flags.setFlag(MarCmd::CmdFlags::Debug);
+			settings.flags.setFlag(MarCmd::CmdFlags::DebugInfo);
 		}
 		else if (elem == "--profile")
 		{
@@ -155,6 +160,9 @@ int main(int argc, const char** argv, const char** env)
 			break;
 		case Mode::Disassemble:
 			exitCode = MarCmd::Disassembler::disassemble(settings);
+			break;
+		case Mode::Debug:
+			exitCode = MarCmd::Debugger::run(settings);
 			break;
 		case Mode::Interpret:
 			exitCode = MarCmd::Interpreter::run(settings);
