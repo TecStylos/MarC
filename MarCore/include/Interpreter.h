@@ -164,6 +164,8 @@ case MarC::BC_DT_U_64: __left.as_U_64 __operator __right.as_U_64; break; \
 \
 case MarC::BC_DT_F_32: __left.as_F_32 __operator __right.as_F_32; break; \
 case MarC::BC_DT_F_64: __left.as_F_64 __operator __right.as_F_64; break; \
+\
+case MarC::BC_DT_ADDR: __left.as_ADDR __operator __right.as_ADDR; break; \
 }
 
 #define MARC_INTERPRETER_BINARY_OP_BOOLEAN_RESULT(__result, __left, __operator, __right, __datatype) \
@@ -180,4 +182,6 @@ case MarC::BC_DT_U_64: __result = __left.as_U_64 __operator __right.as_U_64; bre
 \
 case MarC::BC_DT_F_32: __result = __left.as_F_32 __operator __right.as_F_32; break; \
 case MarC::BC_DT_F_64: __result = __left.as_F_64 __operator __right.as_F_64; break; \
+\
+case MarC::BC_DT_ADDR: __result = __left.as_ADDR __operator __right.as_ADDR; break; \
 }

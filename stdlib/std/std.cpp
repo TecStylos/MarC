@@ -15,7 +15,7 @@ public:
 	{
 		if (efd.nParams != 1)
 			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected 1 parameter! Got " + std::to_string(efd.nParams) + "!");
-		if (efd.param[0].datatype != MarC::BC_DT_U_64)
+		if (efd.param[0].datatype != MarC::BC_DT_ADDR)
 			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected parameter of type 'u64! Got '" + MarC::BC_DatatypeToString(efd.param[0].datatype) + "'!");
 		const char* str = &interpreter.hostObject<char>(efd.param[0].cell.as_ADDR);
 		std::cout << str;
@@ -43,6 +43,7 @@ public:
 		case MarC::BC_DT_U_64: std::cout << efd.param[0].cell.as_U_64; break;
 		case MarC::BC_DT_F_32: std::cout << efd.param[0].cell.as_F_32; break;
 		case MarC::BC_DT_F_64: std::cout << efd.param[0].cell.as_F_64; break;
+		case MarC::BC_DT_ADDR: std::cout << efd.param[0].cell.as_U_64; break;
 		default:
 			throw MarC::InterpreterError(MarC::IntErrCode::InvalidDatatype, "Invalid datatype specified for extFunc '>>std>>printt'!"); break;
 		}
@@ -58,7 +59,7 @@ public:
 	{
 		if (efd.nParams != 1)
 			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected 1 parameter! Got " + std::to_string(efd.nParams) + "!");
-		if (efd.param[0].datatype != MarC::BC_DT_U_64)
+		if (efd.param[0].datatype != MarC::BC_DT_ADDR)
 			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected parameter of type 'addr! Got '" + MarC::BC_DatatypeToString(efd.param[0].datatype) + "'!");
 
 		char* str = &interpreter.hostObject<char>(efd.param[0].cell.as_ADDR);
@@ -87,6 +88,7 @@ public:
 		case MarC::BC_DT_I_64: std::cin >> efd.retVal.cell.as_I_64; break;
 		case MarC::BC_DT_F_32: std::cin >> efd.retVal.cell.as_F_32;  break;
 		case MarC::BC_DT_F_64: std::cin >> efd.retVal.cell.as_F_64;  break;
+		case MarC::BC_DT_ADDR: std::cin >> efd.retVal.cell.as_U_64; break;
 		}
 	}
 };

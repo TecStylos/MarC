@@ -35,12 +35,50 @@ namespace MarC
 		asCode.page = page;
 		asCode.addr = addr;
 	}
-  bool BC_MemAddress::operator<(const BC_MemAddress& other) const
-  {
-    if (base != other.base)
-      return base < other.base;
-    return addr < other.addr;
-  }
+	bool BC_MemAddress::operator<(const BC_MemAddress& other) const
+	{
+		return _raw < other._raw;
+	}
+	bool BC_MemAddress::operator>(const BC_MemAddress& other) const
+	{
+		return _raw > other._raw;
+	}
+	bool BC_MemAddress::operator<=(const BC_MemAddress& other) const
+	{
+		return _raw <= other._raw;
+	}
+	bool BC_MemAddress::operator>=(const BC_MemAddress& other) const
+	{
+		return _raw >= other._raw;
+	}
+	bool BC_MemAddress::operator==(const BC_MemAddress& other) const
+	{
+		return _raw == other._raw;
+	}
+	bool BC_MemAddress::operator!=(const BC_MemAddress& other) const
+	{
+		return _raw != other._raw;
+	}
+	BC_MemAddress& BC_MemAddress::operator+=(const BC_MemAddress& other)
+	{
+		_raw += other._raw;
+		return *this;
+	}
+	BC_MemAddress& BC_MemAddress::operator-=(const BC_MemAddress& other)
+	{
+		_raw -= other._raw;
+		return *this;
+	}
+	BC_MemAddress& BC_MemAddress::operator*=(const BC_MemAddress& other)
+	{
+		_raw *= other._raw;
+		return *this;
+	}
+	BC_MemAddress& BC_MemAddress::operator/=(const BC_MemAddress& other)
+	{
+		_raw /= other._raw;
+		return *this;
+	}
   
 	BC_Datatype BC_FuncCallData::ArgTypes::get(uint8_t nthArg) const
 	{
@@ -175,7 +213,7 @@ namespace MarC
 			{ "u64",  BC_DT_U_64 },
 			{ "f32",  BC_DT_F_32 },
 			{ "f64",  BC_DT_F_64 },
-			{ "addr", BC_DT_U_64 },
+			{ "addr", BC_DT_ADDR },
 		};
 
 		auto it = dtMap.find(dtStr);
@@ -197,7 +235,7 @@ namespace MarC
 			{ BC_DT_U_64,    "u64"   },
 			{ BC_DT_F_32,    "f32"   },
 			{ BC_DT_F_64,    "f64"   },
-			{ BC_DT_U_64,    "addr"  },
+			{ BC_DT_ADDR,    "addr"  },
 		};
 
 		auto it = dtMap.find(dt);
@@ -303,6 +341,7 @@ namespace MarC
 		{
 		case BC_DT_I_8:
 		case BC_DT_U_8:
+		case BC_DT_DATATYPE:
 			return 1;
 		case BC_DT_I_16:
 		case BC_DT_U_16:
@@ -314,6 +353,7 @@ namespace MarC
 		case BC_DT_I_64:
 		case BC_DT_U_64:
 		case BC_DT_F_64:
+		case BC_DT_ADDR:
 			return 8;
 		}
 

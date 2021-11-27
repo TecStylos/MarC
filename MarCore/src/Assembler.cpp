@@ -162,7 +162,7 @@ namespace MarC
 	{
 		removeNecessaryColon();
 
-		assembleArgAddress(ocx, { InsArgType::Address, BC_DT_NONE, 0 });
+		assembleArgValue(ocx, { InsArgType::Address, BC_DT_NONE, 0 });
 
 		std::string retDtStr;
 		std::string retVal;
@@ -203,7 +203,7 @@ namespace MarC
 
 		removeNecessaryColon();
 
-		assembleArgAddress(ocx, { InsArgType::Address, BC_DT_NONE, argIndex++ });
+		assembleArgValue(ocx, { InsArgType::Address, BC_DT_NONE, argIndex++ });
 
 		DelayedPush<BC_FuncCallData> fcd(*this);
 
@@ -235,7 +235,6 @@ namespace MarC
 		switch (arg.type)
 		{
 		case InsArgType::Address:
-			assembleArgAddress(ocx, arg); break;
 		case InsArgType::Value:
 		case InsArgType::TypedValue:
 			assembleArgValue(ocx, arg); break;
@@ -244,11 +243,6 @@ namespace MarC
 		default:
 			ASSEMBLER_THROW_ERROR(AsmErrCode::UnknownInsArgType, "Cannot handle InsArgType '" + std::to_string((uint64_t)arg.type) + "'!");
 		}
-	}
-
-	void Assembler::assembleArgAddress(BC_OpCodeEx& ocx, const InsArgument& arg)
-	{
-		assembleArgValue(ocx, arg);
 	}
 
 	void Assembler::assembleArgValue(BC_OpCodeEx& ocx, const InsArgument& arg)
@@ -261,6 +255,7 @@ namespace MarC
 		case InsArgType::Address: tc.datatype = BC_DT_U_64; break;
 		case InsArgType::TypedValue: tc.datatype = arg.datatype; break;
 		case InsArgType::Value: tc.datatype = ocx.datatype; break;
+		case InsArgType::Datatype: tc.datatype = BC_DT_DATATYPE; break;
 		}
 
 		bool getsDereferenced;
@@ -351,6 +346,14 @@ namespace MarC
 
 	void Assembler::generateTypeCellName(TypeCell& tc)
 	{
+		if (tc.datatype == BC_DT_DATATYPE)
+		{
+			tc.cell.as_Datatype = BC_DatatypeFromString(currToken().value);
+			if (tc.cell.as_Datatype == BC_DT_UNKNOWN)
+				ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
+			return;
+		}
+
 		m_pModInfo->unresolvedSymbolRefs.push_back(
 			{
 				getScopedName(currToken().value),
@@ -362,7 +365,7 @@ namespace MarC
 
 	void Assembler::generateTypeCellString(TypeCell& tc)
 	{
-		if (tc.datatype != BC_DT_U_64)
+		if (tc.datatype != BC_DT_ADDR)
 			ASSEMBLER_THROW_ERROR(AsmErrCode::DatatypeMismatch, "Cannot use string in instruction with datatype '" + BC_DatatypeToString(tc.datatype) + "'!");
 
 		tc.cell.as_ADDR = currStaticStackAddr();
@@ -483,15 +486,15 @@ namespace MarC
 		switch (nextToken().type)
 		{
 		case AsmToken::Type::Op_Register:
-			tc.datatype = BC_DT_U_64;
+			tc.datatype = BC_DT_ADDR;
 			symbol.usage = SymbolUsage::Address;
 			break;
 		case AsmToken::Type::Op_FP_Relative:
-			tc.datatype = BC_DT_U_64;
+			tc.datatype = BC_DT_ADDR;
 			symbol.usage = SymbolUsage::Address;
 			break;
 		case AsmToken::Type::String:
-			tc.datatype = BC_DT_U_64;
+			tc.datatype = BC_DT_ADDR;
 			symbol.usage = SymbolUsage::Address;
 			break;
 		case AsmToken::Type::Float:

@@ -26,8 +26,6 @@ namespace MarC
 			case InsArgType::TypedValue:
 				insStr.append(BC_DatatypeToString(arg.value.datatype) + ".");
 			case InsArgType::Value:
-				//if (daii.ocx.derefArg.get(i))
-				//	insStr.append("@");
 				if (arg.getsDereferenced)
 				{
 					insStr.append("@");

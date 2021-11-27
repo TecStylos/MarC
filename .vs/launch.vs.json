@@ -12,8 +12,8 @@
         "--verbose",
         "--closeonexit",
         "--grantall",
-        "--disasm",
-        "examples/GameOfLife.mce"
+        //"--disasm",
+        "examples/GameOfLife.mca"
       ]
     }
   ]

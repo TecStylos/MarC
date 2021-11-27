@@ -72,7 +72,6 @@ namespace MarC
 		void assembleSpecCallExtern(BC_OpCodeEx& ocx);
 	private:
 		void assembleArgument(BC_OpCodeEx& ocx, const InsArgument& arg);
-		void assembleArgAddress(BC_OpCodeEx& ocx, const InsArgument& arg);
 		void assembleArgValue(BC_OpCodeEx& ocx, const InsArgument& arg);
 		void generateTypeCell(TypeCell& tc, bool& getsDereferenced);
 		void generateTypeCellRegister(TypeCell& tc);

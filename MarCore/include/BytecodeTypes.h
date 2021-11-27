@@ -23,6 +23,7 @@ namespace MarC
 		BC_DT_F_32,
 		BC_DT_F_64,
 		BC_DT_DATATYPE,
+		BC_DT_ADDR,
 	};
 	MARC_SERIALIZER_ENABLE_FIXED(BC_Datatype);
 	enum BC_OpCode : uint8_t
@@ -128,12 +129,22 @@ namespace MarC
 				uint64_t page : 5;
 				uint64_t base : 4;
 			} asCode;
+			uint64_t _raw;
 		};
 	public:
 		BC_MemAddress() = default;
 		BC_MemAddress(BC_MemBase base, uint64_t addr);
 		BC_MemAddress(BC_MemBase base, uint64_t page, uint64_t addr);
 	  bool operator<(const BC_MemAddress& other) const;
+	  bool operator>(const BC_MemAddress& other) const;
+	  bool operator<=(const BC_MemAddress& other) const;
+	  bool operator>=(const BC_MemAddress& other) const;
+	  bool operator==(const BC_MemAddress& other) const;
+	  bool operator!=(const BC_MemAddress& other) const;
+	  BC_MemAddress& operator+=(const BC_MemAddress& other);
+	  BC_MemAddress& operator-=(const BC_MemAddress& other);
+	  BC_MemAddress& operator*=(const BC_MemAddress& other);
+	  BC_MemAddress& operator/=(const BC_MemAddress& other);
 	};
 
 	struct BC_MemCell
