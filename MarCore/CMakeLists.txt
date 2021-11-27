@@ -22,7 +22,7 @@ add_library(
 	"src/AsmTokenizerTypes.cpp"
 	"src/ExtensionLocator.cpp"
 	"src/ExecutableInfo.cpp"
-)
+ "include/DisAsmTypes.h" "src/Disassembler.cpp")
 
 target_include_directories(
 	MarCore PUBLIC

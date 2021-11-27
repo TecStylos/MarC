@@ -42,7 +42,7 @@ namespace MarC
     return addr < other.addr;
   }
   
-	BC_Datatype BC_FuncCallData::ArgTypes::get(uint8_t nthArg)
+	BC_Datatype BC_FuncCallData::ArgTypes::get(uint8_t nthArg) const
 	{
 		uint8_t shift = 4 * nthArg;
 		uint32_t val = data >> shift;

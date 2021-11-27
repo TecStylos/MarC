@@ -12,7 +12,7 @@
         "--verbose",
         "--closeonexit",
         "--grantall",
-        "examples/GameOfLife.mca"
+        "examples/GameOfLife.mce"
       ]
     }
   ]

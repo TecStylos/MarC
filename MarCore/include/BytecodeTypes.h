@@ -22,6 +22,7 @@ namespace MarC
 		BC_DT_U_64,
 		BC_DT_F_32,
 		BC_DT_F_64,
+		BC_DT_DATATYPE,
 	};
 	MARC_SERIALIZER_ENABLE_FIXED(BC_Datatype);
 	enum BC_OpCode : uint8_t
@@ -150,6 +151,7 @@ namespace MarC
 			float as_F_32;
 			double as_F_64;
 			BC_MemAddress as_ADDR;
+			BC_Datatype as_Datatype;
 		};
 	public:
 		BC_MemCell() { as_U_64 = 0; };
@@ -163,7 +165,7 @@ namespace MarC
 		struct ArgTypes
 		{
 			uint32_t data = 0;
-			BC_Datatype get(uint8_t nthArg);
+			BC_Datatype get(uint8_t nthArg) const;
 			void set(uint8_t nthArg, BC_Datatype dt);
 		} argType;
 	};

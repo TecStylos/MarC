@@ -6,3 +6,4 @@
 #include "Linker.h"
 #include "Interpreter.h"
 #include "ModuleLocator.h"
+#include "Disassembler.h"
