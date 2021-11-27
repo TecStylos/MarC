@@ -6,6 +6,8 @@
 #elif defined MARCMD_PLATFORM_UNIX
 #include <unistd.h>
 #include <termios.h>
+#include <stdio.h>
+#include <sys/ioctl.h>
 #endif
 
 namespace MarCmd
