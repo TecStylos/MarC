@@ -4,13 +4,13 @@
 Datatype | C Equivalent (stdint.h)
 ---------|------------
 i8 | int8_t
-i16 | i16_t
-i32 | i32_t
-i64 | i64_t
-u8 | u8_t
-u16 | u16_t
-u32 | u32_t
-u64 | u64_t
+i16 | int16_t
+i32 | int32_t
+i64 | int64_t
+u8 | uint8_t
+u16 | uint16_t
+u32 | uint32_t
+u64 | uint64_t
 f32 | float (32 bit)
 f64 | double (64 bit)
 ***
@@ -70,6 +70,7 @@ exit | None | - | Stop the execution and return the exit code @$ec (dt == i64)
 ***
 
 ## Directives:
+(Arguments with * are optional)
 Name | Datatype | Arguments | Explanation
 -----|----------|-----------|-----------
 label | None | [name] | Store the current code address in [name].

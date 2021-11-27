@@ -15,6 +15,8 @@
    - Build a `*.mcc/*.mca` file and store the binary in a `*.mce` file.
  * --disasm
    - Disassemble a `*.mce` file and store the MarCembly code of each module in a separate `*.mcd` file in either a specified folder or a folder with the name of the input file.
+ * --debug
+   - Debug a `*.mcc/*.mca/*.mce` file.
  * --interpret
    - Interpret a `*.mcc/*.mca/*.mce` file.
 ### I/O
@@ -34,9 +36,8 @@
 ### Debugging
  * --profile
    - Profile the interpreter (func/funx/instruction call counts/timings, execution time, ...)
- * --debug
+ * --dbginfo
    - With `build` switch: Generate debug information for the application.
-   - With `interpret` switch: Run the debugger. (Works only on `*.mce` files built with the `debug` switch)
  * --verbose
    - Show more details when building/running code.
 ### Miscellaneous
