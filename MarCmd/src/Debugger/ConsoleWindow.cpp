@@ -1,6 +1,7 @@
 #include "Debugger/ConsoleWindow.h"
 
 #include <iostream>
+#include <cstring>
 
 #include "Debugger/ConsoleHelper.h"
 
