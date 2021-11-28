@@ -19,6 +19,8 @@ namespace MarCmd
 			Window(Window&&) = default;
 			Window(const Window&) = default;
 		public:
+			const std::string& getName() const;
+		public:
 			virtual void setPos(uint64_t newX, uint64_t newY) = 0;
 			virtual void resize(uint64_t newWidth, uint64_t newHeight) = 0;
 			virtual void render(uint64_t offX, uint64_t offY) const = 0;
@@ -95,6 +97,9 @@ namespace MarCmd
 			void setBottom(WindowRef wndRef);
 			void setRight(WindowRef wndRef);
 		public:
+			template <class WindowClass>
+			WindowClass* getSubWindowByName(const std::string& name);
+		public:
 			static SplitWindowRef create(const std::string& name);
 		private:
 			void update();
@@ -112,5 +117,49 @@ namespace MarCmd
 			WindowRef m_wndTopLeft = nullptr;
 			WindowRef m_wndBottomRight = nullptr;
 		};
+
+		template <class WindowClass>
+		WindowClass* SplitWindow::getSubWindowByName(const std::string& name)
+		{
+			static_assert(std::is_base_of<Window, WindowClass>::value);
+
+			WindowClass* temp = nullptr;
+			SplitWindow* subSplitWnd = nullptr;
+			if (m_wndTopLeft)
+			{
+				if (
+					(temp = dynamic_cast<WindowClass*>(m_wndTopLeft.get())) != nullptr &&
+					m_wndTopLeft->getName() == name
+					)
+				{
+					return temp;
+				}
+				if ((subSplitWnd = dynamic_cast<SplitWindow*>(m_wndTopLeft.get())) != nullptr)
+				{
+					if ((temp = subSplitWnd->getSubWindowByName<WindowClass>(name)) != nullptr)
+						return temp;
+				}
+			}
+
+			if (m_wndBottomRight)
+			{
+				if (
+					(temp = dynamic_cast<WindowClass*>(m_wndBottomRight.get())) != nullptr &&
+					m_wndBottomRight->getName() == name
+					)
+				{
+					return temp;
+				}
+				if ((subSplitWnd = dynamic_cast<SplitWindow*>(m_wndBottomRight.get())) != nullptr)
+				{
+					if ((temp = subSplitWnd->getSubWindowByName<WindowClass>(name)) != nullptr)
+						return temp;
+				}
+			}
+
+			return nullptr;
+		}
+
+		bool subTextWndWrite(SplitWindowRef swr, const std::string& textWndName, const std::string& text, uint64_t x, uint64_t y);
 	}
 }

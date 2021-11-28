@@ -12,6 +12,11 @@ namespace MarCmd
 			: m_name(name)
 		{}
 
+		const std::string& Window::getName() const
+		{
+			return m_name;
+		}
+
 		TextWindow::TextWindow(const std::string& name)
 			: Window(name)
 		{
@@ -228,6 +233,14 @@ namespace MarCmd
 			cSecond = cAbs;
 			vFirst = rAbs;
 			vSecond = vAbs - rAbs;
+		}
+
+		bool subTextWndWrite(SplitWindowRef swr, const std::string& textWndName, const std::string& text, uint64_t x, uint64_t y)
+		{
+			auto wndConTitle = swr->getSubWindowByName<TextWindow>(textWndName);
+			if (wndConTitle)
+				wndConTitle->write(text, x, y);
+			return !!wndConTitle;
 		}
 	}
 }

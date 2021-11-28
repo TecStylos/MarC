@@ -106,6 +106,13 @@ namespace MarCmd
 
 		auto cd = Console::getDimensions();
 		wndFull->resize(cd.width, cd.height);
+
+		if (!Console::subTextWndWrite(wndFull, "Disassembly Title", "This is the disassembly title!", 0, 0))
+			throw std::runtime_error("Unable to find the 'Disassembly Title' window!");
+
+		if (!Console::subTextWndWrite(wndFull, "Console Title", "This is the console title!", 0, 0))
+			throw std::runtime_error("Unable to find the 'Console Title' window!");
+
 		wndFull->render(0, 0);
 
 		return 0;
