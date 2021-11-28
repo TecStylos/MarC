@@ -45,6 +45,7 @@ namespace MarCmd
 			case CurVis::Hide:
 				return oStream << "\033[?25l";
 			}
+			return oStream;
 		}
 		std::ostream& operator<<(std::ostream& oStream, const CursorPos& cp)
 		{
