@@ -78,9 +78,17 @@ namespace MarCmd
 		};
 
 
-		enum class TextFormat
+		typedef enum class TextFormatCode
 		{
-			_FG_BEGIN = 29,
+			F_Default = 0,
+			F_Bright = 1,
+			F_NoBright = 22,
+			F_Underline = 4,
+			F_NoUnderline = 24,
+
+			F_Negative = 7,
+			F_Positive = 27,
+
 			FG_Black = 30,
 			FG_Red = 31,
 			FG_Green = 32,
@@ -90,9 +98,7 @@ namespace MarCmd
 			FG_Cyan = 36,
 			FG_White = 37,
 			FG_Default = 39,
-			_FG_END = 40,
 
-			_BG_BEGIN = 39,
 			BG_Black = 40,
 			BG_Red = 41,
 			BG_Green = 42,
@@ -102,10 +108,47 @@ namespace MarCmd
 			BG_Cyan = 46,
 			BG_White = 47,
 			BG_Default = 49,
-			_BG_END = 50,
+
+			FG_Bright_Black = 90,
+			FG_Bright_Red = 91,
+			FG_Bright_Green = 92,
+			FG_Bright_Yellow = 93,
+			FG_Bright_Blue = 94,
+			FG_Bright_Magenta = 95,
+			FG_Bright_Cyan = 96,
+			FG_Bright_White = 97,
+
+			BG_Bright_Black = 100,
+			BG_Bright_Red = 101,
+			BG_Bright_Green = 102,
+			BG_Bright_Yellow = 103,
+			BG_Bright_Blue = 104,
+			BG_Bright_Magenta = 105,
+			BG_Bright_Cyan = 106,
+			BG_Bright_White = 107,
+		} TFC;
+
+		typedef enum class TextFormatGround
+		{
+			Foreground = 38,
+			Background = 48,
+		} TFG;
+
+		struct TextFormat
+		{
+			std::string subsequence;
+		public:
+			TextFormat() = default;
+			TextFormat(TextFormatCode tfc);
+			TextFormat(uint8_t r, uint8_t g, uint8_t b, TextFormatGround ground);
+		public:
+			static TextFormat ColorFG(uint8_t r, uint8_t g, uint8_t b);
+			static TextFormat ColorBG(uint8_t r, uint8_t g, uint8_t b);
+		private:
+			static TextFormat Color(uint8_t r, uint8_t g, uint8_t b, uint8_t ground);
 		};
 
 		std::ostream& operator<<(std::ostream& oStream, const CursorPos& cp);
-		std::ostream& operator<<(std::ostream& oStream, TextFormat tf);
+		std::ostream& operator<<(std::ostream& oStream, TextFormat tfc);
 	}
 }
