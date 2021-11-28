@@ -113,6 +113,13 @@ namespace MarCmd
 			m_formats.clear();
 		}
 
+		void TextWindow::clearBuffer()
+		{
+			for (auto& line : m_buffer)
+				for (uint64_t i = 0; i < line.size(); ++i)
+					line[i] = ' ';
+		}
+
 		TextWindowRef TextWindow::create(const std::string& name)
 		{
 			return std::shared_ptr<TextWindow>(new TextWindow(name));

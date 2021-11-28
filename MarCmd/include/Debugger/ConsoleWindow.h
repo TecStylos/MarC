@@ -48,6 +48,7 @@ namespace MarCmd
 		public:
 			void addTextFormat(TextFormat tf);
 			void clearTextFormats();
+			void clearBuffer();
 		public:
 			static TextWindowRef create(const std::string& name);
 		protected:
@@ -132,32 +133,34 @@ namespace MarCmd
 			if (m_wndTopLeft)
 			{
 				if (
-					(temp = dynamic_cast<WindowClass*>(m_wndTopLeft.get())) != nullptr &&
-					m_wndTopLeft->getName() == name
+					(
+						(temp = dynamic_cast<WindowClass*>(m_wndTopLeft.get())) != nullptr &&
+						m_wndTopLeft->getName() == name
+						) ||
+					(
+						(subSplitWnd = dynamic_cast<SplitWindow*>(m_wndTopLeft.get())) != nullptr &&
+						(temp = subSplitWnd->getSubWindowByName<WindowClass>(name)) != nullptr
+						)
 					)
 				{
 					return temp;
-				}
-				if ((subSplitWnd = dynamic_cast<SplitWindow*>(m_wndTopLeft.get())) != nullptr)
-				{
-					if ((temp = subSplitWnd->getSubWindowByName<WindowClass>(name)) != nullptr)
-						return temp;
 				}
 			}
 
 			if (m_wndBottomRight)
 			{
 				if (
-					(temp = dynamic_cast<WindowClass*>(m_wndBottomRight.get())) != nullptr &&
-					m_wndBottomRight->getName() == name
+					(
+						(temp = dynamic_cast<WindowClass*>(m_wndBottomRight.get())) != nullptr &&
+						m_wndBottomRight->getName() == name
+						) ||
+					(
+						(subSplitWnd = dynamic_cast<SplitWindow*>(m_wndBottomRight.get())) != nullptr &&
+						(temp = subSplitWnd->getSubWindowByName<WindowClass>(name)) != nullptr
+						)
 					)
 				{
 					return temp;
-				}
-				if ((subSplitWnd = dynamic_cast<SplitWindow*>(m_wndBottomRight.get())) != nullptr)
-				{
-					if ((temp = subSplitWnd->getSubWindowByName<WindowClass>(name)) != nullptr)
-						return temp;
 				}
 			}
 

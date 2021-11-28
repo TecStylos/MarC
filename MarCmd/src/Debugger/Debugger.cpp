@@ -1,6 +1,7 @@
 #include "Debugger/Debugger.h"
 
 #include <iostream>
+#include <thread>
 
 #include "Debugger/ConsoleHelper.h"
 #include "Debugger/ConsoleWindow.h"
@@ -20,7 +21,9 @@ namespace MarCmd
 				wndDisasm->setRatio(Console::WRT::AbsoluteTop, 1);
 				{
 					auto wndDisasmTitle = Console::TextWindow::create("Disassembly Title");
+					wndDisasmTitle->addTextFormat(Console::TextFormat::ColorFG(150, 150, 150));
 					wndDisasmTitle->addTextFormat(Console::TFC::F_Negative);
+					wndDisasmTitle->wrapping(false);
 					wndDisasm->setTop(wndDisasmTitle);
 				}
 				{
@@ -38,7 +41,9 @@ namespace MarCmd
 					wndConsole->setRatio(Console::WRT::AbsoluteTop, 1);
 					{
 						auto wndConsoleTitle = Console::TextWindow::create("Console Title");
+						wndConsoleTitle->addTextFormat(Console::TextFormat::ColorFG(150, 150, 150));
 						wndConsoleTitle->addTextFormat(Console::TFC::F_Negative);
+						wndConsoleTitle->wrapping(false);
 						wndConsole->setTop(wndConsoleTitle);
 					}
 					{
@@ -50,7 +55,9 @@ namespace MarCmd
 				{
 					// Input
 					auto wndInput = Console::TextWindow::create("Input");
+					wndInput->addTextFormat(Console::TextFormat::ColorFG(150, 150, 150));
 					wndInput->addTextFormat(Console::TFC::F_Negative);
+					wndInput->wrapping(false);
 					wndConsoleAndInput->setBottom(wndInput);
 				}
 				wndFullLeft->setBottom(wndConsoleAndInput);
@@ -63,7 +70,9 @@ namespace MarCmd
 			{
 				// Separator
 				auto wndSeparator = Console::TextWindow::create("Separator");
+				wndSeparator->addTextFormat(Console::TextFormat::ColorFG(150, 150, 150));
 				wndSeparator->addTextFormat(Console::TFC::F_Negative);
+				wndSeparator->wrapping(false);
 				wndFullRight->setLeft(wndSeparator);
 			}
 			{
@@ -75,7 +84,9 @@ namespace MarCmd
 					wndMemory->setRatio(Console::WRT::AbsoluteTop, 1);
 					{
 						auto wndMemoryTitle = Console::TextWindow::create("Memory Title");
+						wndMemoryTitle->addTextFormat(Console::TextFormat::ColorFG(150, 150, 150));
 						wndMemoryTitle->addTextFormat(Console::TFC::F_Negative);
+						wndMemoryTitle->wrapping(false);
 						wndMemory->setTop(wndMemoryTitle);
 					}
 					{
@@ -90,7 +101,9 @@ namespace MarCmd
 					wndCallStack->setRatio(Console::WRT::AbsoluteTop, 1);
 					{
 						auto wndCallStackTitle = Console::TextWindow::create("Callstack Title");
+						wndCallStackTitle->addTextFormat(Console::TextFormat::ColorFG(150, 150, 150));
 						wndCallStackTitle->addTextFormat(Console::TFC::F_Negative);
+						wndCallStackTitle->wrapping(false);
 						wndCallStack->setTop(wndCallStackTitle);
 					}
 					{
@@ -104,22 +117,37 @@ namespace MarCmd
 			wndFull->setRight(wndFullRight);
 		}
 
-		auto cd = Console::getDimensions();
+		Console::Dimensions cd = { 0 };
 		wndFull->resize(cd.width, cd.height);
 
-		Console::subTextWndWrite(wndFull, "Disassembly Title", "This is the disassembly title!", 0, 0);
-		Console::subTextWndWrite(wndFull, "Console Title", "This is the console title!", 0, 0);
+		while (true)
+		{
+			auto newCD = Console::getDimensions();
+			if (newCD.width != cd.width || newCD.height != cd.height)
+			{
+				cd = newCD;
+				wndFull->resize(cd.width, cd.height);
 
-		std::string text = "This is a long text that needs wrapping, I hope it works as I expect it to work. If it should not work, I need to edit my implementation.\n"
-			"It also has line breaks.\n"
-			"Like the one before this sentence.\n"
-			"It should work as expected.\n"
-			"Indentation should also be preserved for line breaks.\n"
-			"Here's a tab: '\t' It should occupy two chars in the buffer."
-			;
-		Console::subTextWndWrite(wndFull, "Disassembly View", text, 0, 0);
+				Console::subTextWndWrite(wndFull, "Disassembly Title", "This is the disassembly title!", 0, 0);
+				Console::subTextWndWrite(wndFull, "Console Title", "This is the console title!", 0, 0);
 
-		wndFull->render(0, 0);
+				std::string text = "This is a long text that needs wrapping, I hope it works as I expect it to work. If it should not work, I need to edit my implementation.\n"
+					"It also has line breaks.\n"\
+					"Like the one before this sentence.\n"
+					"It should work as expected.\n"
+					"Indentation should also be preserved for line breaks.\n"
+					"Here's a tab: '\t' It should occupy two chars in the buffer."
+					;
+				auto disasmView = wndFull->getSubWindowByName<Console::TextWindow>("Disassembly View");
+				if (disasmView)
+				{
+					disasmView->clearBuffer();
+					disasmView->write(text, 0, 0);
+				}
+			}
+			wndFull->render(0, 0);
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		}
 
 		return 0;
 	}
