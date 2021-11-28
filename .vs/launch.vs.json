@@ -14,7 +14,7 @@
         "--grantall",
         "--debug",
         "--dbginfo",
-        "examples/GameOfLife.mce"
+        "examples/function_high.mca"
       ]
     }
   ]

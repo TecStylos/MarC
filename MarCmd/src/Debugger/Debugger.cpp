@@ -8,53 +8,77 @@
 
 namespace MarCmd
 {
-	int Debugger::run(const Settings& settings)
+	namespace DbgWndName
 	{
-		auto wndFull = Console::SplitWindow::create("Full");
+		const std::string Full = "Full";
+		const std::string LeftHalf = "Left Half";
+		const std::string DisasmSplit = "Disassembly Split";
+		const std::string DisasmTitle = "Disassembly Title";
+		const std::string DisasmView = "Disassembly View";
+		const std::string ConsoleInputSplit = "Console & Input";
+		const std::string ConsoleSplit = "Console Split";
+		const std::string ConsoleTitle = "Console Title";
+		const std::string ConsoleView = "Console View";
+		const std::string InputView = "Input View";
+		const std::string RightHalfWithSep = "Right Half & Separator";
+		const std::string Separator = "Separator";
+		const std::string RightHalf = "Right Half";
+		const std::string MemorySplit = "Memory Split";
+		const std::string MemoryTitle = "Memory Title";
+		const std::string MemoryView = "Memory View";
+		const std::string CallstackSplit = "Callstack Split";
+		const std::string CallstackTitle = "Callstack Title";
+		const std::string CallstackView = "Callstack View";
+	}
+
+	Console::SplitWindowRef createDebugWindow(uint64_t width, uint64_t height)
+	{
+		auto wndFull = Console::SplitWindow::create(DbgWndName::Full);
+		wndFull->resize(width, height);
 		wndFull->setRatio(Console::WRT::RelativeLeft, 50);
 		{
-			auto wndFullLeft = Console::SplitWindow::create("Full Left");
+			auto wndFullLeft = Console::SplitWindow::create(DbgWndName::LeftHalf);
 			wndFullLeft->setRatio(Console::WRT::RelativeTop, 50);
 			{
 				// Disassembler
-				auto wndDisasm = Console::SplitWindow::create("Disassembly");
+				auto wndDisasm = Console::SplitWindow::create(DbgWndName::DisasmSplit);
 				wndDisasm->setRatio(Console::WRT::AbsoluteTop, 1);
 				{
-					auto wndDisasmTitle = Console::TextWindow::create("Disassembly Title");
+					auto wndDisasmTitle = Console::TextWindow::create(DbgWndName::DisasmTitle);
 					wndDisasmTitle->addTextFormat(Console::TextFormat::ColorFG(150, 150, 150));
 					wndDisasmTitle->addTextFormat(Console::TFC::F_Negative);
 					wndDisasmTitle->wrapping(false);
 					wndDisasm->setTop(wndDisasmTitle);
 				}
 				{
-					auto wndDisasmView = Console::TextWindow::create("Disassembly View");
+					auto wndDisasmView = Console::TextWindow::create(DbgWndName::DisasmView);
 					wndDisasm->setBottom(wndDisasmView);
 				}
 				wndFullLeft->setTop(wndDisasm);
 			}
 			{
-				auto wndConsoleAndInput = Console::SplitWindow::create("Console & Input");
+				auto wndConsoleAndInput = Console::SplitWindow::create(DbgWndName::ConsoleInputSplit);
 				wndConsoleAndInput->setRatio(Console::WRT::AbsoluteBottom, 1);
 				{
 					// Console
-					auto wndConsole = Console::SplitWindow::create("Console");
+					auto wndConsole = Console::SplitWindow::create(DbgWndName::ConsoleSplit);
 					wndConsole->setRatio(Console::WRT::AbsoluteTop, 1);
 					{
-						auto wndConsoleTitle = Console::TextWindow::create("Console Title");
+						auto wndConsoleTitle = Console::TextWindow::create(DbgWndName::ConsoleTitle);
 						wndConsoleTitle->addTextFormat(Console::TextFormat::ColorFG(150, 150, 150));
 						wndConsoleTitle->addTextFormat(Console::TFC::F_Negative);
 						wndConsoleTitle->wrapping(false);
 						wndConsole->setTop(wndConsoleTitle);
 					}
 					{
-						auto wndConsoleView = Console::TextWindow::create("Console View");
+						auto wndConsoleView = Console::TextWindow::create(DbgWndName::ConsoleView);
 						wndConsole->setBottom(wndConsoleView);
 					}
 					wndConsoleAndInput->setTop(wndConsole);
 				}
 				{
 					// Input
-					auto wndInput = Console::TextWindow::create("Input");
+					auto wndInput = Console::TextWindow::create(DbgWndName::InputView);
 					wndInput->addTextFormat(Console::TextFormat::ColorFG(150, 150, 150));
 					wndInput->addTextFormat(Console::TFC::F_Negative);
 					wndInput->wrapping(false);
@@ -65,49 +89,49 @@ namespace MarCmd
 			wndFull->setLeft(wndFullLeft);
 		}
 		{
-			auto wndFullRight = Console::SplitWindow::create("Full Right");
+			auto wndFullRight = Console::SplitWindow::create(DbgWndName::RightHalfWithSep);
 			wndFullRight->setRatio(Console::WRT::AbsoluteLeft, 1);
 			{
 				// Separator
-				auto wndSeparator = Console::TextWindow::create("Separator");
+				auto wndSeparator = Console::TextWindow::create(DbgWndName::Separator);
 				wndSeparator->addTextFormat(Console::TextFormat::ColorFG(150, 150, 150));
 				wndSeparator->addTextFormat(Console::TFC::F_Negative);
 				wndSeparator->wrapping(false);
 				wndFullRight->setLeft(wndSeparator);
 			}
 			{
-				auto wndRight = Console::SplitWindow::create("Right");
+				auto wndRight = Console::SplitWindow::create(DbgWndName::RightHalf);
 				wndRight->setRatio(Console::WRT::RelativeTop, 65);
 				{
 					// Memory
-					auto wndMemory = Console::SplitWindow::create("Memory");
+					auto wndMemory = Console::SplitWindow::create(DbgWndName::MemorySplit);
 					wndMemory->setRatio(Console::WRT::AbsoluteTop, 1);
 					{
-						auto wndMemoryTitle = Console::TextWindow::create("Memory Title");
+						auto wndMemoryTitle = Console::TextWindow::create(DbgWndName::MemoryTitle);
 						wndMemoryTitle->addTextFormat(Console::TextFormat::ColorFG(150, 150, 150));
 						wndMemoryTitle->addTextFormat(Console::TFC::F_Negative);
 						wndMemoryTitle->wrapping(false);
 						wndMemory->setTop(wndMemoryTitle);
 					}
 					{
-						auto wndMemoryView = Console::TextWindow::create("Memory Vie");
+						auto wndMemoryView = Console::TextWindow::create(DbgWndName::MemoryView);
 						wndMemory->setBottom(wndMemoryView);
 					}
 					wndRight->setTop(wndMemory);
 				}
 				{
 					// Callstack
-					auto wndCallStack = Console::SplitWindow::create("Callstack");
+					auto wndCallStack = Console::SplitWindow::create(DbgWndName::CallstackSplit);
 					wndCallStack->setRatio(Console::WRT::AbsoluteTop, 1);
 					{
-						auto wndCallStackTitle = Console::TextWindow::create("Callstack Title");
+						auto wndCallStackTitle = Console::TextWindow::create(DbgWndName::CallstackTitle);
 						wndCallStackTitle->addTextFormat(Console::TextFormat::ColorFG(150, 150, 150));
 						wndCallStackTitle->addTextFormat(Console::TFC::F_Negative);
 						wndCallStackTitle->wrapping(false);
 						wndCallStack->setTop(wndCallStackTitle);
 					}
 					{
-						auto wndCallStackView = Console::TextWindow::create("Callstack View");
+						auto wndCallStackView = Console::TextWindow::create(DbgWndName::CallstackView);
 						wndCallStack->setBottom(wndCallStackView);
 					}
 					wndRight->setBottom(wndCallStack);
@@ -117,9 +141,14 @@ namespace MarCmd
 			wndFull->setRight(wndFullRight);
 		}
 
-		Console::Dimensions cd = { 0 };
-		wndFull->resize(cd.width, cd.height);
+		return wndFull;
+	}
 
+	int Debugger::run(const Settings& settings)
+	{
+		auto cd = Console::getDimensions();
+		auto wndFull = createDebugWindow(cd.width, cd.height);
+		cd = { 0 };
 		while (true)
 		{
 			auto newCD = Console::getDimensions();
@@ -128,8 +157,9 @@ namespace MarCmd
 				cd = newCD;
 				wndFull->resize(cd.width, cd.height);
 
-				Console::subTextWndWrite(wndFull, "Disassembly Title", "This is the disassembly title!", 0, 0);
-				Console::subTextWndWrite(wndFull, "Console Title", "This is the console title!", 0, 0);
+				Console::subTextWndWrite(wndFull, DbgWndName::DisasmTitle, "This is the disassembly title!", 0, 0);
+				Console::subTextWndWrite(wndFull, DbgWndName::ConsoleTitle, "This is the console title!", 0, 0);
+				Console::subTextWndWrite(wndFull, DbgWndName::InputView, " >> ", 0, 0);
 
 				std::string text = "This is a long text that needs wrapping, I hope it works as I expect it to work. If it should not work, I need to edit my implementation.\n"
 					"It also has line breaks.\n"\
@@ -138,7 +168,7 @@ namespace MarCmd
 					"Indentation should also be preserved for line breaks.\n"
 					"Here's a tab: '\t' It should occupy two chars in the buffer."
 					;
-				auto disasmView = wndFull->getSubWindowByName<Console::TextWindow>("Disassembly View");
+				auto disasmView = wndFull->getSubWindowByName<Console::TextWindow>(DbgWndName::DisasmView);
 				if (disasmView)
 				{
 					disasmView->clearBuffer();
