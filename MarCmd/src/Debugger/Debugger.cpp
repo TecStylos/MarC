@@ -107,11 +107,17 @@ namespace MarCmd
 		auto cd = Console::getDimensions();
 		wndFull->resize(cd.width, cd.height);
 
-		if (!Console::subTextWndWrite(wndFull, "Disassembly Title", "This is the disassembly title!", 0, 0))
-			throw std::runtime_error("Unable to find the 'Disassembly Title' window!");
+		Console::subTextWndWrite(wndFull, "Disassembly Title", "This is the disassembly title!", 0, 0);
+		Console::subTextWndWrite(wndFull, "Console Title", "This is the console title!", 0, 0);
 
-		if (!Console::subTextWndWrite(wndFull, "Console Title", "This is the console title!", 0, 0))
-			throw std::runtime_error("Unable to find the 'Console Title' window!");
+		std::string text = "This is a long text that needs wrapping, I hope it works as I expect it to work. If it should not work, I need to edit my implementation.\n"
+			"It also has line breaks.\n"
+			"Like the one before this sentence.\n"
+			"It should work as expected.\n"
+			"Indentation should also be preserved for line breaks.\n"
+			"Here's a tab: '\t' It should occupy two chars in the buffer."
+			;
+		Console::subTextWndWrite(wndFull, "Disassembly View", text, 0, 0);
 
 		wndFull->render(0, 0);
 

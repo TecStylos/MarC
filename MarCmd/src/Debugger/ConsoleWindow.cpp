@@ -41,13 +41,52 @@ namespace MarCmd
 
 		void TextWindow::write(const std::string& text, uint64_t x, uint64_t y)
 		{
-			if (text.find('\n') != std::string::npos)
-				return;
 			if (x >= m_width || y >= m_buffer.size())
 				return;
 
-			uint64_t nToCpy = std::min(text.size(), m_width - x);
-			memcpy((void*)(m_buffer[y].c_str() + x), text.c_str(), nToCpy);
+			uint64_t xBackup = x;
+
+			for (char c : text)
+			{
+				if (isprint(c))
+				{
+					m_buffer[y][x++] = c;
+				}
+				else
+				{
+					switch (c)
+					{
+					case '\n':
+						++y;
+						x = xBackup;
+						break;
+					case '\t':
+						write("  ", x, y);
+						x += 2;
+						break;
+					}
+				}
+
+				if (x >= m_width)
+				{
+					if (!m_wrapping)
+						return;
+					++y;
+					x = xBackup;
+				}
+				if (y >= m_height)
+					return;
+			}
+		}
+
+		bool TextWindow::wrapping() const
+		{
+			return m_wrapping;
+		}
+
+		void TextWindow::wrapping(bool status)
+		{
+			m_wrapping = status;
 		}
 
 		void TextWindow::render(uint64_t offX, uint64_t offY) const

@@ -43,6 +43,8 @@ namespace MarCmd
 			virtual void render(uint64_t offX, uint64_t offY) const override;
 		public:
 			void write(const std::string& text, uint64_t x, uint64_t y);
+			bool wrapping() const;
+			void wrapping(bool status);
 		public:
 			void addTextFormat(TextFormat tf);
 			void clearTextFormats();
@@ -53,6 +55,7 @@ namespace MarCmd
 			uint64_t m_y = 0;
 			uint64_t m_width;
 			uint64_t m_height;
+			bool m_wrapping = true;
 		private:
 			std::vector<std::string> m_buffer;
 			std::vector<TextFormat> m_formats;
