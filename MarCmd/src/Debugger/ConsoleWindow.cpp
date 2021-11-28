@@ -8,15 +8,15 @@ namespace MarCmd
 {
 	namespace Console
 	{
-		void Window::setPos(uint64_t newX, uint64_t newY)
-		{
-			m_x = newX;
-			m_y = newY;
-		}
-
 		TextWindow::TextWindow()
 		{
 			resize(1, 1);
+		}
+
+		void TextWindow::setPos(uint64_t newX, uint64_t newY)
+		{
+			m_x = newX;
+			m_y = newY;
 		}
 
 		void TextWindow::resize(uint64_t newWidth, uint64_t newHeight)
@@ -117,6 +117,12 @@ namespace MarCmd
 			cSecond = cAbs;
 			vFirst = rAbs;
 			vSecond = vAbs - rAbs;
+		}
+
+		void SplitWindow::setPos(uint64_t newX, uint64_t newY)
+		{
+			m_x = newX;
+			m_y = newY;
 		}
 
 		void SplitWindow::resize(uint64_t newWidth, uint64_t newHeight)

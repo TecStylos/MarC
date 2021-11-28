@@ -18,13 +18,10 @@ namespace MarCmd
 			Window(Window&&) = default;
 			Window(const Window&) = default;
 		public:
-			void setPos(uint64_t newX, uint64_t newY);
-		public:
+			virtual void setPos(uint64_t newX, uint64_t newY) = 0;
 			virtual void resize(uint64_t newWidth, uint64_t newHeight) = 0;
 			virtual void render(uint64_t offX, uint64_t offY) const = 0;
-		protected:
-			uint64_t m_x = 0;
-			uint64_t m_y = 0;
+
 		};
 
 		typedef std::shared_ptr<class TextWindow> TextWindowRef;
@@ -35,6 +32,7 @@ namespace MarCmd
 			TextWindow(TextWindow&&) = delete;
 			TextWindow(const TextWindow&) = delete;
 		public:
+			virtual void setPos(uint64_t newX, uint64_t newY) override;
 			virtual void resize(uint64_t newWidth, uint64_t newHeight) override;
 			virtual void render(uint64_t offX, uint64_t offY) const override;
 		public:
@@ -45,6 +43,8 @@ namespace MarCmd
 		public:
 			static TextWindowRef create();
 		protected:
+			uint64_t m_x = 0;
+			uint64_t m_y = 0;
 			uint64_t m_width;
 			uint64_t m_height;
 		private:
@@ -52,7 +52,7 @@ namespace MarCmd
 			std::vector<TextFormat> m_formats;
 		};
 
-		enum class WindowRatioType
+		typedef enum class WindowRatioType
 		{
 			AbsoluteTop,
 			AbsoluteRight,
@@ -62,7 +62,7 @@ namespace MarCmd
 			RelativeRight,
 			RelativeBottom,
 			RelativeLeft
-		};
+		} WRT;
 
 		struct WndAbsDimPos
 		{
@@ -78,6 +78,7 @@ namespace MarCmd
 			SplitWindow(SplitWindow&&) = delete;
 			SplitWindow(const SplitWindow&) = delete;
 		public:
+			virtual void setPos(uint64_t newX, uint64_t newY) override;
 			virtual void resize(uint64_t newWidth, uint64_t newHeight) override;
 			virtual void render(uint64_t offX, uint64_t offY) const override;
 		public:
@@ -94,6 +95,8 @@ namespace MarCmd
 			static WndAbsDimPos calcAbsDimPos(uint64_t width, uint64_t height, WindowRatioType wrt, uint64_t ratio);
 			static void calcAbsDim(uint64_t& cFirst, uint64_t& cSecond, uint64_t& vFirst, uint64_t& vSecond, uint64_t cAbs, uint64_t vAbs, uint64_t rAbs);
 		protected:
+			uint64_t m_x = 0;
+			uint64_t m_y = 0;
 			uint64_t m_width = 0;
 			uint64_t m_height = 0;
 			WindowRatioType m_wrt = WindowRatioType::RelativeLeft;
