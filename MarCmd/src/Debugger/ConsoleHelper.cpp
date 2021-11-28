@@ -32,6 +32,20 @@ namespace MarCmd
 			return TextFormat(r, g, b, TFG::Background);
 		}
 
+		std::ostream& operator<<(std::ostream& oStream, CursorVisibility curVis)
+		{
+			switch (curVis)
+			{
+			case CurVis::EnableBlink:
+				return oStream << "\033[?12h";
+			case CurVis::DisableBlink:
+				return oStream << "\033[?12l";
+			case CurVis::Show:
+				return oStream << "\033[?25h";
+			case CurVis::Hide:
+				return oStream << "\033[?25l";
+			}
+		}
 		std::ostream& operator<<(std::ostream& oStream, const CursorPos& cp)
 		{
 			return oStream << "\033[" << (1 + cp.x) << ";" << (1 + cp.y) << "H";

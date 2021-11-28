@@ -28,6 +28,10 @@ namespace MarCmd
 		{
 			return _getch();
 		}
+		inline bool charWaiting()
+		{
+			return _kbhit() != 0;
+		}
 		inline Dimensions getDimensions()
 		{
 			CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -60,6 +64,21 @@ namespace MarCmd
 				perror("tcsetattr ~ICANON");
 			return buf;
 		}
+		inline bool charWaiting()
+		{
+			struct termios term = { 0 };
+			tcgetattr(0, &term);
+			termios term2 = term;
+			term2.c_lflag &= ~ICANON;
+			tcsetattr(0, TCSANOW, &term2);
+
+			int byteswaiting;
+			ioctl(0, FIONREAD, &byteswaiting);
+
+			tcsetattr(0, TCSANOW, &term);
+
+			return byteswaiting > 0;
+		}
 		inline Dimensions getDimensions()
 		{
 			struct winsize ws;
@@ -70,6 +89,14 @@ namespace MarCmd
 			return cd;
 		}
 		#endif
+
+		typedef enum class CursorVisibility
+		{
+			EnableBlink,
+			DisableBlink,
+			Show,
+			Hide
+		} CurVis;
 
 		struct CursorPos
 		{
@@ -148,6 +175,7 @@ namespace MarCmd
 			static TextFormat Color(uint8_t r, uint8_t g, uint8_t b, uint8_t ground);
 		};
 
+		std::ostream& operator<<(std::ostream& oStream, CursorVisibility curVis);
 		std::ostream& operator<<(std::ostream& oStream, const CursorPos& cp);
 		std::ostream& operator<<(std::ostream& oStream, TextFormat tfc);
 	}

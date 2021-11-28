@@ -149,7 +149,9 @@ namespace MarCmd
 		auto cd = Console::getDimensions();
 		auto wndFull = createDebugWindow(cd.width, cd.height);
 		cd = { 0 };
-		while (true)
+
+		bool stopExecution = false;
+		while (!stopExecution)
 		{
 			auto newCD = Console::getDimensions();
 			if (newCD.width != cd.width || newCD.height != cd.height)
@@ -157,9 +159,11 @@ namespace MarCmd
 				cd = newCD;
 				wndFull->resize(cd.width, cd.height);
 
-				Console::subTextWndWrite(wndFull, DbgWndName::DisasmTitle, "This is the disassembly title!", 0, 0);
-				Console::subTextWndWrite(wndFull, DbgWndName::ConsoleTitle, "This is the console title!", 0, 0);
-				Console::subTextWndWrite(wndFull, DbgWndName::InputView, " >> ", 0, 0);
+				Console::subTextWndWrite(wndFull, DbgWndName::DisasmTitle, "Disassembly:", 1, 0);
+				Console::subTextWndWrite(wndFull, DbgWndName::ConsoleTitle, "Console:", 1, 0);
+				Console::subTextWndWrite(wndFull, DbgWndName::InputView, ">> ", 1, 0);
+				Console::subTextWndWrite(wndFull, DbgWndName::MemoryTitle, "Memory:", 1, 0);
+				Console::subTextWndWrite(wndFull, DbgWndName::CallstackTitle, "Callstack:", 1, 0);
 
 				std::string text = "This is a long text that needs wrapping, I hope it works as I expect it to work. If it should not work, I need to edit my implementation.\n"
 					"It also has line breaks.\n"\
@@ -175,10 +179,22 @@ namespace MarCmd
 					disasmView->write(text, 0, 0);
 				}
 			}
+			std::cout << Console::CurVis::Hide;
 			wndFull->render(0, 0);
+			std::cout << Console::CurVis::Show;
+			if (Console::charWaiting())
+			{
+				switch (Console::getChar())
+				{
+				case 'n':
+					break;
+				case 'e':
+					stopExecution = true;
+					break;
+				}
+			}
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		}
-
 		return 0;
 	}
 }
