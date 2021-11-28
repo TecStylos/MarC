@@ -1,6 +1,7 @@
 #pragma once
 
 #if defined MARCMD_PLATFORM_WINDOWS
+#define NOMINMAX
 #include <Windows.h>
 #include <conio.h>
 #elif defined MARCMD_PLATFORM_UNIX
@@ -10,59 +11,101 @@
 #include <sys/ioctl.h>
 #endif
 
+#include <ostream>
+
 namespace MarCmd
 {
-	struct ConsoleDimensions
+	namespace Console
 	{
-		uint64_t width = 0;
-		uint64_t height = 0;
-	};
+		struct Dimensions
+		{
+			uint64_t width = 0;
+			uint64_t height = 0;
+		};
 
-	#if defined MARCMD_PLATFORM_WINDOWS
-	inline char getChar()
-	{
-		return _getch();
-	}
-	inline ConsoleDimensions getConsoleDimensions()
-	{
-		CONSOLE_SCREEN_BUFFER_INFO csbi;
-		GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-		ConsoleDimensions cd;
-		cd.width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-		cd.height = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+		#if defined MARCMD_PLATFORM_WINDOWS
+		inline char getChar()
+		{
+			return _getch();
+		}
+		inline Dimensions getDimensions()
+		{
+			CONSOLE_SCREEN_BUFFER_INFO csbi;
+			GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+			Dimensions cd;
+			cd.width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+			cd.height = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 
-		return cd;
+			return cd;
+		}
+		#elif defined MARCMD_PLATFORM_UNIX
+		inline char getChar()
+		{
+			char buf = 0;
+			struct termios old = { 0 };
+			fflush(stdout);
+			if (tcgetattr(0, &old) < 0)
+				perror("tcgetattr()");
+			old.c_lflag &= ~ICANON;
+			old.c_lflag &= ~ECHO;
+			old.c_cc[VMIN] = 1;
+			old.c_cc[VTIME] = 0;
+			if (tcsetattr(0, TCSANOW, &old) < 0)
+				perror("tcsetattr ICANON");
+			if (read(0, &buf, 1) < 0)
+				perror("read()");
+			old.c_lflag |= ICANON;
+			old.c_lflag |= ECHO;
+			if (tcsetattr(0, TCSADRAIN, &old) < 0)
+				perror("tcsetattr ~ICANON");
+			return buf;
+		}
+		inline Dimensions getDimensions()
+		{
+			struct winsize ws;
+			ioctl(0, TIOCGWINSZ, &ws);
+			Dimensions cd;
+			cd.width = ws.ws_col;
+			cd.height = ws.ws_row;
+			return cd;
+		}
+		#endif
+
+		struct CursorPos
+		{
+			uint64_t x, y;
+			CursorPos(uint64_t x, uint64_t y) : x(x), y(y) {}
+		};
+
+
+		enum class TextFormat
+		{
+			_FG_BEGIN = 29,
+			FG_Black = 30,
+			FG_Red = 31,
+			FG_Green = 32,
+			FG_Yellow = 33,
+			FG_Blue = 34,
+			FG_Magenta = 35,
+			FG_Cyan = 36,
+			FG_White = 37,
+			FG_Default = 39,
+			_FG_END = 40,
+
+			_BG_BEGIN = 39,
+			BG_Black = 40,
+			BG_Red = 41,
+			BG_Green = 42,
+			BG_Yellow = 43,
+			BG_Blue = 44,
+			BG_Magenta = 45,
+			BG_Cyan = 46,
+			BG_White = 47,
+			BG_Default = 49,
+			_BG_END = 50,
+		};
+
+		std::ostream& operator<<(std::ostream& oStream, const CursorPos& cp);
+		std::ostream& operator<<(std::ostream& oStream, TextFormat tf);
 	}
-	#elif defined MARCMD_PLATFORM_UNIX
-	inline char getChar()
-	{
-		char buf = 0;
-		struct termios old = { 0 };
-		fflush(stdout);
-		if (tcgetattr(0, &old) < 0)
-			perror("tcgetattr()");
-		old.c_lflag &= ~ICANON;
-		old.c_lflag &= ~ECHO;
-		old.c_cc[VMIN] = 1;
-		old.c_cc[VTIME] = 0;
-		if (tcsetattr(0, TCSANOW, &old) < 0)
-			perror("tcsetattr ICANON");
-		if (read(0, &buf, 1) < 0)
-			perror("read()");
-		old.c_lflag |= ICANON;
-		old.c_lflag |= ECHO;
-		if (tcsetattr(0, TCSADRAIN, &old) < 0)
-			perror("tcsetattr ~ICANON");
-		return buf;
-	}
-	inline ConsoleDimensions getConsoleDimensions()
-	{
-		struct winsize ws;
-		ioctl(0, TIOCGWINSZ, &ws);
-		ConsoleDimensions cd;
-		cd.width = ws.ws_col;
-		cd.height = ws.ws_row;
-		return cd;
-	}
-	#endif
 }

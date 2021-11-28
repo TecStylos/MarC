@@ -15,6 +15,8 @@ add_executable(
     "src/MarCmdModuleAdder.cpp"
     "src/MarCmdDisassembler.cpp"
     "src/Debugger/Debugger.cpp"
+    "src/Debugger/ConsoleWindow.cpp"
+    "src/Debugger/ConsoleHelper.cpp"
 )
 
 target_include_directories(
