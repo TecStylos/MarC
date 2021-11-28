@@ -8,7 +8,12 @@ namespace MarCmd
 {
 	namespace Console
 	{
-		TextWindow::TextWindow()
+		Window::Window(const std::string& name)
+			: m_name(name)
+		{}
+
+		TextWindow::TextWindow(const std::string& name)
+			: Window(name)
 		{
 			resize(1, 1);
 		}
@@ -63,9 +68,115 @@ namespace MarCmd
 			m_formats.clear();
 		}
 
-		TextWindowRef TextWindow::create()
+		TextWindowRef TextWindow::create(const std::string& name)
 		{
-			return std::shared_ptr<TextWindow>(new TextWindow);
+			return std::shared_ptr<TextWindow>(new TextWindow(name));
+		}
+
+		SplitWindow::SplitWindow(const std::string& name)
+			: Window(name)
+		{}
+
+		void SplitWindow::setPos(uint64_t newX, uint64_t newY)
+		{
+			m_x = newX;
+			m_y = newY;
+		}
+
+		void SplitWindow::resize(uint64_t newWidth, uint64_t newHeight)
+		{
+			m_width = newWidth;
+			m_height = newHeight;
+			update();
+		}
+
+		void SplitWindow::render(uint64_t offX, uint64_t offY) const
+		{
+			if (m_wndTopLeft)
+				m_wndTopLeft->render(offX + m_x, offY + m_y);
+			if (m_wndBottomRight)
+				m_wndBottomRight->render(offX + m_x, offY + m_y);
+		}
+
+		void SplitWindow::setRatio(WindowRatioType wrt, uint64_t ratio)
+		{
+			m_wrt = wrt;
+			m_ratio = ratio;
+			update();
+		}
+
+		WindowRef SplitWindow::getTop() const
+		{
+			return m_wndTopLeft;
+		}
+
+		WindowRef SplitWindow::getLeft() const
+		{
+			return m_wndTopLeft;
+		}
+
+		WindowRef SplitWindow::getBottom() const
+		{
+			return m_wndBottomRight;
+		}
+
+		WindowRef SplitWindow::getRight() const
+		{
+			return m_wndBottomRight;
+		}
+
+		void SplitWindow::setTop(WindowRef wndRef)
+		{
+			m_wndTopLeft = wndRef;
+			update(wndRef);
+		}
+
+		void SplitWindow::setLeft(WindowRef wndRef)
+		{
+			m_wndTopLeft = wndRef;
+			update(wndRef);
+		}
+
+		void SplitWindow::setBottom(WindowRef wndRef)
+		{
+			m_wndBottomRight = wndRef;
+			update(wndRef);
+		}
+
+		void SplitWindow::setRight(WindowRef wndRef)
+		{
+			m_wndBottomRight = wndRef;
+			update(wndRef);
+		}
+
+		SplitWindowRef SplitWindow::create(const std::string& name)
+		{
+			return std::shared_ptr<SplitWindow>(new SplitWindow(name));
+		}
+
+		void SplitWindow::update()
+		{
+			update(m_wndTopLeft);
+			update(m_wndBottomRight);
+		}
+
+		void SplitWindow::update(WindowRef wndRef)
+		{
+			if (!wndRef)
+				return;
+
+			auto abs = calcAbsDimPos(m_width, m_height, m_wrt, m_ratio);
+
+			if (wndRef == m_wndTopLeft)
+			{
+				m_wndTopLeft->setPos(abs.tlX, abs.tlY);
+				m_wndTopLeft->resize(abs.tlW, abs.tlH);
+			}
+			if (wndRef == m_wndBottomRight)
+			{
+				m_wndBottomRight->setPos(abs.brX, abs.brY);
+				m_wndBottomRight->resize(abs.brW, abs.brH);
+			}
 		}
 
 		WndAbsDimPos SplitWindow::calcAbsDimPos(uint64_t width, uint64_t height, WindowRatioType wrt, uint64_t ratio)
@@ -117,86 +228,6 @@ namespace MarCmd
 			cSecond = cAbs;
 			vFirst = rAbs;
 			vSecond = vAbs - rAbs;
-		}
-
-		void SplitWindow::setPos(uint64_t newX, uint64_t newY)
-		{
-			m_x = newX;
-			m_y = newY;
-		}
-
-		void SplitWindow::resize(uint64_t newWidth, uint64_t newHeight)
-		{
-			m_width = newWidth;
-			m_height = newHeight;
-			update();
-		}
-
-		void SplitWindow::render(uint64_t offX, uint64_t offY) const
-		{
-			if (m_wndTopLeft)
-				m_wndTopLeft->render(m_x, m_y);
-			if (m_wndBottomRight)
-				m_wndBottomRight->render(m_x, m_y);
-		}
-
-		void SplitWindow::setRatio(WindowRatioType wrt, uint64_t ratio)
-		{
-			m_wrt = wrt;
-			m_ratio = ratio;
-			update();
-		}
-
-		WindowRef SplitWindow::getTopLeft() const
-		{
-			return m_wndTopLeft;
-		}
-
-		WindowRef SplitWindow::getBottomRight() const
-		{
-			return m_wndBottomRight;
-		}
-
-		void SplitWindow::setTopLeft(WindowRef wndRef)
-		{
-			m_wndTopLeft = wndRef;
-			update(wndRef);
-		}
-
-		void SplitWindow::setBottomRight(WindowRef wndRef)
-		{
-			m_wndBottomRight = wndRef;
-			update(wndRef);
-		}
-
-		SplitWindowRef SplitWindow::create()
-		{
-			return std::shared_ptr<SplitWindow>(new SplitWindow);
-		}
-
-		void SplitWindow::update()
-		{
-			update(m_wndTopLeft);
-			update(m_wndBottomRight);
-		}
-
-		void SplitWindow::update(WindowRef wndRef)
-		{
-			if (!wndRef)
-				return;
-
-			auto abs = calcAbsDimPos(m_width, m_height, m_wrt, m_ratio);
-
-			if (wndRef == m_wndTopLeft)
-			{
-				m_wndTopLeft->setPos(abs.tlX, abs.tlY);
-				m_wndTopLeft->resize(abs.tlW, abs.tlH);
-			}
-			if (wndRef == m_wndBottomRight)
-			{
-				m_wndBottomRight->setPos(abs.brX, abs.brY);
-				m_wndBottomRight->resize(abs.brW, abs.brH);
-			}
 		}
 	}
 }

@@ -9,99 +9,99 @@ namespace MarCmd
 {
 	int Debugger::run(const Settings& settings)
 	{
-		auto wndFull = Console::SplitWindow::create();
+		auto wndFull = Console::SplitWindow::create("Full");
 		wndFull->setRatio(Console::WRT::RelativeLeft, 50);
 		{
-			auto wndFullLeft = Console::SplitWindow::create();
+			auto wndFullLeft = Console::SplitWindow::create("Full Left");
 			wndFullLeft->setRatio(Console::WRT::RelativeTop, 50);
 			{
 				// Disassembler
-				auto wndDisasm = Console::SplitWindow::create();
+				auto wndDisasm = Console::SplitWindow::create("Disassembly");
 				wndDisasm->setRatio(Console::WRT::AbsoluteTop, 1);
 				{
-					auto wndDisasmTitle = Console::TextWindow::create();
+					auto wndDisasmTitle = Console::TextWindow::create("Disassembly Title");
 					wndDisasmTitle->addTextFormat(Console::TFC::F_Negative);
-					wndDisasm->setTopLeft(wndDisasmTitle);
+					wndDisasm->setTop(wndDisasmTitle);
 				}
 				{
-					auto wndDisasmView = Console::TextWindow::create();
-					wndDisasm->setBottomRight(wndDisasmView);
+					auto wndDisasmView = Console::TextWindow::create("Disassembly View");
+					wndDisasm->setBottom(wndDisasmView);
 				}
-				wndFullLeft->setTopLeft(wndDisasm);
+				wndFullLeft->setTop(wndDisasm);
 			}
 			{
-				auto wndConsoleAndInput = Console::SplitWindow::create();
+				auto wndConsoleAndInput = Console::SplitWindow::create("Console & Input");
 				wndConsoleAndInput->setRatio(Console::WRT::AbsoluteBottom, 1);
 				{
 					// Console
-					auto wndConsole = Console::SplitWindow::create();
+					auto wndConsole = Console::SplitWindow::create("Console");
 					wndConsole->setRatio(Console::WRT::AbsoluteTop, 1);
 					{
-						auto wndConsoleTitle = Console::TextWindow::create();
+						auto wndConsoleTitle = Console::TextWindow::create("Console Title");
 						wndConsoleTitle->addTextFormat(Console::TFC::F_Negative);
-						wndConsole->setTopLeft(wndConsoleTitle);
+						wndConsole->setTop(wndConsoleTitle);
 					}
 					{
-						auto wndConsoleView = Console::TextWindow::create();
-						wndConsole->setBottomRight(wndConsoleView);
+						auto wndConsoleView = Console::TextWindow::create("Console View");
+						wndConsole->setBottom(wndConsoleView);
 					}
-					wndConsoleAndInput->setTopLeft(wndConsole);
+					wndConsoleAndInput->setTop(wndConsole);
 				}
 				{
 					// Input
-					auto wndInput = Console::TextWindow::create();
+					auto wndInput = Console::TextWindow::create("Input");
 					wndInput->addTextFormat(Console::TFC::F_Negative);
-					wndConsoleAndInput->setBottomRight(wndInput);
+					wndConsoleAndInput->setBottom(wndInput);
 				}
-				wndFullLeft->setBottomRight(wndConsoleAndInput);
+				wndFullLeft->setBottom(wndConsoleAndInput);
 			}
-			wndFull->setTopLeft(wndFullLeft);
+			wndFull->setLeft(wndFullLeft);
 		}
 		{
-			auto wndSepAndRight = Console::SplitWindow::create();
-			wndSepAndRight->setRatio(Console::WRT::AbsoluteLeft, 1);
+			auto wndFullRight = Console::SplitWindow::create("Full Right");
+			wndFullRight->setRatio(Console::WRT::AbsoluteLeft, 1);
 			{
 				// Separator
-				auto wndSeparator = Console::TextWindow::create();
+				auto wndSeparator = Console::TextWindow::create("Separator");
 				wndSeparator->addTextFormat(Console::TFC::F_Negative);
-				wndSepAndRight->setTopLeft(wndSeparator);
+				wndFullRight->setLeft(wndSeparator);
 			}
 			{
-				auto wndRight = Console::SplitWindow::create();
-				wndRight->setRatio(Console::WRT::RelativeTop, 50);
+				auto wndRight = Console::SplitWindow::create("Right");
+				wndRight->setRatio(Console::WRT::RelativeTop, 65);
 				{
 					// Memory
-					auto wndMemory = Console::SplitWindow::create();
+					auto wndMemory = Console::SplitWindow::create("Memory");
 					wndMemory->setRatio(Console::WRT::AbsoluteTop, 1);
 					{
-						auto wndMemoryTitle = Console::TextWindow::create();
+						auto wndMemoryTitle = Console::TextWindow::create("Memory Title");
 						wndMemoryTitle->addTextFormat(Console::TFC::F_Negative);
-						wndMemory->setTopLeft(wndMemoryTitle);
+						wndMemory->setTop(wndMemoryTitle);
 					}
 					{
-						auto wndMemoryView = Console::TextWindow::create();
-						wndMemory->setBottomRight(wndMemoryView);
+						auto wndMemoryView = Console::TextWindow::create("Memory Vie");
+						wndMemory->setBottom(wndMemoryView);
 					}
-					wndRight->setTopLeft(wndMemory);
+					wndRight->setTop(wndMemory);
 				}
 				{
 					// Callstack
-					auto wndCallStack = Console::SplitWindow::create();
+					auto wndCallStack = Console::SplitWindow::create("Callstack");
 					wndCallStack->setRatio(Console::WRT::AbsoluteTop, 1);
 					{
-						auto wndCallStackTitle = Console::TextWindow::create();
+						auto wndCallStackTitle = Console::TextWindow::create("Callstack Title");
 						wndCallStackTitle->addTextFormat(Console::TFC::F_Negative);
-						wndCallStack->setTopLeft(wndCallStackTitle);
+						wndCallStack->setTop(wndCallStackTitle);
 					}
 					{
-						auto wndCallStackView = Console::TextWindow::create();
-						wndCallStack->setBottomRight(wndCallStackView);
+						auto wndCallStackView = Console::TextWindow::create("Callstack View");
+						wndCallStack->setBottom(wndCallStackView);
 					}
-					wndRight->setBottomRight(wndCallStack);
+					wndRight->setBottom(wndCallStack);
 				}
-				wndSepAndRight->setBottomRight(wndRight);
+				wndFullRight->setRight(wndRight);
 			}
-			wndFull->setBottomRight(wndSepAndRight);
+			wndFull->setRight(wndFullRight);
 		}
 
 		auto cd = Console::getDimensions();

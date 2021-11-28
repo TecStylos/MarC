@@ -14,13 +14,16 @@ namespace MarCmd
 		class Window
 		{
 		protected:
-			Window() = default;
+			Window() = delete;
+			Window(const std::string& name = "<unnamed>");
 			Window(Window&&) = default;
 			Window(const Window&) = default;
 		public:
 			virtual void setPos(uint64_t newX, uint64_t newY) = 0;
 			virtual void resize(uint64_t newWidth, uint64_t newHeight) = 0;
 			virtual void render(uint64_t offX, uint64_t offY) const = 0;
+		protected:
+			std::string m_name;
 
 		};
 
@@ -28,7 +31,7 @@ namespace MarCmd
 		class TextWindow : public Window
 		{
 		protected:
-			TextWindow();
+			TextWindow(const std::string& name);
 			TextWindow(TextWindow&&) = delete;
 			TextWindow(const TextWindow&) = delete;
 		public:
@@ -41,7 +44,7 @@ namespace MarCmd
 			void addTextFormat(TextFormat tf);
 			void clearTextFormats();
 		public:
-			static TextWindowRef create();
+			static TextWindowRef create(const std::string& name);
 		protected:
 			uint64_t m_x = 0;
 			uint64_t m_y = 0;
@@ -74,7 +77,7 @@ namespace MarCmd
 		class SplitWindow : public Window
 		{
 		protected:
-			SplitWindow() = default;
+			SplitWindow(const std::string& name);
 			SplitWindow(SplitWindow&&) = delete;
 			SplitWindow(const SplitWindow&) = delete;
 		public:
@@ -83,12 +86,16 @@ namespace MarCmd
 			virtual void render(uint64_t offX, uint64_t offY) const override;
 		public:
 			void setRatio(WindowRatioType wrt, uint64_t ratio);
-			WindowRef getTopLeft() const;
-			WindowRef getBottomRight() const;
-			void setTopLeft(WindowRef wndRef);
-			void setBottomRight(WindowRef wndRef);
+			WindowRef getTop() const;
+			WindowRef getLeft() const;
+			WindowRef getBottom() const;
+			WindowRef getRight() const;
+			void setTop(WindowRef wndRef);
+			void setLeft(WindowRef wndRef);
+			void setBottom(WindowRef wndRef);
+			void setRight(WindowRef wndRef);
 		public:
-			static SplitWindowRef create();
+			static SplitWindowRef create(const std::string& name);
 		private:
 			void update();
 			void update(WindowRef wndRef);
