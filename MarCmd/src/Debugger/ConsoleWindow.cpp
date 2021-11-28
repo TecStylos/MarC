@@ -8,13 +8,18 @@ namespace MarCmd
 {
 	namespace Console
 	{
-		Window::Window(uint64_t w, uint64_t h, uint64_t x, uint64_t y)
+		void Window::setPos(uint64_t newX, uint64_t newY)
 		{
-			resize(w, h);
-			setPos(x, y);
+			m_x = newX;
+			m_y = newY;
 		}
 
-		void Window::resize(uint64_t newWidth, uint64_t newHeight)
+		TextWindow::TextWindow()
+		{
+			resize(1, 1);
+		}
+
+		void TextWindow::resize(uint64_t newWidth, uint64_t newHeight)
 		{
 			m_width = newWidth;
 			m_height = newHeight;
@@ -23,13 +28,7 @@ namespace MarCmd
 				m_buffer[i].resize(m_width, ' ');
 		}
 
-		void Window::setPos(uint64_t newX, uint64_t newY)
-		{
-			m_x = newX;
-			m_y = newY;
-		}
-
-		void Window::write(const std::string& text, uint64_t x, uint64_t y)
+		void TextWindow::write(const std::string& text, uint64_t x, uint64_t y)
 		{
 			if (text.find('\n') != std::string::npos)
 				return;
@@ -40,28 +39,158 @@ namespace MarCmd
 			memcpy((void*)(m_buffer[y].c_str() + x), text.c_str(), nToCpy);
 		}
 
-		void Window::render() const
+		void TextWindow::render(uint64_t offX, uint64_t offY) const
 		{
 			for (TextFormat tf : m_formats)
 				std::cout << tf;
 
 			for (uint64_t i = 0; i < m_height; ++i)
 			{
-				std::cout << Console::CursorPos(m_y + i, m_x);
+				std::cout << Console::CursorPos(offY + m_y + i, offX + m_x);
 				std::cout << m_buffer[i];
 			}
 
 			std::cout << TFC::F_Default;
 		}
 
-		void Window::addTextFormat(TextFormat tf)
+		void TextWindow::addTextFormat(TextFormat tf)
 		{
 			m_formats.push_back(tf);
 		}
 
-		void Window::clearTextFormats()
+		void TextWindow::clearTextFormats()
 		{
 			m_formats.clear();
+		}
+
+		TextWindowRef TextWindow::create()
+		{
+			return std::shared_ptr<TextWindow>(new TextWindow);
+		}
+
+		WndAbsDimPos SplitWindow::calcAbsDimPos(uint64_t width, uint64_t height, WindowRatioType wrt, uint64_t ratio)
+		{
+			WndAbsDimPos wadp = { 0 };
+
+			switch (wrt)
+			{
+			case WindowRatioType::AbsoluteTop:
+				ratio = std::min(ratio, height);
+				calcAbsDim(wadp.tlW, wadp.brW, wadp.tlH, wadp.brH, width, height, ratio);
+				wadp.brY = wadp.tlH;
+				break;
+			case WindowRatioType::AbsoluteRight:
+				ratio = std::min(ratio, width);
+				calcAbsDim(wadp.brH, wadp.tlH, wadp.brW, wadp.tlW, height, width, ratio);
+				wadp.brX = wadp.tlW;
+				break;
+			case WindowRatioType::AbsoluteBottom:
+				ratio = std::min(ratio, height);
+				calcAbsDim(wadp.brW, wadp.tlW, wadp.brH, wadp.tlH, width, height, ratio);
+				wadp.brY = wadp.tlH;
+				break;
+			case WindowRatioType::AbsoluteLeft:
+				ratio = std::min(ratio, width);
+				calcAbsDim(wadp.tlH, wadp.brH, wadp.tlW, wadp.brW, height, width, ratio);
+				wadp.brX = wadp.tlW;
+				break;
+			case WindowRatioType::RelativeTop:
+				wadp = calcAbsDimPos(width, height, WindowRatioType::AbsoluteTop, height * ratio / 100);
+				break;
+			case WindowRatioType::RelativeRight:
+				wadp = calcAbsDimPos(width, height, WindowRatioType::AbsoluteRight, width * ratio / 100);
+				break;
+			case WindowRatioType::RelativeBottom:
+				wadp = calcAbsDimPos(width, height, WindowRatioType::AbsoluteBottom, height * ratio / 100);
+				break;
+			case WindowRatioType::RelativeLeft:
+				wadp = calcAbsDimPos(width, height, WindowRatioType::AbsoluteLeft, width * ratio / 100);
+				break;
+			}
+
+			return wadp;
+		}
+
+		void SplitWindow::calcAbsDim(uint64_t& cFirst, uint64_t& cSecond, uint64_t& vFirst, uint64_t& vSecond, uint64_t cAbs, uint64_t vAbs, uint64_t rAbs)
+		{
+			cFirst = cAbs;
+			cSecond = cAbs;
+			vFirst = rAbs;
+			vSecond = vAbs - rAbs;
+		}
+
+		void SplitWindow::resize(uint64_t newWidth, uint64_t newHeight)
+		{
+			m_width = newWidth;
+			m_height = newHeight;
+			update();
+		}
+
+		void SplitWindow::render(uint64_t offX, uint64_t offY) const
+		{
+			if (m_wndTopLeft)
+				m_wndTopLeft->render(m_x, m_y);
+			if (m_wndBottomRight)
+				m_wndBottomRight->render(m_x, m_y);
+		}
+
+		void SplitWindow::setRatio(WindowRatioType wrt, uint64_t ratio)
+		{
+			m_wrt = wrt;
+			m_ratio = ratio;
+			update();
+		}
+
+		WindowRef SplitWindow::getTopLeft() const
+		{
+			return m_wndTopLeft;
+		}
+
+		WindowRef SplitWindow::getBottomRight() const
+		{
+			return m_wndBottomRight;
+		}
+
+		void SplitWindow::setTopLeft(WindowRef wndRef)
+		{
+			m_wndTopLeft = wndRef;
+			update(wndRef);
+		}
+
+		void SplitWindow::setBottomRight(WindowRef wndRef)
+		{
+			m_wndBottomRight = wndRef;
+			update(wndRef);
+		}
+
+		SplitWindowRef SplitWindow::create()
+		{
+			return std::shared_ptr<SplitWindow>(new SplitWindow);
+		}
+
+		void SplitWindow::update()
+		{
+			update(m_wndTopLeft);
+			update(m_wndBottomRight);
+		}
+
+		void SplitWindow::update(WindowRef wndRef)
+		{
+			if (!wndRef)
+				return;
+
+			auto abs = calcAbsDimPos(m_width, m_height, m_wrt, m_ratio);
+
+			if (wndRef == m_wndTopLeft)
+			{
+				m_wndTopLeft->setPos(abs.tlX, abs.tlY);
+				m_wndTopLeft->resize(abs.tlW, abs.tlH);
+			}
+			if (wndRef == m_wndBottomRight)
+			{
+				m_wndBottomRight->setPos(abs.brX, abs.brY);
+				m_wndBottomRight->resize(abs.brW, abs.brH);
+			}
 		}
 	}
 }

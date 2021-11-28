@@ -13,17 +13,22 @@ namespace MarCmd
 		std::cout << "Width:  " << cd.width << std::endl;
 		std::cout << "Height: " << cd.height << std::endl;
 
-		for (int i = 0; i < 20; ++i)
-			std::cout << std::endl;
+		auto wndUpper = Console::TextWindow::create();
+		auto wndLower = Console::TextWindow::create();
 
-		Console::Window wnd(20, 10, 4, 4);
-		wnd.addTextFormat(Console::TFC::F_Negative);
-		wnd.write("#", 0, 0);
-		wnd.write("Hello world this is a long text that does not fit", 0, 1);
-		wnd.write("#", 0, 9);
-		wnd.write("#", 19, 0);
-		wnd.write("#", 19, 9);
-		wnd.render();
+		auto full = Console::SplitWindow::create();
+		full->resize(120, 30);
+		full->setRatio(Console::WindowRatioType::RelativeLeft, 97);
+		full->setTopLeft(wndUpper);
+		full->setBottomRight(wndLower);
+
+		wndUpper->addTextFormat(Console::TFC::F_Underline);
+		wndUpper->addTextFormat(Console::TFC::FG_Blue);
+		wndLower->addTextFormat(Console::TFC::F_Underline);
+		wndLower->addTextFormat(Console::TFC::FG_Red);
+
+		full->render(0, 0);
+
 		return 0;
 	}
 }
