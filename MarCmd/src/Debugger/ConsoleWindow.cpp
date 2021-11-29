@@ -172,6 +172,15 @@ namespace MarCmd
 			insert(text, m_text.empty() ? 0 : m_text.back().size(), m_text.empty() ? 0 : m_text.size() - 1);
 		}
 
+		void TextWindow::replace(const std::string& text, uint64_t x, uint64_t y)
+		{
+			while (m_text.size() < y)
+				m_text.push_back(std::string());
+
+			m_text.erase(m_text.begin() + y);
+			insert(text, x, y);
+		}
+
 		bool TextWindow::wrapping() const
 		{
 			return m_wrapping;

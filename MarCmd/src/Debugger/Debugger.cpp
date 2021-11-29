@@ -151,19 +151,44 @@ namespace MarCmd
 			auto diff = now - lastRefresh;
 			if (100000000 < diff.count() || refreshRequested)
 			{
-				if (exeThreadData.mtxExeCount.try_lock())
+				bool updateIsSafe = false;
+				if (settings.flags.hasFlag(CmdFlags::AggressiveRefresh))
 				{
-					if (exeThreadData.exeCount == 0)
+					exeThreadData.mtxExeCount.lock();
+					updateIsSafe = true;
+				}
+				else
+				{
+					if (exeThreadData.mtxExeCount.try_lock())
+					{
+						if (exeThreadData.exeCount > 0)
+							exeThreadData.mtxExeCount.unlock();
+						else
+							updateIsSafe = true;
+					}
+				}
+				
+				if (updateIsSafe)
+				{
 					{
 						MarC::BC_MemAddress exeAddr = exeThreadData.pInterpreter->getRegister(MarC::BC_MEM_REG_CODE_POINTER).as_ADDR;
+						uint64_t modIndex = exeAddr.asCode.page;
 						uint64_t offset = exeAddr.asCode.addr;
-						int64_t line = MarC::searchBinary(offset, modDisasmInfo[exeAddr.asCode.page].instructionOffsets);
+						int64_t line = MarC::searchBinary(offset, modDisasmInfo[modIndex].instructionOffsets);
 
-						auto wndDisasmViewControl = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmViewControl);
-						auto wndDisasmViewCode = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmViewCode);
-						int64_t mid = wndDisasmViewCode->getHeight() / 2;
-						wndDisasmViewControl->setScroll(-mid);
-						wndDisasmViewCode->setScroll(-mid + line);
+						{
+							auto wndDisasmTitle = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmTitle);
+							auto wndDisasmViewControl = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmViewControl);
+							auto wndDisasmViewCode = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmViewCode);
+							wndDisasmTitle->replace("Disassembly: " + exeInfo->modules[modIndex]->moduleName, 1, 0);
+							int64_t mid = wndDisasmViewCode->getHeight() / 2;
+							wndDisasmViewControl->setScroll(-mid);
+							wndDisasmViewCode->setScroll(-mid + line);
+						}
+
+						{
+							auto wndMemoryView = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_MemoryView);
+						}
 					}
 					exeThreadData.mtxExeCount.unlock();
 				}

@@ -84,6 +84,7 @@ namespace MarCmd
 		public:
 			void insert(const std::string& text, uint64_t x, uint64_t y);
 			void append(const std::string& text);
+			void replace(const std::string& text, uint64_t x, uint64_t y);
 			bool wrapping() const;
 			void wrapping(bool status);
 		public:

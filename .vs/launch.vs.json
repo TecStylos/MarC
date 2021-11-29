@@ -14,6 +14,7 @@
         "--grantall",
         "--debug",
         "--dbginfo",
+        "--aggressiverefresh",
         "examples/fibonacci.mca"
       ]
     }
