@@ -21,6 +21,7 @@ For more info check the [MarCmd Documentation](./docs/MarCmd.md)
  * CMake
  * Make
  * C++17 Compiler
+ * ANSI Escape Code compatible terminal (Required for the [Debugger](./docs/MarCmd.md) and some [examples](./examples/))
 
 ### Downloading the repo
 Download the repo with `git clone --recursive https://github.com/TecStylos/MarC.git`
