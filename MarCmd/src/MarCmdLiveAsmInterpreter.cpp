@@ -90,17 +90,11 @@ namespace MarCmd
 
 					auto manPerms = m_pInterpreter->getUngrantedPerms(m_pInterpreter->getManPerms());
 					if (!manPerms.empty())
-					{
-						std::cout << "  <!> A module requests the following MANDATORY permissions: " << std::endl;
-						permissionGrantPrompt(manPerms, toGrant);
-					}
+						permissionGrantPrompt(PermissionPromptType::Mandatory, manPerms, toGrant);
 
 					auto optPerms = m_pInterpreter->getUngrantedPerms(m_pInterpreter->getOptPerms());
 					if (!optPerms.empty())
-					{
-						std::cout << "  <!> A module requests the following OPTIONAL permissions: " << std::endl;
-						permissionGrantPrompt(optPerms, toGrant);
-					}
+						permissionGrantPrompt(PermissionPromptType::Optional, optPerms, toGrant);
 
 					m_pInterpreter->grantPerms(toGrant);
 				}

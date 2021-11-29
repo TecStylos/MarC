@@ -5,5 +5,10 @@
 
 namespace MarCmd
 {
-	bool permissionGrantPrompt(const std::set<std::string>& toGrant, std::set<std::string>& output);
+	enum class PermissionPromptType
+	{
+		Mandatory,
+		Optional
+	};
+	bool permissionGrantPrompt(PermissionPromptType ppt, const std::set<std::string>& toGrant, std::set<std::string>& output);
 }

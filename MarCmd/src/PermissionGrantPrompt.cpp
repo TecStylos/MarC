@@ -4,8 +4,18 @@
 
 namespace MarCmd
 {
-	bool permissionGrantPrompt(const std::set<std::string>& toGrant, std::set<std::string>& output)
+	bool permissionGrantPrompt(PermissionPromptType ppt, const std::set<std::string>& toGrant, std::set<std::string>& output)
 	{
+		switch (ppt)
+		{
+		case PermissionPromptType::Mandatory:
+			std::cout << "  <!> A module requests the following MANDATORY permissions: " << std::endl;
+			break;
+		case PermissionPromptType::Optional:
+			std::cout << "  <!> A module requests the following OPTIONAL permissions: " << std::endl;
+			break;
+		}
+
 		uint64_t count = 0;
 		std::cout << "    (";
 		for (auto& perm : toGrant)

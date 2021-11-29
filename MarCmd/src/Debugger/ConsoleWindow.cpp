@@ -163,6 +163,17 @@ namespace MarCmd
 			rewrite();
 		}
 
+		uint64_t TextWindow::scrollPos() const
+		{
+			return m_scrollPos;
+		}
+
+		void TextWindow::scroll(int64_t nLines)
+		{
+			m_scrollPos += nLines;
+			rewrite();
+		}
+
 		TextWindowRef TextWindow::create(const std::string& name)
 		{
 			return std::shared_ptr<TextWindow>(new TextWindow(name));
@@ -173,24 +184,32 @@ namespace MarCmd
 			clearBuffer();
 
 			uint64_t lineShift = 0;
-			for (uint64_t line = m_scrollPos; line < m_text.size(); ++line)
+			for (int64_t line = m_scrollPos; line < (int64_t)m_text.size(); ++line)
 			{
-				uint64_t nCharsInLine = m_text[line].size();
-				const char* lineStr = m_text[line].c_str();
-
-				uint64_t nWritten = 0;
-				while (nWritten < nCharsInLine)
+				if (line < 0)
 				{
-					writeToBuff(lineStr, 0, lineShift);
-
-					lineStr += m_width;
-					nWritten += m_width;
-					
-					if (++lineShift >= m_text.size())
+					if (++lineShift >= m_height)
 						break;
+				}
+				else
+				{
+					uint64_t nCharsInLine = m_text[line].size();
+					const char* lineStr = m_text[line].c_str();
 
-					if (!m_wrapping)
-						break;
+					uint64_t nWritten = 0;
+					while (nWritten < nCharsInLine)
+					{
+						writeToBuff(lineStr, 0, lineShift);
+
+						lineStr += m_width;
+						nWritten += m_width;
+
+						if (++lineShift >= m_height)
+							break;
+
+						if (!m_wrapping)
+							break;
+					}
 				}
 			}
 		}

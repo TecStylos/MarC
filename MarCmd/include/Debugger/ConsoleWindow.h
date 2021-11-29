@@ -77,11 +77,14 @@ namespace MarCmd
 			bool wrapping() const;
 			void wrapping(bool status);
 		public:
+			uint64_t scrollPos() const;
+			void scroll(int64_t nLines);
+		public:
 			static TextWindowRef create(const std::string& name);
 		protected:
 			void rewrite();
 		private:
-			uint64_t m_scrollPos = 0;
+			int64_t m_scrollPos = 0;
 			bool m_wrapping = true;
 			std::vector<std::string> m_text;
 		};

@@ -29,9 +29,6 @@ namespace MarC
 		if (!daii.args.empty())
 			insStr.append(" : ");
 
-		if ((daii.ocx.opCode == BC_OC_CALL || daii.ocx.opCode == BC_OC_CALL_EXTERN) && daii.ocx.datatype != BC_DT_NONE)
-			insStr.append("??? : ");
-
 		for (uint64_t i = 0; i < daii.args.size(); ++i)
 		{
 			auto& arg = daii.args[i];
@@ -83,6 +80,9 @@ namespace MarC
 
 			if (i + 1 < daii.args.size())
 				insStr.append(" : ");
+
+			if (i == 0 && (daii.ocx.opCode == BC_OC_CALL || daii.ocx.opCode == BC_OC_CALL_EXTERN) && daii.ocx.datatype != BC_DT_NONE)
+				insStr.append("??? : ");
 		}
 
 		return insStr;
