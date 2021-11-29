@@ -3,6 +3,7 @@
 #include <iostream>
 #include <thread>
 #include <condition_variable>
+#include <atomic>
 
 #include <MarCore.h>
 

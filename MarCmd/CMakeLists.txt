@@ -25,11 +25,10 @@ target_include_directories(
 	"${CMAKE_SOURCE_DIR}/MarCore/include"
 )
 
-target_link_libraries(
-	MarCmd PUBLIC
+set(
+	MARCMD_LINK_LIBRARIES
 	MarCore
 )
-
 set(
     MARCMD_COMPILE_DEFINITIONS
 )
@@ -45,11 +44,22 @@ elseif (UNIX)
         ${MARCMD_COMPILE_DEFINITIONS}
         "MARCMD_PLATFORM_UNIX"
     )
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
+    set(
+	MARCMD_LINK_LIBRARIES
+	${MARCMD_LINK_LIBRARIES}
+	Threads::Threads
+    )
 endif()
 
 target_compile_definitions(
     MarCmd PUBLIC
     ${MARCMD_COMPILE_DEFINITIONS}
+)
+target_link_libraries(
+	MarCmd PUBLIC
+	${MARCMD_LINK_LIBRARIES}
 )
 
 if (MSVC) 
