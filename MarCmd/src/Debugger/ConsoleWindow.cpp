@@ -18,19 +18,19 @@ namespace MarCmd
 			return m_name;
 		}
 
-		TextWindow::TextWindow(const std::string& name)
+		TextBufWindow::TextBufWindow(const std::string& name)
 			: Window(name)
 		{
 			resize(1, 1);
 		}
 
-		void TextWindow::setPos(uint64_t newX, uint64_t newY)
+		void TextBufWindow::setPos(uint64_t newX, uint64_t newY)
 		{
 			m_x = newX;
 			m_y = newY;
 		}
 
-		void TextWindow::resize(uint64_t newWidth, uint64_t newHeight)
+		void TextBufWindow::resize(uint64_t newWidth, uint64_t newHeight)
 		{
 			m_width = newWidth;
 			m_height = newHeight;
@@ -39,57 +39,42 @@ namespace MarCmd
 				m_buffer[i].resize(m_width, ' ');
 		}
 
-		void TextWindow::write(const std::string& text, uint64_t x, uint64_t y)
+		void TextBufWindow::writeToBuff(const char* text, uint64_t x, uint64_t y)
 		{
 			if (x >= m_width || y >= m_buffer.size())
 				return;
 
 			uint64_t xBackup = x;
 
-			for (char c : text)
+			while (isprint(*text))
 			{
-				if (isprint(c))
+				if (isprint(*text))
 				{
-					m_buffer[y][x++] = c;
+					m_buffer[y][x++] = *text;
 				}
 				else
 				{
-					switch (c)
+					switch (*text)
 					{
 					case '\n':
 						++y;
 						x = xBackup;
 						break;
 					case '\t':
-						write("  ", x, y);
+						writeToBuff("  ", x, y);
 						x += 2;
 						break;
 					}
 				}
 
-				if (x >= m_width)
-				{
-					if (!m_wrapping)
-						return;
-					++y;
-					x = xBackup;
-				}
-				if (y >= m_height)
+				if (x >= m_width || y >= m_height)
 					return;
+
+				++text;
 			}
 		}
 
-		bool TextWindow::wrapping() const
-		{
-			return m_wrapping;
-		}
-
-		void TextWindow::wrapping(bool status)
-		{
-			m_wrapping = status;
-		}
-
-		void TextWindow::render(uint64_t offX, uint64_t offY) const
+		void TextBufWindow::render(uint64_t offX, uint64_t offY) const
 		{
 			for (TextFormat tf : m_formats)
 				std::cout << tf;
@@ -103,26 +88,111 @@ namespace MarCmd
 			std::cout << TFC::F_Default;
 		}
 
-		void TextWindow::addTextFormat(TextFormat tf)
+		void TextBufWindow::addTextFormat(TextFormat tf)
 		{
 			m_formats.push_back(tf);
 		}
 
-		void TextWindow::clearTextFormats()
+		void TextBufWindow::clearTextFormats()
 		{
 			m_formats.clear();
 		}
 
-		void TextWindow::clearBuffer()
+		void TextBufWindow::clearBuffer()
 		{
 			for (auto& line : m_buffer)
 				for (uint64_t i = 0; i < line.size(); ++i)
 					line[i] = ' ';
 		}
 
+		TextWindow::TextWindow(const std::string& name)
+			: TextBufWindow(name)
+		{}
+
+		void TextWindow::resize(uint64_t newWidth, uint64_t newHeight)
+		{
+			TextBufWindow::resize(newWidth, newHeight);
+			rewrite();
+		}
+
+		void TextWindow::insert(const std::string& text, uint64_t x, uint64_t y)
+		{
+			while (m_text.size() < y + 1)
+				m_text.push_back(std::string(x, ' '));
+
+			auto it = m_text.begin() + y;
+			uint64_t offset = 0;
+			while (offset < text.size())
+			{
+				if (isprint(text[offset]))
+				{
+					it->push_back(text[offset]);
+				}
+				else
+				{
+					switch (text[offset])
+					{
+					case '\t':
+						it->append("  ");
+						break;
+					case '\n':
+						it = m_text.insert(++it, std::string(x, ' '));
+						break;
+					}
+				}
+
+				++offset;
+			}
+
+			rewrite();
+		}
+
+		void TextWindow::append(const std::string& text)
+		{
+			insert(text, m_text.empty() ? 0 : m_text.back().size(), m_text.empty() ? 0 : m_text.size() - 1);
+		}
+
+		bool TextWindow::wrapping() const
+		{
+			return m_wrapping;
+		}
+
+		void TextWindow::wrapping(bool status)
+		{
+			m_wrapping = status;
+			rewrite();
+		}
+
 		TextWindowRef TextWindow::create(const std::string& name)
 		{
 			return std::shared_ptr<TextWindow>(new TextWindow(name));
+		}
+
+		void TextWindow::rewrite()
+		{
+			clearBuffer();
+
+			uint64_t lineShift = 0;
+			for (uint64_t line = m_scrollPos; line < m_text.size(); ++line)
+			{
+				uint64_t nCharsInLine = m_text[line].size();
+				const char* lineStr = m_text[line].c_str();
+
+				uint64_t nWritten = 0;
+				while (nWritten < nCharsInLine)
+				{
+					writeToBuff(lineStr, 0, lineShift);
+
+					lineStr += m_width;
+					nWritten += m_width;
+					
+					if (++lineShift >= m_text.size())
+						break;
+
+					if (!m_wrapping)
+						break;
+				}
+			}
 		}
 
 		SplitWindow::SplitWindow(const std::string& name)
@@ -282,11 +352,11 @@ namespace MarCmd
 			vSecond = vAbs - rAbs;
 		}
 
-		bool subTextWndWrite(SplitWindowRef swr, const std::string& textWndName, const std::string& text, uint64_t x, uint64_t y)
+		bool subTextWndInsert(SplitWindowRef swr, const std::string& textWndName, const std::string& text, uint64_t x, uint64_t y)
 		{
-			auto wndConTitle = swr->getSubWindowByName<TextWindow>(textWndName);
+			auto wndConTitle = swr->getSubWndByName<TextWindow>(textWndName);
 			if (wndConTitle)
-				wndConTitle->write(text, x, y);
+				wndConTitle->insert(text, x, y);
 			return !!wndConTitle;
 		}
 	}

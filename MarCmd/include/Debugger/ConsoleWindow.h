@@ -1,5 +1,6 @@
 #pragma once
 
+#include <list>
 #include <string>
 #include <vector>
 #include <memory>
@@ -30,36 +31,59 @@ namespace MarCmd
 
 		};
 
-		typedef std::shared_ptr<class TextWindow> TextWindowRef;
-		class TextWindow : public Window
+		typedef std::shared_ptr<class TextBufWindow> TextBufWindowRef;
+		class TextBufWindow : public Window
 		{
 		protected:
-			TextWindow(const std::string& name);
-			TextWindow(TextWindow&&) = delete;
-			TextWindow(const TextWindow&) = delete;
+			TextBufWindow() = delete;
+			TextBufWindow(const std::string& name);
+			TextBufWindow(TextBufWindow&&) = delete;
+			TextBufWindow(const TextBufWindow&) = delete;
 		public:
 			virtual void setPos(uint64_t newX, uint64_t newY) override;
 			virtual void resize(uint64_t newWidth, uint64_t newHeight) override;
 			virtual void render(uint64_t offX, uint64_t offY) const override;
 		public:
-			void write(const std::string& text, uint64_t x, uint64_t y);
-			bool wrapping() const;
-			void wrapping(bool status);
+			void writeToBuff(const char* text, uint64_t x, uint64_t y);
 		public:
 			void addTextFormat(TextFormat tf);
 			void clearTextFormats();
 			void clearBuffer();
 		public:
-			static TextWindowRef create(const std::string& name);
+			static TextBufWindow create(const std::string& name);
 		protected:
 			uint64_t m_x = 0;
 			uint64_t m_y = 0;
 			uint64_t m_width;
 			uint64_t m_height;
-			bool m_wrapping = true;
 		private:
 			std::vector<std::string> m_buffer;
 			std::vector<TextFormat> m_formats;
+		};
+
+		typedef std::shared_ptr<class TextWindow> TextWindowRef;
+		class TextWindow : public TextBufWindow
+		{
+		protected:
+			TextWindow() = delete;
+			TextWindow(const std::string& name);
+			TextWindow(TextWindow&&) = delete;
+			TextWindow(const TextWindow&) = delete;
+		public:
+			virtual void resize(uint64_t newWidth, uint64_t newHeight) override;
+		public:
+			void insert(const std::string& text, uint64_t x, uint64_t y);
+			void append(const std::string& text);
+			bool wrapping() const;
+			void wrapping(bool status);
+		public:
+			static TextWindowRef create(const std::string& name);
+		protected:
+			void rewrite();
+		private:
+			uint64_t m_scrollPos = 0;
+			bool m_wrapping = true;
+			std::vector<std::string> m_text;
 		};
 
 		typedef enum class WindowRatioType
@@ -84,6 +108,7 @@ namespace MarCmd
 		class SplitWindow : public Window
 		{
 		protected:
+			SplitWindow() = delete;
 			SplitWindow(const std::string& name);
 			SplitWindow(SplitWindow&&) = delete;
 			SplitWindow(const SplitWindow&) = delete;
@@ -103,7 +128,7 @@ namespace MarCmd
 			void setRight(WindowRef wndRef);
 		public:
 			template <class WindowClass>
-			WindowClass* getSubWindowByName(const std::string& name);
+			WindowClass* getSubWndByName(const std::string& name);
 		public:
 			static SplitWindowRef create(const std::string& name);
 		private:
@@ -123,8 +148,10 @@ namespace MarCmd
 			WindowRef m_wndBottomRight = nullptr;
 		};
 
+		bool subTextWndInsert(SplitWindowRef swr, const std::string& textWndName, const std::string& text, uint64_t x, uint64_t y);
+
 		template <class WindowClass>
-		WindowClass* SplitWindow::getSubWindowByName(const std::string& name)
+		WindowClass* SplitWindow::getSubWndByName(const std::string& name)
 		{
 			static_assert(std::is_base_of<Window, WindowClass>::value);
 
@@ -139,7 +166,7 @@ namespace MarCmd
 						) ||
 					(
 						(subSplitWnd = dynamic_cast<SplitWindow*>(m_wndTopLeft.get())) != nullptr &&
-						(temp = subSplitWnd->getSubWindowByName<WindowClass>(name)) != nullptr
+						(temp = subSplitWnd->getSubWndByName<WindowClass>(name)) != nullptr
 						)
 					)
 				{
@@ -156,7 +183,7 @@ namespace MarCmd
 						) ||
 					(
 						(subSplitWnd = dynamic_cast<SplitWindow*>(m_wndBottomRight.get())) != nullptr &&
-						(temp = subSplitWnd->getSubWindowByName<WindowClass>(name)) != nullptr
+						(temp = subSplitWnd->getSubWndByName<WindowClass>(name)) != nullptr
 						)
 					)
 				{
@@ -166,7 +193,5 @@ namespace MarCmd
 
 			return nullptr;
 		}
-
-		bool subTextWndWrite(SplitWindowRef swr, const std::string& textWndName, const std::string& text, uint64_t x, uint64_t y);
 	}
 }
