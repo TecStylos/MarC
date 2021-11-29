@@ -27,8 +27,17 @@ namespace MarCmd
 					auto wndDisasmViewSplit = Console::SplitWindow::create(DbgWndName_DisasmViewSplit);
 					wndDisasmViewSplit->setRatio(Console::WRT::AbsoluteLeft, 3);
 					{
-						auto wndDisasmViewControl = Console::TextWindow::create(DbgWndName_DisasmViewControl);
-						wndDisasmViewSplit->setLeft(wndDisasmViewControl);
+						auto wndDisasmViewControlSplit = Console::SplitWindow::create(DbgWndName_DisasmViewControlSplit);
+						wndDisasmViewControlSplit->setRatio(Console::WRT::AbsoluteLeft, 2);
+						{
+							auto wndDisasmViewControlInsPtr = Console::TextWindow::create(DbgWndName_DisasmViewControlInsPtr);
+							wndDisasmViewControlSplit->setLeft(wndDisasmViewControlInsPtr);
+						}
+						{
+							auto wndDisasmViewControlBreakpoints = Console::TextWindow::create(DbgWndName_DisasmViewControlBreakpoints);
+							wndDisasmViewControlSplit->setRight(wndDisasmViewControlBreakpoints);
+						}
+						wndDisasmViewSplit->setLeft(wndDisasmViewControlSplit);
 					}
 					{
 						auto wndDisasmViewCode = Console::TextWindow::create(DbgWndName_DisasmViewCode);

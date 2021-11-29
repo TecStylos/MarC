@@ -31,8 +31,9 @@ namespace MarCmd
 		struct ModuleDisasmInfo
 		{
 			std::vector<uint64_t> instructionOffsets;
-			std::vector<std::string> instructions;
-			std::set<uint64_t> breakpoints;
+			std::vector<std::string> insStr;
+			std::vector<MarC::DisAsmInsInfo> insInfo;
+			std::set<MarC::BC_MemAddress> breakpoints;
 		};
 
 		std::vector<ModuleDisasmInfo> modDisasmInfo(exeInfo->modules.size());
@@ -45,16 +46,17 @@ namespace MarCmd
 			uint64_t nDisassembled = 0;
 			while (nDisassembled < mem->size())
 			{
-				auto daii = MarC::Disassembler::disassemble((char*)mem->getBaseAddress() + nDisassembled);
-				inf.instructions.push_back(MarC::DisAsmInsInfoToString(daii, exeInfo->symbols));
+				inf.insInfo.push_back(MarC::Disassembler::disassemble((char*)mem->getBaseAddress() + nDisassembled));
+				inf.insStr.push_back(MarC::DisAsmInsInfoToString(inf.insInfo.back(), exeInfo->symbols));
 				inf.instructionOffsets.push_back(nDisassembled);
-				nDisassembled += daii.rawData.size();
+				nDisassembled += inf.insInfo.back().rawData.size();
 			}
 		}
 
 		struct ExeThreadData
 		{
 			std::shared_ptr<MarC::Interpreter> pInterpreter = nullptr;
+			std::vector<ModuleDisasmInfo>* pModInfos;
 
 			uint64_t exeCount = 0;
 			std::mutex mtxExeCount;
@@ -65,6 +67,7 @@ namespace MarCmd
 			MarC::BC_Datatype regDatatypes[MarC::BC_MEM_REG_NUM_OF_REGS];
 		} exeThreadData;
 		exeThreadData.pInterpreter = std::make_shared<MarC::Interpreter>(exeInfo);
+		exeThreadData.pModInfos = &modDisasmInfo;
 		exeThreadData.regDatatypes[MarC::BC_MEM_REG_CODE_POINTER] = MarC::BC_DT_ADDR;
 		exeThreadData.regDatatypes[MarC::BC_MEM_REG_STACK_POINTER] = MarC::BC_DT_ADDR;
 		exeThreadData.regDatatypes[MarC::BC_MEM_REG_FRAME_POINTER] = MarC::BC_DT_ADDR;
@@ -77,19 +80,33 @@ namespace MarCmd
 			[](ExeThreadData* pEtd)
 			{
 				auto& etd = *pEtd;
+				auto& regCP = etd.pInterpreter->getRegister(MarC::BC_MEM_REG_CODE_POINTER);
 				while (!etd.pInterpreter->lastError() && !etd.stopExecution)
 				{
 					std::unique_lock lock(etd.mtxExeCount);
 					etd.conExeCount.wait(lock, [&]() { return etd.exeCount != 0 || etd.stopExecution; });
 
+					bool isFirstInstruction = true;
 					while (etd.exeCount > 0 && !etd.pInterpreter->lastError() && !etd.stopExecution)
 					{
+						if (!isFirstInstruction)
+						{
+							auto& breakpoints = (*etd.pModInfos)[regCP.as_ADDR.asCode.page].breakpoints;
+							if (breakpoints.find(regCP.as_ADDR) != breakpoints.end())
+							{
+								etd.exeCount = 0;
+								lock.unlock();
+								break;
+							}
+						}
 						--etd.exeCount;
 						lock.unlock();
 
 						etd.pInterpreter->interpret(1);
 
 						lock.lock();
+
+						isFirstInstruction = false;
 					}
 					etd.exeCount = 0;
 
@@ -108,12 +125,12 @@ namespace MarCmd
 		Console::subTextWndInsert(wndFull, DbgWndName_InputView, ">> ", 1, 0);
 		Console::subTextWndInsert(wndFull, DbgWndName_MemoryTitle, "Memory:", 1, 0);
 		Console::subTextWndInsert(wndFull, DbgWndName_CallstackTitle, "Callstack:", 1, 0);
-		Console::subTextWndInsert(wndFull, DbgWndName_DisasmViewControl, "->", 0, 0);
+		Console::subTextWndInsert(wndFull, DbgWndName_DisasmViewControlInsPtr, "->", 0, 0);
 
 		auto wndDisasm = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmViewCode);
 		if (wndDisasm)
 		{
-			for (auto& line : modDisasmInfo[0].instructions)
+			for (auto& line : modDisasmInfo[0].insStr)
 				wndDisasm->append(line + "\n");
 		}
 
@@ -136,7 +153,15 @@ namespace MarCmd
 					refreshRequested = true;
 					break;
 				}
-				case 's': // [S]top the execution.
+				case 's': // [S]tep
+				{
+					std::lock_guard lock(exeThreadData.mtxExeCount);
+					++exeThreadData.exeCount;
+					exeThreadData.conExeCount.notify_one();
+					refreshRequested = true;
+					break;
+				}
+				case 'b': // [B]reak
 				{
 					std::lock_guard lock(exeThreadData.mtxExeCount);
 					exeThreadData.exeCount = 0;
@@ -144,12 +169,8 @@ namespace MarCmd
 					refreshRequested = true;
 					break;
 				}
-				case 'n': // Execute the [n]ext instruction
+				case 'p': // Set/unset breakpoint
 				{
-					std::lock_guard lock(exeThreadData.mtxExeCount);
-					++exeThreadData.exeCount;
-					exeThreadData.conExeCount.notify_one();
-					refreshRequested = true;
 					break;
 				}
 				case 'e': // [E]xit the debugger
@@ -197,11 +218,13 @@ namespace MarCmd
 
 						{
 							auto wndDisasmTitle = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmTitle);
-							auto wndDisasmViewControl = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmViewControl);
+							auto wndDisasmViewControlInsPtr = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmViewControlInsPtr);
+							auto wndDisasmViewControlBreakpoints = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmViewControlBreakpoints);
 							auto wndDisasmViewCode = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmViewCode);
 							wndDisasmTitle->replace("Disassembly: " + exeInfo->modules[modIndex]->moduleName, 1, 0);
 							int64_t mid = wndDisasmViewCode->getHeight() / 2;
-							wndDisasmViewControl->setScroll(-mid);
+							wndDisasmViewControlInsPtr->setScroll(-mid);
+							wndDisasmViewControlBreakpoints->setScroll(-mid);
 							wndDisasmViewCode->setScroll(-mid + line);
 						}
 
@@ -270,6 +293,6 @@ namespace MarCmd
 		}
 
 		int64_t exitCode = exeThreadData.pInterpreter->getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_64;
-		return exitCode;
+		return (int)exitCode;
 	}
 }
