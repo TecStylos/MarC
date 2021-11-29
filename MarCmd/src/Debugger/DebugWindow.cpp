@@ -32,6 +32,7 @@ namespace MarCmd
 					}
 					{
 						auto wndDisasmViewCode = Console::TextWindow::create(DbgWndName_DisasmViewCode);
+						wndDisasmViewCode->wrapping(false);
 						wndDisasmViewSplit->setRight(wndDisasmViewCode);
 					}
 					wndDisasm->setBottom(wndDisasmViewSplit);

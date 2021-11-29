@@ -27,20 +27,11 @@ namespace MarC
 	template <typename T, class C>
 	uint64_t searchBinary(const T& elem, const C& container)
 	{
-		return binarySearch(elem, &*container.begin(), &*(container.end() - 1));
+		return searchBinary(elem, &*container.begin(), &*(container.end() - 1));
 	}
 
 	template <typename Key, typename Val>
 	const std::pair<const Key, Val>& findGreatestSmaller(const Key& elem, const std::map<Key, Val>& cont)
-	{
-		auto it = cont.lower_bound(elem);
-		if (it != cont.begin())
-			--it;
-		return *it;
-	}
-
-	template <typename Key>
-	const Key& findGreatestSmaller(const Key& elem, const std::set<Key>& cont)
 	{
 		auto it = cont.lower_bound(elem);
 		if (it != cont.begin())

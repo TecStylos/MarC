@@ -61,7 +61,7 @@ namespace MarCmd
 				while (!etd.pInterpreter->lastError() && !etd.stopExecution)
 				{
 					std::unique_lock lock(etd.mtxExeCount);
-					etd.conExeCount.wait(lock, [&]() { return etd.exeCount != 0; });
+					etd.conExeCount.wait(lock, [&]() { return etd.exeCount != 0 || etd.stopExecution; });
 
 					while (etd.exeCount > 0 && !etd.pInterpreter->lastError() && !etd.stopExecution)
 					{
@@ -89,6 +89,7 @@ namespace MarCmd
 		Console::subTextWndInsert(wndFull, DbgWndName_InputView, ">> ", 1, 0);
 		Console::subTextWndInsert(wndFull, DbgWndName_MemoryTitle, "Memory:", 1, 0);
 		Console::subTextWndInsert(wndFull, DbgWndName_CallstackTitle, "Callstack:", 1, 0);
+		Console::subTextWndInsert(wndFull, DbgWndName_DisasmViewControl, "->", 0, 0);
 
 		auto wndDisasm = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmViewCode);
 		if (wndDisasm)
@@ -132,14 +133,6 @@ namespace MarCmd
 					refreshRequested = true;
 					break;
 				}
-				case 'u': // Scroll the disassembly view [u]p
-					wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmViewCode)->scroll(1);
-					refreshRequested = true;
-					break;
-				case 'd': // Scroll the disassembly view [d]own
-					wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmViewCode)->scroll(-1);
-					refreshRequested = true;
-					break;
 				case 'e': // [E]xit the debugger
 					closeDebugger = true;
 					break;
@@ -156,8 +149,25 @@ namespace MarCmd
 
 			auto now = std::chrono::high_resolution_clock::now();
 			auto diff = now - lastRefresh;
-			if (1000000000 < diff.count() || refreshRequested)
+			if (100000000 < diff.count() || refreshRequested)
 			{
+				if (exeThreadData.mtxExeCount.try_lock())
+				{
+					if (exeThreadData.exeCount == 0)
+					{
+						MarC::BC_MemAddress exeAddr = exeThreadData.pInterpreter->getRegister(MarC::BC_MEM_REG_CODE_POINTER).as_ADDR;
+						uint64_t offset = exeAddr.asCode.addr;
+						int64_t line = MarC::searchBinary(offset, modDisasmInfo[exeAddr.asCode.page].instructionOffsets);
+
+						auto wndDisasmViewControl = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmViewControl);
+						auto wndDisasmViewCode = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmViewCode);
+						int64_t mid = wndDisasmViewCode->getHeight() / 2;
+						wndDisasmViewControl->setScroll(-mid);
+						wndDisasmViewCode->setScroll(-mid + line);
+					}
+					exeThreadData.mtxExeCount.unlock();
+				}
+
 				std::cout << Console::CurVis::Hide;
 				wndFull->render(0, 0);
 				std::cout << Console::CurVis::Show;
@@ -169,6 +179,7 @@ namespace MarCmd
 		}
 
 		exeThreadData.stopExecution = true;
+		exeThreadData.conExeCount.notify_all();
 		exeThread.join();
 
 		if (!exeThreadData.pInterpreter->lastError().isOK())

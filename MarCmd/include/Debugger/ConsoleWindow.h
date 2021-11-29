@@ -26,6 +26,11 @@ namespace MarCmd
 			virtual void setPos(uint64_t newX, uint64_t newY) = 0;
 			virtual void resize(uint64_t newWidth, uint64_t newHeight) = 0;
 			virtual void render(uint64_t offX, uint64_t offY) const = 0;
+		public:
+			virtual uint64_t getWidth() const = 0;
+			virtual uint64_t getHeight() const = 0;
+			virtual uint64_t getX() const = 0;
+			virtual uint64_t getY() const = 0;
 		protected:
 			std::string m_name;
 
@@ -43,6 +48,11 @@ namespace MarCmd
 			virtual void setPos(uint64_t newX, uint64_t newY) override;
 			virtual void resize(uint64_t newWidth, uint64_t newHeight) override;
 			virtual void render(uint64_t offX, uint64_t offY) const override;
+		public:
+			virtual uint64_t getWidth() const override;
+			virtual uint64_t getHeight() const override;
+			virtual uint64_t getX() const override;
+			virtual uint64_t getY() const override;
 		public:
 			void writeToBuff(const char* text, uint64_t x, uint64_t y);
 		public:
@@ -77,7 +87,8 @@ namespace MarCmd
 			bool wrapping() const;
 			void wrapping(bool status);
 		public:
-			uint64_t scrollPos() const;
+			int64_t getScroll() const;
+			void setScroll(int64_t line);
 			void scroll(int64_t nLines);
 		public:
 			static TextWindowRef create(const std::string& name);
@@ -119,6 +130,11 @@ namespace MarCmd
 			virtual void setPos(uint64_t newX, uint64_t newY) override;
 			virtual void resize(uint64_t newWidth, uint64_t newHeight) override;
 			virtual void render(uint64_t offX, uint64_t offY) const override;
+		public:
+			virtual uint64_t getWidth() const override;
+			virtual uint64_t getHeight() const override;
+			virtual uint64_t getX() const override;
+			virtual uint64_t getY() const override;
 		public:
 			void setRatio(WindowRatioType wrt, uint64_t ratio);
 			WindowRef getTop() const;

@@ -88,6 +88,26 @@ namespace MarCmd
 			std::cout << TFC::F_Default;
 		}
 
+		uint64_t TextBufWindow::getWidth() const
+		{
+			return m_width;
+		}
+
+		uint64_t TextBufWindow::getHeight() const
+		{
+			return m_height;
+		}
+
+		uint64_t TextBufWindow::getX() const
+		{
+			return m_x;
+		}
+
+		uint64_t TextBufWindow::getY() const
+		{
+			return m_y;
+		}
+
 		void TextBufWindow::addTextFormat(TextFormat tf)
 		{
 			m_formats.push_back(tf);
@@ -163,9 +183,15 @@ namespace MarCmd
 			rewrite();
 		}
 
-		uint64_t TextWindow::scrollPos() const
+		int64_t TextWindow::getScroll() const
 		{
 			return m_scrollPos;
+		}
+
+		void TextWindow::setScroll(int64_t line)
+		{
+			m_scrollPos = line;
+			rewrite();
 		}
 
 		void TextWindow::scroll(int64_t nLines)
@@ -237,6 +263,26 @@ namespace MarCmd
 				m_wndTopLeft->render(offX + m_x, offY + m_y);
 			if (m_wndBottomRight)
 				m_wndBottomRight->render(offX + m_x, offY + m_y);
+		}
+
+		uint64_t SplitWindow::getWidth() const
+		{
+			return m_width;
+		}
+
+		uint64_t SplitWindow::getHeight() const
+		{
+			return m_height;
+		}
+
+		uint64_t SplitWindow::getX() const
+		{
+			return m_x;
+		}
+
+		uint64_t SplitWindow::getY() const
+		{
+			return m_y;
 		}
 
 		void SplitWindow::setRatio(WindowRatioType wrt, uint64_t ratio)
