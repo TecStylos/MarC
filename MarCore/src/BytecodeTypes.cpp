@@ -281,6 +281,26 @@ namespace MarC
 		return it->second;
 	}
 
+	std::string BC_MemCellToString(BC_MemCell mc, BC_Datatype dt)
+	{
+		switch (dt)
+		{
+		case MarC::BC_DT_I_8:  return std::to_string((int)mc.as_I_8);
+		case MarC::BC_DT_I_16: return std::to_string(mc.as_I_16);
+		case MarC::BC_DT_I_32: return std::to_string(mc.as_I_32);
+		case MarC::BC_DT_I_64: return std::to_string(mc.as_I_64);
+		case MarC::BC_DT_U_8:  return std::to_string((unsigned int)mc.as_U_8);
+		case MarC::BC_DT_U_16: return std::to_string(mc.as_U_16);
+		case MarC::BC_DT_U_32: return std::to_string(mc.as_U_32);
+		case MarC::BC_DT_U_64: return std::to_string(mc.as_U_64);
+		case MarC::BC_DT_F_32: return std::to_string(mc.as_F_32);
+		case MarC::BC_DT_F_64: return std::to_string(mc.as_F_64);
+		case MarC::BC_DT_ADDR: return BC_MemAddressToString(mc.as_ADDR);
+		case MarC::BC_DT_DATATYPE: return BC_DatatypeToString(mc.as_Datatype);
+		}
+		return "???";
+	}
+
 	std::string BC_MemAddressToString(BC_MemAddress addr)
 	{
 		std::string str;

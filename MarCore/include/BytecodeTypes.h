@@ -192,6 +192,8 @@ namespace MarC
 	BC_MemRegister BC_RegisterFromString(const std::string& regStr);
 	std::string BC_RegisterToString(BC_MemRegister reg);
 
+	std::string BC_MemCellToString(BC_MemCell mc, BC_Datatype dt);
+
 	std::string BC_MemAddressToString(BC_MemAddress addr);
 
 	uint64_t BC_DatatypeSize(BC_Datatype dt);

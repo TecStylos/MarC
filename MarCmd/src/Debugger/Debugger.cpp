@@ -18,10 +18,21 @@ namespace MarCmd
 		if (!exeInfo)
 			return -1;
 
+		uint64_t maxPrintSymLen = 0;
+		for (auto& sym : exeInfo->symbols)
+		{
+			if (sym.usage == MarC::SymbolUsage::Address &&
+				sym.value.as_ADDR.base != MarC::BC_MEM_BASE_CODE_MEMORY &&
+				sym.value.as_ADDR.base != MarC::BC_MEM_BASE_REGISTER
+				)
+				maxPrintSymLen = std::max(maxPrintSymLen, sym.name.size());
+		}
+
 		struct ModuleDisasmInfo
 		{
 			std::vector<uint64_t> instructionOffsets;
 			std::vector<std::string> instructions;
+			std::set<uint64_t> breakpoints;
 		};
 
 		std::vector<ModuleDisasmInfo> modDisasmInfo(exeInfo->modules.size());
@@ -51,8 +62,16 @@ namespace MarCmd
 
 			std::atomic_bool stopExecution = false;
 			std::atomic_bool threadClosed = false;
+			MarC::BC_Datatype regDatatypes[MarC::BC_MEM_REG_NUM_OF_REGS];
 		} exeThreadData;
 		exeThreadData.pInterpreter = std::make_shared<MarC::Interpreter>(exeInfo);
+		exeThreadData.regDatatypes[MarC::BC_MEM_REG_CODE_POINTER] = MarC::BC_DT_ADDR;
+		exeThreadData.regDatatypes[MarC::BC_MEM_REG_STACK_POINTER] = MarC::BC_DT_ADDR;
+		exeThreadData.regDatatypes[MarC::BC_MEM_REG_FRAME_POINTER] = MarC::BC_DT_ADDR;
+		exeThreadData.regDatatypes[MarC::BC_MEM_REG_LOOP_COUNTER] = MarC::BC_DT_UNKNOWN;
+		exeThreadData.regDatatypes[MarC::BC_MEM_REG_ACCUMULATOR] = MarC::BC_DT_I_64;
+		exeThreadData.regDatatypes[MarC::BC_MEM_REG_TEMPORARY_DATA] = MarC::BC_DT_UNKNOWN;
+		exeThreadData.regDatatypes[MarC::BC_MEM_REG_EXIT_CODE] = MarC::BC_DT_I_64;
 
 		std::thread exeThread(
 			[](ExeThreadData* pEtd)
@@ -188,6 +207,42 @@ namespace MarCmd
 
 						{
 							auto wndMemoryView = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_MemoryView);
+							int line = 0;
+							for (auto reg = MarC::BC_MEM_REG_CODE_POINTER; reg < MarC::BC_MEM_REG_NUM_OF_REGS; reg = (MarC::BC_MemRegister)(reg + 1))
+							{
+								auto mc = exeThreadData.pInterpreter->getRegister(reg);
+								auto dt = exeThreadData.regDatatypes[reg];
+								std::string name = "$" + MarC::BC_RegisterToString(reg);
+								name.resize(maxPrintSymLen + 1, ' ');
+								std::string dtStr = MarC::BC_DatatypeToString(dt);
+								dtStr.resize(10, ' ');
+								std::string valStr = MarC::BC_MemCellToString(mc, dt);
+
+								std::string lineStr = name + dtStr + valStr;
+								wndMemoryView->replace(lineStr, 1, line);
+								++line;
+							}
+
+							for (auto& sym : exeInfo->symbols)
+							{
+								if (sym.usage == MarC::SymbolUsage::Address &&
+									sym.value.as_ADDR.base != MarC::BC_MEM_BASE_CODE_MEMORY &&
+									sym.value.as_ADDR.base != MarC::BC_MEM_BASE_REGISTER
+									)
+								{
+									auto mc = exeThreadData.pInterpreter->hostMemCell(sym.value.as_ADDR, false);
+									auto dt = MarC::BC_DT_I_64; // TODO: Get actual datatype
+									std::string name = sym.name;
+									name.resize(maxPrintSymLen + 1, ' ');
+									std::string dtStr = MarC::BC_DatatypeToString(dt);
+									dtStr.resize(10, ' ');
+									std::string valStr = MarC::BC_MemCellToString(mc, dt);
+
+									std::string lineStr = name + dtStr + valStr;
+									wndMemoryView->replace(lineStr, 1, line);
+									++line;
+								}
+							}
 						}
 					}
 					exeThreadData.mtxExeCount.unlock();

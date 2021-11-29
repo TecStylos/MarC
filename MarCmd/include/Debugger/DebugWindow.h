@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "Debugger/ConsoleHelper.h"
 #include "Debugger/ConsoleWindow.h"
 
 namespace MarCmd

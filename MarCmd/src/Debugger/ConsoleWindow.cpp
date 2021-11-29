@@ -140,10 +140,23 @@ namespace MarCmd
 			while (m_text.size() < y + 1)
 				m_text.push_back(std::string(x, ' '));
 
+			bool isNewIt = true;
+			bool isFirstIt = true;
 			auto it = m_text.begin() + y;
 			uint64_t offset = 0;
+			std::string lineBackup;
 			while (offset < text.size())
 			{
+				if (isNewIt)
+				{
+					isNewIt = false;
+					if (isFirstIt)
+					{
+						if (it->size() < x)
+							it->resize(x, ' ');
+						lineBackup = it->substr(x);
+					}
+				}
 				if (isprint(text[offset]))
 				{
 					it->push_back(text[offset]);
@@ -157,12 +170,16 @@ namespace MarCmd
 						break;
 					case '\n':
 						it = m_text.insert(++it, std::string(x, ' '));
+						isNewIt = true;
 						break;
 					}
 				}
 
 				++offset;
 			}
+
+			if (!lineBackup.empty())
+				it->append(lineBackup);
 
 			rewrite();
 		}
@@ -174,11 +191,16 @@ namespace MarCmd
 
 		void TextWindow::replace(const std::string& text, uint64_t x, uint64_t y)
 		{
-			while (m_text.size() < y)
+			while (m_text.size() < y + 1)
 				m_text.push_back(std::string());
 
-			m_text.erase(m_text.begin() + y);
+			m_text[y].clear();
 			insert(text, x, y);
+		}
+
+		void TextWindow::clearText()
+		{
+			m_text.clear();
 		}
 
 		bool TextWindow::wrapping() const

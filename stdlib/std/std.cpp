@@ -33,19 +33,11 @@ public:
 			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected 1 parameter! Got " + std::to_string(efd.nParams) + "!");
 		switch (efd.param[0].datatype)
 		{
-		case MarC::BC_DT_I_8:  std::cout << efd.param[0].cell.as_I_8;  break;
-		case MarC::BC_DT_I_16: std::cout << efd.param[0].cell.as_I_16; break;
-		case MarC::BC_DT_I_32: std::cout << efd.param[0].cell.as_I_32; break;
-		case MarC::BC_DT_I_64: std::cout << efd.param[0].cell.as_I_64; break;
-		case MarC::BC_DT_U_8:  std::cout << efd.param[0].cell.as_U_8;  break;
-		case MarC::BC_DT_U_16: std::cout << efd.param[0].cell.as_U_16; break;
-		case MarC::BC_DT_U_32: std::cout << efd.param[0].cell.as_U_32; break;
-		case MarC::BC_DT_U_64: std::cout << efd.param[0].cell.as_U_64; break;
-		case MarC::BC_DT_F_32: std::cout << efd.param[0].cell.as_F_32; break;
-		case MarC::BC_DT_F_64: std::cout << efd.param[0].cell.as_F_64; break;
-		case MarC::BC_DT_ADDR: std::cout << efd.param[0].cell.as_U_64; break;
+		case MarC::BC_DT_I_8:
+			std::cout << efd.param[0].cell.as_I_8;
+			break;
 		default:
-			throw MarC::InterpreterError(MarC::IntErrCode::InvalidDatatype, "Invalid datatype specified for extFunc '>>std>>printt'!"); break;
+			std::cout << MarC::BC_MemCellToString(efd.param[0].cell, efd.param[0].datatype);
 		}
 	}
 };
