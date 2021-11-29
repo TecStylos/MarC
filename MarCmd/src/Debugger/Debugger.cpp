@@ -214,6 +214,7 @@ namespace MarCmd
 			return -1;
 		}
 
-		return 0;
+		int64_t exitCode = exeThreadData.pInterpreter->getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_64;
+		return exitCode;
 	}
 }
