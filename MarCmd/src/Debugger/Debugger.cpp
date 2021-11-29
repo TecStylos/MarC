@@ -183,6 +183,10 @@ namespace MarCmd
 				switch (Console::getChar())
 				{
 				case 'n':
+				{
+					auto wnd = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName::DisasmView);
+					wnd->wrapping(!wnd->wrapping());
+				}
 					break;
 				case 'e':
 					stopExecution = true;
