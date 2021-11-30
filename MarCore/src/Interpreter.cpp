@@ -195,6 +195,11 @@ namespace MarC
 		return m_mem.registers[reg];
 	}
 
+	MarC::ExecutableInfoRef Interpreter::getExeInfo() const
+	{
+		return m_pExeInfo;
+	}
+
 	uint64_t Interpreter::nInsExecuted() const
 	{
 		return m_nInsExecuted;
@@ -661,5 +666,10 @@ namespace MarC
 	void Interpreter::resetError()
 	{
 		m_lastErr = InterpreterError();
+	}
+
+	InterpreterRef Interpreter::create(ExecutableInfoRef pExeInfo, uint64_t defDynStackSize)
+	{
+		return std::make_shared<Interpreter>(pExeInfo, defDynStackSize);
 	}
 }

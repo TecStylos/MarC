@@ -48,6 +48,7 @@ namespace MarCmd
 			WindowWeakRef m_wndParent;
 		};
 
+		typedef std::shared_ptr<class BaseWindow> BaseWindowRef;
 		class BaseWindow
 		{
 		public:

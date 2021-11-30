@@ -2,7 +2,7 @@
 
 namespace MarCmd
 {
-	Console::BaseWindow createDebugWindow(uint64_t width, uint64_t height)
+	Console::BaseWindowRef createDebugWindow(uint64_t width, uint64_t height)
 	{
 		auto wndFull = Console::SplitWindow::create(DbgWndName_Full);
 		wndFull->resize(width, height);
@@ -11,46 +11,13 @@ namespace MarCmd
 			auto wndFullLeft = Console::SplitWindow::create(DbgWndName_LeftHalf);
 			wndFullLeft->setRatio(Console::WRT::RelativeTop, 50);
 			{
-				// Disassembler
-				auto wndDisasm = Console::SplitWindow::create(DbgWndName_DisasmSplit);
-				wndDisasm->setRatio(Console::WRT::AbsoluteTop, 1);
-				{
-					auto wndDisasmTitle = Console::TextWindow::create(DbgWndName_DisasmTitle);
-					wndDisasmTitle->addTextFormat(Console::TextFormat::ColorFG(150, 150, 150));
-					wndDisasmTitle->addTextFormat(Console::TFC::F_Negative);
-					wndDisasmTitle->wrapping(false);
-					wndDisasm->setTop(wndDisasmTitle);
-				}
-				{
-					auto wndDisasmViewSplit = Console::SplitWindow::create(DbgWndName_DisasmViewSplit);
-					wndDisasmViewSplit->setRatio(Console::WRT::AbsoluteLeft, 3);
-					{
-						auto wndDisasmViewControlSplit = Console::SplitWindow::create(DbgWndName_DisasmViewControlSplit);
-						wndDisasmViewControlSplit->setRatio(Console::WRT::AbsoluteLeft, 2);
-						{
-							auto wndDisasmViewControlInsPtr = Console::TextWindow::create(DbgWndName_DisasmViewControlInsPtr);
-							wndDisasmViewControlSplit->setLeft(wndDisasmViewControlInsPtr);
-						}
-						{
-							auto wndDisasmViewControlBreakpoints = Console::TextWindow::create(DbgWndName_DisasmViewControlBreakpoints);
-							wndDisasmViewControlSplit->setRight(wndDisasmViewControlBreakpoints);
-						}
-						wndDisasmViewSplit->setLeft(wndDisasmViewControlSplit);
-					}
-					{
-						auto wndDisasmViewCode = Console::TextWindow::create(DbgWndName_DisasmViewCode);
-						wndDisasmViewCode->wrapping(false);
-						wndDisasmViewSplit->setRight(wndDisasmViewCode);
-					}
-					wndDisasm->setBottom(wndDisasmViewSplit);
-				}
-				wndFullLeft->setTop(wndDisasm);
+				// Disassembler (top)
 			}
 			{
 				auto wndConsoleAndInput = Console::SplitWindow::create(DbgWndName_ConsoleInputSplit);
 				wndConsoleAndInput->setRatio(Console::WRT::AbsoluteBottom, 1);
 				{
-					// Console
+					// Console (top)
 					auto wndConsole = Console::SplitWindow::create(DbgWndName_ConsoleSplit);
 					wndConsole->setRatio(Console::WRT::AbsoluteTop, 1);
 					{
@@ -67,7 +34,7 @@ namespace MarCmd
 					wndConsoleAndInput->setTop(wndConsole);
 				}
 				{
-					// Input
+					// Input (bottom)
 					auto wndInput = Console::TextWindow::create(DbgWndName_InputView);
 					wndInput->addTextFormat(Console::TextFormat::ColorFG(150, 150, 150));
 					wndInput->addTextFormat(Console::TFC::F_Negative);
@@ -82,7 +49,7 @@ namespace MarCmd
 			auto wndFullRight = Console::SplitWindow::create(DbgWndName_RightHalfWithSep);
 			wndFullRight->setRatio(Console::WRT::AbsoluteLeft, 1);
 			{
-				// Separator
+				// Separator (left)
 				auto wndSeparator = Console::TextWindow::create(DbgWndName_Separator);
 				wndSeparator->addTextFormat(Console::TextFormat::ColorFG(150, 150, 150));
 				wndSeparator->addTextFormat(Console::TFC::F_Negative);
@@ -93,7 +60,7 @@ namespace MarCmd
 				auto wndRight = Console::SplitWindow::create(DbgWndName_RightHalf);
 				wndRight->setRatio(Console::WRT::RelativeTop, 65);
 				{
-					// Memory
+					// Memory (top)
 					auto wndMemory = Console::SplitWindow::create(DbgWndName_MemorySplit);
 					wndMemory->setRatio(Console::WRT::AbsoluteTop, 1);
 					{
@@ -110,7 +77,7 @@ namespace MarCmd
 					wndRight->setTop(wndMemory);
 				}
 				{
-					// Callstack
+					// Callstack (bottom)
 					auto wndCallStack = Console::SplitWindow::create(DbgWndName_CallstackSplit);
 					wndCallStack->setRatio(Console::WRT::AbsoluteTop, 1);
 					{
@@ -131,6 +98,6 @@ namespace MarCmd
 			wndFull->setRight(wndFullRight);
 		}
 
-		return Console::BaseWindow(wndFull);
+		return std::make_shared<Console::BaseWindow>(wndFull);
 	}
 }

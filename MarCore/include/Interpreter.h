@@ -43,6 +43,7 @@ namespace MarC
 
 	typedef InterpreterError::Code IntErrCode;
 
+	typedef std::shared_ptr<class Interpreter> InterpreterRef;
 	class Interpreter
 	{
 		static constexpr uint64_t RunTillEOC = -1; // Run until the interpreter reaches the end of code.
@@ -69,6 +70,7 @@ namespace MarC
 	public:
 		BC_MemCell& getRegister(BC_MemRegister reg);
 		const BC_MemCell& getRegister(BC_MemRegister reg) const;
+		MarC::ExecutableInfoRef getExeInfo() const;
 	public:
 		uint64_t nInsExecuted() const;
 	private:
@@ -122,6 +124,8 @@ namespace MarC
 	public:
 		const InterpreterError& lastError() const;
 		void resetError();
+	public:
+		static InterpreterRef create(ExecutableInfoRef pExeInfo, uint64_t defDynStackSize = 512);
 	private:
 		ExecutableInfoRef m_pExeInfo;
 		InterpreterMemory m_mem;

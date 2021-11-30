@@ -6,6 +6,7 @@ namespace MarCmd
 {
 	#define DbgWndName_Full "Full"
 	#define DbgWndName_LeftHalf "Left Half"
+	#define DbgWndName_Disasm "Disassembly"
 	#define DbgWndName_DisasmSplit "Disassembly Split"
 	#define DbgWndName_DisasmTitle "Disassembly Title"
 	#define DbgWndName_DisasmViewSplit "Disassembly View Split"
@@ -28,5 +29,5 @@ namespace MarCmd
 	#define DbgWndName_CallstackTitle "Callstack Title"
 	#define DbgWndName_CallstackView "Callstack View"
 
-	Console::BaseWindow createDebugWindow(uint64_t width, uint64_t height);
+	Console::BaseWindowRef createDebugWindow(uint64_t width, uint64_t height);
 }
