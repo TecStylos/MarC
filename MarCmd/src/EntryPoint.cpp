@@ -114,9 +114,9 @@ int main(int argc, const char** argv, const char** env)
 		{
 			settings.flags.setFlag(MarCmd::CmdFlags::DebugInfo);
 		}
-		else if (elem == "--aggressiverefresh")
+		else if (elem == "--forcerefresh")
 		{
-			settings.flags.setFlag(MarCmd::CmdFlags::AggressiveRefresh);
+		  settings.flags.setFlag(MarCmd::CmdFlags::ForceRefresh);
 		}
 		else if (elem == "--profile")
 		{

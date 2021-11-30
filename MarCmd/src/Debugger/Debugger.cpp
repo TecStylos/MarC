@@ -223,7 +223,7 @@ namespace MarCmd
 			if (100000000 < diff.count() || refreshRequested)
 			{
 				bool updateIsSafe = false;
-				if (m_settings.flags.hasFlag(CmdFlags::AggressiveRefresh))
+				if (m_settings.flags.hasFlag(CmdFlags::ForceRefresh))
 				{
 					m_exeThreadData.mtxExeCount.lock();
 					updateIsSafe = true;

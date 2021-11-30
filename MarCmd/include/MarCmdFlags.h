@@ -26,6 +26,6 @@ namespace MarCmd
 		Profile,
 		GrantAll,
 		NoExitInfo,
-		AggressiveRefresh,
+		ForceRefresh,
 	};
 }
