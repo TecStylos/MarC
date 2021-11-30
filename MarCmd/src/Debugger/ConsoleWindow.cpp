@@ -18,6 +18,70 @@ namespace MarCmd
 			return m_name;
 		}
 
+		void Window::setParent(WindowWeakRef wndParent)
+		{
+			m_wndParent = wndParent;
+		}
+
+		void Window::handleKeyPress(char key)
+		{
+			WindowRef wndParent = m_wndParent.lock();
+			if (wndParent)
+				wndParent->handleKeyPress(key);
+		}
+
+		WindowRef Window::getSubWndRef(const std::string& name)
+		{
+			return nullptr;
+		}
+
+		BaseWindow::BaseWindow(WindowRef wndChild)
+			: m_wndChild(wndChild)
+		{}
+
+		bool BaseWindow::setFocus(const std::string& name)
+		{
+			if (!m_wndChild)
+				return false;
+
+			WindowRef temp = m_wndChild->getSubWndRef(name);
+			if (!temp)
+				return false;
+
+			m_wndFocus = temp;
+			return true;
+		}
+
+		WindowRef BaseWindow::getFocus() const
+		{
+			return m_wndFocus.lock();
+		}
+
+		bool BaseWindow::handleKeyPress(char key)
+		{
+			auto focus = getFocus();
+			if (!focus)
+				return false;
+
+			focus->handleKeyPress(key);
+			return true;
+		}
+
+		WindowRef BaseWindow::getChild()
+		{
+			return m_wndChild;
+		}
+
+		WindowRef BaseWindow::operator->()
+		{
+			return m_wndChild;
+		}
+
+		WindowRef BaseWindow::operator*()
+		{
+			return m_wndChild;
+		}
+
 		TextBufWindow::TextBufWindow(const std::string& name)
 			: Window(name)
 		{
@@ -275,6 +339,24 @@ namespace MarCmd
 			: Window(name)
 		{}
 
+		WindowRef SplitWindow::getSubWndRef(const std::string& name)
+		{
+			WindowRef temp = nullptr;
+			if (m_wndTopLeft)
+			{
+				if (m_wndTopLeft->getName() == name)
+					return m_wndTopLeft;
+				temp = m_wndTopLeft->getSubWndRef(name);
+			}
+			if (!temp && m_wndBottomRight)
+			{
+				if (m_wndBottomRight->getName() == name)
+					return m_wndBottomRight;
+				temp = m_wndBottomRight->getSubWndRef(name);
+			}
+			return temp;
+		}
+
 		void SplitWindow::setPos(uint64_t newX, uint64_t newY)
 		{
 			m_x = newX;
@@ -448,12 +530,13 @@ namespace MarCmd
 			vSecond = vAbs - rAbs;
 		}
 
-		bool subTextWndInsert(SplitWindowRef swr, const std::string& textWndName, const std::string& text, uint64_t x, uint64_t y)
+		bool subTextWndInsert(WindowRef wnd, const std::string& textWndName, const std::string& text, uint64_t x, uint64_t y)
 		{
-			auto wndConTitle = swr->getSubWndByName<TextWindow>(textWndName);
-			if (wndConTitle)
-				wndConTitle->insert(text, x, y);
-			return !!wndConTitle;
+			auto wndText = wnd->getSubWnd<TextWindow>(textWndName);
+
+			if (wndText)
+				wndText->insert(text, x, y);
+			return !!wndText;
 		}
 	}
 }

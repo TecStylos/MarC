@@ -28,5 +28,5 @@ namespace MarCmd
 	#define DbgWndName_CallstackTitle "Callstack Title"
 	#define DbgWndName_CallstackView "Callstack View"
 
-	Console::SplitWindowRef createDebugWindow(uint64_t width, uint64_t height);
+	Console::BaseWindow createDebugWindow(uint64_t width, uint64_t height);
 }

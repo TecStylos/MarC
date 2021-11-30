@@ -2,9 +2,7 @@
 
 namespace MarCmd
 {
-	
-
-	Console::SplitWindowRef createDebugWindow(uint64_t width, uint64_t height)
+	Console::BaseWindow createDebugWindow(uint64_t width, uint64_t height)
 	{
 		auto wndFull = Console::SplitWindow::create(DbgWndName_Full);
 		wndFull->resize(width, height);
@@ -133,6 +131,6 @@ namespace MarCmd
 			wndFull->setRight(wndFullRight);
 		}
 
-		return wndFull;
+		return Console::BaseWindow(wndFull);
 	}
 }

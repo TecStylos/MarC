@@ -31,8 +31,12 @@ namespace MarCmd
 		struct ModuleDisasmInfo
 		{
 			std::vector<uint64_t> instructionOffsets;
-			std::vector<std::string> insStr;
-			std::vector<MarC::DisAsmInsInfo> insInfo;
+			struct InsInfo
+			{
+				std::string str;
+				MarC::DisAsmInsInfo data;
+			};
+			std::vector<InsInfo> ins;
 			std::set<MarC::BC_MemAddress> breakpoints;
 		};
 
@@ -46,10 +50,12 @@ namespace MarCmd
 			uint64_t nDisassembled = 0;
 			while (nDisassembled < mem->size())
 			{
-				inf.insInfo.push_back(MarC::Disassembler::disassemble((char*)mem->getBaseAddress() + nDisassembled));
-				inf.insStr.push_back(MarC::DisAsmInsInfoToString(inf.insInfo.back(), exeInfo->symbols));
+				ModuleDisasmInfo::InsInfo insInfo;
+				insInfo.data = MarC::Disassembler::disassemble((char*)mem->getBaseAddress() + nDisassembled);
+				insInfo.str = MarC::DisAsmInsInfoToString(insInfo.data, exeInfo->symbols);
+				inf.ins.push_back(insInfo);
 				inf.instructionOffsets.push_back(nDisassembled);
-				nDisassembled += inf.insInfo.back().rawData.size();
+				nDisassembled += inf.ins.back().data.rawData.size();
 			}
 		}
 
@@ -120,18 +126,18 @@ namespace MarCmd
 		auto consoleDimensions = Console::getDimensions();
 		auto wndFull = createDebugWindow(consoleDimensions.width, consoleDimensions.height);
 
-		Console::subTextWndInsert(wndFull, DbgWndName_DisasmTitle, "Disassembly:", 1, 0);
-		Console::subTextWndInsert(wndFull, DbgWndName_ConsoleTitle, "Console:", 1, 0);
-		Console::subTextWndInsert(wndFull, DbgWndName_InputView, ">> ", 1, 0);
-		Console::subTextWndInsert(wndFull, DbgWndName_MemoryTitle, "Memory:", 1, 0);
-		Console::subTextWndInsert(wndFull, DbgWndName_CallstackTitle, "Callstack:", 1, 0);
-		Console::subTextWndInsert(wndFull, DbgWndName_DisasmViewControlInsPtr, "->", 0, 0);
+		Console::subTextWndInsert(*wndFull, DbgWndName_DisasmTitle, "Disassembly:", 1, 0);
+		Console::subTextWndInsert(*wndFull, DbgWndName_ConsoleTitle, "Console:", 1, 0);
+		Console::subTextWndInsert(*wndFull, DbgWndName_InputView, ">> ", 1, 0);
+		Console::subTextWndInsert(*wndFull, DbgWndName_MemoryTitle, "Memory:", 1, 0);
+		Console::subTextWndInsert(*wndFull, DbgWndName_CallstackTitle, "Callstack:", 1, 0);
+		Console::subTextWndInsert(*wndFull, DbgWndName_DisasmViewControlInsPtr, "->", 0, 0);
 
-		auto wndDisasm = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmViewCode);
+		auto wndDisasm = wndFull->getSubWnd<Console::TextWindow>(DbgWndName_DisasmViewCode);
 		if (wndDisasm)
 		{
-			for (auto& line : modDisasmInfo[0].insStr)
-				wndDisasm->append(line + "\n");
+			for (auto& ins : modDisasmInfo[0].ins)
+				wndDisasm->append(ins.str + "\n");
 		}
 
 		bool closeDebugger = false;
@@ -217,10 +223,10 @@ namespace MarCmd
 						int64_t line = MarC::searchBinary(offset, modDisasmInfo[modIndex].instructionOffsets);
 
 						{
-							auto wndDisasmTitle = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmTitle);
-							auto wndDisasmViewControlInsPtr = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmViewControlInsPtr);
-							auto wndDisasmViewControlBreakpoints = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmViewControlBreakpoints);
-							auto wndDisasmViewCode = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_DisasmViewCode);
+							auto wndDisasmTitle = wndFull->getSubWnd<Console::TextWindow>(DbgWndName_DisasmTitle);
+							auto wndDisasmViewControlInsPtr = wndFull->getSubWnd<Console::TextWindow>(DbgWndName_DisasmViewControlInsPtr);
+							auto wndDisasmViewControlBreakpoints = wndFull->getSubWnd<Console::TextWindow>(DbgWndName_DisasmViewControlBreakpoints);
+							auto wndDisasmViewCode = wndFull->getSubWnd<Console::TextWindow>(DbgWndName_DisasmViewCode);
 							wndDisasmTitle->replace("Disassembly: " + exeInfo->modules[modIndex]->moduleName, 1, 0);
 							int64_t mid = wndDisasmViewCode->getHeight() / 2;
 							wndDisasmViewControlInsPtr->setScroll(-mid);
@@ -229,7 +235,7 @@ namespace MarCmd
 						}
 
 						{
-							auto wndMemoryView = wndFull->getSubWndByName<Console::TextWindow>(DbgWndName_MemoryView);
+							auto wndMemoryView = wndFull->getSubWnd<Console::TextWindow>(DbgWndName_MemoryView);
 							int line = 0;
 							for (auto reg = MarC::BC_MEM_REG_CODE_POINTER; reg < MarC::BC_MEM_REG_NUM_OF_REGS; reg = (MarC::BC_MemRegister)(reg + 1))
 							{
