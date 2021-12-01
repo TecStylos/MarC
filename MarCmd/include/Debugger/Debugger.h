@@ -2,6 +2,7 @@
 
 #include <condition_variable>
 #include <atomic>
+#include <mutex>
 
 #include <MarCore.h>
 
@@ -10,6 +11,22 @@
 
 namespace MarCmd
 {
+	struct SharedDebugData
+	{
+		MarC::ExecutableInfoRef exeInfo;
+		MarC::InterpreterRef interpreter;
+		bool refreshRequested = false;
+
+		uint64_t exeCount = 0;
+		std::mutex mtxExeCount;
+		std::condition_variable conExeCount;
+
+		std::atomic_bool stopExecution = false;
+		std::atomic_bool threadClosed = false;
+		MarC::BC_Datatype regDatatypes[MarC::BC_MEM_REG_NUM_OF_REGS];
+	};
+	typedef std::shared_ptr<SharedDebugData> SharedDebugDataRef;
+
 	class Debugger;
 
 	typedef std::shared_ptr<class DisasmWindow> DisasmWindowRef;
@@ -17,7 +34,7 @@ namespace MarCmd
 	{
 	protected:
 		DisasmWindow() = delete;
-		DisasmWindow(const std::string& name, MarC::InterpreterRef interpreter, uint64_t modIndex);
+		DisasmWindow(const std::string& name, SharedDebugDataRef sdd, uint64_t modIndex);
 		DisasmWindow(DisasmWindow&&) = delete;
 		DisasmWindow(const DisasmWindow&) = delete;
 	public:
@@ -27,8 +44,9 @@ namespace MarCmd
 		uint64_t getModIndex() const;
 		void refresh();
 		bool hasBreakpoint(MarC::BC_MemAddress breakpoint);
+		bool toggleBreakpoint(MarC::BC_MemAddress brekpoint);
 	public:
-		static DisasmWindowRef create(const std::string& name, MarC::InterpreterRef interpreter, uint64_t modIndex);
+		static DisasmWindowRef create(const std::string& name, SharedDebugDataRef sdd, uint64_t modIndex);
 	private:
 		struct ModDisasmInfo
 		{
@@ -39,9 +57,10 @@ namespace MarCmd
 				MarC::DisAsmInsInfo data;
 			};
 			std::vector<InsInfo> ins;
+			std::mutex mtxBreakpoints;
 			std::set<MarC::BC_MemAddress> breakpoints;
 		};
-		MarC::InterpreterRef m_interpreter;
+		SharedDebugDataRef m_sdd;
 		uint64_t m_modIndex;
 		ModDisasmInfo m_modDisasmInfo;
 	};
@@ -64,18 +83,6 @@ namespace MarCmd
 	private:
 		uint64_t m_maxPrintSymLen = 0;
 	private:
-		struct SharedDebugData
-		{
-			MarC::ExecutableInfoRef exeInfo;
-			MarC::InterpreterRef interpreter;
-
-			uint64_t exeCount = 0;
-			std::mutex mtxExeCount;
-			std::condition_variable conExeCount;
-
-			std::atomic_bool stopExecution = false;
-			std::atomic_bool threadClosed = false;
-			MarC::BC_Datatype regDatatypes[MarC::BC_MEM_REG_NUM_OF_REGS];
-		} m_sharedDebugData;
+		SharedDebugDataRef m_sharedDebugData;
 	};
 }
