@@ -125,8 +125,7 @@ namespace MarCmd
 	{
 		MarC::BC_MemAddress exeAddr = m_sdd->interpreter->getRegister(MarC::BC_MEM_REG_CODE_POINTER).as_ADDR;
 		uint64_t modIndex = exeAddr.asCode.page;
-		uint64_t offset = exeAddr.asCode.addr;
-		int64_t line = MarC::searchBinary(offset, m_modDisasmInfo.instructionOffsets);
+		int64_t line = addrToLine(exeAddr);
 		{
 			auto wndDisasmTitle = this->getSubWnd<Console::TextWindow>("Title");
 			auto wndDisasmViewControlInsPtr = this->getSubWnd<Console::TextWindow>("Line Marker");
@@ -135,7 +134,7 @@ namespace MarCmd
 			wndDisasmTitle->replace("Disassembly: " + m_sdd->interpreter->getExeInfo()->modules[modIndex]->moduleName, 1, 0);
 			int64_t mid = wndDisasmViewCode->getHeight() / 2;
 			wndDisasmViewControlInsPtr->setScroll(-mid);
-			wndDisasmViewControlBreakpoints->setScroll(-mid);
+			wndDisasmViewControlBreakpoints->setScroll(line - mid);
 			wndDisasmViewCode->setScroll(line - mid);
 		}
 	}
@@ -148,13 +147,23 @@ namespace MarCmd
 
 	bool DisasmWindow::toggleBreakpoint(MarC::BC_MemAddress breakpoint)
 	{
+		int64_t line = addrToLine(breakpoint);
+
 		if (hasBreakpoint(breakpoint))
 		{
 			m_modDisasmInfo.breakpoints.erase(breakpoint);
+			getSubWnd<Console::TextWindow>("Breakpoints")->replace(" ", 0, line);
 			return false;
 		}
+
 		m_modDisasmInfo.breakpoints.insert(breakpoint);
+		getSubWnd<Console::TextWindow>("Breakpoints")->replace("*", 0, line);
 		return true;
+	}
+
+	int64_t DisasmWindow::addrToLine(MarC::BC_MemAddress addr) const
+	{
+		return MarC::searchBinary(addr.asCode.addr, m_modDisasmInfo.instructionOffsets);
 	}
 
 	DisasmWindowRef DisasmWindow::create(const std::string& name, SharedDebugDataRef sdd, uint64_t modIndex)

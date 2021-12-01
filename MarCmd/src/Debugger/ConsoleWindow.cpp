@@ -217,7 +217,7 @@ namespace MarCmd
 		void TextWindow::insert(const std::string& text, uint64_t x, uint64_t y)
 		{
 			while (m_text.size() < y + 1)
-				m_text.push_back(std::string(x, ' '));
+				m_text.push_back(std::string());
 
 			bool isNewIt = true;
 			bool isFirstIt = true;
@@ -231,6 +231,7 @@ namespace MarCmd
 					isNewIt = false;
 					if (isFirstIt)
 					{
+						isFirstIt = false;
 						if (it->size() < x)
 							it->resize(x, ' ');
 						lineBackup = it->substr(x);

@@ -45,6 +45,7 @@ namespace MarCmd
 		void refresh();
 		bool hasBreakpoint(MarC::BC_MemAddress breakpoint);
 		bool toggleBreakpoint(MarC::BC_MemAddress brekpoint);
+		int64_t addrToLine(MarC::BC_MemAddress addr) const;
 	public:
 		static DisasmWindowRef create(const std::string& name, SharedDebugDataRef sdd, uint64_t modIndex);
 	private:
