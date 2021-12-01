@@ -71,7 +71,19 @@ namespace MarCmd
 	{
 		switch (key)
 		{
+		case 'm':
+			break;
+		case 'u':
+			break;
+		case 'd':
+			break;
+		case 's':
+			break;
 		case 'r':
+			break;
+		case 'b':
+			break;
+		case 'x':
 			break;
 		default:
 			;
@@ -104,6 +116,11 @@ namespace MarCmd
 		}
 	}
 
+	bool DisasmWindow::hasBreakpoint(MarC::BC_MemAddress breakpoint)
+	{
+		return m_modDisasmInfo.breakpoints.find(breakpoint) != m_modDisasmInfo.breakpoints.end();
+	}
+
 	DisasmWindowRef DisasmWindow::create(const std::string& name, MarC::InterpreterRef interpreter, uint64_t modIndex)
 	{
 		auto temp = std::shared_ptr<DisasmWindow>(new DisasmWindow(name, interpreter, modIndex));
@@ -120,9 +137,9 @@ namespace MarCmd
 	Debugger::Debugger(const Settings& settings)
 		: m_settings(settings)
 	{
-		m_exeInfo = loadExeInfo(m_settings);
+		m_sharedDebugData.exeInfo = loadExeInfo(m_settings);
 
-		for (auto& sym : m_exeInfo->symbols)
+		for (auto& sym : m_sharedDebugData.exeInfo->symbols)
 		{
 			if (sym.usage == MarC::SymbolUsage::Address &&
 				sym.value.as_ADDR.base != MarC::BC_MEM_BASE_CODE_MEMORY &&
@@ -131,22 +148,22 @@ namespace MarCmd
 				m_maxPrintSymLen = std::max(m_maxPrintSymLen, sym.name.size());
 		}
 
-		m_interpreter = MarC::Interpreter::create(m_exeInfo);
+		m_sharedDebugData.interpreter = MarC::Interpreter::create(m_sharedDebugData.exeInfo);
 		for (auto& entry : settings.extDirs)
-			m_interpreter->addExtDir(entry);
+			m_sharedDebugData.interpreter->addExtDir(entry);
 
-		m_vecWndDisasm.resize(m_exeInfo->modules.size());
-		for (uint64_t i = 0; i < m_exeInfo->modules.size(); ++i)
-			m_vecWndDisasm[i] = DisasmWindow::create("Disassembly", m_interpreter, i);
+		m_vecWndDisasm.resize(m_sharedDebugData.exeInfo->modules.size());
+		for (uint64_t i = 0; i < m_sharedDebugData.exeInfo->modules.size(); ++i)
+			m_vecWndDisasm[i] = DisasmWindow::create("Disassembly", m_sharedDebugData.interpreter, i);
 		m_wndDisasm = m_vecWndDisasm[0];
 
-		m_exeThreadData.regDatatypes[MarC::BC_MEM_REG_CODE_POINTER] = MarC::BC_DT_ADDR;
-		m_exeThreadData.regDatatypes[MarC::BC_MEM_REG_STACK_POINTER] = MarC::BC_DT_ADDR;
-		m_exeThreadData.regDatatypes[MarC::BC_MEM_REG_FRAME_POINTER] = MarC::BC_DT_ADDR;
-		m_exeThreadData.regDatatypes[MarC::BC_MEM_REG_LOOP_COUNTER] = MarC::BC_DT_UNKNOWN;
-		m_exeThreadData.regDatatypes[MarC::BC_MEM_REG_ACCUMULATOR] = MarC::BC_DT_I_64;
-		m_exeThreadData.regDatatypes[MarC::BC_MEM_REG_TEMPORARY_DATA] = MarC::BC_DT_UNKNOWN;
-		m_exeThreadData.regDatatypes[MarC::BC_MEM_REG_EXIT_CODE] = MarC::BC_DT_I_64;
+		m_sharedDebugData.regDatatypes[MarC::BC_MEM_REG_CODE_POINTER] = MarC::BC_DT_ADDR;
+		m_sharedDebugData.regDatatypes[MarC::BC_MEM_REG_STACK_POINTER] = MarC::BC_DT_ADDR;
+		m_sharedDebugData.regDatatypes[MarC::BC_MEM_REG_FRAME_POINTER] = MarC::BC_DT_ADDR;
+		m_sharedDebugData.regDatatypes[MarC::BC_MEM_REG_LOOP_COUNTER] = MarC::BC_DT_UNKNOWN;
+		m_sharedDebugData.regDatatypes[MarC::BC_MEM_REG_ACCUMULATOR] = MarC::BC_DT_I_64;
+		m_sharedDebugData.regDatatypes[MarC::BC_MEM_REG_TEMPORARY_DATA] = MarC::BC_DT_UNKNOWN;
+		m_sharedDebugData.regDatatypes[MarC::BC_MEM_REG_EXIT_CODE] = MarC::BC_DT_I_64;
 
 		m_wndBase = createDebugWindow(1, 1);
 		(*m_wndBase)->getSubWnd<Console::SplitWindow>(DbgWndName_LeftHalf)->setTop(m_wndDisasm);
@@ -159,28 +176,28 @@ namespace MarCmd
 
 	int Debugger::run()
 	{
-		if (!m_exeInfo)
+		if (!m_sharedDebugData.exeInfo)
 			return -1;
 
-		if (m_interpreter->hasUngrantedPerms())
+		if (m_sharedDebugData.interpreter->hasUngrantedPerms())
 		{
 			if (m_settings.flags.hasFlag(CmdFlags::GrantAll))
 			{
-				m_interpreter->grantAllPerms();
+				m_sharedDebugData.interpreter->grantAllPerms();
 			}
 			else
 			{
 				std::set<std::string> toGrant;
 
-				auto manPerms = m_interpreter->getUngrantedPerms(m_interpreter->getManPerms());
+				auto manPerms = m_sharedDebugData.interpreter->getUngrantedPerms(m_sharedDebugData.interpreter->getManPerms());
 				if (!manPerms.empty())
 					permissionGrantPrompt(PermissionPromptType::Mandatory, manPerms, toGrant);
 
-				auto optPerms = m_interpreter->getUngrantedPerms(m_interpreter->getOptPerms());
+				auto optPerms = m_sharedDebugData.interpreter->getUngrantedPerms(m_sharedDebugData.interpreter->getOptPerms());
 				if (!optPerms.empty())
 					permissionGrantPrompt(PermissionPromptType::Optional, optPerms, toGrant);
 
-				m_interpreter->grantPerms(toGrant);
+				m_sharedDebugData.interpreter->grantPerms(toGrant);
 			}
 		}
 
@@ -193,7 +210,7 @@ namespace MarCmd
 		bool refreshRequested = false;
 		std::chrono::high_resolution_clock::time_point lastRefresh;
 
-		while (!closeDebugger && !m_exeThreadData.threadClosed)
+		while (!closeDebugger && !m_sharedDebugData.threadClosed)
 		{
 			if (Console::charWaiting())
 			{
@@ -204,25 +221,25 @@ namespace MarCmd
 				{
 				case 'r': // [R]un the code until a stop is requested or the interpreter exits.
 				{
-					std::lock_guard lock(m_exeThreadData.mtxExeCount);
-					m_exeThreadData.exeCount = -1;
-					m_exeThreadData.conExeCount.notify_one();
+					std::lock_guard lock(m_sharedDebugData.mtxExeCount);
+					m_sharedDebugData.exeCount = -1;
+					m_sharedDebugData.conExeCount.notify_one();
 					refreshRequested = true;
 					break;
 				}
 				case 's': // [S]tep
 				{
-					std::lock_guard lock(m_exeThreadData.mtxExeCount);
-					++m_exeThreadData.exeCount;
-					m_exeThreadData.conExeCount.notify_one();
+					std::lock_guard lock(m_sharedDebugData.mtxExeCount);
+					++m_sharedDebugData.exeCount;
+					m_sharedDebugData.conExeCount.notify_one();
 					refreshRequested = true;
 					break;
 				}
 				case 'b': // [B]reak
 				{
-					std::lock_guard lock(m_exeThreadData.mtxExeCount);
-					m_exeThreadData.exeCount = 0;
-					m_exeThreadData.conExeCount.notify_one();
+					std::lock_guard lock(m_sharedDebugData.mtxExeCount);
+					m_sharedDebugData.exeCount = 0;
+					m_sharedDebugData.conExeCount.notify_one();
 					refreshRequested = true;
 					break;
 				}
@@ -251,15 +268,15 @@ namespace MarCmd
 				bool updateIsSafe = false;
 				if (m_settings.flags.hasFlag(CmdFlags::ForceRefresh))
 				{
-					m_exeThreadData.mtxExeCount.lock();
+					m_sharedDebugData.mtxExeCount.lock();
 					updateIsSafe = true;
 				}
 				else
 				{
-					if (m_exeThreadData.mtxExeCount.try_lock())
+					if (m_sharedDebugData.mtxExeCount.try_lock())
 					{
-						if (m_exeThreadData.exeCount > 0)
-							m_exeThreadData.mtxExeCount.unlock();
+						if (m_sharedDebugData.exeCount > 0)
+							m_sharedDebugData.mtxExeCount.unlock();
 						else
 							updateIsSafe = true;
 					}
@@ -268,7 +285,7 @@ namespace MarCmd
 				if (updateIsSafe)
 				{
 					{
-						MarC::BC_MemAddress cp = m_interpreter->getRegister(MarC::BC_MEM_REG_CODE_POINTER).as_ADDR;
+						MarC::BC_MemAddress cp = m_sharedDebugData.interpreter->getRegister(MarC::BC_MEM_REG_CODE_POINTER).as_ADDR;
 						if (cp.asCode.page != m_wndDisasm->getModIndex())
 						{
 							bool hadFocus = m_wndBase->getFocus() == m_wndDisasm;
@@ -285,8 +302,8 @@ namespace MarCmd
 							int line = 0;
 							for (auto reg = MarC::BC_MEM_REG_CODE_POINTER; reg < MarC::BC_MEM_REG_NUM_OF_REGS; reg = (MarC::BC_MemRegister)(reg + 1))
 							{
-								auto mc = m_interpreter->getRegister(reg);
-								auto dt = m_exeThreadData.regDatatypes[reg];
+								auto mc = m_sharedDebugData.interpreter->getRegister(reg);
+								auto dt = m_sharedDebugData.regDatatypes[reg];
 								std::string name = "$" + MarC::BC_RegisterToString(reg);
 								name.resize(m_maxPrintSymLen + 1, ' ');
 								std::string dtStr = MarC::BC_DatatypeToString(dt);
@@ -298,14 +315,14 @@ namespace MarCmd
 								++line;
 							}
 
-							for (auto& sym : m_exeInfo->symbols)
+							for (auto& sym : m_sharedDebugData.exeInfo->symbols)
 							{
 								if (sym.usage == MarC::SymbolUsage::Address &&
 									sym.value.as_ADDR.base != MarC::BC_MEM_BASE_CODE_MEMORY &&
 									sym.value.as_ADDR.base != MarC::BC_MEM_BASE_REGISTER
 									)
 								{
-									MarC::BC_MemCell mc = m_interpreter->hostMemCell(sym.value.as_ADDR, false);
+									MarC::BC_MemCell mc = m_sharedDebugData.interpreter->hostMemCell(sym.value.as_ADDR, false);
 									auto dt = MarC::BC_DT_I_64; // TODO: Get actual datatype
 									std::string name = sym.name;
 									name.resize(m_maxPrintSymLen + 1, ' ');
@@ -320,7 +337,7 @@ namespace MarCmd
 							}
 						}
 					}
-					m_exeThreadData.mtxExeCount.unlock();
+					m_sharedDebugData.mtxExeCount.unlock();
 				}
 
 				std::cout << Console::CurVis::Hide;
@@ -333,56 +350,55 @@ namespace MarCmd
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 
-		m_exeThreadData.stopExecution = true;
-		m_exeThreadData.conExeCount.notify_all();
+		m_sharedDebugData.stopExecution = true;
+		m_sharedDebugData.conExeCount.notify_all();
 		exeThread.join();
 
-		if (!m_interpreter->lastError().isOK())
+		if (!m_sharedDebugData.interpreter->lastError().isOK())
 		{
 			std::cout << "An error occured while running the interpreter!:" << std::endl
-				<< m_interpreter->lastError().getMessage() << std::endl;
+				<< m_sharedDebugData.interpreter->lastError().getMessage() << std::endl;
 			return -1;
 		}
 
-		int64_t exitCode = m_interpreter->getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_64;
+		int64_t exitCode = m_sharedDebugData.interpreter->getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_64;
 		return (int)exitCode;
 	}
 
 	void Debugger::exeThreadFunc()
 	{
-		auto& etd = m_exeThreadData;
-		auto& regCP = m_interpreter->getRegister(MarC::BC_MEM_REG_CODE_POINTER);
-		while (!m_interpreter->lastError() && !etd.stopExecution)
+		auto& sdd = m_sharedDebugData;
+		auto& regCP = m_sharedDebugData.interpreter->getRegister(MarC::BC_MEM_REG_CODE_POINTER);
+		while (!m_sharedDebugData.interpreter->lastError() && !sdd.stopExecution)
 		{
-			std::unique_lock lock(etd.mtxExeCount);
-			etd.conExeCount.wait(lock, [&]() { return etd.exeCount != 0 || etd.stopExecution; });
+			std::unique_lock lock(sdd.mtxExeCount);
+			sdd.conExeCount.wait(lock, [&]() { return sdd.exeCount != 0 || sdd.stopExecution; });
 
 			bool isFirstInstruction = true;
-			while (etd.exeCount > 0 && !m_interpreter->lastError() && !etd.stopExecution)
+			while (sdd.exeCount > 0 && !m_sharedDebugData.interpreter->lastError() && !sdd.stopExecution)
 			{
 				if (!isFirstInstruction)
 				{
-					//auto& breakpoints = (*etd.pModInfos)[regCP.as_ADDR.asCode.page].breakpoints;
-					//if (breakpoints.find(regCP.as_ADDR) != breakpoints.end())
-					//{
-					//	etd.exeCount = 0;
-					//	lock.unlock();
-					//	break;
-					//}
+					if (m_wndDisasm->hasBreakpoint(regCP.as_ADDR))
+					{
+						sdd.exeCount = 0;
+						lock.unlock();
+						break;
+					}
 				}
-				--etd.exeCount;
+				--sdd.exeCount;
 				lock.unlock();
 
-				m_interpreter->interpret(1);
+				m_sharedDebugData.interpreter->interpret(1);
 
 				lock.lock();
 
 				isFirstInstruction = false;
 			}
-			etd.exeCount = 0;
+			sdd.exeCount = 0;
 
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
-		etd.threadClosed = true;
+		sdd.threadClosed = true;
 	}
 }

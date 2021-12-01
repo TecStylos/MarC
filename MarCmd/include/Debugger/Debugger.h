@@ -26,6 +26,7 @@ namespace MarCmd
 		std::vector<struct ModDisasmInfo> getInfo() const;
 		uint64_t getModIndex() const;
 		void refresh();
+		bool hasBreakpoint(MarC::BC_MemAddress breakpoint);
 	public:
 		static DisasmWindowRef create(const std::string& name, MarC::InterpreterRef interpreter, uint64_t modIndex);
 	private:
@@ -57,16 +58,17 @@ namespace MarCmd
 		void exeThreadFunc();
 	private:
 		Settings m_settings;
-		MarC::ExecutableInfoRef m_exeInfo;
-		MarC::InterpreterRef m_interpreter;
 		Console::BaseWindowRef m_wndBase;
 		DisasmWindowRef m_wndDisasm;
 		std::vector<DisasmWindowRef> m_vecWndDisasm;
 	private:
 		uint64_t m_maxPrintSymLen = 0;
 	private:
-		struct ExeThreadData
+		struct SharedDebugData
 		{
+			MarC::ExecutableInfoRef exeInfo;
+			MarC::InterpreterRef interpreter;
+
 			uint64_t exeCount = 0;
 			std::mutex mtxExeCount;
 			std::condition_variable conExeCount;
@@ -74,6 +76,6 @@ namespace MarCmd
 			std::atomic_bool stopExecution = false;
 			std::atomic_bool threadClosed = false;
 			MarC::BC_Datatype regDatatypes[MarC::BC_MEM_REG_NUM_OF_REGS];
-		} m_exeThreadData;
+		} m_sharedDebugData;
 	};
 }
