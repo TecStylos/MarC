@@ -4,6 +4,7 @@
 #include <thread>
 
 #include "MarCmdExeInfoLoader.h"
+#include "PermissionGrantPrompt.h"
 
 namespace MarCmd
 {
@@ -131,10 +132,12 @@ namespace MarCmd
 		}
 
 		m_interpreter = MarC::Interpreter::create(m_exeInfo);
+		for (auto& entry : settings.extDirs)
+			m_interpreter->addExtDir(entry);
 
 		m_vecWndDisasm.resize(m_exeInfo->modules.size());
 		for (uint64_t i = 0; i < m_exeInfo->modules.size(); ++i)
-			m_vecWndDisasm[i] = DisasmWindow::create(DbgWndName_Disasm, m_interpreter, i);
+			m_vecWndDisasm[i] = DisasmWindow::create("Disassembly", m_interpreter, i);
 		m_wndDisasm = m_vecWndDisasm[0];
 
 		m_exeThreadData.regDatatypes[MarC::BC_MEM_REG_CODE_POINTER] = MarC::BC_DT_ADDR;
@@ -159,15 +162,31 @@ namespace MarCmd
 		if (!m_exeInfo)
 			return -1;
 
+		if (m_interpreter->hasUngrantedPerms())
+		{
+			if (m_settings.flags.hasFlag(CmdFlags::GrantAll))
+			{
+				m_interpreter->grantAllPerms();
+			}
+			else
+			{
+				std::set<std::string> toGrant;
+
+				auto manPerms = m_interpreter->getUngrantedPerms(m_interpreter->getManPerms());
+				if (!manPerms.empty())
+					permissionGrantPrompt(PermissionPromptType::Mandatory, manPerms, toGrant);
+
+				auto optPerms = m_interpreter->getUngrantedPerms(m_interpreter->getOptPerms());
+				if (!optPerms.empty())
+					permissionGrantPrompt(PermissionPromptType::Optional, optPerms, toGrant);
+
+				m_interpreter->grantPerms(toGrant);
+			}
+		}
+
 		std::thread exeThread(&Debugger::exeThreadFunc, this);
 		auto consoleDimensions = Console::getDimensions();
 		(*m_wndBase)->resize(consoleDimensions.width, consoleDimensions.height);
-
-		auto wndDisasm = (*m_wndBase)->getSubWnd<Console::TextWindow>(DbgWndName_DisasmViewCode);
-		if (wndDisasm)
-		{
-			
-		}
 
 		bool closeDebugger = false;
 
@@ -180,7 +199,7 @@ namespace MarCmd
 			{
 				unsigned char ch = Console::getChar();
 				if (!m_wndBase->handleKeyPress(ch))
-					m_wndBase->setFocus(DbgWndName_Disasm);
+					m_wndBase->setFocus("Disassembly");
 				switch (ch)
 				{
 				case 'r': // [R]un the code until a stop is requested or the interpreter exits.
