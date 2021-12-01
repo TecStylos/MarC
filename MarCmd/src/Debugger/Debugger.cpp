@@ -79,6 +79,11 @@ namespace MarCmd
 		Window::handleKeyPress(key);
 	}
 
+	uint64_t DisasmWindow::getModIndex() const
+	{
+		return m_modIndex;
+	}
+
 	void DisasmWindow::refresh()
 	{
 		MarC::BC_MemAddress exeAddr = m_interpreter->getRegister(MarC::BC_MEM_REG_CODE_POINTER).as_ADDR;
@@ -100,7 +105,9 @@ namespace MarCmd
 
 	DisasmWindowRef DisasmWindow::create(const std::string& name, MarC::InterpreterRef interpreter, uint64_t modIndex)
 	{
-		return std::shared_ptr<DisasmWindow>(new DisasmWindow(name, interpreter, modIndex));
+		auto temp = std::shared_ptr<DisasmWindow>(new DisasmWindow(name, interpreter, modIndex));
+		temp->setSelfRef(temp);
+		return temp;
 	}
 
 	int Debugger::run(const Settings& settings)
@@ -242,6 +249,16 @@ namespace MarCmd
 				if (updateIsSafe)
 				{
 					{
+						MarC::BC_MemAddress cp = m_interpreter->getRegister(MarC::BC_MEM_REG_CODE_POINTER).as_ADDR;
+						if (cp.asCode.page != m_wndDisasm->getModIndex())
+						{
+							bool hadFocus = m_wndBase->getFocus() == m_wndDisasm;
+							m_wndDisasm = m_vecWndDisasm[cp.asCode.page];
+							(*m_wndBase)->replaceSubWnd("Disassembly", m_wndDisasm);
+							if (hadFocus)
+								m_wndBase->setFocus("Disassembly");
+						}
+
 						m_wndDisasm->refresh();
 
 						{

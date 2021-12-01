@@ -24,11 +24,14 @@ namespace MarCmd
 		public:
 			const std::string& getName() const;
 			void setParent(WindowWeakRef wndParent);
+			WindowRef getParentRef() const;
+			void setSelfRef(WindowWeakRef selfRef);
 			template <class WndClass = Window>
 			WndClass* getSubWnd(const std::string& name);
 		public:
 			virtual void handleKeyPress(char key);
 			virtual WindowRef getSubWndRef(const std::string& name);
+			virtual bool replaceSubWnd(const std::string& name, WindowRef newWnd);
 		public:
 			virtual void setPos(uint64_t newX, uint64_t newY) = 0;
 			virtual void resize(uint64_t newWidth, uint64_t newHeight) = 0;
@@ -46,6 +49,7 @@ namespace MarCmd
 		protected:
 			std::string m_name;
 			WindowWeakRef m_wndParent;
+			WindowWeakRef m_selfRef;
 		};
 
 		typedef std::shared_ptr<class BaseWindow> BaseWindowRef;
@@ -163,6 +167,7 @@ namespace MarCmd
 			SplitWindow(const SplitWindow&) = delete;
 		public:
 			virtual WindowRef getSubWndRef(const std::string& name) override;
+			virtual bool replaceSubWnd(const std::string& name, WindowRef newWnd) override;
 		public:
 			virtual void setPos(uint64_t newX, uint64_t newY) override;
 			virtual void resize(uint64_t newWidth, uint64_t newHeight) override;

@@ -23,6 +23,16 @@ namespace MarCmd
 			m_wndParent = wndParent;
 		}
 
+		WindowRef Window::getParentRef() const
+		{
+			return m_wndParent.lock();
+		}
+
+		void Window::setSelfRef(WindowWeakRef selfRef)
+		{
+			m_selfRef = selfRef;
+		}
+
 		void Window::handleKeyPress(char key)
 		{
 			WindowRef wndParent = m_wndParent.lock();
@@ -33,6 +43,11 @@ namespace MarCmd
 		WindowRef Window::getSubWndRef(const std::string& name)
 		{
 			return nullptr;
+		}
+
+		bool Window::replaceSubWnd(const std::string& name, WindowRef newWnd)
+		{
+			return false;
 		}
 
 		BaseWindow::BaseWindow(WindowRef wndChild)
@@ -297,7 +312,9 @@ namespace MarCmd
 
 		TextWindowRef TextWindow::create(const std::string& name)
 		{
-			return std::shared_ptr<TextWindow>(new TextWindow(name));
+			auto temp = std::shared_ptr<TextWindow>(new TextWindow(name));
+			temp->setSelfRef(temp);
+			return temp;
 		}
 
 		void TextWindow::rewrite()
@@ -357,6 +374,32 @@ namespace MarCmd
 			return temp;
 		}
 
+		bool SplitWindow::replaceSubWnd(const std::string& name, WindowRef newWnd)
+		{
+			if (m_wndTopLeft)
+			{
+				if (m_wndTopLeft->getName() == name)
+				{
+					setTop(newWnd);
+					return true;
+				}
+				if (m_wndTopLeft->replaceSubWnd(name, newWnd))
+					return true;
+			}
+			if (m_wndBottomRight)
+			{
+				if (m_wndBottomRight->getName() == name)
+				{
+					setBottom(newWnd);
+					return true;
+				}
+				if (m_wndBottomRight->replaceSubWnd(name, newWnd))
+					return true;
+			}
+
+			return false;
+		}
+
 		void SplitWindow::setPos(uint64_t newX, uint64_t newY)
 		{
 			m_x = newX;
@@ -412,7 +455,7 @@ namespace MarCmd
 
 		WindowRef SplitWindow::getLeft() const
 		{
-			return m_wndTopLeft;
+			return getTop();
 		}
 
 		WindowRef SplitWindow::getBottom() const
@@ -422,36 +465,38 @@ namespace MarCmd
 
 		WindowRef SplitWindow::getRight() const
 		{
-			return m_wndBottomRight;
+			return getBottom();
 		}
 
 		void SplitWindow::setTop(WindowRef wndRef)
 		{
 			m_wndTopLeft = wndRef;
+			wndRef->setParent(m_selfRef);
 			update(wndRef);
 		}
 
 		void SplitWindow::setLeft(WindowRef wndRef)
 		{
-			m_wndTopLeft = wndRef;
-			update(wndRef);
+			setTop(wndRef);
 		}
 
 		void SplitWindow::setBottom(WindowRef wndRef)
 		{
 			m_wndBottomRight = wndRef;
+			wndRef->setParent(m_selfRef);
 			update(wndRef);
 		}
 
 		void SplitWindow::setRight(WindowRef wndRef)
 		{
-			m_wndBottomRight = wndRef;
-			update(wndRef);
+			setBottom(wndRef);
 		}
 
 		SplitWindowRef SplitWindow::create(const std::string& name)
 		{
-			return std::shared_ptr<SplitWindow>(new SplitWindow(name));
+			auto temp = std::shared_ptr<SplitWindow>(new SplitWindow(name));
+			temp->setSelfRef(temp);
+			return temp;
 		}
 
 		void SplitWindow::update()

@@ -24,6 +24,7 @@ namespace MarCmd
 		virtual void handleKeyPress(char key) override;
 	public:
 		std::vector<struct ModDisasmInfo> getInfo() const;
+		uint64_t getModIndex() const;
 		void refresh();
 	public:
 		static DisasmWindowRef create(const std::string& name, MarC::InterpreterRef interpreter, uint64_t modIndex);

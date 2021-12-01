@@ -15,7 +15,7 @@
         "--debug",
         "--dbginfo",
         "--aggressiverefresh",
-        "examples/fibonacci.mca"
+        "examples/GameOfLife.mca"
       ]
     }
   ]
