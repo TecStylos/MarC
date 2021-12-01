@@ -38,8 +38,8 @@
    - Profile the interpreter (func/funx/instruction call counts/timings, execution time, ...)
  * --dbginfo
    - With `build` switch: Generate debug information for the application.
- * --aggressiverefresh
-   - Aggressively tries to refresh the debug window. May impact performance of the debugger and/or the application to debug.
+ * --forcerefresh
+   - Force-refresh the debug window. May impact performance of the debugger and/or the application to debug.
  * --verbose
    - Show more details when building/running code.
 ### Miscellaneous
