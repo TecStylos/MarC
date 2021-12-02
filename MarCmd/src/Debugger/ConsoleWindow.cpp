@@ -333,6 +333,12 @@ namespace MarCmd
 				else
 				{
 					uint64_t nCharsInLine = m_text[line].size();
+					if (nCharsInLine == 0)
+					{
+						if (++lineShift >= m_height)
+							break;
+						continue;
+					}
 					const char* lineStr = m_text[line].c_str();
 
 					uint64_t nWritten = 0;

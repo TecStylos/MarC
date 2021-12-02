@@ -157,7 +157,7 @@ namespace MarCmd
 		}
 
 		m_modDisasmInfo.breakpoints.insert(breakpoint);
-		getSubWnd<Console::TextWindow>("Breakpoints")->replace("*", 0, line);
+		getSubWnd<Console::TextWindow>("Breakpoints")->replace("+", 0, line);
 		return true;
 	}
 
