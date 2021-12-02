@@ -398,7 +398,7 @@ namespace MarCmd
 				{
 					if (!ignoreBreakpoint)
 					{
-						if (m_wndDisasm->hasBreakpoint(regCP.as_ADDR))
+						if (m_vecWndDisasm[regCP.as_ADDR.asCode.page]->hasBreakpoint(regCP.as_ADDR))
 						{
 							sdd->exeCount = 0;
 							lock.unlock();
