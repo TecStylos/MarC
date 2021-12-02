@@ -38,7 +38,7 @@ namespace MarCmd
 		}
 		{
 			auto wndDisasmViewSplit = Console::SplitWindow::create("View");
-			wndDisasmViewSplit->setRatio(Console::WRT::AbsoluteLeft, 3);
+			wndDisasmViewSplit->setRatio(Console::WRT::AbsoluteLeft, 4);
 			{
 				auto wndDisasmViewControlSplit = Console::SplitWindow::create("Control");
 				wndDisasmViewControlSplit->setRatio(Console::WRT::AbsoluteLeft, 2);
@@ -72,16 +72,20 @@ namespace MarCmd
 		switch (key)
 		{
 		case 'm':
+		{
+			auto parent = m_wndParent.lock();
+			//parent->replaceSubWnd("Disassembly", m_sdd->wndModuleBrowser);
 			break;
-		case 'u':
+		}
+		case 'u': // Scroll up
 			--m_scrollOffset;
 			m_sdd->refreshRequested = true;
 			break;
-		case 'd':
+		case 'd': // Scroll down
 			++m_scrollOffset;
 			m_sdd->refreshRequested = true;
 			break;
-		case 's':
+		case 's': // Step into
 		{
 			std::lock_guard lock(m_sdd->mtxExeCount);
 			m_sdd->exeCount = 1;
@@ -89,7 +93,7 @@ namespace MarCmd
 			m_sdd->refreshRequested = true;
 			break;
 		}
-		case 'r':
+		case 'r': // Run
 		{
 			std::lock_guard lock(m_sdd->mtxExeCount);
 			m_sdd->exeCount = -1;
@@ -97,7 +101,7 @@ namespace MarCmd
 			m_sdd->refreshRequested = true;
 			break;
 		}
-		case 'b':
+		case 'b': // Break
 		{
 			std::lock_guard lock(m_sdd->mtxExeCount);
 			m_sdd->exeCount = 0;
@@ -105,7 +109,7 @@ namespace MarCmd
 			m_sdd->refreshRequested = true;
 			break;
 		}
-		case 'x':
+		case 'x': // Set breakpoint
 		{
 			std::lock_guard lock(m_sdd->mtxExeCount);
 			if (!m_sdd->exeCount)
@@ -241,6 +245,7 @@ namespace MarCmd
 		Console::subTextWndInsert(**m_wndBase, DbgWndName_InputView, ">> ", 1, 0);
 		Console::subTextWndInsert(**m_wndBase, DbgWndName_ConsoleTitle, "Console:", 1, 0);
 		Console::subTextWndInsert(**m_wndBase, DbgWndName_MemoryTitle, "Memory:", 1, 0);
+		Console::subTextWndInsert(**m_wndBase, DbgWndName_ModuleTitle, "Module Browser:", 1, 0);
 		Console::subTextWndInsert(**m_wndBase, DbgWndName_CallstackTitle, "Callstack:", 1, 0);
 	}
 
