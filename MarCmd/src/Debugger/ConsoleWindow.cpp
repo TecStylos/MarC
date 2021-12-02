@@ -294,6 +294,11 @@ namespace MarCmd
 			rewrite();
 		}
 
+		uint64_t TextWindow::nLines() const
+		{
+			return m_text.size();
+		}
+
 		int64_t TextWindow::getScroll() const
 		{
 			return m_scrollPos;

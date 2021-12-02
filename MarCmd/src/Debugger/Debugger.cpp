@@ -74,8 +74,12 @@ namespace MarCmd
 		case 'm':
 			break;
 		case 'u':
+			--m_scrollOffset;
+			m_sdd->refreshRequested = true;
 			break;
 		case 'd':
+			++m_scrollOffset;
+			m_sdd->refreshRequested = true;
 			break;
 		case 's':
 		{
@@ -106,14 +110,17 @@ namespace MarCmd
 			std::lock_guard lock(m_sdd->mtxExeCount);
 			if (!m_sdd->exeCount)
 			{
-				toggleBreakpoint(m_sdd->interpreter->getRegister(MarC::BC_MEM_REG_CODE_POINTER).as_ADDR);
+				auto wndDisasmViewCode = this->getSubWnd<Console::TextWindow>("Code");
+				int64_t mid = wndDisasmViewCode->getHeight() / 2;
+				int64_t line = mid + wndDisasmViewCode->getScroll();
+				if (0 <= line && line < wndDisasmViewCode->nLines())
+					toggleBreakpoint(MarC::BC_MemAddress(MarC::BC_MEM_BASE_CODE_MEMORY, m_modIndex, m_modDisasmInfo.instructionOffsets[line]));
 			}
 			break;
 		}
 		default:
 			Window::handleKeyPress(key);
 		}
-
 	}
 
 	uint64_t DisasmWindow::getModIndex() const
@@ -123,20 +130,36 @@ namespace MarCmd
 
 	void DisasmWindow::refresh()
 	{
+		uint64_t nInsExecuted = m_sdd->interpreter->nInsExecuted();
 		MarC::BC_MemAddress exeAddr = m_sdd->interpreter->getRegister(MarC::BC_MEM_REG_CODE_POINTER).as_ADDR;
-		uint64_t modIndex = exeAddr.asCode.page;
-		int64_t line = addrToLine(exeAddr);
+
+		auto wndDisasmTitle = this->getSubWnd<Console::TextWindow>("Title");
+		auto wndDisasmViewControlInsPtr = this->getSubWnd<Console::TextWindow>("Line Marker");
+		auto wndDisasmViewControlBreakpoints = this->getSubWnd<Console::TextWindow>("Breakpoints");
+		auto wndDisasmViewCode = this->getSubWnd<Console::TextWindow>("Code");
+
+		wndDisasmTitle->replace("Disassembly: " + m_sdd->interpreter->getExeInfo()->modules[exeAddr.asCode.page]->moduleName, 1, 0);
+
+		int64_t exeLine = addrToLine(exeAddr);
+		if (m_nInsExecuted != m_sdd->interpreter->nInsExecuted())
 		{
-			auto wndDisasmTitle = this->getSubWnd<Console::TextWindow>("Title");
-			auto wndDisasmViewControlInsPtr = this->getSubWnd<Console::TextWindow>("Line Marker");
-			auto wndDisasmViewControlBreakpoints = this->getSubWnd<Console::TextWindow>("Breakpoints");
-			auto wndDisasmViewCode = this->getSubWnd<Console::TextWindow>("Code");
-			wndDisasmTitle->replace("Disassembly: " + m_sdd->interpreter->getExeInfo()->modules[modIndex]->moduleName, 1, 0);
-			int64_t mid = wndDisasmViewCode->getHeight() / 2;
-			wndDisasmViewControlInsPtr->setScroll(-mid);
-			wndDisasmViewControlBreakpoints->setScroll(line - mid);
-			wndDisasmViewCode->setScroll(line - mid);
+			m_scrollOffset = 0;
+			wndDisasmViewControlInsPtr->replace("=>", 0, 0);
+			m_nInsExecuted = m_sdd->interpreter->nInsExecuted();
 		}
+		else if (m_scrollOffset == 0)
+		{
+			wndDisasmViewControlInsPtr->replace("=>", 0, 0);
+		}
+		else
+		{
+			wndDisasmViewControlInsPtr->replace("->", 0, 0);
+		}
+
+		int64_t mid = -(int64_t)wndDisasmViewCode->getHeight() / 2;
+		wndDisasmViewControlInsPtr->setScroll(mid);
+		wndDisasmViewControlBreakpoints->setScroll(mid + exeLine + m_scrollOffset);
+		wndDisasmViewCode->setScroll(mid + exeLine + m_scrollOffset);
 	}
 
 	bool DisasmWindow::hasBreakpoint(MarC::BC_MemAddress breakpoint)
@@ -213,6 +236,7 @@ namespace MarCmd
 
 		m_wndBase = createDebugWindow(1, 1);
 		(*m_wndBase)->getSubWnd<Console::SplitWindow>(DbgWndName_LeftHalf)->setTop(m_wndDisasm);
+		m_wndBase->setFocus("Disassembly");
 
 		Console::subTextWndInsert(**m_wndBase, DbgWndName_InputView, ">> ", 1, 0);
 		Console::subTextWndInsert(**m_wndBase, DbgWndName_ConsoleTitle, "Console:", 1, 0);

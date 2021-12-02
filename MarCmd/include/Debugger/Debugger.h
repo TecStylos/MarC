@@ -63,6 +63,8 @@ namespace MarCmd
 		};
 		SharedDebugDataRef m_sdd;
 		uint64_t m_modIndex;
+		int64_t m_scrollOffset = 0;
+		uint64_t m_nInsExecuted;
 		ModDisasmInfo m_modDisasmInfo;
 	};
 

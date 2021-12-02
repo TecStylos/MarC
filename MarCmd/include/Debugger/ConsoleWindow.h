@@ -126,6 +126,7 @@ namespace MarCmd
 			bool wrapping() const;
 			void wrapping(bool status);
 		public:
+			uint64_t nLines() const;
 			int64_t getScroll() const;
 			void setScroll(int64_t line);
 			void scroll(int64_t nLines);
