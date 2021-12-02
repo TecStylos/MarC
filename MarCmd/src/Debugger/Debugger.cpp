@@ -200,6 +200,35 @@ namespace MarCmd
 		return temp;
 	}
 
+	ModuleBrowserWindow::ModuleBrowserWindow(const std::string& name, SharedDebugDataRef sdd)
+		: SplitWindow(name)
+	{
+		// TODO: Setup the window
+		m_sdd = sdd;
+		for (auto& mod : m_sdd->interpreter->getExeInfo()->modules)
+		{
+			
+		}
+	}
+
+	void ModuleBrowserWindow::handleKeyPress(char key)
+	{
+		// TODO: Proper key press handling
+		Window::handleKeyPress(key);
+	}
+
+	void ModuleBrowserWindow::refresh()
+	{
+		// TODO: Refresh the marker to the currently opened window
+	}
+
+	ModuleBrowserWindowRef ModuleBrowserWindow::create(const std::string& name, SharedDebugDataRef sdd)
+	{
+		auto temp = std::shared_ptr<ModuleBrowserWindow>(new ModuleBrowserWindow(name, sdd));
+		temp->setSelfRef(temp);
+		return temp;
+	}
+
 	int Debugger::run(const Settings& settings)
 	{
 		auto dbgr = Debugger(settings);
@@ -238,15 +267,15 @@ namespace MarCmd
 		m_sharedDebugData->regDatatypes[MarC::BC_MEM_REG_TEMPORARY_DATA] = MarC::BC_DT_UNKNOWN;
 		m_sharedDebugData->regDatatypes[MarC::BC_MEM_REG_EXIT_CODE] = MarC::BC_DT_I_64;
 
-		m_wndBase = createDebugWindow(1, 1);
-		(*m_wndBase)->getSubWnd<Console::SplitWindow>(DbgWndName_LeftHalf)->setTop(m_wndDisasm);
-		m_wndBase->setFocus("Disassembly");
+		m_sharedDebugData->wndBase = createDebugWindow(1, 1);
+		(*m_sharedDebugData->wndBase)->getSubWnd<Console::SplitWindow>(DbgWndName_LeftHalf)->setTop(m_wndDisasm);
+		m_sharedDebugData->wndBase->setFocus("Disassembly");
 
-		Console::subTextWndInsert(**m_wndBase, DbgWndName_InputView, ">> ", 1, 0);
-		Console::subTextWndInsert(**m_wndBase, DbgWndName_ConsoleTitle, "Console:", 1, 0);
-		Console::subTextWndInsert(**m_wndBase, DbgWndName_MemoryTitle, "Memory:", 1, 0);
-		Console::subTextWndInsert(**m_wndBase, DbgWndName_ModuleTitle, "Module Browser:", 1, 0);
-		Console::subTextWndInsert(**m_wndBase, DbgWndName_CallstackTitle, "Callstack:", 1, 0);
+		Console::subTextWndInsert(**m_sharedDebugData->wndBase, DbgWndName_InputView, ">> ", 1, 0);
+		Console::subTextWndInsert(**m_sharedDebugData->wndBase, DbgWndName_ConsoleTitle, "Console:", 1, 0);
+		Console::subTextWndInsert(**m_sharedDebugData->wndBase, DbgWndName_MemoryTitle, "Memory:", 1, 0);
+		Console::subTextWndInsert(**m_sharedDebugData->wndBase, DbgWndName_ModuleTitle, "Module Browser:", 1, 0);
+		Console::subTextWndInsert(**m_sharedDebugData->wndBase, DbgWndName_CallstackTitle, "Callstack:", 1, 0);
 	}
 
 	int Debugger::run()
@@ -278,7 +307,7 @@ namespace MarCmd
 
 		std::thread exeThread(&Debugger::exeThreadFunc, this);
 		auto consoleDimensions = Console::getDimensions();
-		(*m_wndBase)->resize(consoleDimensions.width, consoleDimensions.height);
+		(*m_sharedDebugData->wndBase)->resize(consoleDimensions.width, consoleDimensions.height);
 
 		bool closeDebugger = false;
 
@@ -295,8 +324,8 @@ namespace MarCmd
 					closeDebugger = true;
 					break;
 				default:
-					if (!m_wndBase->handleKeyPress(ch))
-						m_wndBase->setFocus("Disassembly");
+					if (!m_sharedDebugData->wndBase->handleKeyPress(ch))
+						m_sharedDebugData->wndBase->setFocus("Disassembly");
 				}
 			}
 
@@ -304,7 +333,7 @@ namespace MarCmd
 			if (newCD.width != consoleDimensions.width || newCD.height != consoleDimensions.height)
 			{
 				consoleDimensions = newCD;
-				(*m_wndBase)->resize(consoleDimensions.width, consoleDimensions.height);
+				(*m_sharedDebugData->wndBase)->resize(consoleDimensions.width, consoleDimensions.height);
 				m_sharedDebugData->refreshRequested = true;
 			}
 
@@ -335,17 +364,17 @@ namespace MarCmd
 						MarC::BC_MemAddress cp = m_sharedDebugData->interpreter->getRegister(MarC::BC_MEM_REG_CODE_POINTER).as_ADDR;
 						if (cp.asCode.page != m_wndDisasm->getModIndex())
 						{
-							bool hadFocus = m_wndBase->getFocus() == m_wndDisasm;
+							bool hadFocus = m_sharedDebugData->wndBase->getFocus() == m_wndDisasm;
 							m_wndDisasm = m_vecWndDisasm[cp.asCode.page];
-							(*m_wndBase)->replaceSubWnd("Disassembly", m_wndDisasm);
+							(*m_sharedDebugData->wndBase)->replaceSubWnd("Disassembly", m_wndDisasm);
 							if (hadFocus)
-								m_wndBase->setFocus("Disassembly");
+								m_sharedDebugData->wndBase->setFocus("Disassembly");
 						}
 
 						m_wndDisasm->refresh();
 
 						{
-							auto wndMemoryView = (*m_wndBase)->getSubWnd<Console::TextWindow>(DbgWndName_MemoryView);
+							auto wndMemoryView = (*m_sharedDebugData->wndBase)->getSubWnd<Console::TextWindow>(DbgWndName_MemoryView);
 							int line = 0;
 							for (auto reg = MarC::BC_MEM_REG_CODE_POINTER; reg < MarC::BC_MEM_REG_NUM_OF_REGS; reg = (MarC::BC_MemRegister)(reg + 1))
 							{
@@ -388,7 +417,7 @@ namespace MarCmd
 				}
 
 				std::cout << Console::CurVis::Hide;
-				(*m_wndBase)->render(0, 0);
+				(*m_sharedDebugData->wndBase)->render(0, 0);
 				std::cout << Console::CurVis::Show;
 				lastRefresh = now;
 				m_sharedDebugData->refreshRequested = false;

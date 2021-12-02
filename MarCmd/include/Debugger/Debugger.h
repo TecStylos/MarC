@@ -16,6 +16,7 @@ namespace MarCmd
 		MarC::ExecutableInfoRef exeInfo;
 		MarC::InterpreterRef interpreter;
 		bool refreshRequested = false;
+		Console::BaseWindowRef wndBase;
 
 		uint64_t exeCount = 0;
 		std::mutex mtxExeCount;
@@ -68,6 +69,24 @@ namespace MarCmd
 		ModDisasmInfo m_modDisasmInfo;
 	};
 
+	typedef std::shared_ptr<class ModuleBrowserWindow> ModuleBrowserWindowRef;
+	class ModuleBrowserWindow : public Console::SplitWindow
+	{
+	protected:
+		ModuleBrowserWindow() = delete;
+		ModuleBrowserWindow(const std::string& name, SharedDebugDataRef sdd);
+		ModuleBrowserWindow(ModuleBrowserWindow&&) = delete;
+		ModuleBrowserWindow(const ModuleBrowserWindow&) = delete;
+	public:
+		virtual void handleKeyPress(char key) override;
+	public:
+		void refresh();
+	public:
+		static ModuleBrowserWindowRef create(const std::string& name, SharedDebugDataRef sdd);
+	private:
+		SharedDebugDataRef m_sdd;
+	};
+
 	class Debugger
 	{
 	public:
@@ -80,7 +99,6 @@ namespace MarCmd
 		void exeThreadFunc();
 	private:
 		Settings m_settings;
-		Console::BaseWindowRef m_wndBase;
 		DisasmWindowRef m_wndDisasm;
 		std::vector<DisasmWindowRef> m_vecWndDisasm;
 	private:
