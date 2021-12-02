@@ -113,7 +113,7 @@ namespace MarCmd
 				auto wndDisasmViewCode = this->getSubWnd<Console::TextWindow>("Code");
 				int64_t mid = wndDisasmViewCode->getHeight() / 2;
 				int64_t line = mid + wndDisasmViewCode->getScroll();
-				if (0 <= line && line < wndDisasmViewCode->nLines())
+				if (0 <= line && line < m_modDisasmInfo.instructionOffsets.size())
 					toggleBreakpoint(MarC::BC_MemAddress(MarC::BC_MEM_BASE_CODE_MEMORY, m_modIndex, m_modDisasmInfo.instructionOffsets[line]));
 			}
 			break;
