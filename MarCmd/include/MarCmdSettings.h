@@ -21,6 +21,7 @@ namespace MarCmd
 		Mode mode = Mode::None;
 		std::string inFile = "";
 		std::string outFile = "";
+		std::string exeDir = "";
 		std::set<std::string> modDirs;
 		std::set<std::string> extDirs;
 		ExitBehavior exitBehavior = ExitBehavior::CloseWhenZero;

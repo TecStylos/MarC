@@ -60,7 +60,7 @@ namespace MarCmd
 
 		if (!settings.flags.hasFlag(CmdFlags::NoExitInfo))
 		{
-			std::cout << std::endl << "Module '" << exeInfo->modules[0] << "' exited with code " << exitCode << "." << std::endl;
+			std::cout << std::endl << "Module '" << exeInfo->modules[0]->moduleName << "' exited with code " << exitCode << "." << std::endl;
 
 			if (verbose)
 				std::cout << "  Reason: '" << interpreter.lastError().getCodeStr() << "'" << std::endl;

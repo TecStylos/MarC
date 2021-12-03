@@ -10,6 +10,7 @@
 #include "MarCmdInterpreter.h"
 #include "Debugger/Debugger.h"
 #include "MarCmdLiveAsmInterpreter.h"
+#include "CurrExePath.h"
 
 int main(int argc, const char** argv, const char** env)
 {
@@ -26,8 +27,11 @@ int main(int argc, const char** argv, const char** env)
 	using Mode = MarCmd::Mode;
 
 	MarCmd::Settings settings;
+	settings.exeDir = std::filesystem::path(MarCmd::CurrExePath()).parent_path().string();
 	settings.modDirs.insert(std::filesystem::current_path().string());
+	settings.modDirs.insert(settings.exeDir);
 	settings.extDirs.insert(std::filesystem::current_path().string());
+	settings.extDirs.insert(settings.exeDir);
 
 	MarCmd::CmdArgParser cmd(argc, argv);
 
@@ -183,8 +187,8 @@ int main(int argc, const char** argv, const char** env)
 		)
 	{
 		std::cout << "Press enter to exit...";
-		std::cin.clear();
-		std::cin.get();
+		std::string temp;
+		std::getline(std::cin, temp);
 	}
 
 	return exitCode;

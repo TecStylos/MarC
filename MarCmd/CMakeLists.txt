@@ -17,7 +17,9 @@ add_executable(
     "src/Debugger/Debugger.cpp"
     "src/Debugger/ConsoleWindow.cpp"
     "src/Debugger/ConsoleHelper.cpp"
- "include/Debugger/DebugWindow.h" "src/Debugger/DebugWindow.cpp" "include/MarCmdExeInfoLoader.h" "src/MarCmdExeInfoLoader.cpp")
+    "src/Debugger/DebugWindow.cpp"
+    "src/MarCmdExeInfoLoader.cpp"
+)
 
 target_include_directories(
 	MarCmd PUBLIC 

@@ -188,7 +188,7 @@ namespace MarC
 				for (auto& pair : modPaths)
 				{
 					if (pair.second.empty())
-						throw LinkerError(LinkErrCode::ModuleNotFound, "Unable to find module '" + pair.first + "!");
+						throw LinkerError(LinkErrCode::ModuleNotFound, "Unable to find module '" + pair.first + "'!");
 
 					if (pair.second.size() > 1)
 					{
