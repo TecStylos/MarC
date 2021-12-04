@@ -32,3 +32,14 @@
 		return
 	#end
 #end / std
+
+!!MACROS!!
+
+#macro.dt : if : val
+	\#scope : IF_+_LINE_
+	jeq.dt : END_SCOPE : val : 0
+#end
+
+#macro : endif
+	\#end
+#end

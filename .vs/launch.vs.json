@@ -14,8 +14,7 @@
         "--grantall",
         "--dbginfo",
         "--forcerefresh",
-        "--debug",
-        "examples/GameOfLife.mca"
+        "examples/branching.mca"
       ]
     }
   ]

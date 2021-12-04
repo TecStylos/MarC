@@ -35,7 +35,7 @@ namespace MarCmd
 		}
 		else if (extension == ".mca")
 		{
-			MarC::Linker linker;
+			MarC::Linker linker(settings.modDirs);
 
 			try
 			{
@@ -49,7 +49,7 @@ namespace MarCmd
 			}
 			catch (const MarC::AssemblerError& err)
 			{
-				std::cout << "An error occured while runing the assembler!" << std::endl
+				std::cout << "An error occured while running the assembler!" << std::endl
 					<< "  " << err.getMessage() << std::endl;
 				return nullptr;
 			}
@@ -66,7 +66,7 @@ namespace MarCmd
 				return nullptr;
 			}
 
-			if (!linker.autoAddMissingModules(settings.modDirs, &addModule, &verbose))
+			if (!linker.autoAddMissingModules(&addModule, &verbose))
 			{
 				std::cout << "An error occured while auto adding the required modules!:" << std::endl
 					<< "  " << linker.lastError().getMessage() << std::endl;

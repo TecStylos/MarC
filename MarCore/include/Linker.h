@@ -43,7 +43,8 @@ namespace MarC
 	class Linker
 	{
 	public:
-		Linker();
+		Linker() = delete;
+		Linker(std::set<std::string> modDirs);
 	public:
 		bool addModule(ModuleInfoRef pModInfo);
 	public:
@@ -56,7 +57,7 @@ namespace MarC
 		bool hasMissingModules() const;
 		const std::set<std::string>& getMissingModules() const;
 	public:
-		bool autoAddMissingModules(const std::set<std::string>& modDirs, AddModuleCallback amc, void* pPaam);
+		bool autoAddMissingModules(AddModuleCallback amc, void* pPaam);
 	private:
 		void update(ModuleInfoRef pModInfo);
 		void copySymbols(ModuleInfoRef pModInfo);
@@ -77,5 +78,6 @@ namespace MarC
 		LinkerError m_lastErr;
 		ExecutableInfoRef m_pExeInfo;
 		std::set<std::string> m_missingModules;
+		std::set<std::string> m_modDirs;
 	};
 }

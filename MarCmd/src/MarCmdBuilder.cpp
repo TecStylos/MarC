@@ -10,7 +10,7 @@ namespace MarCmd
 {
 	int Builder::run(const Settings& settings)
 	{
-		MarC::Linker linker;
+		MarC::Linker linker(settings.modDirs);
 
 		bool verbose = settings.flags.hasFlag(CmdFlags::Verbose);
 
@@ -22,7 +22,7 @@ namespace MarCmd
 
 			if (verbose)
 				std::cout << "Adding missing modules to the linker..." << std::endl;
-			linker.autoAddMissingModules(settings.modDirs, &addModule, &verbose);
+			linker.autoAddMissingModules(&addModule, &verbose);
 		}
 		catch (const MarC::AsmTokenizerError& err)
 		{

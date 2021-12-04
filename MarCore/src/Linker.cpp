@@ -20,7 +20,8 @@ namespace MarC
 			"ERROR\n  -> " + getText();
 	}
 
-	Linker::Linker()
+	Linker::Linker(std::set<std::string> modDirs)
+		: m_modDirs(modDirs)
 	{
 		m_pExeInfo = ExecutableInfo::create();
 	}
@@ -176,14 +177,14 @@ namespace MarC
 		copyPerms(pModInfo);
 	}
 
-	bool Linker::autoAddMissingModules(const std::set<std::string>& modDirs, AddModuleCallback amc, void* pParam)
+	bool Linker::autoAddMissingModules(AddModuleCallback amc, void* pParam)
 	{
 		try
 		{
 			while (hasMissingModules())
 			{
 				auto& misMods = getMissingModules();
-				auto modPaths = MarC::locateModules(modDirs, misMods);
+				auto modPaths = MarC::locateModules(m_modDirs, misMods);
 
 				for (auto& pair : modPaths)
 				{
