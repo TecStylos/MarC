@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug",
+            "program": "${workspaceFolder}/bin/Debug/MarCmd/MarCmd",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "--verbose",
+                "--closeonexit",
+                "--grantall",
+                "--dbginfo",
+                "--forcerefresh",
+                "--debug",
+                "examples/GameOfLife.mca"
+              ]
+        }
+    ]
+}
