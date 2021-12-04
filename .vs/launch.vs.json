@@ -10,11 +10,12 @@
       "currentDir": "${workspaceRoot}",
       "args": [
         "--verbose",
-        //"--closeonexit",
+        "--closeonexit",
         "--grantall",
         "--dbginfo",
         "--forcerefresh",
-        "examples/fibonacci_no_recursion.mca"
+        "--debug",
+        "examples/GameOfLife.mca"
       ]
     }
   ]
