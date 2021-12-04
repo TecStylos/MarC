@@ -66,6 +66,7 @@ namespace MarC
 		void assembleStatement();
 		void assembleStatement(const std::string& statement);
 		void assembleInstruction();
+		void assembleMacroUsage();
 	private:
 		void assembleSpecializedInstruction(BC_OpCodeEx& ocx);
 		void assembleSpecCall(BC_OpCodeEx& ocx);
@@ -106,6 +107,8 @@ namespace MarC
 		void removeScope();
 		std::string getScopedName(const std::string& name);
 		void addUnresolvedSymbol(UnresolvedSymbol unresSymbol);
+	private:
+		bool macroExists(const std::string& name);
 	private:
 		bool isInstructionLike();
 		bool isDirectiveLike();

@@ -177,6 +177,11 @@ namespace MarC
 		copyPerms(pModInfo);
 	}
 
+	const std::set<std::string> Linker::getModDirs() const
+	{
+		return m_modDirs;
+	}
+
 	bool Linker::autoAddMissingModules(AddModuleCallback amc, void* pParam)
 	{
 		try

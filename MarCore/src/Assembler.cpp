@@ -109,7 +109,11 @@ namespace MarC
 
 		ocx.opCode = BC_OpCodeFromString(currToken().value);
 		if (ocx.opCode == BC_OC_NONE || ocx.opCode == BC_OC_UNKNOWN)
-			ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to opCode!");
+		{
+			if (!macroExists(currToken().value))
+				ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Unknown identifier '" + currToken().value + "'!");
+			assembleMacroUsage();
+		}
 
 		auto& layout = InstructionLayoutFromOpCode(ocx.opCode);
 
@@ -143,6 +147,11 @@ namespace MarC
 
 			assembleArgument(ocx, arg);
 		}
+	}
+
+	void Assembler::assembleMacroUsage()
+	{
+		ASSEMBLER_THROW_ERROR(AsmErrCode::InternalError, "Macro usages have not been implemented yet!");
 	}
 
 	void Assembler::assembleSpecializedInstruction(BC_OpCodeEx& ocx)
@@ -819,6 +828,11 @@ namespace MarC
 		unresSymbol.name = getScopedName(unresSymbol.name);
 		unresSymbol.refName = getScopedName(unresSymbol.refName);
 		m_pModInfo->unresolvedSymbols.push_back(unresSymbol);
+	}
+
+	bool Assembler::macroExists(const std::string& name)
+	{
+		return false;
 	}
 
 	bool Assembler::isInstructionLike()

@@ -57,6 +57,8 @@ namespace MarC
 		bool hasMissingModules() const;
 		const std::set<std::string>& getMissingModules() const;
 	public:
+		const std::set<std::string> getModDirs() const;
+	public:
 		bool autoAddMissingModules(AddModuleCallback amc, void* pPaam);
 	private:
 		void update(ModuleInfoRef pModInfo);
