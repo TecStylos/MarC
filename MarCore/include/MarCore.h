@@ -7,3 +7,4 @@
 #include "Interpreter.h"
 #include "ModuleLocator.h"
 #include "Disassembler.h"
+#include "ModuleLoader.h"

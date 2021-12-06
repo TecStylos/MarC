@@ -147,6 +147,8 @@ int main(int argc, const char** argv, const char** env)
 		settings.mode = Mode::Interpret;
 	}
 
+	auto mod = MarC::ModuleLoader::load(settings.inFile, settings.modDirs);
+
 	int exitCode = 0;
 
 	{
