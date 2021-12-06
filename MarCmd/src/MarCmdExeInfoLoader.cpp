@@ -14,7 +14,6 @@ namespace MarCmd
 			throw std::runtime_error("Interpreting *.mcc files is not supported at the moment!");
 		else if (extension == ".mce")
 		{
-
 			std::ifstream iStream(settings.inFile, std::ios::binary | std::ios::in);
 			if (!iStream.is_open())
 			{
