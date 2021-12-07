@@ -1,5 +1,5 @@
 #reqmod : "std"
-#manperm : >>std>>ext>>prints
+#manperm : >>stdext>>prints
 
         / Memory init
 #alias : BUFFSIZE : 14
@@ -9,9 +9,9 @@ alloc : dst : BUFFSIZE
 
 call : >>std>>copyString : addr.@dst : addr.src
 
-calx : >>std>>ext>>prints : addr."src: "
-calx : >>std>>ext>>prints : addr.src
-calx : >>std>>ext>>prints : addr."dst: "
-calx : >>std>>ext>>prints : addr.@dst
+calx : >>stdext>>prints : addr."src: "
+calx : >>stdext>>prints : addr.src
+calx : >>stdext>>prints : addr."dst: "
+calx : >>stdext>>prints : addr.@dst
 
 free : @dst

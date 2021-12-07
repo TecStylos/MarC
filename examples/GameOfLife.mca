@@ -1,6 +1,6 @@
 #reqmod : "std"
-#manperm : >>std>>ext>>prints
-#manperm : >>std>>ext>>sleepms
+#manperm : >>stdext>>prints
+#manperm : >>stdext>>sleepms
 
 #alias : FRAME_TIME : 75
 #alias : MAIN_LOOP_COUNT : 16

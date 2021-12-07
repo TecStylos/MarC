@@ -1,37 +1,37 @@
 #reqmod : "std"
-#manperm : >>std>>ext>>prints
-#manperm : >>std>>ext>>scans
-#manperm : >>std>>ext>>printt
-#manperm : >>std>>ext>>scant
+#manperm : >>stdext>>prints
+#manperm : >>stdext>>scans
+#manperm : >>stdext>>printt
+#manperm : >>stdext>>scant
 
 #static : USER_NAME : 128
 #static : USER_AGE : ^i16
 
-calx : >>std>>ext>>prints : addr."What's your name?: "
-calx : >>std>>ext>>scans : addr.USER_NAME
-calx : >>std>>ext>>prints : addr."Hello "
-calx : >>std>>ext>>prints : addr.USER_NAME
-calx : >>std>>ext>>prints : addr."!\n"
+calx : >>stdext>>prints : addr."What's your name?: "
+calx : >>stdext>>scans : addr.USER_NAME
+calx : >>stdext>>prints : addr."Hello "
+calx : >>stdext>>prints : addr.USER_NAME
+calx : >>stdext>>prints : addr."!\n"
 
-calx : >>std>>ext>>prints : addr."How old are you?: "
-calx.i16 : >>std>>ext>>scant : USER_AGE
-calx : >>std>>ext>>prints : addr."Wow, you're already "
-calx : >>std>>ext>>printt : i16.@USER_AGE
-calx : >>std>>ext>>prints : addr." years old!\n"
-calx : >>std>>ext>>prints : addr."I'm 17 years old. That means you're "
+calx : >>stdext>>prints : addr."How old are you?: "
+calx.i16 : >>stdext>>scant : USER_AGE
+calx : >>stdext>>prints : addr."Wow, you're already "
+calx : >>stdext>>printt : i16.@USER_AGE
+calx : >>stdext>>prints : addr." years old!\n"
+calx : >>stdext>>prints : addr."I'm 17 years old. That means you're "
 mov.i16 : $ac : @USER_AGE
 sub.i16 : $ac : 17
 
 jgt.i16 : USER_IS_OLDER : @$ac : 0
 jlt.i16 : USER_IS_YOUNGER : @$ac : 0
-calx : >>std>>ext>>prints : addr."the same age as I am!\n"
+calx : >>stdext>>prints : addr."the same age as I am!\n"
 jmp : USER_AGE_CHECK_END
 #label : USER_IS_YOUNGER
 mul.i16 : $ac : -1
-calx : >>std>>ext>>printt : i16.@$ac
-calx : >>std>>ext>>prints : addr." years younger than me!\n"
+calx : >>stdext>>printt : i16.@$ac
+calx : >>stdext>>prints : addr." years younger than me!\n"
 jmp : USER_AGE_CHECK_END
 #label : USER_IS_OLDER
-calx : >>std>>ext>>printt : i16.@$ac
-calx : >>std>>ext>>prints : addr." years older than me!\n"
+calx : >>stdext>>printt : i16.@$ac
+calx : >>stdext>>prints : addr." years older than me!\n"
 #label : USER_AGE_CHECK_END
