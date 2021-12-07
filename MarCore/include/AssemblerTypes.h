@@ -86,15 +86,15 @@ namespace MarC
 		BC_Datatype datatype = BC_DT_NONE;
 	};
 
-	struct UnresolvedSymbol
+	struct SymbolAlias
 	{
 		std::string name = "<unnamed>";
 		std::string refName = "<unknown>";
 	public:
-		UnresolvedSymbol() = default;
-		UnresolvedSymbol(const std::string& name, const std::string& refName) : name(name), refName(refName) {}
+		SymbolAlias() = default;
+		SymbolAlias(const std::string& name, const std::string& refName) : name(name), refName(refName) {}
 	public:
-		bool operator<(const UnresolvedSymbol& other) const { return name < other.name; }
+		bool operator<(const SymbolAlias& other) const { return name < other.name; }
 	};
 
 	template <>
@@ -110,33 +110,5 @@ namespace MarC
 		deserialize(symbol.name, iStream);
 		deserialize(symbol.usage, iStream);
 		deserialize(symbol.value, iStream);
-	}
-
-	template <>
-	inline void serialize(const SymbolRef& symRef, std::ostream& oStream)
-	{
-		serialize(symRef.name, oStream);
-		serialize(symRef.datatype, oStream);
-		serialize(symRef.offset, oStream);
-	}
-	template <>
-	inline void deserialize(SymbolRef& symRef, std::istream& iStream)
-	{
-		deserialize(symRef.name, iStream);
-		deserialize(symRef.datatype, iStream);
-		deserialize(symRef.offset, iStream);
-	}
-
-	template <>
-	inline void serialize(const UnresolvedSymbol& unresSymbol, std::ostream& oStream)
-	{
-		serialize(unresSymbol.name, oStream);
-		serialize(unresSymbol.refName, oStream);
-	}
-	template <>
-	inline void deserialize(UnresolvedSymbol& unresSymbol, std::istream& iStream)
-	{
-		deserialize(unresSymbol.name, iStream);
-		deserialize(unresSymbol.refName, iStream);
 	}
 }

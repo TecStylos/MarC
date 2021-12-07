@@ -30,7 +30,7 @@ namespace MarC
 
 		try
 		{
-			resolveUnresolvedSymbols();
+			resolveSymbolAliases();
 			resolveUnresolvedSymbolRefs();
 		}
 		catch (LinkerError& err)
@@ -46,7 +46,7 @@ namespace MarC
 		return m_modInfo->exeInfo;
 	}
 
-	void Linker::resolveUnresolvedSymbols()
+	void Linker::resolveSymbolAliases()
 	{
 		uint64_t nResolved;
 
@@ -54,9 +54,9 @@ namespace MarC
 		{
 			nResolved = 0;
 
-			auto it = m_modInfo->unresolvedSymbols.begin();
+			auto it = m_modInfo->symbolAliases.begin();
 
-			while (it != m_modInfo->unresolvedSymbols.end())
+			while (it != m_modInfo->symbolAliases.end())
 			{
 				auto current = it++;
 
@@ -71,7 +71,7 @@ namespace MarC
 
 				m_modInfo->exeInfo->symbols.insert(sym);
 
-				m_modInfo->unresolvedSymbols.erase(current);
+				m_modInfo->symbolAliases.erase(current);
 
 				++nResolved;
 			}
@@ -107,7 +107,7 @@ namespace MarC
 	{
 		if (m_modInfo->exeInfo->symbols.find(Symbol(name)) != m_modInfo->exeInfo->symbols.end())
 			return true;
-		if (m_modInfo->unresolvedSymbols.find(UnresolvedSymbol(name, "")) != m_modInfo->unresolvedSymbols.end())
+		if (m_modInfo->symbolAliases.find(SymbolAlias(name, "")) != m_modInfo->symbolAliases.end())
 			return true;
 		return false;
 	}

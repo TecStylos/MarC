@@ -50,7 +50,7 @@ namespace MarC
 	public:
 		ExecutableInfoRef getExeInfo();
 	private:
-		void resolveUnresolvedSymbols();
+		void resolveSymbolAliases();
 		void resolveUnresolvedSymbolRefs();
 	private:
 		bool symbolNameExists(const std::string& name);

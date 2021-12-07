@@ -13,7 +13,7 @@ namespace MarC
 
 	struct ExecutableInfo
 	{
-		std::string name;
+		std::string name = "<unnamed>";
 		MemoryRef codeMemory;
 		MemoryRef staticStack;
 		std::set<std::string> mandatoryPermissions;

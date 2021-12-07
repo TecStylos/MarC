@@ -519,7 +519,7 @@ namespace MarC
 			symbol.usage = SymbolUsage::Value;
 			break;
 		case AsmToken::Type::Name:
-			addUnresolvedSymbol({ symbol.name, currToken().value });
+			addSymbolAlias({ symbol.name, currToken().value });
 			return;
 		default:
 			ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Unexpected token'" + currToken().value + "' for alias value!");
@@ -853,11 +853,11 @@ namespace MarC
 		return fullName;
 	}
 
-	void Assembler::addUnresolvedSymbol(UnresolvedSymbol unresSymbol)
+	void Assembler::addSymbolAlias(SymbolAlias symAlias)
 	{
-		unresSymbol.name = getScopedName(unresSymbol.name);
-		unresSymbol.refName = getScopedName(unresSymbol.refName);
-		m_pModInfo->unresolvedSymbols.insert(unresSymbol);
+		symAlias.name = getScopedName(symAlias.name);
+		symAlias.refName = getScopedName(symAlias.refName);
+		m_pModInfo->symbolAliases.insert(symAlias);
 	}
 
 	bool Assembler::macroExists(const std::string& name)

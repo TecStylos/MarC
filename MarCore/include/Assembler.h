@@ -108,7 +108,7 @@ namespace MarC
 		void addFuncScope(const std::string& name);
 		void removeScope();
 		std::string getScopedName(const std::string& name);
-		void addUnresolvedSymbol(UnresolvedSymbol unresSymbol);
+		void addSymbolAlias(SymbolAlias symAlias);
 	private:
 		bool macroExists(const std::string& name);
 	private:
