@@ -77,6 +77,7 @@ label | None | [name] | Store the current code address in [name].
 alias | None |  [name] : [literal] | Give a literal an alias (No stack allocation). (Literals can be other aliases, labels, names for static allocations, scopes, (extern) function names, local variables, ...)
 static | None | [name] : [size] | Reserve n bytes on the static stack and store the address in [name].
 reqmod | None | [string] | Request/Require a module.
+extension | None | [string] | Request an extension. (Required for external functions)
 manperm | None | [funcName] | Request a mandatory permission for an external function.
 optperm | None | [funcName] | Request an optional permission for an external function.
 scope | None | [name] | Begin a new scope.

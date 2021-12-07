@@ -24,26 +24,9 @@ namespace MarC
 		: m_modInfo(modInfo)
 	{}
 
-	bool Linker::addModule(ModuleInfoRef pModInfo)
-	{
-		resetError();
-
-		return !m_lastErr;
-	}
-
-	bool Linker::update()
-	{
-		resetError();
-
-		return !m_lastErr;
-	}
-
 	bool Linker::link()
 	{
 		resetError();
-
-		if (!update())
-			return false;
 
 		try
 		{

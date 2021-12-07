@@ -5,7 +5,6 @@
 
 #include "MarCore.h"
 #include "PermissionGrantPrompt.h"
-#include "MarCmdExeInfoLoader.h"
 
 namespace MarCmd
 {

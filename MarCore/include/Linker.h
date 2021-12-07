@@ -46,9 +46,6 @@ namespace MarC
 		Linker() = delete;
 		Linker(ModuleInfoRef modInfo);
 	public:
-		bool addModule(ModuleInfoRef pModInfo);
-	public:
-		bool update();
 		bool link();
 	public:
 		ExecutableInfoRef getExeInfo();

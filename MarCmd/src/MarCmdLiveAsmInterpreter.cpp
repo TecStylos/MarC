@@ -20,14 +20,14 @@ namespace MarCmd
 	{
 		m_codeStr = "";
 		m_pTokenizer = std::make_shared<MarC::AsmTokenizer>(m_codeStr);
-		//m_pAssembler = std::make_shared<MarC::Assembler>(m_pTokenizer->getTokenList(), "<cin>");
-		//m_pLinker = std::make_shared<MarC::Linker>(settings.modDirs);
+		m_pModPack = MarC::ModulePack::create("<cin>");
+		m_pModPack->tokenList = m_pTokenizer->getTokenList();
+		m_pAssembler = std::make_shared<MarC::Assembler>(m_pModPack);
+		m_pLinker = std::make_shared<MarC::Linker>(m_pAssembler->getModuleInfo());
 		m_pInterpreter = std::make_shared<MarC::Interpreter>(m_pLinker->getExeInfo());
 
 		for (auto& entry : m_settings.extDirs)
 			m_pInterpreter->addExtDir(entry);
-
-		m_pLinker->addModule(m_pAssembler->getModuleInfo());
 	}
 
 	int LiveAsmInterpreter::run()
@@ -48,6 +48,8 @@ namespace MarCmd
 				continue;
 			}
 
+			MarC::ModuleLoader::loadDependencies(m_pModPack->tokenList, m_pModPack->dependencies, m_settings.modDirs);
+
 			if (!m_pAssembler->assemble())
 			{
 				recover(RecoverBegin::Assembler);
@@ -56,17 +58,9 @@ namespace MarCmd
 				continue;
 			}
 
-			if (!m_pLinker->update())
-			{
-				std::cout << "An error occured while updating the linker information:" << std::endl
-					<< "  " << m_pLinker->lastError().getMessage() << std::endl;
-				continue;
-			}
-
 			try
 			{
 				bool verbose = m_settings.flags.hasFlag(CmdFlags::Verbose);
-				//m_pLinker->autoAddMissingModules(&addModule, &verbose);
 				if (!m_pLinker->link())
 					throw m_pLinker->lastError();
 			}

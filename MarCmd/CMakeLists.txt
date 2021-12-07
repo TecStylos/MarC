@@ -18,7 +18,7 @@ add_executable(
     "src/Debugger/ConsoleWindow.cpp"
     "src/Debugger/ConsoleHelper.cpp"
     "src/Debugger/DebugWindow.cpp"
-    "src/MarCmdExeInfoLoader.cpp"
+    
 )
 
 target_include_directories(

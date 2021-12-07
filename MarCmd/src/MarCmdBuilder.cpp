@@ -10,52 +10,19 @@ namespace MarCmd
 {
 	int Builder::run(const Settings& settings)
 	{
-		//MarC::Linker linker(settings.modDirs);
-		MarC::Linker linker(nullptr);
-
 		bool verbose = settings.flags.hasFlag(CmdFlags::Verbose);
 
-		try
-		{
-			if (verbose)
-				std::cout << "Adding input file to the linker..." << std::endl;
-			addModule(linker, settings.inFile, modNameFromPath(settings.inFile), &verbose);
+		auto mod = MarC::ModuleLoader::load(settings.inFile, settings.modDirs);
 
-			if (verbose)
-				std::cout << "Adding missing modules to the linker..." << std::endl;
-			//linker.autoAddMissingModules(&addModule, &verbose);
-		}
-		catch (const MarC::AsmTokenizerError& err)
-		{
-			std::cout << "An error occured while running the tokenizer!:" << std::endl
-				<< "  " << err.getMessage() << std::endl;
-			return -1;
-		}
-		catch (const MarC::AssemblerError& err)
-		{
-			std::cout << "An error occured while runing the assembler!" << std::endl
-				<< "  " << err.getMessage() << std::endl;
-			return -1;
-		}
-		catch (const MarC::LinkerError& err)
-		{
-			std::cout << "An error occured while running the linker!:" << std::endl
-				<< "  " << err.getMessage() << std::endl;
-			return -1;
-		}
-		catch (const std::runtime_error& err)
-		{
-			std::cout << "An unexpected error occured!:" << std::endl
-				<< "  " << err.what() << std::endl;
-			return -1;
-		}
+		MarC::Assembler assembler(mod);
+		if (!assembler.assemble())
+			throw std::runtime_error("Unable to assemble the modules!");
 
+		MarC::Linker linker(assembler.getModuleInfo());
 		if (!linker.link())
-		{
-			std::cout << "An error occured while running the linker!:" << std::endl
-				<< "  " << linker.lastError().getMessage() << std::endl;
-			return -1;
-		}
+			throw std::runtime_error("Unable to link the modules!");
+
+		auto exeInfo = linker.getExeInfo();
 
 		std::string outFile;
 		if (!settings.outFile.empty())
@@ -69,9 +36,6 @@ namespace MarCmd
 			std::cout << "Unable to open the output file!" << std::endl;
 			return -1;
 		}
-
-		auto exeInfo = linker.getExeInfo();
-		//exeInfo->hasDebugInfo = settings.flags.hasFlag(CmdFlags::DebugInfo);
 
 		if (verbose)
 			std::cout << "Writing executable to disk..." << std::endl;

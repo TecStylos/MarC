@@ -3,7 +3,6 @@
 #include <iostream>
 #include <thread>
 
-#include "MarCmdExeInfoLoader.h"
 #include "PermissionGrantPrompt.h"
 
 namespace MarCmd
@@ -234,7 +233,20 @@ namespace MarCmd
 		: m_settings(settings)
 	{
 		m_sharedDebugData = std::make_shared<SharedDebugData>();
-		m_sharedDebugData->exeInfo = loadExeInfo(m_settings);
+
+		{
+			auto mod = MarC::ModuleLoader::load(settings.inFile, settings.modDirs);
+
+			MarC::Assembler assembler(mod);
+			if (!assembler.assemble())
+				throw std::runtime_error("Unable to assemble the modules!");
+
+			MarC::Linker linker(assembler.getModuleInfo());
+			if (!linker.link())
+				throw std::runtime_error("Unable to link the modules!");
+
+			m_sharedDebugData->exeInfo = linker.getExeInfo();
+		}
 
 		for (auto& sym : m_sharedDebugData->exeInfo->symbols)
 		{
