@@ -3,6 +3,7 @@
 #include <string>
 #include "Memory.h"
 #include "ModuleInfo.h"
+#include "ModulePack.h"
 #include "AsmInstructions.h"
 #include "AsmTokenizerTypes.h"
 
@@ -51,7 +52,7 @@ namespace MarC
 	class Assembler
 	{
 	public:
-		Assembler(const AsmTokenListRef tokenList, const std::string& moduleName = "<unnamed>");
+		Assembler(const ModulePackRef modPack);
 	public:
 		bool assemble();
 	public:
@@ -89,6 +90,7 @@ namespace MarC
 		void assembleDirAlias();
 		void assembleDirStatic();
 		void assembleDirRequestModule();
+		void assembleDirExtension();
 		void assembleDirScope();
 		void assembleDirEnd();
 		void assembleDirFunction();
@@ -130,7 +132,8 @@ namespace MarC
 		uint64_t currStaticStackOffset() const;
 		BC_MemAddress currStaticStackAddr() const;
 	private:
-		AsmTokenListRef m_pTokenList;
+		AsmTokenListRef m_pCurrTokenList;
+		ModulePackRef m_pModPack;
 		AssemblerError m_lastErr;
 		ModuleInfoRef m_pModInfo;
 		std::vector<ScopeDesc> m_scopeList;
@@ -187,12 +190,12 @@ namespace MarC
 	template <typename T>
 	void Assembler::pushCode(const T& data)
 	{
-		m_pModInfo->codeMemory->push(data);
+		m_pModInfo->exeInfo->codeMemory->push(data);
 	}
 
 	template <typename T>
 	void Assembler::writeCode(const T& data, uint64_t offset)
 	{
-		m_pModInfo->codeMemory->write(data, offset);
+		m_pModInfo->exeInfo->codeMemory->write(data, offset);
 	}
 }

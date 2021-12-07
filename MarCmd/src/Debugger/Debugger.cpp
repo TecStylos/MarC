@@ -14,8 +14,7 @@ namespace MarCmd
 		m_sdd = sdd;
 		m_modIndex = modIndex;
 
-		auto& mod = m_sdd->interpreter->getExeInfo()->modules[modIndex];
-		auto& mem = mod->codeMemory;
+		auto& mem = m_sdd->interpreter->getExeInfo()->codeMemory;
 
 		uint64_t nDisassembled = 0;
 		while (nDisassembled < mem->size())
@@ -142,7 +141,7 @@ namespace MarCmd
 		auto wndDisasmViewControlBreakpoints = this->getSubWnd<Console::TextWindow>("Breakpoints");
 		auto wndDisasmViewCode = this->getSubWnd<Console::TextWindow>("Code");
 
-		wndDisasmTitle->replace("Disassembly: " + m_sdd->interpreter->getExeInfo()->modules[exeAddr.asCode.page]->moduleName, 1, 0);
+		wndDisasmTitle->replace("Disassembly: " + m_sdd->interpreter->getExeInfo()->name, 1, 0);
 
 		int64_t exeLine = addrToLine(exeAddr);
 		if (m_nInsExecuted != m_sdd->interpreter->nInsExecuted())
@@ -205,10 +204,6 @@ namespace MarCmd
 	{
 		// TODO: Setup the window
 		m_sdd = sdd;
-		for (auto& mod : m_sdd->interpreter->getExeInfo()->modules)
-		{
-			
-		}
 	}
 
 	void ModuleBrowserWindow::handleKeyPress(char key)
@@ -254,9 +249,8 @@ namespace MarCmd
 		for (auto& entry : settings.extDirs)
 			m_sharedDebugData->interpreter->addExtDir(entry);
 
-		m_vecWndDisasm.resize(m_sharedDebugData->exeInfo->modules.size());
-		for (uint64_t i = 0; i < m_sharedDebugData->exeInfo->modules.size(); ++i)
-			m_vecWndDisasm[i] = DisasmWindow::create("Disassembly", m_sharedDebugData, i);
+		m_vecWndDisasm.resize(1);
+			m_vecWndDisasm[0] = DisasmWindow::create("Disassembly", m_sharedDebugData, 0);
 		m_wndDisasm = m_vecWndDisasm[0];
 
 		m_sharedDebugData->regDatatypes[MarC::BC_MEM_REG_CODE_POINTER] = MarC::BC_DT_ADDR;

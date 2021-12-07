@@ -13,9 +13,17 @@ namespace MarCmd
 	{
 		bool verbose = settings.flags.hasFlag(CmdFlags::Verbose);
 
-		auto exeInfo = loadExeInfo(settings);
-		if (!exeInfo)
-			return -1;
+		auto mod = MarC::ModuleLoader::load(settings.inFile, settings.modDirs);
+
+		MarC::Assembler assembler(mod);
+		if (!assembler.assemble())
+			throw std::runtime_error("Unable to assemble the modules!");
+
+		MarC::Linker linker(assembler.getModuleInfo());
+		if (!linker.link())
+			throw std::runtime_error("Unable to link the modules!");
+
+		auto exeInfo = linker.getExeInfo();
 
 		MarC::Interpreter interpreter(exeInfo);
 		for (auto& entry : settings.extDirs)
@@ -60,7 +68,7 @@ namespace MarCmd
 
 		if (!settings.flags.hasFlag(CmdFlags::NoExitInfo))
 		{
-			std::cout << std::endl << "Module '" << exeInfo->modules[0]->moduleName << "' exited with code " << exitCode << "." << std::endl;
+			std::cout << std::endl << "Module '" << exeInfo->name << "' exited with code " << exitCode << "." << std::endl;
 
 			if (verbose)
 				std::cout << "  Reason: '" << interpreter.lastError().getCodeStr() << "'" << std::endl;

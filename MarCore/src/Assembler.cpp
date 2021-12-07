@@ -22,11 +22,13 @@ namespace MarC
 			"  -> " + getText();
 	}
 
-	Assembler::Assembler(const AsmTokenListRef tokenList, const std::string& moduleName)
-		: m_pTokenList(tokenList)
+	Assembler::Assembler(const ModulePackRef modPack)
+		: m_pModPack(modPack), m_pCurrTokenList(modPack->tokenList)
 	{
 		m_pModInfo = ModuleInfo::create();
-		m_pModInfo->moduleName = moduleName;
+		m_pModInfo->exeInfo->name = modPack->name;
+		m_pModInfo->exeInfo->codeMemory = Memory::create();
+		m_pModInfo->exeInfo->staticStack = Memory::create();
 	}
 
 	ModuleInfoRef Assembler::getModuleInfo()
@@ -378,7 +380,7 @@ namespace MarC
 			ASSEMBLER_THROW_ERROR(AsmErrCode::DatatypeMismatch, "Cannot use string in instruction with datatype '" + BC_DatatypeToString(tc.datatype) + "'!");
 
 		tc.cell.as_ADDR = currStaticStackAddr();
-		m_pModInfo->staticStack->push(currToken().value.c_str(), currToken().value.size() + 1);
+		m_pModInfo->exeInfo->staticStack->push(currToken().value.c_str(), currToken().value.size() + 1);
 	}
 
 	void Assembler::generateTypeCellFloat(TypeCell& tc, bool getsDereferenced)
@@ -450,6 +452,8 @@ namespace MarC
 			return assembleDirStatic();
 		case DirectiveID::RequestModule:
 			return assembleDirRequestModule();
+		case DirectiveID::Extension:
+			return assembleDirExtension();
 		case DirectiveID::Scope:
 			return assembleDirScope();
 		case DirectiveID::End:
@@ -556,7 +560,7 @@ namespace MarC
 
 		BC_MemCell mc;
 		mc.as_ADDR = currStaticStackAddr();
-		m_pModInfo->staticStack->resize(m_pModInfo->staticStack->size() + tc.cell.as_U_64);
+		m_pModInfo->exeInfo->staticStack->resize(m_pModInfo->exeInfo->staticStack->size() + tc.cell.as_U_64);
 
 		addSymbol({ name, SymbolUsage::Address, mc });
 	}
@@ -570,7 +574,35 @@ namespace MarC
 
 		std::string modName = currToken().value;
 
-		m_pModInfo->requiredModules.push_back(modName);
+		auto modIt = m_pModPack->dependencies.find(modName);
+		if (modIt == m_pModPack->dependencies.end())
+			throw std::runtime_error("Unable to resolve dependency!");
+
+		{
+			VirtualAsmTokenList vtl(*this, modIt->second);
+
+			try
+			{
+				while (!isEndOfCode())
+					assembleStatement();
+			}
+			catch (AssemblerError& err)
+			{
+				throw err;
+			}
+		}
+	}
+
+	void Assembler::assembleDirExtension()
+	{
+		removeNecessaryColon();
+
+		if (nextToken().type != AsmToken::Type::String)
+			ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::String, currToken());
+
+		std::string extName = currToken().value;
+
+		m_pModInfo->exeInfo->requiredExtensions.insert(extName);
 	}
 
 	void Assembler::assembleDirScope()
@@ -676,8 +708,6 @@ namespace MarC
 		std::string name = currToken().value;
 
 		assembleStatement("#alias : " + name + " : \"" + getScopedName(name) + "\"");
-
-		m_pModInfo->extensionRequired = true;
 	}
 
 	void Assembler::assembleDirLocal()
@@ -724,7 +754,7 @@ namespace MarC
 
 		std::string name = currToken().value;
 
-		m_pModInfo->mandatoryPermissions.push_back(name);
+		m_pModInfo->exeInfo->mandatoryPermissions.insert(name);
 	}
 
 	void Assembler::assembleDirOptionalPermission()
@@ -736,7 +766,7 @@ namespace MarC
 
 		std::string name = currToken().value;
 
-		m_pModInfo->optionalPermissions.push_back(name);
+		m_pModInfo->exeInfo->optionalPermissions.insert(name);
 	}
 
 	void Assembler::removeNecessaryColon()
@@ -780,7 +810,7 @@ namespace MarC
 	void Assembler::addSymbol(Symbol symbol)
 	{
 		symbol.name = getScopedName(symbol.name);
-		m_pModInfo->definedSymbols.push_back(symbol);
+		m_pModInfo->exeInfo->symbols.insert(symbol);
 	}
 
 	void Assembler::addScope(const std::string& name)
@@ -827,7 +857,7 @@ namespace MarC
 	{
 		unresSymbol.name = getScopedName(unresSymbol.name);
 		unresSymbol.refName = getScopedName(unresSymbol.refName);
-		m_pModInfo->unresolvedSymbols.push_back(unresSymbol);
+		m_pModInfo->unresolvedSymbols.insert(unresSymbol);
 	}
 
 	bool Assembler::macroExists(const std::string& name)
@@ -859,7 +889,7 @@ namespace MarC
 
 	const AsmToken& Assembler::currToken() const
 	{
-		return (*m_pTokenList)[m_nextTokenToCompile];
+		return (*m_pCurrTokenList)[m_nextTokenToCompile];
 	}
 
 	bool Assembler::isEndOfCode() const
@@ -869,17 +899,17 @@ namespace MarC
 
 	void Assembler::pushCode(const void* data, uint64_t size)
 	{
-		m_pModInfo->codeMemory->push(data, size);
+		m_pModInfo->exeInfo->codeMemory->push(data, size);
 	}
 
 	void Assembler::writeCode(const void* data, uint64_t size, uint64_t offset)
 	{
-		m_pModInfo->codeMemory->write(data, size, offset);
+		m_pModInfo->exeInfo->codeMemory->write(data, size, offset);
 	}
 
 	uint64_t Assembler::currCodeOffset() const
 	{
-		return m_pModInfo->codeMemory->size();
+		return m_pModInfo->exeInfo->codeMemory->size();
 	}
 
 	BC_MemAddress Assembler::currCodeAddr() const
@@ -889,7 +919,7 @@ namespace MarC
 
 	uint64_t Assembler::currStaticStackOffset() const
 	{
-		return m_pModInfo->staticStack->size();
+		return m_pModInfo->exeInfo->staticStack->size();
 	}
 
 	BC_MemAddress Assembler::currStaticStackAddr() const

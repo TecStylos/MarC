@@ -6,9 +6,9 @@
 
 namespace MarC
 {
-	ModuleRef ModuleLoader::load(const std::string& modPath, const std::set<std::string>& modDirs)
+	ModulePackRef ModuleLoader::load(const std::string& modPath, const std::set<std::string>& modDirs)
 	{
-		ModuleRef mod = std::make_shared<Module>();
+		ModulePackRef mod = std::make_shared<ModulePack>();
 
 		mod->name = modNameFromPath(modPath);
 

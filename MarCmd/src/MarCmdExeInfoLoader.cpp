@@ -34,7 +34,8 @@ namespace MarCmd
 		}
 		else if (extension == ".mca")
 		{
-			MarC::Linker linker(settings.modDirs);
+			//MarC::Linker linker(settings.modDirs);
+			MarC::Linker linker(nullptr);
 
 			try
 			{
@@ -65,7 +66,7 @@ namespace MarCmd
 				return nullptr;
 			}
 
-			if (!linker.autoAddMissingModules(&addModule, &verbose))
+			//if (!linker.autoAddMissingModules(&addModule, &verbose))
 			{
 				std::cout << "An error occured while auto adding the required modules!:" << std::endl
 					<< "  " << linker.lastError().getMessage() << std::endl;

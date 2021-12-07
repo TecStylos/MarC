@@ -1,8 +1,12 @@
-/#module : "std"
-
 #reqmod : "std-ext"
 
 #scope : std
+	#alias : exPrints : >>stdext>>prints
+    #alias : exPrintt : >>stdext>>printt
+    #alias : exScans : >>stdext>>scans
+    #alias : exScant : >>stdext>>scant
+    #alias : exSleepms : >>stdext>>sleepms
+
 	#func : copyString : addr.DEST : addr.SRC
 		#label : LOOP_BEGIN
 			drf : $td : @SRC

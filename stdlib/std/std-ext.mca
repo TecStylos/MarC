@@ -1,26 +1,18 @@
-#scope : std
-    #scope : ext
-        #scope : ext
-            / Print a string to the console
-            #funx : prints
+#extension : "std"
 
-            / Print value of specified type to the console
-            #funx : printt
+#scope : stdext
+    / Print a string to the console
+    #funx : prints
 
-            / Read a string from the console
-            #funx : scans
+    / Print value of specified type to the console
+    #funx : printt
 
-            / Read a vale from the console
-            #funx : scant
+    / Read a string from the console
+    #funx : scans
+
+    / Read a vale from the console
+    #funx : scant
         
-            / Sleep n milliseconds
-            #funx : sleepms
-        #end / scope ext
-
-        #alias : exPrints : ext>>prints
-        #alias : exPrintt : ext>>printt
-        #alias : exScans : ext>>scans
-        #alias : exScant : ext>>scant
-        #alias : exSleepms : ext>>sleepms
-    #end / scope ext
-#end / scope std
+    / Sleep n milliseconds
+    #funx : sleepms
+#end / scope std>>ext

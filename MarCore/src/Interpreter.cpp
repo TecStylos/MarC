@@ -150,7 +150,7 @@ namespace MarC
 		case BC_MEM_BASE_NONE:
 			break;
 		case BC_MEM_BASE_STATIC_STACK:
-			hostAddr = (char*)m_pExeInfo->modules[clientAddr.asCode.page]->staticStack->getBaseAddress() + clientAddr.asCode.addr;
+			hostAddr = (char*)m_pExeInfo->staticStack->getBaseAddress() + clientAddr.asCode.addr;
 			break;
 		case BC_MEM_BASE_DYNAMIC_STACK:
 			hostAddr = (char*)m_mem.dynamicStack->getBaseAddress() + clientAddr.addr;
@@ -162,7 +162,7 @@ namespace MarC
 			hostAddr = (char*)hostAddress(getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR) - clientAddr.addr;
 			break;
 		case BC_MEM_BASE_CODE_MEMORY:
-			hostAddr = (char*)m_pExeInfo->modules[clientAddr.asCode.page]->codeMemory->getBaseAddress() + clientAddr.asCode.addr;
+			hostAddr = (char*)m_pExeInfo->codeMemory->getBaseAddress() + clientAddr.asCode.addr;
 			break;
 		case BC_MEM_BASE_REGISTER:
 			hostAddr = &getRegister((BC_MemRegister)clientAddr.addr);
@@ -222,9 +222,9 @@ namespace MarC
 	{
 		std::set<std::string> missingExtensions;
 
-		for (auto& pModInfo : m_pExeInfo->modules)
-			if (pModInfo->extensionRequired && !pModInfo->extensionLoaded)
-				missingExtensions.insert(pModInfo->moduleName);
+		for (auto& ext : m_pExeInfo->requiredExtensions)
+			if (m_loadedExtensions.find(ext) == m_loadedExtensions.end())
+				missingExtensions.insert(ext);
 
 		auto results = locateExtensions(m_extDirs, missingExtensions);
 
@@ -237,10 +237,9 @@ namespace MarC
 
 			if (!PluS::PluginManager::get().loadPlugin(*result.second.begin()))
 				throw InterpreterError(IntErrCode::ExtensionLoadFailure, "Unable to load extension '" + result.first + "'!");
-		}
 
-		for (auto& pModInfo : m_pExeInfo->modules)
-			pModInfo->extensionLoaded = true;
+			m_loadedExtensions.insert(result.first);
+		}
 	}
 
 	BC_MemCell& Interpreter::readMemCellAndMove(BC_Datatype dt, bool deref)
@@ -652,8 +651,7 @@ namespace MarC
 	{
 		auto& cp = getRegister(BC_MEM_REG_CODE_POINTER);
 		auto addr = cp.as_ADDR.asCode.addr;
-		auto& mod = *m_pExeInfo->modules[cp.as_ADDR.asCode.page];
-		auto& code = *mod.codeMemory;
+		auto& code = *m_pExeInfo->codeMemory;
 
 		return addr >= code.size();
 	}

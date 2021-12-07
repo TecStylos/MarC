@@ -10,7 +10,8 @@ namespace MarCmd
 {
 	int Builder::run(const Settings& settings)
 	{
-		MarC::Linker linker(settings.modDirs);
+		//MarC::Linker linker(settings.modDirs);
+		MarC::Linker linker(nullptr);
 
 		bool verbose = settings.flags.hasFlag(CmdFlags::Verbose);
 
@@ -22,7 +23,7 @@ namespace MarCmd
 
 			if (verbose)
 				std::cout << "Adding missing modules to the linker..." << std::endl;
-			linker.autoAddMissingModules(&addModule, &verbose);
+			//linker.autoAddMissingModules(&addModule, &verbose);
 		}
 		catch (const MarC::AsmTokenizerError& err)
 		{
@@ -70,7 +71,7 @@ namespace MarCmd
 		}
 
 		auto exeInfo = linker.getExeInfo();
-		exeInfo->hasDebugInfo = settings.flags.hasFlag(CmdFlags::DebugInfo);
+		//exeInfo->hasDebugInfo = settings.flags.hasFlag(CmdFlags::DebugInfo);
 
 		if (verbose)
 			std::cout << "Writing executable to disk..." << std::endl;

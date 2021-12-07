@@ -20,8 +20,8 @@ namespace MarCmd
 	{
 		m_codeStr = "";
 		m_pTokenizer = std::make_shared<MarC::AsmTokenizer>(m_codeStr);
-		m_pAssembler = std::make_shared<MarC::Assembler>(m_pTokenizer->getTokenList(), "<cin>");
-		m_pLinker = std::make_shared<MarC::Linker>(settings.modDirs);
+		//m_pAssembler = std::make_shared<MarC::Assembler>(m_pTokenizer->getTokenList(), "<cin>");
+		//m_pLinker = std::make_shared<MarC::Linker>(settings.modDirs);
 		m_pInterpreter = std::make_shared<MarC::Interpreter>(m_pLinker->getExeInfo());
 
 		for (auto& entry : m_settings.extDirs)
@@ -66,7 +66,7 @@ namespace MarCmd
 			try
 			{
 				bool verbose = m_settings.flags.hasFlag(CmdFlags::Verbose);
-				m_pLinker->autoAddMissingModules(&addModule, &verbose);
+				//m_pLinker->autoAddMissingModules(&addModule, &verbose);
 				if (!m_pLinker->link())
 					throw m_pLinker->lastError();
 			}

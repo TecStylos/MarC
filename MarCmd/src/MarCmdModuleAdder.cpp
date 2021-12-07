@@ -43,7 +43,7 @@ namespace MarCmd
 		bool verbose = *(bool*)pParam;
 		std::string codeStr = readFile(modPath);
 		MarC::AsmTokenizer tokenizer(codeStr);
-		MarC::Assembler assembler(tokenizer.getTokenList(), modName);
+		/*MarC::Assembler assembler(tokenizer.getTokenList(), modName);
 
 		if (verbose)
 			std::cout << "Tokenizing module '" << modName << "'..." << std::endl;
@@ -58,6 +58,6 @@ namespace MarCmd
 		if (verbose)
 			std::cout << "Adding module '" << assembler.getModuleInfo()->moduleName << "' to the linker..." << std::endl;
 		if (!linker.addModule(assembler.getModuleInfo()))
-			throw linker.lastError();
+			throw linker.lastError();*/
 	}
 }

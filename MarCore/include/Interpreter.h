@@ -131,6 +131,7 @@ namespace MarC
 		InterpreterMemory m_mem;
 		std::map<BC_MemAddress, ExternalFunctionPtr> m_extFuncs;
 		std::set<std::string> m_grantedPermissions;
+		std::set<std::string> m_loadedExtensions;
 		std::set<std::string> m_extDirs;
 		InterpreterError m_lastErr;
 		uint64_t m_nInsExecuted = 0;

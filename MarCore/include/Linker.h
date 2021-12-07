@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ExecutableInfo.h"
+#include "ModuleInfo.h"
 
 #include <set>
 
@@ -44,7 +44,7 @@ namespace MarC
 	{
 	public:
 		Linker() = delete;
-		Linker(std::set<std::string> modDirs);
+		Linker(ModuleInfoRef modInfo);
 	public:
 		bool addModule(ModuleInfoRef pModInfo);
 	public:
@@ -52,34 +52,16 @@ namespace MarC
 		bool link();
 	public:
 		ExecutableInfoRef getExeInfo();
-	public:
-		bool hasModule(const std::string& name) const;
-		bool hasMissingModules() const;
-		const std::set<std::string>& getMissingModules() const;
-	public:
-		const std::set<std::string> getModDirs() const;
-	public:
-		bool autoAddMissingModules(AddModuleCallback amc, void* pPaam);
 	private:
-		void update(ModuleInfoRef pModInfo);
-		void copySymbols(ModuleInfoRef pModInfo);
-		void copyUnresolvedSymbols(ModuleInfoRef pModInfo);
-		void copyReqMods(ModuleInfoRef pModInfo);
-		void copyPerms(ModuleInfoRef pModInfo);
 		void resolveUnresolvedSymbols();
 		void resolveUnresolvedSymbolRefs();
 	private:
 		bool symbolNameExists(const std::string& name);
-	private:
-		std::string misModListStr() const;
-		std::string unresSymRefsListStr() const;
 	public:
 		const LinkerError& lastError() const;
 		void resetError();
 	private:
+		ModuleInfoRef m_modInfo;
 		LinkerError m_lastErr;
-		ExecutableInfoRef m_pExeInfo;
-		std::set<std::string> m_missingModules;
-		std::set<std::string> m_modDirs;
 	};
 }

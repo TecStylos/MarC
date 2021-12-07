@@ -17,6 +17,7 @@ namespace MarC
 		Alias,
 		Static,
 		RequestModule,
+		Extension,
 		Scope,
 		End,
 		Function,

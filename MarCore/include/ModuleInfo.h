@@ -1,9 +1,6 @@
 #pragma once
 
-#include <iostream>
-
-#include "Serializer.h"
-#include "AssemblerTypes.h"
+#include "ExecutableInfo.h"
 
 namespace MarC
 {
@@ -14,17 +11,9 @@ namespace MarC
 	class ModuleInfo
 	{
 	public:
-		std::string moduleName;
-		bool extensionRequired;
-		std::vector<std::string> requiredModules;
-		std::vector<std::string> mandatoryPermissions;
-		std::vector<std::string> optionalPermissions;
-		std::vector<Symbol> definedSymbols;
-		std::vector<UnresolvedSymbol> unresolvedSymbols;
+		ExecutableInfoRef exeInfo;
+		std::set<UnresolvedSymbol> unresolvedSymbols;
 		std::vector<SymbolRef> unresolvedSymbolRefs;
-		MemoryRef codeMemory;
-		MemoryRef staticStack;
-		bool extensionLoaded;
 	public:
 		ModuleInfo();
 	public:
@@ -62,20 +51,19 @@ namespace MarC
 	inline void serialize(const ModuleInfo& modInfo, std::ostream& oStream)
 	{
 		ModInfoHeader header;
-		header.extRequired = modInfo.extensionRequired;
-		header.nDefSymbols = modInfo.definedSymbols.size();
+		//header.extRequired = modInfo.extensionRequired;
+		//header.nDefSymbols = modInfo.definedSymbols.size();
 		header.nUnresSymbols = modInfo.unresolvedSymbols.size();
 		header.nUnresSymbolRefs = modInfo.unresolvedSymbolRefs.size();
 
 		serialize(header, oStream);
-		serialize(modInfo.moduleName, oStream);
 
-		serialize(modInfo.requiredModules, oStream);
-		serialize(modInfo.mandatoryPermissions, oStream);
-		serialize(modInfo.optionalPermissions, oStream);
+		//serialize(modInfo.requiredModules, oStream);
+		//serialize(modInfo.mandatoryPermissions, oStream);
+		//serialize(modInfo.optionalPermissions, oStream);
 
-		for (auto& symbol : modInfo.definedSymbols)
-			serialize(symbol, oStream);
+		//for (auto& symbol : modInfo.definedSymbols)
+		//	serialize(symbol, oStream);
 
 		for (auto& symRef : modInfo.unresolvedSymbolRefs)
 			serialize(symRef, oStream);
@@ -83,8 +71,8 @@ namespace MarC
 		for (auto& unresSym : modInfo.unresolvedSymbols)
 			serialize(unresSym, oStream);
 
-		serialize(*modInfo.codeMemory, oStream);
-		serialize(*modInfo.staticStack, oStream);
+		//serialize(*modInfo.codeMemory, oStream);
+		//serialize(*modInfo.staticStack, oStream);
 	}
 
 	template <>
@@ -93,38 +81,37 @@ namespace MarC
 		modInfo = ModuleInfo();
 		ModInfoHeader header;
 		deserialize(header, iStream);
-		deserialize(modInfo.moduleName, iStream);
 
-		deserialize(modInfo.requiredModules, iStream);
-		deserialize(modInfo.mandatoryPermissions, iStream);
-		deserialize(modInfo.optionalPermissions, iStream);
+		//deserialize(modInfo.requiredModules, iStream);
+		//deserialize(modInfo.mandatoryPermissions, iStream);
+		//deserialize(modInfo.optionalPermissions, iStream);
 
-		modInfo.extensionRequired = header.extRequired;
+		//modInfo.extensionRequired = header.extRequired;
 
 		for (uint64_t i = 0; i < header.nDefSymbols; ++i)
 		{
 			Symbol symbol;
 			deserialize(symbol, iStream);
-			modInfo.definedSymbols.push_back(symbol);
+			//modInfo.definedSymbols.push_back(symbol);
 		}
 
 		for (uint64_t i = 0; i < header.nUnresSymbolRefs; ++i)
 		{
 			SymbolRef symRef;
 			deserialize(symRef, iStream);
-			modInfo.unresolvedSymbolRefs.push_back(symRef);
+			//modInfo.unresolvedSymbolRefs.push_back(symRef);
 		}
 
 		for (uint64_t i = 0; i < header.nUnresSymbols; ++i)
 		{
 			UnresolvedSymbol unresSym;
 			deserialize(unresSym, iStream);
-			modInfo.unresolvedSymbols.push_back(unresSym);
+			//modInfo.unresolvedSymbols.push_back(unresSym);
 		}
 
-		modInfo.codeMemory = Memory::create();
-		deserialize(*modInfo.codeMemory, iStream);
-		modInfo.staticStack = Memory::create();
-		deserialize(*modInfo.staticStack, iStream);
+		//modInfo.codeMemory = Memory::create();
+		//deserialize(*modInfo.codeMemory, iStream);
+		//modInfo.staticStack = Memory::create();
+		//deserialize(*modInfo.staticStack, iStream);
 	}
 }

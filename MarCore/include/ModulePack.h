@@ -9,11 +9,11 @@
 
 namespace MarC
 {
-	struct Module
+	struct ModulePack
 	{
 		std::string name = "<unnamed>";
 		AsmTokenListRef tokenList;
 		std::map<std::string, AsmTokenListRef> dependencies;
 	};
-	typedef std::shared_ptr<Module> ModuleRef;
+	typedef std::shared_ptr<ModulePack> ModulePackRef;
 }

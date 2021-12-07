@@ -3,7 +3,8 @@
 #include <set>
 #include <iostream>
 
-#include "ModuleInfo.h"
+#include "AssemblerTypes.h"
+#include "Serializer.h"
 
 namespace MarC
 {
@@ -12,13 +13,13 @@ namespace MarC
 
 	struct ExecutableInfo
 	{
-		bool hasDebugInfo = false;
+		std::string name;
+		MemoryRef codeMemory;
+		MemoryRef staticStack;
 		std::set<Symbol> symbols;
-		std::set<UnresolvedSymbol> unresolvedSymbols;
 		std::set<std::string> mandatoryPermissions;
 		std::set<std::string> optionalPermissions;
-		std::vector<ModuleInfoRef> modules;
-		std::map<std::string, uint64_t> moduleNameMap;
+		std::set<std::string> requiredExtensions;
 	public:
 		static ExecutableInfoRef create();
 	};
@@ -36,26 +37,26 @@ namespace MarC
 	inline void serialize(const ExecutableInfo& exeInfo, std::ostream& oStream)
 	{
 		ExeInfoHeader header;
-		header.nModules = exeInfo.modules.size();
-		header.hasDebugInfo = exeInfo.hasDebugInfo;
+		//header.nModules = exeInfo.modules.size();
+		//header.hasDebugInfo = exeInfo.hasDebugInfo;
 		header.nSymbols = exeInfo.symbols.size();
-		header.nUnresolvedSymbols = exeInfo.unresolvedSymbols.size();
+		//header.nUnresolvedSymbols = exeInfo.unresolvedSymbols.size();
 
 		serialize(header, oStream);
 
 		serialize(exeInfo.mandatoryPermissions, oStream);
 		serialize(exeInfo.optionalPermissions, oStream);
 
-		for (auto& mod : exeInfo.modules)
-			serialize(*mod, oStream);
+		//for (auto& mod : exeInfo.modules)
+		//	serialize(*mod, oStream);
 
 		if (header.hasDebugInfo)
 		{
 			for (auto& symbol : exeInfo.symbols)
 				serialize(symbol, oStream);
 
-			for (auto& unresSym : exeInfo.unresolvedSymbols)
-				serialize(unresSym, oStream);
+			//for (auto& unresSym : exeInfo.unresolvedSymbols)
+			//	serialize(unresSym, oStream);
 		}
 	}
 
@@ -71,10 +72,10 @@ namespace MarC
 
 		for (uint64_t i = 0; i < header.nModules; ++i)
 		{
-			auto mod = ModuleInfo::create();
-			deserialize(*mod, iStream);
-			exeInfo.modules.push_back(mod);
-			exeInfo.moduleNameMap.insert({ mod->moduleName, i });
+			//auto mod = ModuleInfo::create();
+			//deserialize(*mod, iStream);
+			//exeInfo.modules.push_back(mod);
+			//exeInfo.moduleNameMap.insert({ mod->moduleName, i });
 		}
 
 		if (header.hasDebugInfo)
@@ -83,14 +84,14 @@ namespace MarC
 			{
 				Symbol symbol;
 				deserialize(symbol, iStream);
-				exeInfo.symbols.insert(symbol);
+				//exeInfo.symbols.insert(symbol);
 			}
 
 			for (uint64_t i = 0; i < header.nUnresolvedSymbols; ++i)
 			{
 				UnresolvedSymbol unresSym;
 				deserialize(unresSym, iStream);
-				exeInfo.unresolvedSymbols.insert(unresSym);
+				//exeInfo.unresolvedSymbols.insert(unresSym);
 			}
 		}
 	}

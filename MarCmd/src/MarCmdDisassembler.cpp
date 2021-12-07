@@ -47,15 +47,13 @@ namespace MarCmd
 			}
 		}
 
-		for (uint64_t i = 0; i < exeInfo->modules.size(); ++i)
 		{
 			if (verbose)
-				std::cout << "Disassembling module " << (i + 1) << "/" << exeInfo->modules.size() << "..." << std::endl;
+				std::cout << "Disassembling executable..." << std::endl;
 
 			std::string source;
 
-			auto& mod = *(exeInfo->modules[i]);
-			auto& codeMem = *(mod.codeMemory);
+			auto& codeMem = *(exeInfo->codeMemory);
 
 			uint64_t nDisassembled = 0;
 			while (nDisassembled < codeMem.size())
@@ -71,7 +69,7 @@ namespace MarCmd
 
 			}
 
-			std::string outFile = std::filesystem::path(outDir).append(exeInfo->modules[i]->moduleName).string() + ".mcd";
+			std::string outFile = std::filesystem::path(outDir).append(exeInfo->name).string() + ".mcd";
 			std::ofstream oStream(outFile, std::ios::out | std::ios::trunc);
 			if (!oStream.is_open())
 			{
