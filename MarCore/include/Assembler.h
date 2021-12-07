@@ -137,6 +137,7 @@ namespace MarC
 		AssemblerError m_lastErr;
 		ModuleInfoRef m_pModInfo;
 		std::vector<ScopeDesc> m_scopeList;
+		std::set<std::string> m_resolvedDependencies;
 		uint64_t m_nextTokenToCompile = 0;
 		uint64_t m_backupNextTokenToCompile = 0;
 	private:

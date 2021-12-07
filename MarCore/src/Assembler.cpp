@@ -574,6 +574,9 @@ namespace MarC
 
 		std::string modName = currToken().value;
 
+		if (m_resolvedDependencies.find(modName) != m_resolvedDependencies.end())
+			return;
+
 		auto modIt = m_pModPack->dependencies.find(modName);
 		if (modIt == m_pModPack->dependencies.end())
 			throw std::runtime_error("Unable to resolve dependency!");
@@ -591,6 +594,8 @@ namespace MarC
 				throw err;
 			}
 		}
+
+		m_resolvedDependencies.insert(modIt->first);
 	}
 
 	void Assembler::assembleDirExtension()
