@@ -14,8 +14,8 @@
         "--grantall",
         "--dbginfo",
         "--forcerefresh",
-        "--liveasm",
-        "examples/GameOfLife.mca"
+        "--debug",
+        "examples/GameOfLife.mce"
       ]
     }
   ]

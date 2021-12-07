@@ -4,6 +4,7 @@
 #include <thread>
 
 #include "PermissionGrantPrompt.h"
+#include "AutoExecutableLoader.h"
 
 namespace MarCmd
 {
@@ -115,7 +116,7 @@ namespace MarCmd
 				auto wndDisasmViewCode = this->getSubWnd<Console::TextWindow>("Code");
 				int64_t mid = wndDisasmViewCode->getHeight() / 2;
 				int64_t line = mid + wndDisasmViewCode->getScroll();
-				if (0 <= line && line < m_modDisasmInfo.instructionOffsets.size())
+				if (0 <= line && line < (int64_t)m_modDisasmInfo.instructionOffsets.size())
 					toggleBreakpoint(MarC::BC_MemAddress(MarC::BC_MEM_BASE_CODE_MEMORY, m_modIndex, m_modDisasmInfo.instructionOffsets[line]));
 			}
 			break;
@@ -234,19 +235,7 @@ namespace MarCmd
 	{
 		m_sharedDebugData = std::make_shared<SharedDebugData>();
 
-		{
-			auto mod = MarC::ModuleLoader::load(settings.inFile, settings.modDirs);
-
-			MarC::Assembler assembler(mod);
-			if (!assembler.assemble())
-				throw std::runtime_error("Unable to assemble the modules!");
-
-			MarC::Linker linker(assembler.getModuleInfo());
-			if (!linker.link())
-				throw std::runtime_error("Unable to link the modules!");
-
-			m_sharedDebugData->exeInfo = linker.getExeInfo();
-		}
+		m_sharedDebugData->exeInfo = autoLoadExecutable(settings.inFile, settings.modDirs);
 
 		for (auto& sym : m_sharedDebugData->exeInfo->symbols)
 		{

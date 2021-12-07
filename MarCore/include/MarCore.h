@@ -8,3 +8,5 @@
 #include "ModuleLocator.h"
 #include "Disassembler.h"
 #include "ModuleLoader.h"
+#include "ExecutableLoader.h"
+#include "CodeFileReader.h"

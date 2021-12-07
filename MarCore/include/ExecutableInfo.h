@@ -16,20 +16,17 @@ namespace MarC
 		std::string name;
 		MemoryRef codeMemory;
 		MemoryRef staticStack;
-		std::set<Symbol> symbols;
 		std::set<std::string> mandatoryPermissions;
 		std::set<std::string> optionalPermissions;
 		std::set<std::string> requiredExtensions;
+		std::set<Symbol> symbols;
 	public:
 		static ExecutableInfoRef create();
 	};
 
 	struct ExeInfoHeader
 	{
-		bool hasDebugInfo;
 		uint64_t nSymbols;
-		uint64_t nUnresolvedSymbols;
-		uint64_t nModules;
 	};
 	MARC_SERIALIZER_ENABLE_FIXED(ExeInfoHeader);
 
@@ -37,62 +34,44 @@ namespace MarC
 	inline void serialize(const ExecutableInfo& exeInfo, std::ostream& oStream)
 	{
 		ExeInfoHeader header;
-		//header.nModules = exeInfo.modules.size();
-		//header.hasDebugInfo = exeInfo.hasDebugInfo;
 		header.nSymbols = exeInfo.symbols.size();
-		//header.nUnresolvedSymbols = exeInfo.unresolvedSymbols.size();
 
 		serialize(header, oStream);
 
+		serialize(exeInfo.name, oStream);
+		serialize(*exeInfo.codeMemory, oStream);
+		serialize(*exeInfo.staticStack, oStream);
 		serialize(exeInfo.mandatoryPermissions, oStream);
 		serialize(exeInfo.optionalPermissions, oStream);
+		serialize(exeInfo.requiredExtensions, oStream);
 
-		//for (auto& mod : exeInfo.modules)
-		//	serialize(*mod, oStream);
-
-		if (header.hasDebugInfo)
-		{
-			for (auto& symbol : exeInfo.symbols)
-				serialize(symbol, oStream);
-
-			//for (auto& unresSym : exeInfo.unresolvedSymbols)
-			//	serialize(unresSym, oStream);
-		}
+		for (auto& symbol : exeInfo.symbols)
+			serialize(symbol, oStream);
 	}
 
 	template <>
 	inline void deserialize(ExecutableInfo& exeInfo, std::istream& iStream)
 	{
 		exeInfo = ExecutableInfo();
+		exeInfo.codeMemory = Memory::create();
+		exeInfo.staticStack = Memory::create();
+
 		ExeInfoHeader header;
 		deserialize(header, iStream);
 
+		deserialize(exeInfo.name, iStream);
+		deserialize(*exeInfo.codeMemory, iStream);
+		deserialize(*exeInfo.staticStack, iStream);
 		deserialize(exeInfo.mandatoryPermissions, iStream);
 		deserialize(exeInfo.optionalPermissions, iStream);
+		deserialize(exeInfo.requiredExtensions, iStream);
 
-		for (uint64_t i = 0; i < header.nModules; ++i)
+		for (uint64_t i = 0; i < header.nSymbols; ++i)
 		{
-			//auto mod = ModuleInfo::create();
-			//deserialize(*mod, iStream);
-			//exeInfo.modules.push_back(mod);
-			//exeInfo.moduleNameMap.insert({ mod->moduleName, i });
+			Symbol symbol;
+			deserialize(symbol, iStream);
+			exeInfo.symbols.insert(symbol);
 		}
 
-		if (header.hasDebugInfo)
-		{
-			for (uint64_t i = 0; i < header.nSymbols; ++i)
-			{
-				Symbol symbol;
-				deserialize(symbol, iStream);
-				//exeInfo.symbols.insert(symbol);
-			}
-
-			for (uint64_t i = 0; i < header.nUnresolvedSymbols; ++i)
-			{
-				UnresolvedSymbol unresSym;
-				deserialize(unresSym, iStream);
-				//exeInfo.unresolvedSymbols.insert(unresSym);
-			}
-		}
 	}
 }

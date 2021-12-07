@@ -3,31 +3,15 @@
 #include <fstream>
 #include <MarCore.h>
 
+#include "AutoExecutableLoader.h"
+
 namespace MarCmd
 {
 	int Disassembler::run(const Settings& settings)
 	{
 		bool verbose = settings.flags.hasFlag(CmdFlags::Verbose);
 
-		auto exeInfo = MarC::ExecutableInfo::create();
-		{
-			std::ifstream iStream(settings.inFile, std::ios::binary | std::ios::in);
-			if (!iStream.is_open())
-			{
-				std::cout << "Unable to open input file!" << std::endl;
-				return -1;
-			}
-
-			if (verbose)
-				std::cout << "Loading input file from disk..." << std::endl;
-			MarC::deserialize(*exeInfo, iStream);
-
-			if (!iStream.good())
-			{
-				std::cout << "An error occured while reading from the input file!" << std::endl;
-				return -1;
-			}
-		}
+		auto exeInfo = autoLoadExecutable(settings.inFile, settings.modDirs);
 
 		if (verbose)
 			std::cout << "Creating the output directory..." << std::endl;

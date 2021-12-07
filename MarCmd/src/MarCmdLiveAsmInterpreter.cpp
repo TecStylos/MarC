@@ -5,7 +5,6 @@
 #include <cstring>
 
 #include "PermissionGrantPrompt.h"
-#include "MarCmdModuleAdder.h"
 
 namespace MarCmd
 {

@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <MarCore.h>
 
-#include "MarCmdModuleAdder.h"
+#include "AutoExecutableLoader.h"
 
 namespace MarCmd
 {
@@ -12,17 +12,7 @@ namespace MarCmd
 	{
 		bool verbose = settings.flags.hasFlag(CmdFlags::Verbose);
 
-		auto mod = MarC::ModuleLoader::load(settings.inFile, settings.modDirs);
-
-		MarC::Assembler assembler(mod);
-		if (!assembler.assemble())
-			throw std::runtime_error("Unable to assemble the modules!");
-
-		MarC::Linker linker(assembler.getModuleInfo());
-		if (!linker.link())
-			throw std::runtime_error("Unable to link the modules!");
-
-		auto exeInfo = linker.getExeInfo();
+		auto exeInfo = autoLoadExecutable(settings.inFile, settings.modDirs);
 
 		std::string outFile;
 		if (!settings.outFile.empty())

@@ -24,7 +24,7 @@ add_library(
 	"src/ExecutableInfo.cpp"
 	"src/Disassembler.cpp"
 	"src/DisAsmTypes.cpp"
- "include/ModuleLoader.h" "src/ModuleLoader.cpp" "include/CodeFileReader.h" "include/exceptions/MarCoreException.h" "src/CodeFileReader.cpp" "src/ModulePack.cpp")
+ "include/ModuleLoader.h" "src/ModuleLoader.cpp" "include/CodeFileReader.h" "include/exceptions/MarCoreException.h" "src/CodeFileReader.cpp" "src/ModulePack.cpp" "include/ExecutableLoader.h" "src/ExecutableLoader.cpp")
 
 target_include_directories(
 	MarCore PUBLIC

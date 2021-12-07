@@ -11,6 +11,11 @@ namespace MarC
 		return std::filesystem::path(filepath).stem().string();
 	}
 
+	std::string modExtFromPath(const std::string& filepath)
+	{
+		return std::filesystem::path(filepath).extension().string();
+	}
+
 	std::string readCodeFile(const std::string& filepath)
 	{
 		std::ifstream f(filepath);

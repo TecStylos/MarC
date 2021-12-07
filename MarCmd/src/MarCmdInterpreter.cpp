@@ -3,8 +3,10 @@
 #include <iostream>
 #include <fstream>
 
-#include "MarCore.h"
+#include <MarCore.h>
+
 #include "PermissionGrantPrompt.h"
+#include "AutoExecutableLoader.h"
 
 namespace MarCmd
 {
@@ -12,17 +14,7 @@ namespace MarCmd
 	{
 		bool verbose = settings.flags.hasFlag(CmdFlags::Verbose);
 
-		auto mod = MarC::ModuleLoader::load(settings.inFile, settings.modDirs);
-
-		MarC::Assembler assembler(mod);
-		if (!assembler.assemble())
-			throw std::runtime_error("Unable to assemble the modules!");
-
-		MarC::Linker linker(assembler.getModuleInfo());
-		if (!linker.link())
-			throw std::runtime_error("Unable to link the modules!");
-
-		auto exeInfo = linker.getExeInfo();
+		auto exeInfo = autoLoadExecutable(settings.inFile, settings.modDirs);
 
 		MarC::Interpreter interpreter(exeInfo);
 		for (auto& entry : settings.extDirs)

@@ -12,14 +12,14 @@ add_executable(
 	"src/MarCmdLiveAsmInterpreter.cpp"
     "src/PermissionGrantPrompt.cpp"
     "src/MarCmdBuilder.cpp"
-    "src/MarCmdModuleAdder.cpp"
+    
     "src/MarCmdDisassembler.cpp"
     "src/Debugger/Debugger.cpp"
     "src/Debugger/ConsoleWindow.cpp"
     "src/Debugger/ConsoleHelper.cpp"
     "src/Debugger/DebugWindow.cpp"
     
-)
+ "include/AutoExecutableLoader.h" "src/AutoExecutableLoader.cpp")
 
 target_include_directories(
 	MarCmd PUBLIC 
