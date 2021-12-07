@@ -10,6 +10,8 @@ namespace MarC
 	{
 		ModuleRef mod = std::make_shared<Module>();
 
+		mod->name = modNameFromPath(modPath);
+
 		std::string source = readCodeFile(modPath);
 
 		AsmTokenizer tokenizer(source);
@@ -30,6 +32,7 @@ namespace MarC
 
 		enum class State
 		{
+			Find_BeginNewline,
 			Find_Directive,
 			Find_DirectiveName,
 			Find_Colon,
@@ -42,12 +45,17 @@ namespace MarC
 			auto& token = (*tokenList)[i];
 			switch (state)
 			{
+			case State::Find_BeginNewline:
+				if (token.type == AsmToken::Type::Sep_Newline)
+					state = State::Find_Directive;
+				break;
 			case State::Find_Directive:
-				if (token.type == AsmToken::Type::Op_Directive)
-					state = State::Find_DirectiveName;
+				state = State::Find_DirectiveName;
+				if (token.type != AsmToken::Type::Op_Directive)
+					state = State::Find_BeginNewline;
 				break;
 			case State::Find_DirectiveName:
-				state = State::Find_Directive;
+				state = State::Find_BeginNewline;
 				if (token.type == AsmToken::Type::Name && token.value == "reqmod")
 					state = State::Find_Colon;
 				break;
@@ -65,7 +73,7 @@ namespace MarC
 			case State::Find_EndNewline:
 				if (token.type != AsmToken::Type::Sep_Newline)
 					throw MarCoreException("Expected newline after module name!");
-				state = State::Find_Directive;
+				state = State::Find_BeginNewline;
 				break;
 			default:
 				break;

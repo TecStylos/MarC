@@ -11,6 +11,7 @@ namespace MarC
 {
 	struct Module
 	{
+		std::string name = "<unnamed>";
 		AsmTokenListRef tokenList;
 		std::map<std::string, AsmTokenListRef> dependencies;
 	};

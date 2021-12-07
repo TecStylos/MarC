@@ -1,29 +1,8 @@
 /#module : "std"
 
+#reqmod : "std-ext"
+
 #scope : std
-	#scope : ext
-		/ Print a string to the console
-		#funx : prints
-
-		/ Print value of specified type to the console
-		#funx : printt
-
-		/ Read a string from the console
-		#funx : scans
-
-		/ Read a vale from the console
-		#funx : scant
-	
-		/ Sleep n milliseconds
-		#funx : sleepms
-	#end
-
-	#alias : exPrints : ext>>prints
-	#alias : exPrintt : ext>>printt
-	#alias : exScans : ext>>scans
-	#alias : exScant : ext>>scant
-	#alias : exSleepms : ext>>sleepms
-
 	#func : copyString : addr.DEST : addr.SRC
 		#label : LOOP_BEGIN
 			drf : $td : @SRC
@@ -33,7 +12,7 @@
 		jne.u8 : LOOP_BEGIN : @$td : 0
 		return
 	#end
-#end / std
+#end / scope std
 
 /#macro.dt : if : val
 /	\#scope : IF_+_LINE_
