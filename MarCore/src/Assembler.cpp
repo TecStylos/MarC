@@ -5,23 +5,6 @@
 
 namespace MarC
 {
-	AssemblerError::operator bool() const
-	{
-		return m_code != Code::Success;
-	}
-
-	const std::string& AssemblerError::getText() const
-	{
-		return m_errText;
-	}
-
-	std::string AssemblerError::getMessage() const
-	{
-		return
-			"ERROR ON L: " + std::to_string(m_line) + " C: " + std::to_string(m_column) + "\n" +
-			"  -> " + getText();
-	}
-
 	Assembler::Assembler(const ModulePackRef modPack)
 		: m_pModPack(modPack), m_pCurrTokenList(modPack->tokenList)
 	{
@@ -69,7 +52,7 @@ namespace MarC
 			while (!isEndOfCode())
 				assembleStatement();
 		}
-		catch (AssemblerError& err)
+		catch (const AssemblerError& err)
 		{
 			m_lastErr = err;
 			recover();
@@ -89,14 +72,14 @@ namespace MarC
 		while (nextToken().type == AsmToken::Type::Sep_Newline)
 			++nNewlines;
 		if (nNewlines == 0 && !isEndOfCode())
-			ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Newline, currToken());
+			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Newline, currToken());
 	}
 
 	void Assembler::assembleStatement(const std::string& statement)
 	{
 		AsmTokenizer tok(statement);
 		if (!tok.tokenize())
-			ASSEMBLER_THROW_ERROR(AsmErrCode::InternalError, "Unable to tokenize internal statement '" + statement +"'!");
+			MARC_ASSEMBLER_THROW(AsmErrCode::InternalError, "Unable to tokenize statement '" + statement +"'!");
 		
 		{
 			VirtualAsmTokenList vtl(*this, tok.getTokenList());
@@ -113,7 +96,7 @@ namespace MarC
 		if (ocx.opCode == BC_OC_NONE || ocx.opCode == BC_OC_UNKNOWN)
 		{
 			if (!macroExists(currToken().value))
-				ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Unknown identifier '" + currToken().value + "'!");
+				MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Unknown identifier '" + currToken().value + "'!");
 			assembleMacroUsage();
 		}
 
@@ -125,12 +108,12 @@ namespace MarC
 			{
 				ocx.datatype = BC_DatatypeFromString(nextToken().value);
 				if (ocx.datatype == BC_DT_UNKNOWN)
-					ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
+					MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Unable to convert token '" + currToken().value + "' to datatype!");
 			}
 			else
 			{
 				if (layout.insDt == InsDt::Required)
-					ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
+					MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 				prevToken();
 			}
 		}
@@ -153,7 +136,7 @@ namespace MarC
 
 	void Assembler::assembleMacroUsage()
 	{
-		ASSEMBLER_THROW_ERROR(AsmErrCode::InternalError, "Macro usages have not been implemented yet!");
+		MARC_ASSEMBLER_THROW(AsmErrCode::InternalError, "Macro usages have not been implemented yet!");
 	}
 
 	void Assembler::assembleSpecializedInstruction(BC_OpCodeEx& ocx)
@@ -166,7 +149,7 @@ namespace MarC
 			return assembleSpecCallExtern(ocx);
 		}
 
-		ASSEMBLER_THROW_ERROR(AsmErrCode::InternalError, "OpCode '" + BC_OpCodeToString(ocx.opCode) + "' is not specialized!");
+		MARC_ASSEMBLER_THROW(AsmErrCode::NotSpecialized, BC_OpCodeToString(ocx.opCode));
 	}
 
 	void Assembler::assembleSpecCall(BC_OpCodeEx& ocx)
@@ -190,12 +173,12 @@ namespace MarC
 		while (nextToken().type == AsmToken::Type::Sep_Colon)
 		{
 			if (nextToken().type != AsmToken::Type::Name)
-				ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+				MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 			BC_Datatype argDt = BC_DatatypeFromString(currToken().value);
 			fcd->argType.set(fcd->nArgs, argDt);
 
 			if (nextToken().type != AsmToken::Type::Sep_Dot)
-				ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
+				MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 
 			assembleArgument(ocx, { InsArgType::TypedValue, argDt, fcd->nArgs + 1ull });
 
@@ -227,12 +210,12 @@ namespace MarC
 		while (nextToken().type == AsmToken::Type::Sep_Colon)
 		{
 			if (nextToken().type != AsmToken::Type::Name)
-				ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+				MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 			BC_Datatype argDt = BC_DatatypeFromString(currToken().value);
 			fcd->argType.set(fcd->nArgs, argDt);
 
 			if (nextToken().type != AsmToken::Type::Sep_Dot)
-				ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
+				MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 
 			assembleArgument(ocx, { InsArgType::TypedValue, argDt, fcd->nArgs + argIndex });
 
@@ -252,7 +235,7 @@ namespace MarC
 		case InsArgType::Datatype:
 			assembleArgDatatype(ocx, arg); break;
 		default:
-			ASSEMBLER_THROW_ERROR(AsmErrCode::UnknownInsArgType, "Cannot handle InsArgType '" + std::to_string((uint64_t)arg.type) + "'!");
+			MARC_ASSEMBLER_THROW(AsmErrCode::UnknownInsArgType, std::to_string((uint64_t)arg.type));
 		}
 	}
 
@@ -305,7 +288,7 @@ namespace MarC
 		case AsmToken::Type::Integer:
 			generateTypeCellInteger(tc, getsDereferenced); break;
 		default:
-			ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::None, currToken());
+			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::None, currToken());
 		}
 	}
 
@@ -313,7 +296,7 @@ namespace MarC
 	{
 		auto reg = BC_RegisterFromString(nextToken().value);
 		if (reg == BC_MEM_REG_NONE || reg == BC_MEM_REG_UNKNOWN)
-			ASSEMBLER_THROW_ERROR(AsmErrCode::UnknownRegisterName, "Unknown register name '" + currToken().value + "'!");
+			MARC_ASSEMBLER_THROW(AsmErrCode::UnknownRegisterName, currToken().value);
 		tc.cell.as_ADDR = BC_MemAddress(BC_MEM_BASE_REGISTER, reg);
 	}
 
@@ -342,17 +325,17 @@ namespace MarC
 			return;
 		}
 
-		ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Expected token of type 'Op_DT_Size' or 'Integer'! Got '" + AsmTokenTypeToString(currToken().type) + "' with value '" + currToken().value + "'!");
+		MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Integer, currToken());
 	}
 
 	void Assembler::generateTypeCellDTSize(TypeCell& tc)
 	{
 		if (nextToken().type != AsmToken::Type::Name)
-			ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		tc.cell.as_U_64 = BC_DatatypeSize(BC_DatatypeFromString(currToken().value));
 		if (tc.cell.as_U_64 == 0)
-			ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Unable to convert name '" + currToken().value + "' to datatype!");
+			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Unable to convert name '" + currToken().value + "' to datatype!");
 	}
 
 	void Assembler::generateTypeCellName(TypeCell& tc)
@@ -361,7 +344,7 @@ namespace MarC
 		{
 			tc.cell.as_Datatype = BC_DatatypeFromString(currToken().value);
 			if (tc.cell.as_Datatype == BC_DT_UNKNOWN)
-				ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
+				MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Unable to convert token '" + currToken().value + "' to datatype!");
 			return;
 		}
 
@@ -377,7 +360,7 @@ namespace MarC
 	void Assembler::generateTypeCellString(TypeCell& tc)
 	{
 		if (tc.datatype != BC_DT_ADDR)
-			ASSEMBLER_THROW_ERROR(AsmErrCode::DatatypeMismatch, "Cannot use string in instruction with datatype '" + BC_DatatypeToString(tc.datatype) + "'!");
+			MARC_ASSEMBLER_THROW(AsmErrCode::DatatypeMismatch, BC_DatatypeToString(tc.datatype));
 
 		tc.cell.as_ADDR = currStaticStackAddr();
 		m_pModInfo->exeInfo->staticStack->push(currToken().value.c_str(), currToken().value.size() + 1);
@@ -386,7 +369,7 @@ namespace MarC
 	void Assembler::generateTypeCellFloat(TypeCell& tc, bool getsDereferenced)
 	{
 		if (getsDereferenced)
-			ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Cannot dereference argument of type 'float'!");
+			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Cannot dereference argument of type 'float'!");
 		switch (tc.datatype)
 		{
 		case BC_DT_F_32:
@@ -394,20 +377,20 @@ namespace MarC
 		case BC_DT_F_64:
 			tc.cell.as_F_64 = std::stod(currToken().value); break;
 		default:
-			ASSEMBLER_THROW_ERROR(AsmErrCode::DatatypeMismatch, "Cannot use floating-point literal '" + currToken().value + "' in instruction with datatype '" + BC_DatatypeToString(tc.datatype) + "'!");
+			MARC_ASSEMBLER_THROW(AsmErrCode::DatatypeMismatch, BC_DatatypeToString(tc.datatype));
 		}
 	}
 
 	void Assembler::generateTypeCellInteger(TypeCell& tc, bool getsDereferenced)
 	{
 		if (!getsDereferenced && (tc.datatype == BC_DT_F_32 || tc.datatype == BC_DT_F_64))
-			ASSEMBLER_THROW_ERROR(AsmErrCode::DatatypeMismatch, "Cannot use integer '" + currToken().value + "' in instruction with datatype '" + BC_DatatypeToString(tc.datatype) + "'!");
+			MARC_ASSEMBLER_THROW(AsmErrCode::DatatypeMismatch, BC_DatatypeToString(tc.datatype));
 
 		tc.cell.as_U_64 = std::stoull(positiveString(currToken().value));
 		if (isNegativeString(currToken().value))
 		{
 			if (getsDereferenced)
-				ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Cannot dereference literal with negative value!");
+				MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Cannot dereference literal with negative value!");
 
 			switch (tc.datatype)
 			{
@@ -431,7 +414,7 @@ namespace MarC
 	{
 		auto dt = BC_DatatypeFromString(nextToken().value);
 		if (dt == BC_DT_UNKNOWN)
-			ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
+			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Unable to convert token '" + currToken().value + "' to datatype!");
 
 		pushCode(dt);
 	}
@@ -442,7 +425,7 @@ namespace MarC
 		{
 		case DirectiveID::None:
 		case DirectiveID::Unknown:
-			ASSEMBLER_THROW_ERROR(AsmErrCode::UnknownDirectiveID, "Unknown directive '" + currToken().value + "'!");
+			MARC_ASSEMBLER_THROW(AsmErrCode::UnknownDirective, currToken().value);
 			break;
 		case DirectiveID::Label:
 			return assembleDirLabel();
@@ -470,7 +453,7 @@ namespace MarC
 			return assembleDirOptionalPermission();
 		}
 
-		ASSEMBLER_THROW_ERROR(AsmErrCode::UnknownDirectiveID, "Unknown directive '" + currToken().value + "'!");
+		MARC_ASSEMBLER_THROW(AsmErrCode::UnknownDirective, currToken().value);
 	}
 
 	void Assembler::assembleDirLabel()
@@ -478,7 +461,7 @@ namespace MarC
 		removeNecessaryColon();
 
 		if (nextToken().type != AsmToken::Type::Name)
-			ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		addSymbol({ currToken().value, SymbolUsage::Address, currCodeAddr() });
 	}
@@ -488,7 +471,7 @@ namespace MarC
 		removeNecessaryColon();
 
 		if (nextToken().type != AsmToken::Type::Name)
-			ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		Symbol symbol;
 		symbol.name = currToken().value;
@@ -522,14 +505,14 @@ namespace MarC
 			addSymbolAlias({ symbol.name, currToken().value });
 			return;
 		default:
-			ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Unexpected token'" + currToken().value + "' for alias value!");
+			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Unexpected token'" + currToken().value + "' for alias value!");
 		}
 
 		bool getsDereferenced;
 		generateTypeCell(tc, getsDereferenced);
 
 		if (getsDereferenced)
-			ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Usage of the deref operator is not allowed in the alias directive!");
+			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Usage of the deref operator is not allowed in the alias directive!");
 
 		symbol.value = tc.cell;
 
@@ -541,7 +524,7 @@ namespace MarC
 		removeNecessaryColon();
 
 		if (nextToken().type != AsmToken::Type::Name)
-			ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		std::string name = currToken().value;
 
@@ -556,7 +539,7 @@ namespace MarC
 		generateTypeCell(tc, getsDereferenced);
 
 		if (getsDereferenced)
-			ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Usage of the deref operator is not allowed in the static directive!");
+			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Usage of the deref operator is not allowed in the static directive!");
 
 		BC_MemCell mc;
 		mc.as_ADDR = currStaticStackAddr();
@@ -570,7 +553,7 @@ namespace MarC
 		removeNecessaryColon();
 
 		if (nextToken().type != AsmToken::Type::String)
-			ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::String, currToken());
+			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::String, currToken());
 
 		std::string modName = currToken().value;
 
@@ -603,7 +586,7 @@ namespace MarC
 		removeNecessaryColon();
 
 		if (nextToken().type != AsmToken::Type::String)
-			ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::String, currToken());
+			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::String, currToken());
 
 		std::string extName = currToken().value;
 
@@ -615,7 +598,7 @@ namespace MarC
 		removeNecessaryColon();
 
 		if (nextToken().type != AsmToken::Type::Name)
-			ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		addScope(currToken().value);
 	}
@@ -623,7 +606,7 @@ namespace MarC
 	void Assembler::assembleDirEnd()
 	{
 		if (m_scopeList.size() == 0)
-			ASSEMBLER_THROW_ERROR(AsmErrCode::AlreadyInGlobalScope, "Cannot end scope, already in global scope!");
+			MARC_ASSEMBLER_THROW_NO_CONTEXT(AsmErrCode::AlreadyInGlobalScope);
 
 		removeScope();
 	}
@@ -641,11 +624,11 @@ namespace MarC
 		if (hasDatatype)
 		{
 			if (nextToken().type != AsmToken::Type::Name)
-				ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+				MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 			dt = BC_DatatypeFromString(currToken().value);
 			if (dt == BC_DT_UNKNOWN)
-				ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
+				MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Unable to convert token '" + currToken().value + "' to datatype!");
 		}
 
 		removeNecessaryColon();
@@ -653,7 +636,7 @@ namespace MarC
 		std::string funcName;
 		{
 			if (nextToken().type != AsmToken::Type::Name)
-				ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+				MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 			funcName = currToken().value;
 
@@ -668,7 +651,7 @@ namespace MarC
 			removeNecessaryColon();
 
 			if (nextToken().type != AsmToken::Type::Name)
-				ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+				MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 			std::string retName = currToken().value;
 
@@ -679,17 +662,17 @@ namespace MarC
 		while (nextToken().type == AsmToken::Type::Sep_Colon)
 		{
 			if (nextToken().type != AsmToken::Type::Name)
-				ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+				MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 			BC_Datatype dt = BC_DatatypeFromString(currToken().value);
 			if (dt == BC_DT_UNKNOWN)
-				ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Unable to convert token '" + currToken().value + "' to datatype!");
+				MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Unable to convert token '" + currToken().value + "' to datatype!");
 
 			if (nextToken().type != AsmToken::Type::Sep_Dot)
-				ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
+				MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Dot, currToken());
 
 			if (nextToken().type != AsmToken::Type::Name)
-				ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+				MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 			std::string valName = currToken().value;
 
@@ -708,7 +691,7 @@ namespace MarC
 		removeNecessaryColon();
 
 		if (nextToken().type != AsmToken::Type::Name)
-			ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		std::string name = currToken().value;
 
@@ -718,14 +701,14 @@ namespace MarC
 	void Assembler::assembleDirLocal()
 	{
 		if (m_scopeList.empty())
-			ASSEMBLER_THROW_ERROR(AsmErrCode::InvalidScope, "The 'local' directive cannot be used in global scope!");
+			MARC_ASSEMBLER_THROW(AsmErrCode::InvalidScope, "The 'local' directive cannot be used in global scope!");
 		if (!m_scopeList.back().isFuncScope)
-			ASSEMBLER_THROW_ERROR(AsmErrCode::InvalidScope, "The 'local' directive cannot be used in normal scopes!");
+			MARC_ASSEMBLER_THROW(AsmErrCode::InvalidScope, "The 'local' directive cannot be used in plain scopes!");
 
 		removeNecessaryColon();
 
 		if (nextToken().type != AsmToken::Type::Name)
-			ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		std::string name = currToken().value;
 
@@ -739,7 +722,7 @@ namespace MarC
 		generateTypeCell(tc, getsDereferenced);
 
 		if (getsDereferenced)
-			ASSEMBLER_THROW_ERROR(AsmErrCode::UnexpectedToken, "Usage of the deref operator is not allowed in the static directive!");
+			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Usage of the deref operator is not allowed in the static directive!");
 
 		BC_MemCell mc;
 		mc.as_ADDR.base = BC_MEM_BASE_DYN_FRAME_ADD;
@@ -755,7 +738,7 @@ namespace MarC
 		removeNecessaryColon();
 
 		if (nextToken().type != AsmToken::Type::Name)
-			ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		std::string name = currToken().value;
 
@@ -767,7 +750,7 @@ namespace MarC
 		removeNecessaryColon();
 
 		if (nextToken().type != AsmToken::Type::Name)
-			ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		std::string name = currToken().value;
 
@@ -777,7 +760,7 @@ namespace MarC
 	void Assembler::removeNecessaryColon()
 	{
 		if (nextToken().type != AsmToken::Type::Sep_Colon)
-			ASSEMBLER_THROW_ERROR_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Colon, currToken());
+			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Colon, currToken());
 	}
 
 	std::string Assembler::getArgAsString()

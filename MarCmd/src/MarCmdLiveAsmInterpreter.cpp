@@ -53,7 +53,7 @@ namespace MarCmd
 			{
 				recover(RecoverBegin::Assembler);
 				std::cout << "An error occured while running the compiler!:" << std::endl
-					<< "  " << m_pAssembler->lastError().getMessage() << std::endl;
+					<< "  " << m_pAssembler->lastError().what() << std::endl;
 				continue;
 			}
 

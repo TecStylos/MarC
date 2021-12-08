@@ -15,7 +15,7 @@
         "--dbginfo",
         "--forcerefresh",
         "--debug",
-        "examples/GameOfLife.mce"
+        "examples/GameOfLife.mca"
       ]
     }
   ]

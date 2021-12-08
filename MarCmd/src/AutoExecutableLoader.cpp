@@ -20,7 +20,7 @@ namespace MarCmd
 
 			MarC::Assembler assembler(mod);
 			if (!assembler.assemble())
-				throw std::runtime_error("Unable to assemble the modules!");
+				throw assembler.lastError();
 
 			MarC::Linker linker(assembler.getModuleInfo());
 			if (!linker.link())

@@ -149,6 +149,7 @@ int main(int argc, const char** argv, const char** env)
 
 	int exitCode = 0;
 
+	try
 	{
 		switch (settings.mode)
 		{
@@ -176,6 +177,11 @@ int main(int argc, const char** argv, const char** env)
 			exitCode = MarCmd::Interpreter::run(settings);
 			break;
 		}
+	}
+	catch (const MarC::MarCoreError& err)
+	{
+		std::cout << "ERROR: " << err.what() << std::endl;
+		exitCode = -1;
 	}
 
 	if (

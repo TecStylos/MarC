@@ -17,7 +17,7 @@ namespace MarC
 		AsmTokenizer tokenizer(source);
 
 		if (!tokenizer.tokenize())
-			throw MarCoreException("An error occured while running the tokenizer!");
+			throw MarCoreError("An error occured while running the tokenizer!");
 
 		mod->tokenList = tokenizer.getTokenList();
 
@@ -61,18 +61,18 @@ namespace MarC
 				break;
 			case State::Find_Colon:
 				if (token.type != AsmToken::Type::Sep_Colon)
-					throw MarCoreException("Expected ':' after directive 'reqmod'!");
+					throw MarCoreError("Expected ':' after directive 'reqmod'!");
 				state = State::Find_ModName;
 				break;
 			case State::Find_ModName:
 				if (token.type != AsmToken::Type::String)
-					throw MarCoreException("Expected module name after directive 'reqmod'!");
+					throw MarCoreError("Expected module name after directive 'reqmod'!");
 				modNames.insert(token.value);
 				state = State::Find_EndNewline;
 				break;
 			case State::Find_EndNewline:
 				if (token.type != AsmToken::Type::Sep_Newline)
-					throw MarCoreException("Expected newline after module name!");
+					throw MarCoreError("Expected newline after module name!");
 				state = State::Find_BeginNewline;
 				break;
 			default:
@@ -88,16 +88,16 @@ namespace MarC
 				continue;
 
 			if (f.second.empty())
-				throw MarCoreException("Unable to find module '" + f.first + "'!");
+				throw MarCoreError("ModuleLoadError", "Unable to find module '" + f.first + "'!");
 			if (f.second.size() > 1)
-				throw MarCoreException("The module name '" + f.first + "' is ambigious!");
+				throw MarCoreError("ModuleLoadError", "The module name '" + f.first + "' is ambigious!");
 		
 			std::string source = readCodeFile(*f.second.begin());
 
 			AsmTokenizer tokenizer(source);
 			
 			if (!tokenizer.tokenize())
-				throw MarCoreException("An error occured while running the tokenizer for a dependency!");
+				throw MarCoreError("An error occured while running the tokenizer for a dependency!");
 
 			dependencies.insert({ f.first, tokenizer.getTokenList() });
 

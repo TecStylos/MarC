@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exceptions/MarCoreException.h"
+#include "errors/MarCoreError.h"
 
 namespace MarC
 {

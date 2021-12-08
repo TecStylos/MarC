@@ -2,7 +2,7 @@
 
 #include <fstream>
 
-#include "exceptions/MarCoreException.h"
+#include "errors/MarCoreError.h"
 
 namespace MarC
 {
@@ -10,14 +10,14 @@ namespace MarC
 	{
 		std::ifstream iStream(exePath, std::ios::binary | std::ios::in);
 		if (!iStream.is_open())
-			throw MarCoreException("Unable to open executable file!");
+			throw MarCoreError("ExeLoadError", "Unable to open the executable file!");
 
 		auto exeInfo = ExecutableInfo::create();
 
 		deserialize(*exeInfo, iStream);
 
 		if (!iStream.good())
-			throw MarCoreException("An error occured while reading the executable file!");
+			throw MarCoreError("ExeLoadError", "An error occured while reading the executable file!");
 
 		return exeInfo;
 	}
