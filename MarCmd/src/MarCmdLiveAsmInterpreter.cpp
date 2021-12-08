@@ -43,7 +43,7 @@ namespace MarCmd
 			{
 				recover(RecoverBegin::Tokenizer);
 				std::cout << "An error occured while running the tokenizer!" << std::endl
-					<< "  " << m_pTokenizer->lastError().getMessage() << std::endl;
+					<< "  " << m_pTokenizer->lastError().what() << std::endl;
 				continue;
 			}
 

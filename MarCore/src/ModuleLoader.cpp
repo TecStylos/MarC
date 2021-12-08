@@ -17,7 +17,7 @@ namespace MarC
 		AsmTokenizer tokenizer(source);
 
 		if (!tokenizer.tokenize())
-			throw MarCoreError("An error occured while running the tokenizer!");
+			throw tokenizer.lastError();
 
 		mod->tokenList = tokenizer.getTokenList();
 

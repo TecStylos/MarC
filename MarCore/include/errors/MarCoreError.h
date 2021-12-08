@@ -13,10 +13,12 @@ namespace MarC
 		{}
 		virtual ~MarCoreError() noexcept = default;
 	public:
-		virtual const char* what() const noexcept override { return std::runtime_error::what(); }
+		virtual const char* what() const noexcept override { return m_whatBuff.c_str(); }
 	public:
-		explicit operator bool() const { return !m_message.empty(); };
+		virtual explicit operator bool() const { return true; };
 	private:
 		std::string m_message;
+	protected:
+		std::string m_whatBuff;
 	};
 }

@@ -2,23 +2,6 @@
 
 namespace MarC
 {
-	AsmTokenizerError::operator bool() const
-	{
-		return m_code != Code::Success;
-	}
-
-	const std::string& AsmTokenizerError::getText() const
-	{
-		return m_errText;
-	}
-
-	std::string AsmTokenizerError::getMessage() const
-	{
-		return
-			"ERROR ON L: " + std::to_string(m_line) + " C: " + std::to_string(m_column) + "\n" +
-			"  -> " + getText();
-	}
-
 	AsmTokenizer::AsmTokenizer(const std::string& asmCode)
 		: m_asmCode(asmCode)
 	{
