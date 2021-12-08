@@ -51,7 +51,7 @@ namespace MarCmd
 		if (!intResult && !interpreter.lastError().isOK())
 		{
 			std::cout << std::endl << "An error occured while interpreting the code!" << std::endl
-				<< "    " << interpreter.lastError().getMessage() << std::endl;
+				<< "    " << interpreter.lastError().what() << std::endl;
 			return -1;
 		}
 
@@ -62,7 +62,7 @@ namespace MarCmd
 			std::cout << std::endl << "Module '" << exeInfo->name << "' exited with code " << exitCode << "." << std::endl;
 
 			if (verbose)
-				std::cout << "  Reason: '" << interpreter.lastError().getCodeStr() << "'" << std::endl;
+				std::cout << "  Reason: '" << interpreter.lastError().what() << "'" << std::endl;
 
 			if (verbose)
 				std::cout << "Executed " << interpreter.nInsExecuted() << " instructions in " << timer.microseconds() << " microseconds" << std::endl;

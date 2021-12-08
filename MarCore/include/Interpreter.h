@@ -4,44 +4,10 @@
 #include "ExecutableInfo.h"
 
 #include "ExternalFunction.h"
+#include "errors/InterpreterError.h"
 
 namespace MarC
 {
-	class InterpreterError
-	{
-	public:
-		enum class Code
-		{
-			Success = 0,
-			OpCodeUnknown,
-			OpCodeNotExecutable,
-			OpCodeNotImplemented,
-			AbortViaExit,
-			AbortViaEndOfCode,
-			ExtensionLoadFailure,
-			WrongExtCallParamCount,
-			ExternalFunctionNotFound,
-			InvalidDatatype,
-			PermissionDenied,
-		};
-	public:
-		InterpreterError() = default;
-		InterpreterError(Code code, const std::string& errText)
-			: m_code(code), m_errText(errText)
-		{}
-	public:
-		explicit operator bool() const;
-		const std::string& getText() const;
-		std::string getMessage() const;
-		Code getCode() const;
-		std::string getCodeStr() const;
-		bool isOK() const;
-	private:
-		Code m_code = Code::Success;
-		std::string m_errText = "Success!";
-	};
-
-	typedef InterpreterError::Code IntErrCode;
 
 	typedef std::shared_ptr<class Interpreter> InterpreterRef;
 	class Interpreter

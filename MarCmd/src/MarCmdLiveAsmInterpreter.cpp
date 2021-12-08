@@ -103,7 +103,7 @@ namespace MarCmd
 				{
 					recover(RecoverBegin::Interpreter);
 					std::cout << std::endl << "An error occured while interpreting the code!" << std::endl
-						<< "    " << m_pInterpreter->lastError().getMessage() << std::endl;
+						<< "    " << m_pInterpreter->lastError().what() << std::endl;
 				}
 			}
 		}
@@ -115,7 +115,7 @@ namespace MarCmd
 			std::cout << "Module '<cin>' exited with code " << exitCode << "." << std::endl;
 
 			if (m_settings.flags.hasFlag(CmdFlags::Verbose))
-				std::cout << "  Reason: '" << m_pInterpreter->lastError().getCodeStr() << "'" << std::endl;
+				std::cout << "  Reason: '" << m_pInterpreter->lastError().what() << "'" << std::endl;
 		}
 
 		return m_pInterpreter->getRegister(MarC::BC_MEM_REG_EXIT_CODE).as_I_32;

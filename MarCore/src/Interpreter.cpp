@@ -11,49 +11,6 @@
 
 namespace MarC
 {
-	InterpreterError::operator bool() const
-	{
-		return m_code != Code::Success;
-	}
-	const std::string& InterpreterError::getText() const
-	{
-		return m_errText;
-	}
-	std::string InterpreterError::getMessage() const
-	{
-		return "Error with code " + std::to_string((uint64_t)m_code) + ": " + getText();
-	}
-	InterpreterError::Code InterpreterError::getCode() const
-	{
-		return m_code;
-	}
-	std::string InterpreterError::getCodeStr() const
-	{
-		switch (getCode())
-		{
-		case IntErrCode::Success: return "Success";
-		case IntErrCode::OpCodeUnknown: return "OpCode unknown";
-		case IntErrCode::OpCodeNotExecutable: return "OpCode not executable";
-		case IntErrCode::OpCodeNotImplemented: return "OpCode not implemented";
-		case IntErrCode::AbortViaExit: return "Abort via exit";
-		case IntErrCode::AbortViaEndOfCode: return "Abort via EndOfCode";
-		}
-
-		return "<unknown>";
-	}
-	bool InterpreterError::isOK() const
-	{
-		switch (m_code)
-		{
-		case Code::Success:
-		case Code::AbortViaExit:
-		case Code::AbortViaEndOfCode:
-			return true;
-		}
-
-		return false;
-	}
-
 	Interpreter::Interpreter(ExecutableInfoRef pExeInfo, uint64_t defDynStackSize)
 		: m_pExeInfo(pExeInfo)
 	{
@@ -299,13 +256,13 @@ namespace MarC
 
 		case BC_OC_EXIT: Interpreter::exec_insExit(ocx); break;
 		default:
-			throw InterpreterError(IntErrCode::OpCodeNotExecutable, "Unknown opCode '" + std::to_string(ocx.opCode) + "'!");
+			exec_insUndefined(ocx);
 		}
 	}
 
 	void Interpreter::exec_insUndefined(BC_OpCodeEx ocx)
 	{
-		throw InterpreterError(IntErrCode::OpCodeUnknown, "Read undefined opCode '" + std::to_string(ocx.opCode) + "'!");
+		throw InterpreterError(IntErrCode::OpCodeUnknown, std::to_string(ocx.opCode));
 	}
 
 	void Interpreter::exec_insMove(BC_OpCodeEx ocx)
@@ -633,13 +590,13 @@ namespace MarC
 			std::string funcName = &hostObject<char>(funcAddr);
 
 			if (m_grantedPermissions.find(funcName) == m_grantedPermissions.end())
-				throw InterpreterError(IntErrCode::PermissionDenied, "Insufficient permissions for external function '" + funcName + "'!");
+				throw InterpreterError(IntErrCode::PermissionDenied, funcName);
 
 			loadMissingExtensions();
 
 			auto uid = PluS::PluginManager::get().findFeature(funcName);
 			if (!uid)
-				throw InterpreterError(IntErrCode::ExternalFunctionNotFound, "Unable to locate external function '" + funcName + "'!");
+				throw InterpreterError(IntErrCode::ExternalFunctionNotFound, funcName);
 			ExternalFunctionPtr exFunc = PluS::PluginManager::get().createFeature<ExternalFunction>(uid);
 			funcIt = m_extFuncs.insert({ funcAddr, exFunc }).first;
 		}

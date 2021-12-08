@@ -428,7 +428,7 @@ namespace MarCmd
 		if (!m_sharedDebugData->interpreter->lastError().isOK())
 		{
 			std::cout << "An error occured while running the interpreter!:" << std::endl
-				<< m_sharedDebugData->interpreter->lastError().getMessage() << std::endl;
+				<< m_sharedDebugData->interpreter->lastError().what() << std::endl;
 			return -1;
 		}
 
