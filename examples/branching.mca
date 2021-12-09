@@ -1,11 +1,11 @@
 #reqmod : "std"
-#manperm : >>std>>ext>>prints
-#manperm : >>std>>ext>>scant
+#manperm : >>stdext>>prints
+#manperm : >>stdext>>scant
 
 #static : var : ^i64
 
 calx.i64 : >>std>>exScant : var
 
-if.i64 : var
+if.i64 : @var
     calx : >>std>>exPrints : addr."Var != 0"
 endif

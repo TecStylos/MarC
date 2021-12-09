@@ -26,6 +26,8 @@ namespace MarC
 		MandatoryPermission,
 		OptionalPermission,
 		Macro,
+		PragmaPush,
+		PragmaPop,
 	};
 
 	struct ScopeDesc

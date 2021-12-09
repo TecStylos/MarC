@@ -19,11 +19,11 @@
 #end / scope std
 
 #macro.dt : if : val
-	/\#ppush : USYM
-	jeq.dt : END_SCOPE : val : 0
+	\#ppush : USYM
+	jeq.dt : USYM : val : 0
 #end
 
 #macro : endif
 	\#label : USYM
-	/\#ppop
+	\#ppop
 #end

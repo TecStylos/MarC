@@ -61,6 +61,8 @@ namespace MarC
 		void assembleDirMandatoryPermission();
 		void assembleDirOptionalPermission();
 		void assembleDirMacro();
+		void assembleDirPragmaPush();
+		void assembleDirPragmaPop();
 	public:
 		void assembleSubTokenList(AsmTokenListRef tokenList);
 	private:

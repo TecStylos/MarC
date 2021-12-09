@@ -18,6 +18,8 @@ namespace MarC
 		if (value == "manperm") return DirectiveID::MandatoryPermission;
 		if (value == "optperm") return DirectiveID::OptionalPermission;
 		if (value == "macro") return DirectiveID::Macro;
+		if (value == "ppush") return DirectiveID::PragmaPush;
+		if (value == "ppop") return DirectiveID::PragmaPop;
 
 		return DirectiveID::Unknown;
 	}

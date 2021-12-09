@@ -513,6 +513,10 @@ namespace MarC
 			return assembleDirOptionalPermission();
 		case DirectiveID::Macro:
 			return assembleDirMacro();
+		case DirectiveID::PragmaPush:
+			return assembleDirPragmaPush();
+		case DirectiveID::PragmaPop:
+			return assembleDirPragmaPop();
 		}
 
 		MARC_ASSEMBLER_THROW(AsmErrCode::UnknownDirective, currToken().value);
@@ -863,6 +867,21 @@ namespace MarC
 			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Plain directives are not allowed in macro definitions!");
 
 		m_pModInfo->macros.insert({ macroName, macro });
+	}
+
+	void Assembler::assembleDirPragmaPush()
+	{
+		removeNecessaryColon();
+
+		// TODO: Get the pragma name
+		nextToken();
+
+		// TODO: Push
+	}
+
+	void Assembler::assembleDirPragmaPop()
+	{
+		// TODO: Pop
 	}
 
 	void Assembler::assembleSubTokenList(AsmTokenListRef tokenList)
