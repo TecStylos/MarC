@@ -27,6 +27,9 @@ namespace MarC
 	template <typename T, class C>
 	uint64_t searchBinary(const T& elem, const C& container)
 	{
+		if (container.empty())
+			return -1;
+
 		return searchBinary(elem, &*container.begin(), &*(container.end() - 1));
 	}
 

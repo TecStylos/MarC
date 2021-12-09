@@ -6,7 +6,7 @@ namespace MarC
 {
 	struct Macro
 	{
-		std::vector<std::string> parameters;
-		AsmTokenListRef tokenList;
+		std::vector<AsmToken> parameters;
+		AsmTokenList tokenList;
 	};
 }

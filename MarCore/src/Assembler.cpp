@@ -2,6 +2,8 @@
 
 #include "AsmTokenizer.h"
 #include "VirtualAsmTokenList.h"
+#include "SearchAlgorithms.h"
+#include "errors/MacroExpansionError.h"
 
 namespace MarC
 {
@@ -66,10 +68,14 @@ namespace MarC
 		while (currToken().type == AsmToken::Type::Sep_Newline)
 			nextToken();
 
-		if (isInstructionLike())
+		if (isInstruction())
 			assembleInstruction();
-		else if (isDirectiveLike())
+		else if (isMacro())
+			assembleMacroExpansion();
+		else if (isDirective())
 			assembleDirective();
+		else
+			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Unknown statement type!");
 
 		uint64_t nNewlines = 0;
 		while (nextToken().type == AsmToken::Type::Sep_Newline)
@@ -422,6 +428,57 @@ namespace MarC
 		pushCode(dt);
 	}
 
+	void Assembler::assembleMacroExpansion()
+	{
+		std::string macroName = currToken().value;
+
+		bool hasDatatype = true;
+		if (nextToken().type != AsmToken::Type::Sep_Dot)
+		{
+			hasDatatype = false;
+			prevToken();
+		}
+
+		std::vector<AsmTokenList> parameters;
+
+		if (hasDatatype)
+		{
+			if (nextToken().type != AsmToken::Type::Name)
+				MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+
+			parameters.push_back({});
+			parameters.back().push_back(currToken());
+		}
+
+		bool hasParameters = true;
+		if (nextToken().type != AsmToken::Type::Sep_Colon)
+		{
+			hasParameters = false;
+		}
+		prevToken();
+
+		if (hasParameters)
+		{
+			removeNecessaryColon();
+			prevToken();
+
+			while (nextToken().type != AsmToken::Type::Sep_Newline && currToken().type != AsmToken::Type::END_OF_CODE)
+			{
+				if (currToken().type == AsmToken::Type::Sep_Colon)
+				{
+					parameters.push_back({});
+					continue;
+				}
+
+				parameters.back().push_back(currToken());
+			}
+
+			prevToken();
+		}
+
+		expandMacro(macroName, parameters);
+	}
+
 	void Assembler::assembleDirective()
 	{
 		switch (DirectiveIDFromString(nextToken().value))
@@ -569,19 +626,7 @@ namespace MarC
 		if (modIt == m_pModPack->dependencies.end())
 			throw std::runtime_error("Unable to resolve dependency!");
 
-		{
-			VirtualAsmTokenList vtl(*this, modIt->second);
-
-			try
-			{
-				while (!isEndOfCode())
-					assembleStatement();
-			}
-			catch (AssemblerError& err)
-			{
-				throw err;
-			}
-		}
+		assembleSubTokenList(modIt->second);
 
 		m_resolvedDependencies.insert(modIt->first);
 	}
@@ -765,7 +810,6 @@ namespace MarC
 	void Assembler::assembleDirMacro()
 	{
 		Macro macro;
-		macro.tokenList = std::make_shared<AsmTokenList>();
 
 		bool hasDatatype = true;
 		if (nextToken().type != AsmToken::Type::Sep_Dot)
@@ -779,7 +823,7 @@ namespace MarC
 			if (nextToken().type != AsmToken::Type::Name)
 				MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
-			macro.parameters.push_back(currToken().value);
+			macro.parameters.push_back(currToken());
 		}
 
 		removeNecessaryColon();
@@ -788,6 +832,8 @@ namespace MarC
 		{
 			if (nextToken().type != AsmToken::Type::Name)
 				MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+			if (m_pModInfo->macros.find(currToken().value) != m_pModInfo->macros.end())
+				MARC_ASSEMBLER_THROW(AsmErrCode::MacroAlreadyDefined, macroName);
 
 			macroName = currToken().value;
 		}
@@ -797,7 +843,7 @@ namespace MarC
 			if (nextToken().type != AsmToken::Type::Name)
 				MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
-			macro.parameters.push_back(currToken().value);
+			macro.parameters.push_back(currToken());
 		}
 
 		if (currToken().type != AsmToken::Type::Sep_Newline)
@@ -809,15 +855,29 @@ namespace MarC
 				if (nextToken().type != AsmToken::Type::Op_Directive)
 					MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Op_Directive, currToken());
 
-			macro.tokenList->push_back(currToken());
+			macro.tokenList.push_back(currToken());
 		}
+		macro.tokenList.push_back(AsmToken(0, 0, AsmToken::Type::END_OF_CODE));
 
 		if (nextToken().value != "end")
 			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Plain directives are not allowed in macro definitions!");
 
-		if (m_pModInfo->macros.find(macroName) != m_pModInfo->macros.end())
-			MARC_ASSEMBLER_THROW(AsmErrCode::MacroAlreadyDefined, macroName);
 		m_pModInfo->macros.insert({ macroName, macro });
+	}
+
+	void Assembler::assembleSubTokenList(AsmTokenListRef tokenList)
+	{
+		VirtualAsmTokenList vtl(*this, tokenList);
+
+		try
+		{
+			while (!isEndOfCode())
+				assembleStatement();
+		}
+		catch (AssemblerError& err)
+		{
+			throw err;
+		}
 	}
 
 	void Assembler::removeNecessaryColon()
@@ -913,15 +973,70 @@ namespace MarC
 
 	bool Assembler::macroExists(const std::string& name)
 	{
-		return false;
+		return m_pModInfo->macros.find(name) != m_pModInfo->macros.end();
 	}
 
-	bool Assembler::isInstructionLike()
+	void Assembler::expandMacro(const std::string& name, const std::vector<AsmTokenList>& parameters)
 	{
-		return currToken().type == AsmToken::Type::Name;
+		auto itMacro = m_pModInfo->macros.find(name);
+		if (itMacro == m_pModInfo->macros.end())
+			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Unknown macro '" + name + "'!");
+
+		auto& macro = itMacro->second;
+
+		if (macro.parameters.size() != parameters.size())
+			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Parameter count mismatch for macro expansion!");
+
+		auto pTokenList = std::make_shared<AsmTokenList>();
+
+		for (auto& token : macro.tokenList)
+		{
+			uint64_t paramIndex;
+			if (token.type != AsmToken::Type::Name ||
+				(paramIndex = searchBinary(token, macro.parameters)) == -1)
+			{
+				pTokenList->push_back(token);
+				continue;
+			}
+
+			for (AsmToken newToken : parameters[paramIndex])
+			{
+				newToken.line = token.line;
+				newToken.column = token.column;
+				pTokenList->push_back(newToken);
+			}
+		}
+
+		try
+		{
+			assembleSubTokenList(pTokenList);
+		}
+		catch (const MarCoreError& err)
+		{
+			MARC_MACRO_EXPANSION_THROW(err);
+		}
 	}
 
-	bool Assembler::isDirectiveLike()
+	bool Assembler::isInstruction()
+	{
+		if (currToken().type != AsmToken::Type::Name)
+			return false;
+
+		auto temp = BC_OpCodeFromString(currToken().value);
+		
+		return temp != BC_OC_NONE &&
+			temp != BC_OC_UNKNOWN;
+	}
+
+	bool Assembler::isMacro()
+	{
+		if (currToken().type != AsmToken::Type::Name)
+			return false;
+
+		return macroExists(currToken().value);
+	}
+
+	bool Assembler::isDirective()
 	{
 		return currToken().type == AsmToken::Type::Op_Directive;
 	}

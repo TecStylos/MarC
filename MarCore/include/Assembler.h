@@ -28,6 +28,7 @@ namespace MarC
 		void assembleStatement();
 		void assembleStatement(const std::string& statement);
 		void assembleInstruction();
+		void assembleMacroExpansion();
 		void assembleMacroUsage();
 	private:
 		void assembleSpecializedInstruction(BC_OpCodeEx& ocx);
@@ -60,6 +61,8 @@ namespace MarC
 		void assembleDirMandatoryPermission();
 		void assembleDirOptionalPermission();
 		void assembleDirMacro();
+	public:
+		void assembleSubTokenList(AsmTokenListRef tokenList);
 	private:
 		void removeNecessaryColon();
 	private:
@@ -73,9 +76,11 @@ namespace MarC
 		void addSymbolAlias(SymbolAlias symAlias);
 	private:
 		bool macroExists(const std::string& name);
+		void expandMacro(const std::string& name, const std::vector<AsmTokenList>& parameters);
 	private:
-		bool isInstructionLike();
-		bool isDirectiveLike();
+		bool isInstruction();
+		bool isMacro();
+		bool isDirective();
 	private:
 		const AsmToken& nextToken();
 		const AsmToken& prevToken();

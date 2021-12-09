@@ -35,6 +35,9 @@ namespace MarC
 		AsmToken(uint16_t line, uint16_t column, Type type = Type::None, const std::string& value = "")
 			: line(line), column(column), type(type), value(value)
 		{}
+	public:
+		bool operator<(const AsmToken& other) const { return value < other.value; }
+		bool operator>(const AsmToken& other) const { return value > other.value; }
 	};
 	typedef std::vector<AsmToken> AsmTokenList;
 	typedef std::shared_ptr<AsmTokenList> AsmTokenListRef;

@@ -7,5 +7,5 @@
 calx.i64 : >>std>>exScant : var
 
 if.i64 : var
-    calx : >>std>>exPrints >> addr."Var != 0"
+    calx : >>std>>exPrints : addr."Var != 0"
 endif
