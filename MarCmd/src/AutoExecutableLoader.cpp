@@ -8,7 +8,7 @@ namespace MarCmd
 		auto extension = MarC::modExtFromPath(inFile);
 		if (extension == ".mcc")
 		{
-			throw std::runtime_error("MarC code files are not supported yet!");
+			throw MarC::MarCoreError("FileFormatError", "MarC code files are not supported yet!");
 		}
 		else if (extension == ".mce")
 		{
@@ -24,13 +24,13 @@ namespace MarCmd
 
 			MarC::Linker linker(assembler.getModuleInfo());
 			if (!linker.link())
-				throw std::runtime_error("Unable to link the modules!");
+				throw linker.lastError();
 
 			exeInfo = linker.getExeInfo();
 		}
 		else
 		{
-			throw std::runtime_error("Unknown input file format!");
+			throw MarC::MarCoreError("FileFormatError", "Unknown input file format!");
 		}
 		return exeInfo;
 	}

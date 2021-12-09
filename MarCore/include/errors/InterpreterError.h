@@ -61,6 +61,8 @@ namespace MarC
 			case Code::PermissionDenied:
 				message = "Insufficient permissions for external function '" + context + "'!";
 				break;
+			default:
+				message = "Unknown error code! Context: " + context;
 			}
 
 			m_whatBuff = message;

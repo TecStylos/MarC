@@ -4,22 +4,6 @@
 
 namespace MarC
 {
-	LinkerError::operator bool() const
-	{
-		return m_code != Code::Success;
-	}
-
-	const std::string& LinkerError::getText() const
-	{
-		return m_errText;
-	}
-
-	std::string LinkerError::getMessage() const
-	{
-		return
-			"ERROR\n  -> " + getText();
-	}
-
 	Linker::Linker(ModuleInfoRef modInfo)
 		: m_modInfo(modInfo)
 	{}

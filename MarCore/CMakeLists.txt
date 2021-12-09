@@ -28,7 +28,7 @@ add_library(
 	"src/CodeFileReader.cpp"
 	"src/ModulePack.cpp"
 	"src/ExecutableLoader.cpp"
- "include/errors/AsmTokenizerError.h" "include/errors/InterpreterError.h" "include/errors/MacroExpansionError.h" "include/Macro.h")
+ "include/errors/AsmTokenizerError.h" "include/errors/InterpreterError.h" "include/errors/MacroExpansionError.h" "include/Macro.h" "include/errors/LinkerError.h")
 
 target_include_directories(
 	MarCore PUBLIC

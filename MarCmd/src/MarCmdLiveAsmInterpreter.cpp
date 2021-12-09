@@ -67,7 +67,7 @@ namespace MarCmd
 			{
 				recover(RecoverBegin::Linker);
 				std::cout << "An error occured while running the linker!:" << std::endl
-					<< "  " << linkErr.getMessage() << std::endl;
+					<< "  " << linkErr.what() << std::endl;
 				continue;
 			}
 
