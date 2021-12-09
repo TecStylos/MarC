@@ -25,6 +25,7 @@ namespace MarC
 		Local,
 		MandatoryPermission,
 		OptionalPermission,
+		Macro,
 	};
 
 	struct ScopeDesc

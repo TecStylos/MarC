@@ -147,22 +147,16 @@ namespace MarCmd
 	{
 		std::string line;
 		std::getline(std::cin, line);
-		if (line.empty() || line[0] != '%')
+		if (!line.empty())
 			return line + '\n';
 
-		if (line.size() > 1)
+		if (line.find("?moddir ") == 0)
 		{
-			if (line.find("%moddir ") == 0)
-			{
-				line = line.substr(strlen("%moddir "));
-				m_settings.modDirs.insert(line);
-				return "";
-			}
-			std::cout << "Unknown live interpreter command!" << std::endl;
+			line = line.substr(strlen("%moddir "));
+			m_settings.modDirs.insert(line);
+			return "";
 		}
 
-		std::cout << "   > ";
-		std::getline(std::cin, line);
 		std::string code;
 		do
 		{
@@ -170,7 +164,10 @@ namespace MarCmd
 			code.push_back('\n');
 			std::cout << "   > ";
 			std::getline(std::cin, line);
-		} while (line != "%");
+		} while (!line.empty());
+
+		if (code == "\n")
+			return "";
 
 		return code;
 	}

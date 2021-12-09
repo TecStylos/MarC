@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ExecutableInfo.h"
+#include "Macro.h"
 
 namespace MarC
 {
@@ -13,6 +14,7 @@ namespace MarC
 	public:
 		ExecutableInfoRef exeInfo;
 		std::set<SymbolAlias> symbolAliases;
+		std::map<std::string, Macro> macros;
 		std::vector<SymbolRef> unresolvedSymbolRefs;
 	public:
 		ModuleInfo();

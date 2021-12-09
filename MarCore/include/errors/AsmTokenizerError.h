@@ -18,7 +18,7 @@ namespace MarC
 			: AsmTokenizerError(Code::Success, 0, 0, "")
 		{}
 		AsmTokenizerError(Code code, uint16_t line, uint16_t column, const std::string& context)
-			: MarCoreError("AsmTokenizerError", context), m_code(code)
+			: MarCoreError("AsmTokenizerError"), m_code(code)
 		{
 			std::string message;
 

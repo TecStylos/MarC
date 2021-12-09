@@ -17,6 +17,7 @@ namespace MarC
 		if (value == "local") return DirectiveID::Local;
 		if (value == "manperm") return DirectiveID::MandatoryPermission;
 		if (value == "optperm") return DirectiveID::OptionalPermission;
+		if (value == "macro") return DirectiveID::Macro;
 
 		return DirectiveID::Unknown;
 	}

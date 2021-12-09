@@ -59,6 +59,7 @@ namespace MarC
 		void assembleDirLocal();
 		void assembleDirMandatoryPermission();
 		void assembleDirOptionalPermission();
+		void assembleDirMacro();
 	private:
 		void removeNecessaryColon();
 	private:

@@ -25,7 +25,7 @@ namespace MarC
 			: InterpreterError(Code::Success, "")
 		{}
 		InterpreterError(Code code, const std::string& context)
-			: MarCoreError("InterpreterError", context), m_code(code)
+			: MarCoreError("InterpreterError"), m_code(code)
 		{
 			std::string message;
 

@@ -22,6 +22,7 @@ namespace MarC
 			Op_DT_Size,
 			Op_Register,
 			Op_Directive,
+			Op_Ignore_Directive,
 			Name,
 			Float,
 			Integer,

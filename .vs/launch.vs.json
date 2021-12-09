@@ -14,7 +14,7 @@
         "--grantall",
         "--dbginfo",
         "--forcerefresh",
-        "--debug",
+        "--interpret",
         "examples/GameOfLife.mca"
       ]
     }

@@ -63,9 +63,12 @@ namespace MarC
 
 	void Assembler::assembleStatement()
 	{
+		while (currToken().type == AsmToken::Type::Sep_Newline)
+			nextToken();
+
 		if (isInstructionLike())
 			assembleInstruction();
-		if (isDirectiveLike())
+		else if (isDirectiveLike())
 			assembleDirective();
 
 		uint64_t nNewlines = 0;
@@ -451,6 +454,8 @@ namespace MarC
 			return assembleDirMandatoryPermission();
 		case DirectiveID::OptionalPermission:
 			return assembleDirOptionalPermission();
+		case DirectiveID::Macro:
+			return assembleDirMacro();
 		}
 
 		MARC_ASSEMBLER_THROW(AsmErrCode::UnknownDirective, currToken().value);
@@ -755,6 +760,64 @@ namespace MarC
 		std::string name = currToken().value;
 
 		m_pModInfo->exeInfo->optionalPermissions.insert(name);
+	}
+
+	void Assembler::assembleDirMacro()
+	{
+		Macro macro;
+		macro.tokenList = std::make_shared<AsmTokenList>();
+
+		bool hasDatatype = true;
+		if (nextToken().type != AsmToken::Type::Sep_Dot)
+		{
+			hasDatatype = false;
+			prevToken();
+		}
+
+		if (hasDatatype)
+		{
+			if (nextToken().type != AsmToken::Type::Name)
+				MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+
+			macro.parameters.push_back(currToken().value);
+		}
+
+		removeNecessaryColon();
+
+		std::string macroName;
+		{
+			if (nextToken().type != AsmToken::Type::Name)
+				MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+
+			macroName = currToken().value;
+		}
+
+		while (nextToken().type == AsmToken::Type::Sep_Colon)
+		{
+			if (nextToken().type != AsmToken::Type::Name)
+				MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+
+			macro.parameters.push_back(currToken().value);
+		}
+
+		if (currToken().type != AsmToken::Type::Sep_Newline)
+			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Newline, currToken());
+
+		while (nextToken().type != AsmToken::Type::Op_Directive)
+		{
+			if (currToken().type == AsmToken::Type::Op_Ignore_Directive)
+				if (nextToken().type != AsmToken::Type::Op_Directive)
+					MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Op_Directive, currToken());
+
+			macro.tokenList->push_back(currToken());
+		}
+
+		if (nextToken().value != "end")
+			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Plain directives are not allowed in macro definitions!");
+
+		if (m_pModInfo->macros.find(macroName) != m_pModInfo->macros.end())
+			MARC_ASSEMBLER_THROW(AsmErrCode::MacroAlreadyDefined, macroName);
+		m_pModInfo->macros.insert({ macroName, macro });
 	}
 
 	void Assembler::removeNecessaryColon()

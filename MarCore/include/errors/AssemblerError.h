@@ -20,13 +20,14 @@ namespace MarC
 			InternalError,
 			InvalidScope,
 			NotSpecialized,
+			MacroAlreadyDefined,
 		};
 	public:
 		AssemblerError()
 			: AssemblerError(Code::Success, 0, 0, "")
 		{}
 		AssemblerError(Code code, uint64_t line, uint64_t column, const std::string& context)
-			: MarCoreError("AssemblerError", context), m_code(code)
+			: MarCoreError("AssemblerError"), m_code(code)
 		{
 			std::string message;
 			switch (m_code)
@@ -68,6 +69,9 @@ namespace MarC
 				break;
 			case Code::NotSpecialized:
 				message = "The opCode '" + context + "' is not specialized!";
+				break;
+			case Code::MacroAlreadyDefined:
+				message = "A macro with the name '" + context + "' has already been defined!";
 				break;
 			default:
 				message = "Unknown error code! Context: " + context;
