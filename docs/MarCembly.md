@@ -81,7 +81,10 @@ extension | None | [string] | Request an extension. (Required for external funct
 manperm | None | [funcName] | Request a mandatory permission for an external function.
 optperm | None | [funcName] | Request an optional permission for an external function.
 scope | None | [name] | Begin a new scope.
-end | None | - | End a scope.
+end | None | - | End a scope/macro.
 func | Optional | [funcName] *[ : retName] *[ : typedArgs] | Define an internal function.
 funx | None | [funcName] | Tell the linker there's an external function with the specified name in an extension having the same name as the module.
 local | None | [name] : [size] | Reserve local (frame relative) memory (frame offset automatically determined).
+macro | Optional | [macroName] *[ : macroArgs] | Define a macro.
+ppush | None | [name] | Push a name onto the preprocessor stack.
+ppop | None | - | Pop a name from the preprocessor stack.

@@ -47,6 +47,14 @@
    - Any unknown argument gets interpreted as the input file.
 ***
 
+## MarCembly Live Interpreter
+### Multiline input
+The MarCembly Live Interpreter accepts multiline input. Enter a blank line to toogle the multiline input mode.
+***
+
+## Debugger
+***
+
 ## Examples
 ### Run the live MarCembly assembler and close the CLI after the interpreter has exited:
 ```
