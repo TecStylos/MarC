@@ -33,6 +33,7 @@ Usage | Explanation
 @[addr] | Dereference the given address
 ^[dt] | Replaced with the size of the datatype
 ~[+/-][u64] | Calculate the address relative to the current frame pointer with the given offset.
+%[n] | Get the name stored at the `n`th element from the top of the preprocessor stack.
 ***
 
 ## Instructions:
