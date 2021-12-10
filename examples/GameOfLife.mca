@@ -59,7 +59,7 @@
 
 #func : CLEAR
     mov.u64 : $ac : >>HEIGHT
-    add.u64 : $ac : 1
+    inc.u64 : $ac
     calx : >>std>>exPrints : addr."\r"
     #label : LOOP_BEGIN
         calx : >>std>>exPrints : addr."\e[1F"
@@ -76,7 +76,7 @@
 
 #func.u64 : XY_TO_INDEX : RET : u64.X : u64.Y
     mov.u64 : RET : >>WIDTH
-    add.u64 : RET : 1
+    inc.u64 : RET
     mul.u64 : RET : @Y
     add.u64 : RET : @X
     return
@@ -204,9 +204,9 @@
         mov.u64 : Y : 0
         #label : Y_LOOP_BEGIN
             call : >>EVOLVE_CELL : addr.@FROM : addr.@TO : u64.@X : u64.@Y
-            add.u64 : Y : 1
+            inc.u64 : Y
         jne.u64 : Y_LOOP_BEGIN : @Y : >>HEIGHT
-        add.u64 : X : 1
+        inc.u64 : X
     jne.u64 : X_LOOP_BEGIN : @X : >>WIDTH
     return
 #end

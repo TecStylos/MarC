@@ -18,6 +18,13 @@
 	#end
 #end / scope std
 
+#macro.dt : inc : valAddr
+	add.dt : valAddr : 1
+#end
+#macro.dt : dec : valAddr
+	sub.dt : valAddr : 1
+#end
+
 #macro.dt : if : val
 	\#ppush : USYM
 	jeq.dt : USYM : val : 0
