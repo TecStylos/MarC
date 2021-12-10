@@ -21,14 +21,15 @@
 #macro.dt : inc : valAddr
 	add.dt : valAddr : 1
 #end
+
 #macro.dt : dec : valAddr
 	sub.dt : valAddr : 1
 #end
 
-#macro.dt : __if_jmp : value : jmpType
+#macro.dt : __if_jmp : jmpType : left : right
 	\#ppush : IF_END
 	\#ppush : IF_NEXT
-	jmpType.dt : %0 : 0 : value
+	jmpType.dt : %0 : left : right
 #end
 #macro : else
 	jmp : %1
@@ -36,9 +37,9 @@
 	\#ppop
 	\#ppush : IF_NEXT
 #end
-#macro.dt : __elif_jmp : value : jmpType
+#macro.dt : __elif_jmp : jmpType : left : right
 	else
-	jmpType.dt : %0 : 0 : value
+	jmpType.dt : %0 : left : right
 #end
 #macro : endif
 	\#label : %0
@@ -47,9 +48,37 @@
 	\#ppop
 #end
 
+
+#macro : __create_if_bin : name : jmpType
+	\#macro.dt : name : left : right
+		__if_jmp.dt : jmpType : left : right
+	\#end
+#end
+#macro : __create_elif_bin : name : jmpType
+	\#macro.dt : name : left : right
+		__elif_jmp.dt : jmpType : left : right
+	\#end
+#end
+
+
+__create_if_bin : if_eq : jne
+__create_if_bin : if_ne : jeq
+__create_if_bin : if_lt : jge
+__create_if_bin : if_gt : jle
+__create_if_bin : if_le : jgt
+__create_if_bin : if_ge : jlt
+
+__create_elif_bin : elif_eq : jne
+__create_elif_bin : elif_ne : jeq
+__create_elif_bin : elif_lt : jge
+__create_elif_bin : elif_gt : jle
+__create_elif_bin : elif_le : jgt
+__create_elif_bin : elif_ge : jlt
+
+
 #macro.dt : if : value
-	__if_jmp.dt : value : jeq
+	if_ne.dt : 0 : value
 #end
 #macro.dt : elif : value
-	__elif_jmp.dt : value : jeq
+	elif_ne.dt : 0 : value
 #end
