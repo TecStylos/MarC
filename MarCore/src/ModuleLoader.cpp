@@ -97,7 +97,7 @@ namespace MarC
 			AsmTokenizer tokenizer(source);
 			
 			if (!tokenizer.tokenize())
-				throw MarCoreError("An error occured while running the tokenizer for a dependency!");
+				throw tokenizer.lastError();
 
 			dependencies.insert({ f.first, tokenizer.getTokenList() });
 

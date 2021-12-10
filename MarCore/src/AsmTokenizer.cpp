@@ -17,6 +17,7 @@ namespace MarC
 			BeginToken,
 			EndToken,
 			TokenizeString,
+			TokenizePragmaInsertion,
 			TokenizeStringEscapeCode,
 			TokenizeComment,
 			TokenizeInteger,
@@ -145,6 +146,10 @@ namespace MarC
 						currToken.type = AsmToken::Type::String;
 						currAction = CurrAction::TokenizeString;
 						break;
+					case '%':
+						currToken.type = AsmToken::Type::Pragma_Insertion;
+						currAction = CurrAction::TokenizePragmaInsertion;
+						break;
 					case '\'':
 						currToken.type = AsmToken::Type::Integer;
 						currAction = CurrAction::TokenizeChar;
@@ -182,6 +187,19 @@ namespace MarC
 						currAction = CurrAction::TokenizeStringEscapeCode;
 						break;
 					default:
+						currToken.value.push_back(c);
+					}
+					break;
+				case CurrAction::TokenizePragmaInsertion:
+					if (!std::isdigit(c))
+					{
+						if (currToken.value.empty())
+							ASM_TOKENIZER_THROW_ERROR(AsmTokErrCode::UnexpectedChar, "Expected integer after pragma insertion sign!");
+						currAction = CurrAction::EndToken;
+						--nextChar;
+					}
+					else
+					{
 						currToken.value.push_back(c);
 					}
 					break;

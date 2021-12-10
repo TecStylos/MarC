@@ -27,6 +27,7 @@ namespace MarC
 			Float,
 			Integer,
 			String,
+			Pragma_Insertion,
 			Comment,
 		} type = Type::None;
 		std::string value = "<undefined>";

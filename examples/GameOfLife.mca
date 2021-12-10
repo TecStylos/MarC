@@ -25,7 +25,7 @@
     #local : END_ADDR : ^addr
     mov.addr : END_ADDR : @BASE
     add.addr : END_ADDR : >>GRID_SIZE
-    sub.addr : END_ADDR : 1
+    dec.addr : END_ADDR
 
     mov.addr : $ac : @BASE
     call : >>std>>copyString : addr.@$ac : addr.>>LINE_0
@@ -117,52 +117,52 @@
 #func.i8 : NEIGHBOR_ALIVE_COUNT : RET : addr.BASE : u64.X : u64.Y
     mov.i8 : RET : 0
 
-    sub.u64 : Y : 1
+    dec.u64 : Y
     jeq.u64 : UPPER_MID_END : @Y : -1
     call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
     add.i8 : RET : @$ac
     #label : UPPER_MID_END
 
-    add.u64 : X : 1
+    inc.u64 : X
     jeq.u64 : UPPER_RIGHT_END : @Y : -1
     jeq.u64 : UPPER_RIGHT_END : @X : >>WIDTH
     call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
     add.i8 : RET : @$ac
     #label : UPPER_RIGHT_END
 
-    add.u64 : Y : 1
+    inc.u64 : Y
     jeq.u64 : MID_RIGHT_END : @X : >>WIDTH
     call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
     add.i8 : RET : @$ac
     #label : MID_RIGHT_END
 
-    add.u64 : Y : 1
+    inc.u64 : Y
     jeq.u64 : LOWER_RIGHT_END : @Y : >>HEIGHT
     jeq.u64 : LOWER_RIGHT_END : @X : >>WIDTH
     call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
     add.i8 : RET : @$ac
     #label : LOWER_RIGHT_END
 
-    sub.u64 : X : 1
+    dec.u64 : X
     jeq.u64 : LOWER_MID_END : @Y : >>HEIGHT
     call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
     add.i8 : RET : @$ac
     #label : LOWER_MID_END
 
-    sub.u64 : X : 1
+    dec.u64 : X
     jeq.u64 : LOWER_LEFT_END : @Y : >>HEIGHT
     jeq.u64 : LOWER_LEFT_END : @X : -1
     call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
     add.i8 : RET : @$ac
     #label : LOWER_LEFT_END
 
-    sub.u64 : Y : 1
+    dec.u64 : Y
     jeq.u64 : MID_LEFT_END : @X : -1
     call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
     add.i8 : RET : @$ac
     #label : MID_LEFT_END
 
-    sub.u64 : Y : 1
+    dec.u64 : Y
     jeq.u64 : UPPER_LEFT_END : @Y : -1
     jeq.u64 : UPPER_LEFT_END : @X : -1
     call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
@@ -229,7 +229,7 @@
         call : >>CLEAR
         call : >>RENDER : addr.>>GRID1
 
-        sub.i64 : $lc : 1
+        dec.i64 : $lc
     jne.i64 : MAIN_LOOP : @$lc : 0
     return
 #end

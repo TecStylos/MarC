@@ -21,6 +21,8 @@ namespace MarC
 			InvalidScope,
 			NotSpecialized,
 			MacroAlreadyDefined,
+			InvalidPragmaIndex,
+			PragmaListEmpty,
 		};
 	public:
 		AssemblerError()
@@ -73,6 +75,17 @@ namespace MarC
 			case Code::MacroAlreadyDefined:
 				message = "A macro with the name '" + context + "' has already been defined!";
 				break;
+			case Code::InvalidPragmaIndex:
+			{
+				uint64_t sep = context.find('|');
+				std::string providedIndex = sep != std::string::npos ? context.substr(0, sep) : "";
+				std::string maxAllowedIndex = sep != std::string::npos ? context.substr(sep + 1) : "";
+				message = "The provided pragma insertion index (" + providedIndex + ") is out of range! (Pragma count: " + maxAllowedIndex + ")";
+				break;
+			}
+			case Code::PragmaListEmpty:
+				message = "Cannot remove element from empty pragma list!";
+				break;
 			default:
 				message = "Unknown error code! Context: " + context;
 			}
@@ -87,7 +100,7 @@ namespace MarC
 
 	typedef AssemblerError::Code AsmErrCode;
 
-	#define MARC_ASSEMBLER_THROW(code, context) throw AssemblerError(code, currToken().line, currToken().column, context)
+	#define MARC_ASSEMBLER_THROW(code, context) throw AssemblerError(code, currTokenNoModify().line, currTokenNoModify().column, context)
 	#define MARC_ASSEMBLER_THROW_NO_CONTEXT(code) MARC_ASSEMBLER_THROW(code, "")
 
 	#define MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(expectedType, token) \

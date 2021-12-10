@@ -853,13 +853,13 @@ namespace MarC
 		if (currToken().type != AsmToken::Type::Sep_Newline)
 			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Sep_Newline, currToken());
 
-		while (nextToken().type != AsmToken::Type::Op_Directive)
+		while (nextTokenNoModify().type != AsmToken::Type::Op_Directive)
 		{
-			if (currToken().type == AsmToken::Type::Op_Ignore_Directive)
-				if (nextToken().type != AsmToken::Type::Op_Directive)
-					MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Op_Directive, currToken());
+			if (currTokenNoModify().type == AsmToken::Type::Op_Ignore_Directive)
+				if (nextTokenNoModify().type != AsmToken::Type::Op_Directive)
+					MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Op_Directive, currTokenNoModify());
 
-			macro.tokenList.push_back(currToken());
+			macro.tokenList.push_back(currTokenNoModify());
 		}
 		macro.tokenList.push_back(AsmToken(0, 0, AsmToken::Type::END_OF_CODE));
 
@@ -873,15 +873,20 @@ namespace MarC
 	{
 		removeNecessaryColon();
 
-		// TODO: Get the pragma name
-		nextToken();
+		if (nextToken().type != AsmToken::Type::Name)
+			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
-		// TODO: Push
+		std::string name = currToken().value;
+		name.append("__" + std::to_string(std::rand()));
+
+		m_pragmaList.push_back(AsmToken(currTokenNoModify().line, currTokenNoModify().column, AsmToken::Type::Name, name));
 	}
 
 	void Assembler::assembleDirPragmaPop()
 	{
-		// TODO: Pop
+		if (m_pragmaList.empty())
+			MARC_ASSEMBLER_THROW_NO_CONTEXT(AsmErrCode::PragmaListEmpty);
+		m_pragmaList.pop_back();
 	}
 
 	void Assembler::assembleSubTokenList(AsmTokenListRef tokenList)
@@ -1073,6 +1078,31 @@ namespace MarC
 	}
 
 	const AsmToken& Assembler::currToken() const
+	{
+		auto& temp = currTokenNoModify();
+		if (temp.type == AsmToken::Type::Pragma_Insertion)
+		{
+			uint64_t index = std::stoull(temp.value);
+			if (index >= m_pragmaList.size())
+				MARC_ASSEMBLER_THROW(AsmErrCode::InvalidPragmaIndex, temp.value + "|" + std::to_string(m_pragmaList.size()));
+			return *(m_pragmaList.end() - 1 - index);
+		}
+		return temp;
+	}
+
+	const AsmToken& Assembler::nextTokenNoModify()
+	{
+		++m_nextTokenToCompile;
+		return currTokenNoModify();
+	}
+
+	const AsmToken& Assembler::prevTokenNoModify()
+	{
+		--m_nextTokenToCompile;
+		return currTokenNoModify();
+	}
+
+	const AsmToken& Assembler::currTokenNoModify() const
 	{
 		return (*m_pCurrTokenList)[m_nextTokenToCompile];
 	}

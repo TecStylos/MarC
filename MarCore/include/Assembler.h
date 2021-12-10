@@ -87,6 +87,9 @@ namespace MarC
 		const AsmToken& nextToken();
 		const AsmToken& prevToken();
 		const AsmToken& currToken() const;
+		const AsmToken& nextTokenNoModify();
+		const AsmToken& prevTokenNoModify();
+		const AsmToken& currTokenNoModify() const;
 		bool isEndOfCode() const;
 	private:
 		void pushCode(const void* data, uint64_t size);
@@ -106,6 +109,7 @@ namespace MarC
 		AssemblerError m_lastErr;
 		ModuleInfoRef m_pModInfo;
 		std::vector<ScopeDesc> m_scopeList;
+		std::vector<AsmToken> m_pragmaList;
 		std::set<std::string> m_resolvedDependencies;
 		uint64_t m_nextTokenToCompile = 0;
 		uint64_t m_backupNextTokenToCompile = 0;
