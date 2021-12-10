@@ -75,7 +75,7 @@ namespace MarC
 		else if (isDirective())
 			assembleDirective();
 		else
-			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Unknown statement type!");
+			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Unknown statement '" + currToken().value + "'!");
 
 		uint64_t nNewlines = 0;
 		while (nextToken().type == AsmToken::Type::Sep_Newline)
@@ -1015,19 +1015,30 @@ namespace MarC
 
 		for (auto& token : macro.tokenList)
 		{
-			uint64_t paramIndex;
-			if (token.type != AsmToken::Type::Name ||
-				(paramIndex = searchBinary(token, macro.parameters)) == -1)
+			uint64_t paramIndex = -1;
+			if (token.type == AsmToken::Type::Name)
 			{
-				pTokenList->push_back(token);
-				continue;
+				for (uint64_t i = 0; i < macro.parameters.size(); ++i)
+				{
+					if (macro.parameters[i].value != token.value)
+						continue;
+					paramIndex = i;
+					break;
+				}
 			}
 
-			for (AsmToken newToken : parameters[paramIndex])
+			if (paramIndex == -1)
 			{
-				newToken.line = token.line;
-				newToken.column = token.column;
-				pTokenList->push_back(newToken);
+				pTokenList->push_back(token);
+			}
+			else
+			{
+				for (AsmToken newToken : parameters[paramIndex])
+				{
+					newToken.line = token.line;
+					newToken.column = token.column;
+					pTokenList->push_back(newToken);
+				}
 			}
 		}
 

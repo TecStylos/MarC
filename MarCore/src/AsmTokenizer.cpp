@@ -165,7 +165,7 @@ namespace MarC
 							currToken.value.push_back(c);
 							currAction = CurrAction::TokenizeInteger;
 						}
-						else if (std::isalpha(c) || c == '>')
+						else if (std::isalpha(c) || c == '>' || c == '_')
 						{
 							currToken.type = AsmToken::Type::Name;
 							currToken.value.push_back(c);

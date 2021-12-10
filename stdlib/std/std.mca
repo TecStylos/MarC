@@ -25,27 +25,31 @@
 	sub.dt : valAddr : 1
 #end
 
-#macro.dt : if : value
+#macro.dt : __if_jmp : value : jmpType
 	\#ppush : IF_END
 	\#ppush : IF_NEXT
-	jeq.dt : %0 : 0 : value
+	jmpType.dt : %0 : 0 : value
 #end
-
 #macro : else
 	jmp : %1
 	\#label : %0
 	\#ppop
 	\#ppush : IF_NEXT
 #end
-
-#macro.dt : elif : value
+#macro.dt : __elif_jmp : value : jmpType
 	else
-	jeq.dt : %0 : 0 : value
+	jmpType.dt : %0 : 0 : value
 #end
-
 #macro : endif
 	\#label : %0
 	\#label : %1
 	\#ppop
 	\#ppop
+#end
+
+#macro.dt : if : value
+	__if_jmp.dt : value : jeq
+#end
+#macro.dt : elif : value
+	__elif_jmp.dt : value : jeq
 #end
