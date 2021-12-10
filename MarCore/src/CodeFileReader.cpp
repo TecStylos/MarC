@@ -20,7 +20,7 @@ namespace MarC
 	{
 		std::ifstream f(filepath);
 		if (!f.good())
-			throw MarCoreError("Unable to open the code file!");
+			throw MarCoreError("FileIOError", "Unable to open the code file!");
 
 		std::string result;
 		while (!f.eof())
@@ -34,7 +34,7 @@ namespace MarC
 			result.pop_back();
 
 		if (f.fail())
-			throw MarCoreError("An error occured while reading the input file!");
+			throw MarCoreError("FileIOError", "An error occured while reading the input file!");
 
 		return result;
 	}

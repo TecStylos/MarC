@@ -309,7 +309,7 @@ namespace MarC
 	}
 	void Interpreter::exec_insPush(BC_OpCodeEx ocx)
 	{
-		virt_pushStack(BC_MemCell(), BC_DatatypeSize(ocx.datatype));
+		virt_pushStack(BC_DatatypeSize(ocx.datatype));
 	}
 	void Interpreter::exec_insPop(BC_OpCodeEx ocx)
 	{
@@ -489,11 +489,11 @@ namespace MarC
 		BC_MemAddress funcAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg.get(0)).as_ADDR;
 		auto& fcd = readDataAndMove<BC_FuncCallData>();
 		
-		virt_pushStack(BC_MemCell(), BC_DatatypeSize(ocx.datatype)); // Reserve memory for return value
+		virt_pushStack(BC_DatatypeSize(ocx.datatype)); // Reserve memory for return value
 		retMem = regSP.as_ADDR; // Copy address of memory for return address
-		virt_pushStack(BC_MemCell(), BC_DatatypeSize(BC_DT_U_64)); // Reserve memory for return address
+		virt_pushStack(BC_DatatypeSize(BC_DT_U_64)); // Reserve memory for return address
 		fpMem = regSP.as_ADDR; // Copy address of memory for frame pointer
-		virt_pushStack(BC_MemCell(), BC_DatatypeSize(BC_DT_U_64)); // Reserve memory for frame pointer
+		virt_pushStack(BC_DatatypeSize(BC_DT_U_64)); // Reserve memory for frame pointer
 
 		for (uint8_t i = 0; i < fcd.nArgs; ++i)
 		{
