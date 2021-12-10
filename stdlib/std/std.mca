@@ -106,10 +106,34 @@ __create_while_bin : while_ge : jlt
 	while_ne.dt : 0 : value
 #end
 
-/ ------------------------------- Endwhile Macro -------------------------------
 #macro : endwhile
 	jmp : %1
 	\#label : %0
 	\#ppop
 	\#ppop
+#end
+
+/ ------------------------------- Do-While Macros -------------------------------
+#macro : do
+	\#ppush : DO_WHILE_BEGIN
+	\#label : %0
+#end
+
+#macro.dt : __do_while_jmp : jmpType : left : right
+	jmpType.dt : %0 : left : right
+	\#ppop
+#end
+#macro : __create_do_while_bin : name : jmpType
+	\#macro.dt : name : left : right
+		__do_while_jmp.dt : jmpType : left : right
+	\#end
+#end
+__create_do_while_bin : do_while_eq : jeq
+__create_do_while_bin : do_while_ne : jne
+__create_do_while_bin : do_while_lt : jlt
+__create_do_while_bin : do_while_gt : jgt
+__create_do_while_bin : do_while_le : jle
+__create_do_while_bin : do_while_ge : jge
+#macro.dt : do_while : value
+	do_while_ne.dt : 0 : value
 #end

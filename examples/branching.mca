@@ -42,11 +42,19 @@ endif
 calx : >>std>>exPrints : addr."Sum of 0 - "
 calx.i64 : >>std>>exScant : sum_count
 
+mov.i64 : $ac : @sum_count
 mov.i64 : sum : 0
 while.i64 : @sum_count
     add.i64 : sum : @sum_count
     dec.i64 : sum_count
 endwhile
+
+mov.i64 : sum_count : @$ac
+mov.i64 : sum : 0
+do
+    add.i64 : sum : @sum_count
+    dec.i64 : sum_count
+do_while.i64 : @sum_count
 
 calx : >>std>>exPrints : addr."Sum: "
 calx : >>std>>exPrintt : i64.@sum
