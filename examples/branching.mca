@@ -2,10 +2,36 @@
 #manperm : >>stdext>>prints
 #manperm : >>stdext>>scant
 
-#static : var : ^i64
+#static : compare : ^i64
+#static : var_a : ^i64
+#static : var_b : ^i64
 
-calx.i64 : >>std>>exScant : var
+#alias : STATIC_VAR : 0
 
-if.i64 : @var
-    calx : >>std>>exPrints : addr."Var != 0"
+calx : >>std>>exPrints : addr."Compare: "
+calx.i64 : >>std>>exScant : compare
+calx : >>std>>exPrints : addr."Var A: "
+calx.i64 : >>std>>exScant : var_a
+calx : >>std>>exPrints : addr."Var B: "
+calx.i64 : >>std>>exScant : var_b
+
+if.i64 : @compare
+    calx : >>std>>exPrints : addr."Compare != 0\n"
+    if.i64 : @var_a
+        if.i64 : @var_b
+            calx : >>std>>exPrints : addr."A != 0 && B != 0\n"
+        else
+            calx : >>std>>exPrints : addr."A != 0 && B == 0\n"
+        endif
+    else
+        if.i64 : @var_b
+            calx : >>std>>exPrints : addr."A == 0 && B != 0\n"
+        else
+            calx : >>std>>exPrints : addr."A == 0 && B == 0\n"
+        endif
+    endif
+elif.i64 : STATIC_VAR
+    calx : >>std>>exPrints : addr."Compare == 0 && STATIC_VAR != 0\n"
+else
+    calx : >>std>>exPrints : addr."Compare == 0 && STATIC_VAR == 0\n"
 endif

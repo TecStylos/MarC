@@ -25,12 +25,27 @@
 	sub.dt : valAddr : 1
 #end
 
-#macro.dt : if : val
-	\#ppush : USYM
-	jeq.dt : USYM : val : 0
+#macro.dt : if : value
+	\#ppush : IF_END
+	\#ppush : IF_NEXT
+	jeq.dt : %0 : 0 : value
+#end
+
+#macro : else
+	jmp : %1
+	\#label : %0
+	\#ppop
+	\#ppush : IF_NEXT
+#end
+
+#macro.dt : elif : value
+	else
+	jeq.dt : %0 : 0 : value
 #end
 
 #macro : endif
-	\#label : USYM
+	\#label : %0
+	\#label : %1
+	\#ppop
 	\#ppop
 #end
