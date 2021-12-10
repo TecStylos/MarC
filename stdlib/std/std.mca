@@ -18,29 +18,64 @@
 	#end
 #end / scope std
 
+
+/ ------------------------- Instruction Like Macros -------------------------
 #macro.dt : inc : valAddr
 	add.dt : valAddr : 1
 #end
-
 #macro.dt : dec : valAddr
 	sub.dt : valAddr : 1
 #end
 
+/ -------------------------------- If Macros --------------------------------
 #macro.dt : __if_jmp : jmpType : left : right
 	\#ppush : IF_END
 	\#ppush : IF_NEXT
 	jmpType.dt : %0 : left : right
 #end
+#macro : __create_if_bin : name : jmpType
+	\#macro.dt : name : left : right
+		__if_jmp.dt : jmpType : left : right
+	\#end
+#end
+__create_if_bin : if_eq : jne
+__create_if_bin : if_ne : jeq
+__create_if_bin : if_lt : jge
+__create_if_bin : if_gt : jle
+__create_if_bin : if_le : jgt
+__create_if_bin : if_ge : jlt
+#macro.dt : if : value
+	if_ne.dt : 0 : value
+#end
+
+/ ------------------------------- Else Macros -------------------------------
 #macro : else
 	jmp : %1
 	\#label : %0
 	\#ppop
 	\#ppush : IF_NEXT
 #end
+
 #macro.dt : __elif_jmp : jmpType : left : right
 	else
 	jmpType.dt : %0 : left : right
 #end
+#macro : __create_elif_bin : name : jmpType
+	\#macro.dt : name : left : right
+		__elif_jmp.dt : jmpType : left : right
+	\#end
+#end
+__create_elif_bin : elif_eq : jne
+__create_elif_bin : elif_ne : jeq
+__create_elif_bin : elif_lt : jge
+__create_elif_bin : elif_gt : jle
+__create_elif_bin : elif_le : jgt
+__create_elif_bin : elif_ge : jlt
+#macro.dt : elif : value
+	elif_ne.dt : 0 : value
+#end
+
+/ ------------------------------- Endif Macro -------------------------------
 #macro : endif
 	\#label : %0
 	\#label : %1
@@ -49,36 +84,32 @@
 #end
 
 
-#macro : __create_if_bin : name : jmpType
+/ ------------------------------- While Macros -------------------------------
+#macro.dt : __while_jmp : jmpType : left : right
+	\#ppush : WHILE_BEGIN
+	\#ppush : WHILE_END
+	\#label : %1
+	jmpType.dt : %0 : left : right
+#end
+#macro : __create_while_bin : name : jmpType
 	\#macro.dt : name : left : right
-		__if_jmp.dt : jmpType : left : right
+		__while_jmp.dt : jmpType : left : right
 	\#end
 #end
-#macro : __create_elif_bin : name : jmpType
-	\#macro.dt : name : left : right
-		__elif_jmp.dt : jmpType : left : right
-	\#end
+__create_while_bin : while_eq : jne
+__create_while_bin : while_ne : jeq
+__create_while_bin : while_lt : jge
+__create_while_bin : while_gt : jle
+__create_while_bin : while_le : jgt
+__create_while_bin : while_ge : jlt
+#macro.dt : while : value
+	while_ne.dt : 0 : value
 #end
 
-
-__create_if_bin : if_eq : jne
-__create_if_bin : if_ne : jeq
-__create_if_bin : if_lt : jge
-__create_if_bin : if_gt : jle
-__create_if_bin : if_le : jgt
-__create_if_bin : if_ge : jlt
-
-__create_elif_bin : elif_eq : jne
-__create_elif_bin : elif_ne : jeq
-__create_elif_bin : elif_lt : jge
-__create_elif_bin : elif_gt : jle
-__create_elif_bin : elif_le : jgt
-__create_elif_bin : elif_ge : jlt
-
-
-#macro.dt : if : value
-	if_ne.dt : 0 : value
-#end
-#macro.dt : elif : value
-	elif_ne.dt : 0 : value
+/ ------------------------------- Endwhile Macro -------------------------------
+#macro : endwhile
+	jmp : %1
+	\#label : %0
+	\#ppop
+	\#ppop
 #end
