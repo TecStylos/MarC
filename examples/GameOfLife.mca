@@ -50,10 +50,10 @@
 
     mov.addr : $ac : @BASE
     sub.addr : $ac : 1
-    #label : NEWLINE_LOOP_BEGIN
+    do
         add.addr : $ac : 11
         mov.i8 : @$ac : 10
-    jlt.addr : NEWLINE_LOOP_BEGIN : @$ac : @END_ADDR
+    do_while_lt.addr : @$ac : @END_ADDR
     return
 #end
 
@@ -61,10 +61,10 @@
     mov.u64 : $ac : >>HEIGHT
     inc.u64 : $ac
     calx : >>std>>exPrints : addr."\r"
-    #label : LOOP_BEGIN
+    do
         calx : >>std>>exPrints : addr."\e[1F"
-        sub.u64 : $ac : 1
-    jne.u64 : LOOP_BEGIN : @$ac : 0
+        dec.u64 : $ac
+    do_while.u64 : @$ac
     return
 #end
 
@@ -102,15 +102,13 @@
 
 #func.i8 : IS_ALIVE : RET : addr.BASE : u64.X : u64.Y
     call.addr : >>XY_TO_ADDR : $ac : addr.@BASE : u64.@X : u64.@Y
-
     drf : $ac : @$ac
-    jeq.i8 : IS_NOT_ALIVE : @$ac : ' '
 
-    mov.i8 : RET : 1
-    return
-
-    #label : IS_NOT_ALIVE
-    mov.i8 : RET : 0
+    if_eq.i8 : @$ac : ' '
+        mov.i8 : RET : 0
+    else
+        mov.i8 : RET : 1
+    endif
     return
 #end
 
@@ -118,57 +116,60 @@
     mov.i8 : RET : 0
 
     dec.u64 : Y
-    jeq.u64 : UPPER_MID_END : @Y : -1
-    call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
-    add.i8 : RET : @$ac
-    #label : UPPER_MID_END
+    if_ne.u64 : @Y : -1
+        call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
+        add.i8 : RET : @$ac
+    endif
 
     inc.u64 : X
-    jeq.u64 : UPPER_RIGHT_END : @Y : -1
-    jeq.u64 : UPPER_RIGHT_END : @X : >>WIDTH
-    call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
-    add.i8 : RET : @$ac
-    #label : UPPER_RIGHT_END
+    if_eq.u64 : @Y : -1
+    elif_eq.u64 : @X : >>WIDTH
+    else
+        call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
+        add.i8 : RET : @$ac
+    endif
 
     inc.u64 : Y
-    jeq.u64 : MID_RIGHT_END : @X : >>WIDTH
-    call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
-    add.i8 : RET : @$ac
-    #label : MID_RIGHT_END
+    if_ne.u64 : @X : >>WIDTH
+        call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
+        add.i8 : RET : @$ac
+    endif
 
     inc.u64 : Y
-    jeq.u64 : LOWER_RIGHT_END : @Y : >>HEIGHT
-    jeq.u64 : LOWER_RIGHT_END : @X : >>WIDTH
-    call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
-    add.i8 : RET : @$ac
-    #label : LOWER_RIGHT_END
+    if_eq.u64 : @Y : >>HEIGHT
+    elif_eq.u64 : @X : >>WIDTH
+    else
+        call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
+        add.i8 : RET : @$ac
+    endif
 
     dec.u64 : X
-    jeq.u64 : LOWER_MID_END : @Y : >>HEIGHT
-    call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
-    add.i8 : RET : @$ac
-    #label : LOWER_MID_END
+    if_ne.u64 : @Y : >>HEIGHT
+        call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
+        add.i8 : RET : @$ac
+    endif
 
     dec.u64 : X
-    jeq.u64 : LOWER_LEFT_END : @Y : >>HEIGHT
-    jeq.u64 : LOWER_LEFT_END : @X : -1
-    call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
-    add.i8 : RET : @$ac
-    #label : LOWER_LEFT_END
+    if_eq.u64 : @Y : >>HEIGHT
+    elif_eq.u64 : @X : -1
+    else
+        call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
+        add.i8 : RET : @$ac
+    endif
 
     dec.u64 : Y
-    jeq.u64 : MID_LEFT_END : @X : -1
-    call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
-    add.i8 : RET : @$ac
-    #label : MID_LEFT_END
+    if_ne.u64 : @X : -1
+        call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
+        add.i8 : RET : @$ac
+    endif
 
     dec.u64 : Y
-    jeq.u64 : UPPER_LEFT_END : @Y : -1
-    jeq.u64 : UPPER_LEFT_END : @X : -1
-    call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
-    add.i8 : RET : @$ac
-    #label : UPPER_LEFT_END
-
+    if_eq.u64 : @Y : -1
+    elif_eq.u64 : @X : -1
+    else
+        call.i8 : >>IS_ALIVE : $ac : addr.@BASE : u64.@X : u64.@Y
+        add.i8 : RET : @$ac
+    endif
     return
 #end
 
@@ -200,14 +201,14 @@
     #local : Y : ^u64
 
     mov.u64 : X : 0
-    #label : X_LOOP_BEGIN
+    do
         mov.u64 : Y : 0
-        #label : Y_LOOP_BEGIN
+        do
             call : >>EVOLVE_CELL : addr.@FROM : addr.@TO : u64.@X : u64.@Y
             inc.u64 : Y
-        jne.u64 : Y_LOOP_BEGIN : @Y : >>HEIGHT
+        do_while_ne.u64 : @Y : >>HEIGHT
         inc.u64 : X
-    jne.u64 : X_LOOP_BEGIN : @X : >>WIDTH
+    do_while_ne.u64 : @X : >>WIDTH
     return
 #end
 
@@ -218,7 +219,7 @@
     call : >>RENDER : addr.>>GRID1
 
     mov.i64 : $lc : >>MAIN_LOOP_COUNT
-    #label : MAIN_LOOP
+    do
         calx : >>std>>exSleepms : u64.>>FRAME_TIME
         call : >>EVOLVE : addr.>>GRID1 : addr.>>GRID2
         call : >>CLEAR
@@ -230,7 +231,7 @@
         call : >>RENDER : addr.>>GRID1
 
         dec.i64 : $lc
-    jne.i64 : MAIN_LOOP : @$lc : 0
+    do_while_ne.i64 : @$lc : 0
     return
 #end
 
