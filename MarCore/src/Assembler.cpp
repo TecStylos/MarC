@@ -877,7 +877,7 @@ namespace MarC
 			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 		std::string name = currToken().value;
-		name.append("__" + std::to_string(std::rand()));
+		name.append("__" + std::to_string(++m_nextPragmaIndex));
 
 		m_pragmaList.push_back(AsmToken(currTokenNoModify().line, currTokenNoModify().column, AsmToken::Type::Name, name));
 	}
