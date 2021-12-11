@@ -74,6 +74,7 @@ namespace MarC
 				if (token.type != AsmToken::Type::Sep_Newline)
 					throw MarCoreError("Expected newline after module name!");
 				state = State::Find_BeginNewline;
+				--i;
 				break;
 			default:
 				break;

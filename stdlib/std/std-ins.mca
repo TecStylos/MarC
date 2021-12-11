@@ -1,0 +1,11 @@
+/ Defines instruction like macros including
+/  * inc
+/  * dec
+
+#macro.dt : inc : valAddr
+	add.dt : valAddr : 1
+#end / macro inc
+
+#macro.dt : dec : valAddr
+	sub.dt : valAddr : 1
+#end / macro dec

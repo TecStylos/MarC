@@ -1,0 +1,193 @@
+/ Defines control-flow macros including:
+/  * If/Else
+/  * While
+/  * Do-While
+/  * Fast-While
+/  * Switch-Case
+
+/ -------------------------------- If Macros --------------------------------
+#macro.dt : __if_bin_template : jmpType : left : right
+	\#ppush : IF_END
+	\#ppush : IF_NEXT
+	jmpType.dt : %0 : left : right
+#end / macro __if_bin_template
+#macro : __create_if_bin : name : jmpType
+	\#macro.dt : name : left : right
+		__if_bin_template.dt : jmpType : left : right
+	\#end
+#end / macro __create_if_bin
+__create_if_bin : if_eq : jne
+__create_if_bin : if_ne : jeq
+__create_if_bin : if_lt : jge
+__create_if_bin : if_gt : jle
+__create_if_bin : if_le : jgt
+__create_if_bin : if_ge : jlt
+#macro.dt : if : value
+	if_ne.dt : 0 : value
+#end / macro if
+
+/ ------------------------------- Else Macro -------------------------------
+#macro : else
+	jmp : %1
+	\#label : %0
+	\#prep : 0 : IF_NEXT
+#end / macro else
+
+/ ------------------------------- Elif Macros -------------------------------
+#macro.dt : __elif_bin_template : jmpType : left : right
+	else
+	jmpType.dt : %0 : left : right
+#end / macro __elif_bin_template
+#macro : __create_elif_bin : name : jmpType
+	\#macro.dt : name : left : right
+		__elif_bin_template.dt : jmpType : left : right
+	\#end
+#end / macro __create_elif_bin
+__create_elif_bin : elif_eq : jne
+__create_elif_bin : elif_ne : jeq
+__create_elif_bin : elif_lt : jge
+__create_elif_bin : elif_gt : jle
+__create_elif_bin : elif_le : jgt
+__create_elif_bin : elif_ge : jlt
+#macro.dt : elif : value
+	elif_ne.dt : 0 : value
+#end / macro : elif
+
+/ ------------------------------- Endif Macro -------------------------------
+#macro : endif
+	\#label : %0
+	\#label : %1
+	\#ppop
+	\#ppop
+#end / macro endif
+
+
+/ ------------------------------- While Macros -------------------------------
+#macro.dt : __while_bin_template : jmpType : left : right
+	\#ppush : WHILE_BEGIN
+	\#ppush : WHILE_END
+	\#label : %1
+	jmpType.dt : %0 : left : right
+#end / macro __while_bin_template
+#macro : __create_while_bin : name : jmpType
+	\#macro.dt : name : left : right
+		__while_bin_template.dt : jmpType : left : right
+	\#end
+#end / macro : __create_while_bin
+__create_while_bin : while_eq : jne
+__create_while_bin : while_ne : jeq
+__create_while_bin : while_lt : jge
+__create_while_bin : while_gt : jle
+__create_while_bin : while_le : jgt
+__create_while_bin : while_ge : jlt
+#macro.dt : while : value
+	while_ne.dt : 0 : value
+#end / macro while
+
+#macro : endwhile
+	jmp : %1
+	\#label : %0
+	\#ppop
+	\#ppop
+#end / macro endwhile
+
+/ ------------------------------- Do-While Macros -------------------------------
+#macro : do
+	\#ppush : DO_WHILE_BEGIN
+	\#label : %0
+#end / macro do
+
+#macro.dt : __do_while_bin_template : jmpType : left : right
+	jmpType.dt : %0 : left : right
+	\#ppop
+#end / macro __do_while_bin_template
+#macro : __create_do_while_bin : name : jmpType
+	\#macro.dt : name : left : right
+		__do_while_bin_template.dt : jmpType : left : right
+	\#end
+#end / macro __create_do_while_bin
+__create_do_while_bin : do_while_eq : jeq
+__create_do_while_bin : do_while_ne : jne
+__create_do_while_bin : do_while_lt : jlt
+__create_do_while_bin : do_while_gt : jgt
+__create_do_while_bin : do_while_le : jle
+__create_do_while_bin : do_while_ge : jge
+#macro.dt : do_while : value
+	do_while_ne.dt : 0 : value
+#end / macro do_while
+
+/ ------------------------------- Fast-While Macros -------------------------------
+#macro.dt : __fwhile_bin_template : doWhileType : ifType : left : right
+	\#ppush : FWHILE_DO_WHILE
+	\#macro : %0
+		doWhileType.dt : left : right
+	\#end
+	ifType.dt : left : right
+		do
+#end / macro __fwhile_bin_template
+
+#macro : __create_fwhile_bin : name : doWhileType : ifType
+	\#macro.dt : name : left : right
+		__fwhile_bin_template.dt : doWhileType : ifType : left : right
+	\#end
+#end / macro __create_fwhile_bin
+__create_fwhile_bin : fwhile_eq : do_while_eq : if_eq
+__create_fwhile_bin : fwhile_ne : do_while_ne : if_ne
+__create_fwhile_bin : fwhile_lt : do_while_lt : if_lt
+__create_fwhile_bin : fwhile_gt : do_while_gt : if_gt
+__create_fwhile_bin : fwhile_le : do_while_le : if_le
+__create_fwhile_bin : fwhile_ge : do_while_ge : if_ge
+#macro.dt : fwhile : value
+	fwhile_ne.dt : 0 : value
+#end / macro fwhile
+
+#macro : endfwhile
+		%3
+	endif
+	\#ppop
+#end
+
+/ ------------------------------- For Macros -------------------------------
+
+/ ------------------------------- Switch-Case Macros -------------------------------
+#macro.dt : switch : inputValue
+	\#ppush : SWITCH_CASE / %3
+	\#ppush : SWITCH_END  / %2
+	\#ppush : SWITCH_FALLTHROUGH / %1
+	\#ppush : SWITCH_NEXT / %0
+	\#macro : %3 : caseValue / Create the internal switch case macro.
+		jne.dt : %0 : inputValue : caseValue / Jump to the next case if there's not match.
+	\#end
+	jmp : %0
+#end / macro switch
+
+#macro : default
+	jmp : %2 / Jump to the end of the switch.
+	\#label : %0 / Switch Next
+	\#prep : 0 : SWITCH_NEXT
+	\#label : %1 / Switch Fallthrough
+	\#prep : 1 : SWITCH_FALLTHROUGH
+#end / macro default
+
+#macro : case : caseValue
+	jmp : %2 / Jump to the end of the switch.
+	\#label : %0 / Switch Next
+	\#prep : 0 : SWITCH_NEXT
+	%3 : caseValue / Use the internal switch case macro.
+	\#label : %1 / Switch Fallthrough
+	\#prep : 1 : SWITCH_FALLTHROUGH
+#end / macro case
+
+#macro : fallthrough
+	jmp : %1 / Jump to the next case without checking the condition.
+#end
+
+#macro : endswitch
+	\#label : %0 / Switch Next
+	\#label : %1 / Switch Fallthrough
+	\#label : %2 / Switch End
+	\#ppop
+	\#ppop
+	\#ppop
+	\#ppop
+#end / macro endswitch
