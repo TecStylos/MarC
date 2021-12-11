@@ -1,12 +1,6 @@
 #reqmod : "std-ext"
 
 #scope : std
-	#alias : exPrints : >>stdext>>prints
-    #alias : exPrintt : >>stdext>>printt
-    #alias : exScans : >>stdext>>scans
-    #alias : exScant : >>stdext>>scant
-    #alias : exSleepms : >>stdext>>sleepms
-
 	#func : copyString : addr.DEST : addr.SRC
 		#label : LOOP_BEGIN
 			drf : $td : @SRC
@@ -15,29 +9,29 @@
 			add.addr : SRC : 1
 		jne.u8 : LOOP_BEGIN : @$td : 0
 		return
-	#end
+	#end / func copyString
 #end / scope std
 
 
 / ------------------------- Instruction Like Macros -------------------------
 #macro.dt : inc : valAddr
 	add.dt : valAddr : 1
-#end
+#end / macro inc
 #macro.dt : dec : valAddr
 	sub.dt : valAddr : 1
-#end
+#end / macro dec
 
 / -------------------------------- If Macros --------------------------------
 #macro.dt : __if_jmp : jmpType : left : right
 	\#ppush : IF_END
 	\#ppush : IF_NEXT
 	jmpType.dt : %0 : left : right
-#end
+#end / macro __if_jmp
 #macro : __create_if_bin : name : jmpType
 	\#macro.dt : name : left : right
 		__if_jmp.dt : jmpType : left : right
 	\#end
-#end
+#end / macro __create_if_bin
 __create_if_bin : if_eq : jne
 __create_if_bin : if_ne : jeq
 __create_if_bin : if_lt : jge
@@ -46,7 +40,7 @@ __create_if_bin : if_le : jgt
 __create_if_bin : if_ge : jlt
 #macro.dt : if : value
 	if_ne.dt : 0 : value
-#end
+#end / macro if
 
 / ------------------------------- Else Macros -------------------------------
 #macro : else
@@ -54,17 +48,17 @@ __create_if_bin : if_ge : jlt
 	\#label : %0
 	\#ppop
 	\#ppush : IF_NEXT
-#end
+#end / macro else
 
 #macro.dt : __elif_jmp : jmpType : left : right
 	else
 	jmpType.dt : %0 : left : right
-#end
+#end / macro __elif_jmp
 #macro : __create_elif_bin : name : jmpType
 	\#macro.dt : name : left : right
 		__elif_jmp.dt : jmpType : left : right
 	\#end
-#end
+#end / macro __create_elif_bin
 __create_elif_bin : elif_eq : jne
 __create_elif_bin : elif_ne : jeq
 __create_elif_bin : elif_lt : jge
@@ -73,7 +67,7 @@ __create_elif_bin : elif_le : jgt
 __create_elif_bin : elif_ge : jlt
 #macro.dt : elif : value
 	elif_ne.dt : 0 : value
-#end
+#end / macro : elif
 
 / ------------------------------- Endif Macro -------------------------------
 #macro : endif
@@ -81,7 +75,7 @@ __create_elif_bin : elif_ge : jlt
 	\#label : %1
 	\#ppop
 	\#ppop
-#end
+#end / macro endif
 
 
 / ------------------------------- While Macros -------------------------------
@@ -90,12 +84,12 @@ __create_elif_bin : elif_ge : jlt
 	\#ppush : WHILE_END
 	\#label : %1
 	jmpType.dt : %0 : left : right
-#end
+#end / macro __while_jmp
 #macro : __create_while_bin : name : jmpType
 	\#macro.dt : name : left : right
 		__while_jmp.dt : jmpType : left : right
 	\#end
-#end
+#end / macro : __create_while_bin
 __create_while_bin : while_eq : jne
 __create_while_bin : while_ne : jeq
 __create_while_bin : while_lt : jge
@@ -104,30 +98,30 @@ __create_while_bin : while_le : jgt
 __create_while_bin : while_ge : jlt
 #macro.dt : while : value
 	while_ne.dt : 0 : value
-#end
+#end / macro while
 
 #macro : endwhile
 	jmp : %1
 	\#label : %0
 	\#ppop
 	\#ppop
-#end
+#end / macro endwhile
 
 / ------------------------------- Do-While Macros -------------------------------
 #macro : do
 	\#ppush : DO_WHILE_BEGIN
 	\#label : %0
-#end
+#end / macro do
 
 #macro.dt : __do_while_jmp : jmpType : left : right
 	jmpType.dt : %0 : left : right
 	\#ppop
-#end
+#end / macro __do_while_jmp
 #macro : __create_do_while_bin : name : jmpType
 	\#macro.dt : name : left : right
 		__do_while_jmp.dt : jmpType : left : right
 	\#end
-#end
+#end / macro __create_do_while_bin
 __create_do_while_bin : do_while_eq : jeq
 __create_do_while_bin : do_while_ne : jne
 __create_do_while_bin : do_while_lt : jlt
@@ -136,4 +130,4 @@ __create_do_while_bin : do_while_le : jle
 __create_do_while_bin : do_while_ge : jge
 #macro.dt : do_while : value
 	do_while_ne.dt : 0 : value
-#end
+#end / macro do_while

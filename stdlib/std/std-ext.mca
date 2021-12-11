@@ -15,4 +15,24 @@
         
     / Sleep n milliseconds
     #funx : sleepms
-#end / scope std>>ext
+#end / scope stdext
+
+#macro : prints : string
+    calx : >>stdext>>prints : addr.string
+#end / macro prints
+
+#macro.dt : printt : value
+    calx : >>stdext>>printt : dt.value
+#end / macro printt
+
+#macro : scans : string
+    calx : >>stdext>>scans : addr.string
+#end / macro scans
+
+#macro.dt : scant : type
+    calx.dt : >>stdext>>scant : type
+#end / macro scant
+
+#macro : sleepms : milliseconds
+    calx : >>stdext>>sleepms : u64.milliseconds
+#end / macro sleepms
