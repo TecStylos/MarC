@@ -22,14 +22,14 @@
 #end / macro dec
 
 / -------------------------------- If Macros --------------------------------
-#macro.dt : __if_jmp : jmpType : left : right
+#macro.dt : __if_bin_template : jmpType : left : right
 	\#ppush : IF_END
 	\#ppush : IF_NEXT
 	jmpType.dt : %0 : left : right
-#end / macro __if_jmp
+#end / macro __if_bin_template
 #macro : __create_if_bin : name : jmpType
 	\#macro.dt : name : left : right
-		__if_jmp.dt : jmpType : left : right
+		__if_bin_template.dt : jmpType : left : right
 	\#end
 #end / macro __create_if_bin
 __create_if_bin : if_eq : jne
@@ -50,13 +50,13 @@ __create_if_bin : if_ge : jlt
 	\#ppush : IF_NEXT
 #end / macro else
 
-#macro.dt : __elif_jmp : jmpType : left : right
+#macro.dt : __elif_bin_template : jmpType : left : right
 	else
 	jmpType.dt : %0 : left : right
-#end / macro __elif_jmp
+#end / macro __elif_bin_template
 #macro : __create_elif_bin : name : jmpType
 	\#macro.dt : name : left : right
-		__elif_jmp.dt : jmpType : left : right
+		__elif_bin_template.dt : jmpType : left : right
 	\#end
 #end / macro __create_elif_bin
 __create_elif_bin : elif_eq : jne
@@ -79,15 +79,15 @@ __create_elif_bin : elif_ge : jlt
 
 
 / ------------------------------- While Macros -------------------------------
-#macro.dt : __while_jmp : jmpType : left : right
+#macro.dt : __while_bin_template : jmpType : left : right
 	\#ppush : WHILE_BEGIN
 	\#ppush : WHILE_END
 	\#label : %1
 	jmpType.dt : %0 : left : right
-#end / macro __while_jmp
+#end / macro __while_bin_template
 #macro : __create_while_bin : name : jmpType
 	\#macro.dt : name : left : right
-		__while_jmp.dt : jmpType : left : right
+		__while_bin_template.dt : jmpType : left : right
 	\#end
 #end / macro : __create_while_bin
 __create_while_bin : while_eq : jne
@@ -113,13 +113,13 @@ __create_while_bin : while_ge : jlt
 	\#label : %0
 #end / macro do
 
-#macro.dt : __do_while_jmp : jmpType : left : right
+#macro.dt : __do_while_bin_template : jmpType : left : right
 	jmpType.dt : %0 : left : right
 	\#ppop
-#end / macro __do_while_jmp
+#end / macro __do_while_bin_template
 #macro : __create_do_while_bin : name : jmpType
 	\#macro.dt : name : left : right
-		__do_while_jmp.dt : jmpType : left : right
+		__do_while_bin_template.dt : jmpType : left : right
 	\#end
 #end / macro __create_do_while_bin
 __create_do_while_bin : do_while_eq : jeq
@@ -133,13 +133,28 @@ __create_do_while_bin : do_while_ge : jge
 #end / macro do_while
 
 / ------------------------------- Fast-While Macros -------------------------------
-#macro.dt : fwhile : value
+#macro.dt : __fwhile_bin_template : doWhileType : ifType : left : right
 	\#ppush : FWHILE_DO_WHILE
 	\#macro : %0
-		do_while.dt : value
+		doWhileType.dt : left : right
 	\#end
-	if.dt : value
+	ifType.dt : left : right
 		do
+#end / macro __fwhile_bin_template
+
+#macro : __create_fwhile_bin : name : doWhileType : ifType
+	\#macro.dt : name : left : right
+		__fwhile_bin_template.dt : doWhileType : ifType : left : right
+	\#end
+#end / macro __create_fwhile_bin
+__create_fwhile_bin : fwhile_eq : do_while_eq : if_eq
+__create_fwhile_bin : fwhile_ne : do_while_ne : if_ne
+__create_fwhile_bin : fwhile_lt : do_while_lt : if_lt
+__create_fwhile_bin : fwhile_gt : do_while_gt : if_gt
+__create_fwhile_bin : fwhile_le : do_while_le : if_le
+__create_fwhile_bin : fwhile_ge : do_while_ge : if_ge
+#macro.dt : fwhile : value
+	fwhile_ne.dt : 0 : value
 #end / macro fwhile
 
 #macro : endfwhile

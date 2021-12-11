@@ -23,6 +23,7 @@ namespace MarC
 			MacroAlreadyDefined,
 			InvalidPragmaIndex,
 			PragmaListEmpty,
+			PragmaListNotEmpty,
 		};
 	public:
 		AssemblerError()
@@ -85,6 +86,9 @@ namespace MarC
 			}
 			case Code::PragmaListEmpty:
 				message = "Cannot remove element from empty pragma list!";
+				break;
+			case Code::PragmaListNotEmpty:
+				message = "The pragma list is not empty after assembling the given code!";
 				break;
 			default:
 				message = "Unknown error code! Context: " + context;

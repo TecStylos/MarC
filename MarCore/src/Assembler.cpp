@@ -53,6 +53,9 @@ namespace MarC
 		{
 			while (!isEndOfCode())
 				assembleStatement();
+
+			if (!m_pragmaList.empty())
+				MARC_ASSEMBLER_THROW_NO_CONTEXT(AsmErrCode::PragmaListNotEmpty);
 		}
 		catch (const AssemblerError& err)
 		{
