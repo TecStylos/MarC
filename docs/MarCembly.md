@@ -89,4 +89,4 @@ local | None | [name] : [size] | Reserve local (frame relative) memory (frame of
 macro | Optional | [macroName] *[ : macroArgs] | Define a macro.
 ppush | None | [name] | Push a name onto the preprocessor stack.
 ppop | None | - | Pop a name from the preprocessor stack.
-prep | None | [n] : [name] | Replace the `n`th element of the preprocessor stack with `name`.
+prep | None | [n] : [name] | Replace the `n`th element from the top of the preprocessor stack with `name`.
