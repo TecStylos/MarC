@@ -131,3 +131,24 @@ __create_do_while_bin : do_while_ge : jge
 #macro.dt : do_while : value
 	do_while_ne.dt : 0 : value
 #end / macro do_while
+
+/ ------------------------------- Fast-While Macros -------------------------------
+#macro.dt : fwhile : value
+	\#ppush : FWHILE_DO_WHILE
+	\#macro : %0
+		do_while.dt : value
+	\#end
+	if.dt : value
+		do
+#end / macro fwhile
+
+#macro : endfwhile
+		%3
+	endif
+	\#ppop
+#end
+
+
+/ ------------------------------- For Macros -------------------------------
+
+/ ------------------------------- Switch-Case Macros -------------------------------
