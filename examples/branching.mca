@@ -9,38 +9,38 @@
 
 #alias : STATIC_VAR : 0
 
-calx : >>std>>exPrints : addr."Compare: "
-calx.i64 : >>std>>exScant : compare
-calx : >>std>>exPrints : addr."Var A: "
-calx.i64 : >>std>>exScant : var_a
-calx : >>std>>exPrints : addr."Var B: "
-calx.i64 : >>std>>exScant : var_b
+prints : "Compare: "
+scant.i64 : compare
+prints : "Var A: "
+scant.i64 : var_a
+prints : "Var B: "
+scant.i64 : var_b
 
 if.i64 : @compare
-    calx : >>std>>exPrints : addr."Compare != 0\n"
+    prints : "Compare != 0\n"
     if.i64 : @var_a
         if.i64 : @var_b
-            calx : >>std>>exPrints : addr."A != 0 && B != 0\n"
+            prints : "A != 0 && B != 0\n"
         else
-            calx : >>std>>exPrints : addr."A != 0 && B == 0\n"
+            prints : "A != 0 && B == 0\n"
         endif
     else
         if.i64 : @var_b
-            calx : >>std>>exPrints : addr."A == 0 && B != 0\n"
+            prints : "A == 0 && B != 0\n"
         else
-            calx : >>std>>exPrints : addr."A == 0 && B == 0\n"
+            prints : "A == 0 && B == 0\n"
         endif
     endif
 elif.i64 : STATIC_VAR
-    calx : >>std>>exPrints : addr."Compare == 0 && STATIC_VAR != 0\n"
+    prints : "Compare == 0 && STATIC_VAR != 0\n"
 else
-    calx : >>std>>exPrints : addr."Compare == 0 && STATIC_VAR == 0\n"
+    prints : "Compare == 0 && STATIC_VAR == 0\n"
 endif
 
 #static : sum : ^i64
 #static : sum_count : ^i64
-calx : >>std>>exPrints : addr."Sum of 0 - "
-calx.i64 : >>std>>exScant : sum_count
+prints : "Sum of 0 - "
+scant.i64 : sum_count
 
 mov.i64 : $ac : @sum_count
 mov.i64 : sum : 0
@@ -56,6 +56,6 @@ do
     dec.i64 : sum_count
 do_while.i64 : @sum_count
 
-calx : >>std>>exPrints : addr."Sum: "
-calx : >>std>>exPrintt : i64.@sum
-calx : >>std>>exPrints : addr."\n"
+prints : "Sum: "
+printt.i64 : @sum
+prints : "\n"

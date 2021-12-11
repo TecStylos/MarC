@@ -3,9 +3,9 @@
 #manperm : >>stdext>>printt
 
 mov.i64 : $ac : 10
-#label : loopBegin
-    calx : stdext>>prints : addr."Hello world! "
-    calx : stdext>>printt : i64.@$ac
-    calx : stdext>>prints : addr."\n"
-    sub.i64 : $ac : 1
-jne.i64 : loopBegin : @$ac : 0
+do
+    prints : "Hello world! "
+    printt.i64 : @$ac
+    prints : "\n"
+    dec.i64 : $ac
+do_while.i64 : @$ac

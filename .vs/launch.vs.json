@@ -15,7 +15,7 @@
         "--dbginfo",
         "--forcerefresh",
         "--interpret",
-        "examples/GameOfLife.mca"
+        "examples/scanPrint.mca"
       ]
     }
   ]

@@ -60,17 +60,17 @@
 #func : CLEAR
     mov.u64 : $ac : >>HEIGHT
     inc.u64 : $ac
-    calx : >>std>>exPrints : addr."\r"
+    prints : "\r"
     do
-        calx : >>std>>exPrints : addr."\e[1F"
+        prints : "\e[1F"
         dec.u64 : $ac
     do_while.u64 : @$ac
     return
 #end
 
 #func : RENDER : addr.BASE
-    calx : >>std>>exPrints : addr.@BASE
-    calx : >>std>>exPrints : addr."\n"
+    prints : @BASE
+    prints : "\n"
     return
 #end
 
@@ -220,12 +220,12 @@
 
     mov.i64 : $lc : >>MAIN_LOOP_COUNT
     do
-        calx : >>std>>exSleepms : u64.>>FRAME_TIME
+        sleepms : >>FRAME_TIME
         call : >>EVOLVE : addr.>>GRID1 : addr.>>GRID2
         call : >>CLEAR
         call : >>RENDER : addr.>>GRID2
 
-        calx : >>std>>exSleepms : u64.>>FRAME_TIME
+        sleepms : >>FRAME_TIME
         call : >>EVOLVE : addr.>>GRID2 : addr.>>GRID1
         call : >>CLEAR
         call : >>RENDER : addr.>>GRID1

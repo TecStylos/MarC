@@ -1,3 +1,5 @@
+#reqmod : "std"
+
 #func.i64 : FIBONACCI : A : i64.N
 	mov.i64 : A : 0
 	pushc.i64 : 1
@@ -5,12 +7,12 @@
 	push.i64
 	#alias : TEMP : ~16
 
-	#label : LOOP_BEGIN
+	do
 		mov.i64 : TEMP : @B
 		add.i64 : B : @A
 		mov.i64 : A : @TEMP
-		sub.i64 : N : 1
-	jne.i64 : LOOP_BEGIN : @N : 0
+		dec.i64 : N
+	do_while.i64 : @N
 
 	return
 #end

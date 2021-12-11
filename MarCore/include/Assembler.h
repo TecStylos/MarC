@@ -29,7 +29,6 @@ namespace MarC
 		void assembleStatement(const std::string& statement);
 		void assembleInstruction();
 		void assembleMacroExpansion();
-		void assembleMacroUsage();
 	private:
 		void assembleSpecializedInstruction(BC_OpCodeEx& ocx);
 		void assembleSpecCall(BC_OpCodeEx& ocx);
@@ -77,8 +76,9 @@ namespace MarC
 		std::string getScopedName(const std::string& name);
 		void addSymbolAlias(SymbolAlias symAlias);
 	private:
-		bool macroExists(const std::string& name);
-		void expandMacro(const std::string& name, const std::vector<AsmTokenList>& parameters);
+		bool macroExists(const std::string& macroName);
+		void expandMacro(const std::string& macroName, const std::vector<AsmTokenList>& parameters);
+		void addMacro(const std::string& macroName, const Macro& macro);
 	private:
 		bool isInstruction();
 		bool isMacro();

@@ -9,9 +9,9 @@ alloc : dst : BUFFSIZE
 
 call : >>std>>copyString : addr.@dst : addr.src
 
-calx : >>stdext>>prints : addr."src: "
-calx : >>stdext>>prints : addr.src
-calx : >>stdext>>prints : addr."dst: "
-calx : >>stdext>>prints : addr.@dst
+prints : "src: "
+prints : src
+prints : "dst: "
+prints : @dst
 
 free : @dst

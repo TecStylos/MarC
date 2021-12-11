@@ -102,12 +102,6 @@ namespace MarC
 		BC_OpCodeEx ocx;
 
 		ocx.opCode = BC_OpCodeFromString(currToken().value);
-		if (ocx.opCode == BC_OC_NONE || ocx.opCode == BC_OC_UNKNOWN)
-		{
-			if (!macroExists(currToken().value))
-				MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Unknown identifier '" + currToken().value + "'!");
-			assembleMacroUsage();
-		}
 
 		auto& layout = InstructionLayoutFromOpCode(ocx.opCode);
 
@@ -141,11 +135,6 @@ namespace MarC
 
 			assembleArgument(ocx, arg);
 		}
-	}
-
-	void Assembler::assembleMacroUsage()
-	{
-		MARC_ASSEMBLER_THROW(AsmErrCode::InternalError, "Macro usages have not been implemented yet!");
 	}
 
 	void Assembler::assembleSpecializedInstruction(BC_OpCodeEx& ocx)
@@ -836,10 +825,9 @@ namespace MarC
 		{
 			if (nextToken().type != AsmToken::Type::Name)
 				MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
-			if (m_pModInfo->macros.find(currToken().value) != m_pModInfo->macros.end())
-				MARC_ASSEMBLER_THROW(AsmErrCode::MacroAlreadyDefined, macroName);
-
 			macroName = currToken().value;
+			if (macroExists(macroName))
+				MARC_ASSEMBLER_THROW(AsmErrCode::MacroAlreadyDefined, macroName);
 		}
 
 		while (nextToken().type == AsmToken::Type::Sep_Colon)
@@ -866,7 +854,7 @@ namespace MarC
 		if (nextToken().value != "end")
 			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Plain directives are not allowed in macro definitions!");
 
-		m_pModInfo->macros.insert({ macroName, macro });
+		addMacro(macroName, macro);
 	}
 
 	void Assembler::assembleDirPragmaPush()
@@ -995,16 +983,16 @@ namespace MarC
 		m_pModInfo->symbolAliases.insert(symAlias);
 	}
 
-	bool Assembler::macroExists(const std::string& name)
+	bool Assembler::macroExists(const std::string& macroName)
 	{
-		return m_pModInfo->macros.find(name) != m_pModInfo->macros.end();
+		return m_pModInfo->macros.find(macroName) != m_pModInfo->macros.end();
 	}
 
-	void Assembler::expandMacro(const std::string& name, const std::vector<AsmTokenList>& parameters)
+	void Assembler::expandMacro(const std::string& macroName, const std::vector<AsmTokenList>& parameters)
 	{
-		auto itMacro = m_pModInfo->macros.find(name);
+		auto itMacro = m_pModInfo->macros.find(macroName);
 		if (itMacro == m_pModInfo->macros.end())
-			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Unknown macro '" + name + "'!");
+			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Unknown macro '" + macroName + "'!");
 
 		auto& macro = itMacro->second;
 
@@ -1050,6 +1038,11 @@ namespace MarC
 		{
 			MARC_MACRO_EXPANSION_THROW(err);
 		}
+	}
+
+	void Assembler::addMacro(const std::string& macroName, const Macro& macro)
+	{
+		m_pModInfo->macros.insert({ macroName, macro });
 	}
 
 	bool Assembler::isInstruction()

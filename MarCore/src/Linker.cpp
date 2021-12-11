@@ -84,7 +84,16 @@ namespace MarC
 			resolvedAll = false;
 
 		if (!resolvedAll)
-			throw LinkerError(LinkErrCode::UnresolvedSymbols, "Cannot resolve all symbol references!");
+		{
+			std::string unresString;
+			for (uint64_t i = 0; i < m_modInfo->unresolvedSymbolRefs.size(); ++i)
+			{
+				unresString.append(m_modInfo->unresolvedSymbolRefs[i].name);
+				if (i + 1 < m_modInfo->unresolvedSymbolRefs.size())
+					unresString.append(", ");
+			}
+			throw LinkerError(LinkErrCode::UnresolvedSymbols, unresString);
+		}
 	}
 
 	bool Linker::symbolNameExists(const std::string& name)

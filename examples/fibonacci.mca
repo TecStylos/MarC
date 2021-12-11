@@ -1,18 +1,19 @@
+#reqmod : "std"
+
 #func.i64 : FIBONACCI : RET : i64.N
-    jle.i64 : END_RECURSION : @N : 1
+    if_gt.i64 : @N : 1
+        dec.i64 : N
+        call.i64 : >>FIBONACCI : RET : i64.@N
+        dec.i64 : N
+        call.i64 : >>FIBONACCI : $ac : i64.@N
+        add.i64 : RET : @$ac
+        return
+    endif
 
-    sub.i64 : N : 1
-    call.i64 : >>FIBONACCI : RET : i64.@N
-    sub.i64 : N : 1
-    call.i64 : >>FIBONACCI : $ac : i64.@N
-    add.i64 : RET : @$ac
-    return
-
-    #label : END_RECURSION
     mov.i64 : RET : @N
     return
 #end
 
-#alias : N : 34
+#alias : N : 10
 
 call.i64 : FIBONACCI : $ec : i64.N

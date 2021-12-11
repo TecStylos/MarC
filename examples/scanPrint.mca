@@ -7,31 +7,28 @@
 #static : USER_NAME : 128
 #static : USER_AGE : ^i16
 
-calx : >>stdext>>prints : addr."What's your name?: "
-calx : >>stdext>>scans : addr.USER_NAME
-calx : >>stdext>>prints : addr."Hello "
-calx : >>stdext>>prints : addr.USER_NAME
-calx : >>stdext>>prints : addr."!\n"
+prints : "What's your name?: "
+scans : USER_NAME
+prints : "Hello "
+prints : USER_NAME
+prints : "!\n"
 
-calx : >>stdext>>prints : addr."How old are you?: "
-calx.i16 : >>stdext>>scant : USER_AGE
-calx : >>stdext>>prints : addr."Wow, you're already "
-calx : >>stdext>>printt : i16.@USER_AGE
-calx : >>stdext>>prints : addr." years old!\n"
-calx : >>stdext>>prints : addr."I'm 17 years old. That means you're "
+prints : "How old are you?: "
+scant.i16 : USER_AGE
+prints : "Wow, you're already "
+printt.i16 : @USER_AGE
+prints : " years old!\n"
+prints : "I'm 17 years old. That means you're "
 mov.i16 : $ac : @USER_AGE
 sub.i16 : $ac : 17
 
-jgt.i16 : USER_IS_OLDER : @$ac : 0
-jlt.i16 : USER_IS_YOUNGER : @$ac : 0
-calx : >>stdext>>prints : addr."the same age as I am!\n"
-jmp : USER_AGE_CHECK_END
-#label : USER_IS_YOUNGER
-mul.i16 : $ac : -1
-calx : >>stdext>>printt : i16.@$ac
-calx : >>stdext>>prints : addr." years younger than me!\n"
-jmp : USER_AGE_CHECK_END
-#label : USER_IS_OLDER
-calx : >>stdext>>printt : i16.@$ac
-calx : >>stdext>>prints : addr." years older than me!\n"
-#label : USER_AGE_CHECK_END
+if_gt.i16 : @$ac : 0
+    printt.i16 : @$ac
+    prints : " years older than me!\n"
+elif_lt.i16 : @$ac : 0
+    mul.i16 : $ac : -1
+    printt.i16 : @$ac
+    prints : " years younger than me!\n"
+else
+    prints : "the same age as I am!\n"
+endif
