@@ -15,7 +15,7 @@
         "--dbginfo",
         "--forcerefresh",
         "--interpret",
-        "examples/branching.mca"
+        "examples/switch.mca"
       ]
     }
   ]

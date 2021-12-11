@@ -44,7 +44,7 @@ namespace MarC
 				message = "A symbol with the name '" + context + "' has already been defined!";
 				break;
 			case Code::UnresolvedSymbols:
-				message = "Unable to resolved the following symbols!:\n  " + context;
+				message = "Unable to resolve the following symbols!:\n  " + context;
 				break;
 			case Code::ModuleNotFound:
 				message = "Unable to find module '" + context + "'!";

@@ -42,7 +42,7 @@ __create_if_bin : if_ge : jlt
 	if_ne.dt : 0 : value
 #end / macro if
 
-/ ------------------------------- Else Macros -------------------------------
+/ ------------------------------- Else Macro -------------------------------
 #macro : else
 	jmp : %1
 	\#label : %0
@@ -50,6 +50,7 @@ __create_if_bin : if_ge : jlt
 	\#ppush : IF_NEXT
 #end / macro else
 
+/ ------------------------------- Elif Macros -------------------------------
 #macro.dt : __elif_bin_template : jmpType : left : right
 	else
 	jmpType.dt : %0 : left : right
@@ -163,7 +164,38 @@ __create_fwhile_bin : fwhile_ge : do_while_ge : if_ge
 	\#ppop
 #end
 
-
 / ------------------------------- For Macros -------------------------------
 
 / ------------------------------- Switch-Case Macros -------------------------------
+#macro.dt : switch : inputValue
+	\#ppush : SWITCH_CASE / %2
+	\#ppush : SWITCH_END  / %1
+	\#ppush : SWITCH_NEXT / %0
+	\#macro : %2 : caseValue / Create the internal switch case macro
+		jne.dt : %0 : inputValue : caseValue / Jump to the next case if there's not match.
+	\#end
+	jmp : %0
+#end / macro switch
+
+#macro : default
+	jmp : %1 / Jump to the end of the switch.
+	\#label : %0 / Switch Next
+	\#ppop
+	\#ppush : SWITCH_NEXT
+#end / macro default
+
+#macro : case : caseValue
+	jmp : %1 / Jump to the end of the switch.
+	\#label : %0 / Switch Next
+	\#ppop
+	\#ppush : SWITCH_NEXT
+	%2 : caseValue / Use the internal switch case macro.
+#end / macro case
+
+#macro : endswitch
+	\#label : %0 / Switch Next
+	\#label : %1 / Switch End
+	\#ppop
+	\#ppop
+	\#ppop
+#end / macro endswitch

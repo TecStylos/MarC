@@ -1,0 +1,23 @@
+#reqmod : "std"
+#manperm : >>stdext>>prints
+#manperm : >>stdext>>scant
+
+#static : var : ^i64
+
+prints : "Var: "
+scant.i64 : var
+
+switch.i64 : @var
+    case : 1
+        prints : "One\n"
+    case : 2
+        prints : "Two\n"
+    case : 3
+        prints : "Three\n"
+    case : 4
+        prints : "Four\n"
+    case : 5
+        prints : "Five\n"
+    default
+        prints : "Default\n"
+endswitch
