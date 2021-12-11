@@ -46,8 +46,7 @@ __create_if_bin : if_ge : jlt
 #macro : else
 	jmp : %1
 	\#label : %0
-	\#ppop
-	\#ppush : IF_NEXT
+	\#prep : 0 : IF_NEXT
 #end / macro else
 
 / ------------------------------- Elif Macros -------------------------------
@@ -180,15 +179,13 @@ __create_fwhile_bin : fwhile_ge : do_while_ge : if_ge
 #macro : default
 	jmp : %1 / Jump to the end of the switch.
 	\#label : %0 / Switch Next
-	\#ppop
-	\#ppush : SWITCH_NEXT
+	\#prep : 0 : SWITCH_NEXT
 #end / macro default
 
 #macro : case : caseValue
 	jmp : %1 / Jump to the end of the switch.
 	\#label : %0 / Switch Next
-	\#ppop
-	\#ppush : SWITCH_NEXT
+	\#prep : 0 : SWITCH_NEXT
 	%2 : caseValue / Use the internal switch case macro.
 #end / macro case
 

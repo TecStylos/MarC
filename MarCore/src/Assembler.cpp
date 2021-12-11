@@ -509,6 +509,8 @@ namespace MarC
 			return assembleDirPragmaPush();
 		case DirectiveID::PragmaPop:
 			return assembleDirPragmaPop();
+		case DirectiveID::PragmaReplace:
+			return assembleDirPragmaReplace();
 		}
 
 		MARC_ASSEMBLER_THROW(AsmErrCode::UnknownDirective, currToken().value);
@@ -878,6 +880,28 @@ namespace MarC
 		if (m_pragmaList.empty())
 			MARC_ASSEMBLER_THROW_NO_CONTEXT(AsmErrCode::PragmaListEmpty);
 		m_pragmaList.pop_back();
+	}
+
+	void Assembler::assembleDirPragmaReplace()
+	{
+		removeNecessaryColon();
+
+		if (nextToken().type != AsmToken::Type::Integer)
+			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Integer, currToken());
+
+		int64_t pragmaIndex = std::stoll(currToken().value);
+		if (pragmaIndex < 0)
+			MARC_ASSEMBLER_THROW_NO_CONTEXT(AsmErrCode::InvalidPragmaIndex);
+
+		removeNecessaryColon();
+
+		if (nextToken().type != AsmToken::Type::Name)
+			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
+
+		std::string name = currToken().value;
+		name.append("__" + std::to_string(++m_nextPragmaIndex));
+
+		*(m_pragmaList.end() - 1 - pragmaIndex) = AsmToken(currTokenNoModify().line, currTokenNoModify().column, AsmToken::Type::Name, name);
 	}
 
 	void Assembler::assembleSubTokenList(AsmTokenListRef tokenList)

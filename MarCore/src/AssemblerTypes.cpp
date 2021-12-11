@@ -20,6 +20,7 @@ namespace MarC
 		if (value == "macro") return DirectiveID::Macro;
 		if (value == "ppush") return DirectiveID::PragmaPush;
 		if (value == "ppop") return DirectiveID::PragmaPop;
+		if (value == "prep") return DirectiveID::PragmaReplace;
 
 		return DirectiveID::Unknown;
 	}

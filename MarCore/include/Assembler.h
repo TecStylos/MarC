@@ -62,6 +62,7 @@ namespace MarC
 		void assembleDirMacro();
 		void assembleDirPragmaPush();
 		void assembleDirPragmaPop();
+		void assembleDirPragmaReplace();
 	public:
 		void assembleSubTokenList(AsmTokenListRef tokenList);
 	private:

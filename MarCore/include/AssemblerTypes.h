@@ -28,6 +28,7 @@ namespace MarC
 		Macro,
 		PragmaPush,
 		PragmaPop,
+		PragmaReplace,
 	};
 
 	struct ScopeDesc
