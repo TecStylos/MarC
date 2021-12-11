@@ -2,7 +2,7 @@
 
 ## Datatypes [dt]:
 Datatype | C Equivalent (stdint.h)
----------|------------
+---------|------------------------
 i8 | int8_t
 i16 | int16_t
 i32 | int32_t
@@ -29,7 +29,7 @@ $ec | Exit Code | Holds the exit code of the application. (Returned to the inter
 
 ## Operators:
 Usage | Explanation
------------|-----------
+------|------------
 @[addr] | Dereference the given address
 ^[dt] | Replaced with the size of the datatype
 ~[+/-][u64] | Calculate the address relative to the current frame pointer with the given offset.
@@ -39,7 +39,7 @@ Usage | Explanation
 ## Instructions:
 (Arguments with * are optional)
 OpCode | Datatype | Arguments | Explanation
--------|----------|---------- | ----------
+-------|----------|---------- | -----------
 mov | Required | [dest] : [val] | Copy `val` to `dest`
 add | Required | [dest] : [val] | Add [val] to value at [dest]
 sub | Required | [dest] : [val] | Subtract `val` from value at `dest`
@@ -73,7 +73,7 @@ exit | None | - | Stop the execution and return the exit code @$ec (dt == i64)
 ## Directives:
 (Arguments with * are optional)
 Name | Datatype | Arguments | Explanation
------|----------|-----------|-----------
+-----|----------|-----------|------------
 label | None | [name] | Store the current code address in [name].
 alias | None |  [name] : [literal] | Give a literal an alias (No stack allocation). (Literals can be other aliases, labels, names for static allocations, scopes, (extern) function names, local variables, ...)
 static | None | [name] : [size] | Reserve n bytes on the static stack and store the address in [name].
