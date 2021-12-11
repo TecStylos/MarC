@@ -10,12 +10,15 @@ scant.i64 : var
 switch.i64 : @var
     case : 1
         prints : "One\n"
+        fallthrough
     case : 2
         prints : "Two\n"
     case : 3
         prints : "Three\n"
+        fallthrough
     case : 4
         prints : "Four\n"
+        fallthrough
     case : 5
         prints : "Five\n"
     default

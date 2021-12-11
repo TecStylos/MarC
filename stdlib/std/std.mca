@@ -167,31 +167,42 @@ __create_fwhile_bin : fwhile_ge : do_while_ge : if_ge
 
 / ------------------------------- Switch-Case Macros -------------------------------
 #macro.dt : switch : inputValue
-	\#ppush : SWITCH_CASE / %2
-	\#ppush : SWITCH_END  / %1
+	\#ppush : SWITCH_CASE / %3
+	\#ppush : SWITCH_END  / %2
+	\#ppush : SWITCH_FALLTHROUGH / %1
 	\#ppush : SWITCH_NEXT / %0
-	\#macro : %2 : caseValue / Create the internal switch case macro
+	\#macro : %3 : caseValue / Create the internal switch case macro.
 		jne.dt : %0 : inputValue : caseValue / Jump to the next case if there's not match.
 	\#end
 	jmp : %0
 #end / macro switch
 
 #macro : default
-	jmp : %1 / Jump to the end of the switch.
+	jmp : %2 / Jump to the end of the switch.
 	\#label : %0 / Switch Next
 	\#prep : 0 : SWITCH_NEXT
+	\#label : %1 / Switch Fallthrough
+	\#prep : 1 : SWITCH_FALLTHROUGH
 #end / macro default
 
 #macro : case : caseValue
-	jmp : %1 / Jump to the end of the switch.
+	jmp : %2 / Jump to the end of the switch.
 	\#label : %0 / Switch Next
 	\#prep : 0 : SWITCH_NEXT
-	%2 : caseValue / Use the internal switch case macro.
+	%3 : caseValue / Use the internal switch case macro.
+	\#label : %1 / Switch Fallthrough
+	\#prep : 1 : SWITCH_FALLTHROUGH
 #end / macro case
+
+#macro : fallthrough
+	jmp : %1 / Jump to the next case without checking the condition.
+#end
 
 #macro : endswitch
 	\#label : %0 / Switch Next
-	\#label : %1 / Switch End
+	\#label : %1 / Switch Fallthrough
+	\#label : %2 / Switch End
+	\#ppop
 	\#ppop
 	\#ppop
 	\#ppop
