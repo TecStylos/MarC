@@ -40,6 +40,7 @@ namespace MarC
 				break;
 			case InsArgType::TypedValue:
 				insStr.append(BC_DatatypeToString(arg.value.datatype) + ".");
+				// __fallthrough
 			case InsArgType::Value:
 				if (arg.getsDereferenced)
 				{
@@ -69,6 +70,7 @@ namespace MarC
 					}
 					break;
 				}
+				// __fallthrough
 			case InsArgType::Address:
 				auto it = getSymbolForAddress(arg.value.cell.as_ADDR, symbols);
 				if (it != symbols.end())

@@ -37,8 +37,8 @@ namespace MarCmd
 			CONSOLE_SCREEN_BUFFER_INFO csbi;
 			GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
 			Dimensions cd;
-			cd.width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-			cd.height = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+			cd.width = uint64_t(csbi.srWindow.Right - csbi.srWindow.Left) + 1;
+			cd.height = uint64_t(csbi.srWindow.Bottom - csbi.srWindow.Top) + 1;
 
 			return cd;
 		}

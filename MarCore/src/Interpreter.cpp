@@ -497,7 +497,7 @@ namespace MarC
 
 		for (uint8_t i = 0; i < fcd.nArgs; ++i)
 		{
-			bool deref = ocx.derefArg.get(1 + i);
+			bool deref = ocx.derefArg.get(1 + (uint64_t)i);
 			auto dt = fcd.argType.get(i);
 			virt_pushStack(
 				readMemCellAndMove(dt, deref),
