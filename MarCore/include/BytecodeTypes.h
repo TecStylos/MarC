@@ -123,28 +123,21 @@ namespace MarC
 				uint64_t addr : 60;
 				uint64_t base : 4;
 			};
-			struct
-			{
-				uint64_t addr : 55;
-				uint64_t page : 5;
-				uint64_t base : 4;
-			} asCode;
 			uint64_t _raw;
 		};
 	public:
 		BC_MemAddress() = default;
 		BC_MemAddress(BC_MemBase base, uint64_t addr);
-		BC_MemAddress(BC_MemBase base, uint64_t page, uint64_t addr);
-	  bool operator<(const BC_MemAddress& other) const;
-	  bool operator>(const BC_MemAddress& other) const;
-	  bool operator<=(const BC_MemAddress& other) const;
-	  bool operator>=(const BC_MemAddress& other) const;
-	  bool operator==(const BC_MemAddress& other) const;
-	  bool operator!=(const BC_MemAddress& other) const;
-	  BC_MemAddress& operator+=(const BC_MemAddress& other);
-	  BC_MemAddress& operator-=(const BC_MemAddress& other);
-	  BC_MemAddress& operator*=(const BC_MemAddress& other);
-	  BC_MemAddress& operator/=(const BC_MemAddress& other);
+		bool operator<(const BC_MemAddress& other) const;
+		bool operator>(const BC_MemAddress& other) const;
+		bool operator<=(const BC_MemAddress& other) const;
+		bool operator>=(const BC_MemAddress& other) const;
+		bool operator==(const BC_MemAddress& other) const;
+		bool operator!=(const BC_MemAddress& other) const;
+		BC_MemAddress& operator+=(const BC_MemAddress& other);
+		BC_MemAddress& operator-=(const BC_MemAddress& other);
+		BC_MemAddress& operator*=(const BC_MemAddress& other);
+		BC_MemAddress& operator/=(const BC_MemAddress& other);
 	};
 
 	struct BC_MemCell

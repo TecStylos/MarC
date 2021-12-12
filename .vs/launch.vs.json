@@ -15,7 +15,7 @@
         "--dbginfo",
         "--forcerefresh",
         "--interpret",
-        "examples/dynMemory.mca"
+        "examples/fibonacci.mca"
       ]
     }
   ]

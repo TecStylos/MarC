@@ -42,7 +42,6 @@ namespace MarCmd
 		virtual void handleKeyPress(char key) override;
 	public:
 		std::vector<struct ModDisasmInfo> getInfo() const;
-		uint64_t getModIndex() const;
 		void refresh();
 		bool hasBreakpoint(MarC::BC_MemAddress breakpoint);
 		bool toggleBreakpoint(MarC::BC_MemAddress brekpoint);

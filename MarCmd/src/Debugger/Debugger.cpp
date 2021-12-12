@@ -117,18 +117,13 @@ namespace MarCmd
 				int64_t mid = wndDisasmViewCode->getHeight() / 2;
 				int64_t line = mid + wndDisasmViewCode->getScroll();
 				if (0 <= line && line < (int64_t)m_modDisasmInfo.instructionOffsets.size())
-					toggleBreakpoint(MarC::BC_MemAddress(MarC::BC_MEM_BASE_CODE_MEMORY, m_modIndex, m_modDisasmInfo.instructionOffsets[line]));
+					toggleBreakpoint(MarC::BC_MemAddress(MarC::BC_MEM_BASE_CODE_MEMORY, m_modDisasmInfo.instructionOffsets[line]));
 			}
 			break;
 		}
 		default:
 			Window::handleKeyPress(key);
 		}
-	}
-
-	uint64_t DisasmWindow::getModIndex() const
-	{
-		return m_modIndex;
 	}
 
 	void DisasmWindow::refresh()
@@ -189,7 +184,7 @@ namespace MarCmd
 
 	int64_t DisasmWindow::addrToLine(MarC::BC_MemAddress addr) const
 	{
-		return MarC::searchBinary(addr.asCode.addr, m_modDisasmInfo.instructionOffsets);
+		return MarC::searchBinary(addr.addr, m_modDisasmInfo.instructionOffsets);
 	}
 
 	DisasmWindowRef DisasmWindow::create(const std::string& name, SharedDebugDataRef sdd, uint64_t modIndex)
@@ -357,14 +352,6 @@ namespace MarCmd
 				{
 					{
 						MarC::BC_MemAddress cp = m_sharedDebugData->interpreter->getRegister(MarC::BC_MEM_REG_CODE_POINTER).as_ADDR;
-						if (cp.asCode.page != m_wndDisasm->getModIndex())
-						{
-							bool hadFocus = m_sharedDebugData->wndBase->getFocus() == m_wndDisasm;
-							m_wndDisasm = m_vecWndDisasm[cp.asCode.page];
-							(*m_sharedDebugData->wndBase)->replaceSubWnd("Disassembly", m_wndDisasm);
-							if (hadFocus)
-								m_sharedDebugData->wndBase->setFocus("Disassembly");
-						}
 
 						m_wndDisasm->refresh();
 
@@ -451,7 +438,7 @@ namespace MarCmd
 				{
 					if (!ignoreBreakpoint)
 					{
-						if (m_vecWndDisasm[regCP.as_ADDR.asCode.page]->hasBreakpoint(regCP.as_ADDR))
+						if (m_wndDisasm->hasBreakpoint(regCP.as_ADDR))
 						{
 							sdd->exeCount = 0;
 							lock.unlock();
