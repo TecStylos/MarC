@@ -45,7 +45,7 @@ add | Required | [dest] : [val] | Add [val] to value at [dest]
 sub | Required | [dest] : [val] | Subtract `val` from value at `dest`
 mul | Required | [dest] : [val] | Multiply value at `dest` with `val`
 div | Required | [dest] : [val] | Divide value at `dest` by `val`
-drf | None | [dest] : [addr] | Dereference `addr` and store it at `dest`
+drf | Required | [dest] : [addr] | Dereference `addr` and store it at `dest`
 conv | Required | [addr] : [dt] | Convert value at `addr` from `ocdt` datatype to `dt`
 push | Required | - | Push uninitialized memory of size `^ocdt` onto the dynamic stack
 pop | Required | - | Pop value of size `^ocdt` from the dynamic stack

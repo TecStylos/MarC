@@ -299,7 +299,7 @@ namespace MarC
 	{
 		void* dest = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
 		void* src = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[1]);
-		memcpy(dest, src, BC_DatatypeSize(BC_DT_U_64));
+		memcpy(dest, src, BC_DatatypeSize(ocx.datatype));
 	}
 	void Interpreter::exec_insConvert(BC_OpCodeEx ocx)
 	{

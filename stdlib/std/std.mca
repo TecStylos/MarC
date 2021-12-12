@@ -5,7 +5,7 @@
 #scope : std
 	#func : copyString : addr.DEST : addr.SRC
 		do
-			drf : $td : @SRC
+			drf.u8 : $td : @SRC
 			mov.u8 : @DEST : @$td
 			inc.addr : DEST
 			inc.addr : SRC

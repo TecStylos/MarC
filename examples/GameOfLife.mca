@@ -102,7 +102,7 @@
 
 #func.i8 : IS_ALIVE : RET : addr.BASE : u64.X : u64.Y
     call.addr : >>XY_TO_ADDR : $ac : addr.@BASE : u64.@X : u64.@Y
-    drf : $ac : @$ac
+    drf.i8 : $ac : @$ac
 
     if_eq.i8 : @$ac : ' '
         mov.i8 : RET : 0
