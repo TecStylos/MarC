@@ -107,7 +107,7 @@ namespace MarC
 		case BC_MEM_BASE_NONE:
 			break;
 		case BC_MEM_BASE_STATIC_STACK:
-			hostAddr = (char*)m_pExeInfo->staticStack->getBaseAddress() + clientAddr.asCode.addr;
+			hostAddr = (char*)m_pExeInfo->staticStack->getBaseAddress() + clientAddr.addr;
 			break;
 		case BC_MEM_BASE_DYNAMIC_STACK:
 			hostAddr = (char*)m_mem.dynamicStack->getBaseAddress() + clientAddr.addr;
@@ -119,7 +119,7 @@ namespace MarC
 			hostAddr = (char*)hostAddress(getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR) - clientAddr.addr;
 			break;
 		case BC_MEM_BASE_CODE_MEMORY:
-			hostAddr = (char*)m_pExeInfo->codeMemory->getBaseAddress() + clientAddr.asCode.addr;
+			hostAddr = (char*)m_pExeInfo->codeMemory->getBaseAddress() + clientAddr.addr;
 			break;
 		case BC_MEM_BASE_REGISTER:
 			hostAddr = &getRegister((BC_MemRegister)clientAddr.addr);
@@ -607,7 +607,7 @@ namespace MarC
 	bool Interpreter::reachedEndOfCode() const
 	{
 		auto& cp = getRegister(BC_MEM_REG_CODE_POINTER);
-		auto addr = cp.as_ADDR.asCode.addr;
+		auto addr = cp.as_ADDR.addr;
 		auto& code = *m_pExeInfo->codeMemory;
 
 		return addr >= code.size();

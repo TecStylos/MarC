@@ -1160,7 +1160,7 @@ namespace MarC
 
 	BC_MemAddress Assembler::currCodeAddr() const
 	{
-		return BC_MemAddress(BC_MEM_BASE_CODE_MEMORY, 0, currCodeOffset());
+		return BC_MemAddress(BC_MEM_BASE_CODE_MEMORY, currCodeOffset());
 	}
 
 	uint64_t Assembler::currStaticStackOffset() const

@@ -116,7 +116,7 @@ namespace MarC
 	template <typename T> T& Interpreter::readDataAndMove(uint64_t shift)
 	{
 		auto& val = *(T*)hostAddress(getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR, false);
-		getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR.asCode.addr += shift;
+		getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR.addr += shift;
 		return val;
 	}
 }
