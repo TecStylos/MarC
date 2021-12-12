@@ -74,7 +74,7 @@ namespace MarC
 			if (result == m_modInfo->exeInfo->symbols.end())
 				continue;
 
-			m_modInfo->exeInfo->codeMemory->write(&result->value, BC_DatatypeSize(ref.datatype), ref.offset);
+			m_modInfo->exeInfo->codeMemory.write(&result->value, BC_DatatypeSize(ref.datatype), ref.offset);
 
 			m_modInfo->unresolvedSymbolRefs.erase(m_modInfo->unresolvedSymbolRefs.begin() + i);
 			--i;

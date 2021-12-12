@@ -166,12 +166,12 @@ namespace MarC
 	template <typename T>
 	void Assembler::pushCode(const T& data)
 	{
-		m_pModInfo->exeInfo->codeMemory->push(data);
+		m_pModInfo->exeInfo->codeMemory.push(data);
 	}
 
 	template <typename T>
 	void Assembler::writeCode(const T& data, uint64_t offset)
 	{
-		m_pModInfo->exeInfo->codeMemory->write(data, offset);
+		m_pModInfo->exeInfo->codeMemory.write(data, offset);
 	}
 }

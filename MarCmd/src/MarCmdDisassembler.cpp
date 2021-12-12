@@ -37,7 +37,7 @@ namespace MarCmd
 
 			std::string source;
 
-			auto& codeMem = *(exeInfo->codeMemory);
+			auto& codeMem = exeInfo->codeMemory;
 
 			uint64_t nDisassembled = 0;
 			while (nDisassembled < codeMem.size())

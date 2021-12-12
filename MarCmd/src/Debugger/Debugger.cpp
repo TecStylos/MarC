@@ -17,10 +17,10 @@ namespace MarCmd
 		auto& mem = m_sdd->interpreter->getExeInfo()->codeMemory;
 
 		uint64_t nDisassembled = 0;
-		while (nDisassembled < mem->size())
+		while (nDisassembled < mem.size())
 		{
 			ModDisasmInfo::InsInfo insInfo;
-			insInfo.data = MarC::Disassembler::disassemble((char*)mem->getBaseAddress() + nDisassembled);
+			insInfo.data = MarC::Disassembler::disassemble((char*)mem.getBaseAddress() + nDisassembled);
 			insInfo.str = MarC::DisAsmInsInfoToString(insInfo.data, m_sdd->interpreter->getExeInfo()->symbols);
 			m_modDisasmInfo.ins.push_back(insInfo);
 			m_modDisasmInfo.instructionOffsets.push_back(nDisassembled);

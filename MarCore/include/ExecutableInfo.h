@@ -14,8 +14,8 @@ namespace MarC
 	struct ExecutableInfo
 	{
 		std::string name = "<unnamed>";
-		MemoryRef codeMemory;
-		MemoryRef staticStack;
+		Memory codeMemory;
+		Memory staticStack;
 		std::set<std::string> mandatoryPermissions;
 		std::set<std::string> optionalPermissions;
 		std::set<std::string> requiredExtensions;
@@ -39,8 +39,8 @@ namespace MarC
 		serialize(header, oStream);
 
 		serialize(exeInfo.name, oStream);
-		serialize(*exeInfo.codeMemory, oStream);
-		serialize(*exeInfo.staticStack, oStream);
+		serialize(exeInfo.codeMemory, oStream);
+		serialize(exeInfo.staticStack, oStream);
 		serialize(exeInfo.mandatoryPermissions, oStream);
 		serialize(exeInfo.optionalPermissions, oStream);
 		serialize(exeInfo.requiredExtensions, oStream);
@@ -53,15 +53,13 @@ namespace MarC
 	inline void deserialize(ExecutableInfo& exeInfo, std::istream& iStream)
 	{
 		exeInfo = ExecutableInfo();
-		exeInfo.codeMemory = Memory::create();
-		exeInfo.staticStack = Memory::create();
 
 		ExeInfoHeader header;
 		deserialize(header, iStream);
 
 		deserialize(exeInfo.name, iStream);
-		deserialize(*exeInfo.codeMemory, iStream);
-		deserialize(*exeInfo.staticStack, iStream);
+		deserialize(exeInfo.codeMemory, iStream);
+		deserialize(exeInfo.staticStack, iStream);
 		deserialize(exeInfo.mandatoryPermissions, iStream);
 		deserialize(exeInfo.optionalPermissions, iStream);
 		deserialize(exeInfo.requiredExtensions, iStream);

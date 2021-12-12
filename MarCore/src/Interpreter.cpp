@@ -98,43 +98,45 @@ namespace MarC
 			grantPerm(perm);
 	}
 
-	void* Interpreter::hostAddress(BC_MemAddress clientAddr, bool deref)
+	void* Interpreter::hostAddress(BC_MemAddress clientAddr)
 	{
-		void* hostAddr = nullptr;
-
 		switch (clientAddr.base)
 		{
 		case BC_MEM_BASE_NONE:
-			break;
+			return nullptr;
 		case BC_MEM_BASE_STATIC_STACK:
-			hostAddr = (char*)m_pExeInfo->staticStack->getBaseAddress() + clientAddr.addr;
-			break;
+			return (char*)m_pExeInfo->staticStack.getBaseAddress() + clientAddr.addr;
 		case BC_MEM_BASE_DYNAMIC_STACK:
-			hostAddr = (char*)m_mem.dynamicStack->getBaseAddress() + clientAddr.addr;
-			break;
+			return (char*)m_mem.dynamicStack->getBaseAddress() + clientAddr.addr;
 		case BC_MEM_BASE_DYN_FRAME_ADD:
-			hostAddr = (char*)hostAddress(getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR) + clientAddr.addr;
-			break;
+			return (char*)hostAddress(getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR) + clientAddr.addr;
 		case BC_MEM_BASE_DYN_FRAME_SUB:
-			hostAddr = (char*)hostAddress(getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR) - clientAddr.addr;
-			break;
+			return (char*)hostAddress(getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR) - clientAddr.addr;
 		case BC_MEM_BASE_CODE_MEMORY:
-			hostAddr = (char*)m_pExeInfo->codeMemory->getBaseAddress() + clientAddr.addr;
-			break;
+			return (char*)m_pExeInfo->codeMemory.getBaseAddress() + clientAddr.addr;
 		case BC_MEM_BASE_REGISTER:
-			hostAddr = &getRegister((BC_MemRegister)clientAddr.addr);
-			break;
+			return &getRegister((BC_MemRegister)clientAddr.addr);
 		case BC_MEM_BASE_EXTERN:
 		{
 			auto& pair = findGreatestSmaller(clientAddr, m_mem.dynMemMap);
-			hostAddr = (char*)pair.second + (clientAddr.addr - pair.first.addr);
-			break;
+			return (char*)pair.second + (clientAddr.addr - pair.first.addr);
 		}
 		}
+		return nullptr;
+	}
 
+	void* Interpreter::hostAddress(BC_MemAddress clientAddr, bool deref)
+	{
 		if (deref)
-			hostAddr = hostAddress(*(BC_MemAddress*)hostAddr);
-		return hostAddr;
+			return hostAddress(*(BC_MemAddress*)hostAddress(clientAddr));
+		else
+			return hostAddress(clientAddr);
+		return nullptr;
+	}
+
+	BC_MemCell& Interpreter::hostMemCell(BC_MemAddress clientAddr)
+	{
+		return hostObject<BC_MemCell>(clientAddr);
 	}
 
 	BC_MemCell& Interpreter::hostMemCell(BC_MemAddress clientAddr, bool deref)
@@ -202,7 +204,7 @@ namespace MarC
 	BC_MemCell& Interpreter::readMemCellAndMove(BC_Datatype dt, bool deref)
 	{
 		return deref
-			? hostMemCell(readDataAndMove<BC_MemAddress>(), false)
+			? hostMemCell(readDataAndMove<BC_MemAddress>())
 			: readDataAndMove<BC_MemCell>(BC_DatatypeSize(dt));
 	}
 
@@ -267,9 +269,13 @@ namespace MarC
 
 	void Interpreter::exec_insMove(BC_OpCodeEx ocx)
 	{
-		void* dest = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
-		auto& src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
-		memcpy(dest, &src, BC_DatatypeSize(ocx.datatype));
+		//void* dest = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		//auto& src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
+		memcpy(
+			hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]),
+			&readMemCellAndMove(ocx.datatype, ocx.derefArg[1]),
+			BC_DatatypeSize(ocx.datatype)
+		);
 	}
 	void Interpreter::exec_insAdd(BC_OpCodeEx ocx)
 	{
@@ -297,15 +303,23 @@ namespace MarC
 	}
 	void Interpreter::exec_insDereference(BC_OpCodeEx ocx)
 	{
-		void* dest = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
-		void* src = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[1]);
-		memcpy(dest, src, BC_DatatypeSize(ocx.datatype));
+		//void* dest = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		//void* src = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[1]);
+		memcpy(
+			hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]),
+			hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[1]),
+			BC_DatatypeSize(ocx.datatype)
+		);
 	}
 	void Interpreter::exec_insConvert(BC_OpCodeEx ocx)
 	{
-		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
-		BC_Datatype dtNew = readDataAndMove<BC_Datatype>();
-		ConvertInPlace(dest, ocx.datatype, dtNew);
+		//auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		//BC_Datatype dtNew = readDataAndMove<BC_Datatype>();
+		ConvertInPlace(
+			hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]),
+			ocx.datatype,
+			readDataAndMove<BC_Datatype>()
+		);
 	}
 	void Interpreter::exec_insPush(BC_OpCodeEx ocx)
 	{
@@ -333,8 +347,10 @@ namespace MarC
 	}
 	void Interpreter::exec_insPopCopy(BC_OpCodeEx ocx)
 	{
-		auto& mc = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
-		virt_popStack(mc, BC_DatatypeSize(ocx.datatype));
+		virt_popStack(
+			hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]),
+			BC_DatatypeSize(ocx.datatype)
+		);
 	}
 	void Interpreter::exec_insPushFrame(BC_OpCodeEx ocx)
 	{
@@ -346,11 +362,7 @@ namespace MarC
 	}
 	void Interpreter::exec_insJump(BC_OpCodeEx ocx)
 	{
-		auto& regCP = getRegister(BC_MEM_REG_CODE_POINTER);
-
-		auto& destAddr = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[0]);
-
-		regCP = destAddr;
+		getRegister(BC_MEM_REG_CODE_POINTER) = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[0]);
 	}
 	void Interpreter::exec_insJumpEqual(BC_OpCodeEx ocx)
 	{
@@ -467,10 +479,9 @@ namespace MarC
 
 		for (uint8_t i = 0; i < fcd.nArgs; ++i)
 		{
-			bool deref = ocx.derefArg.get(argIndex++);
 			auto dt = fcd.argType.get(i);
 			efd.param[i].datatype = dt;
-			efd.param[i].cell = readMemCellAndMove(dt, deref);
+			efd.param[i].cell = readMemCellAndMove(dt, ocx.derefArg.get(argIndex++));
 		}
 
 		func->call(*this, efd);
@@ -505,19 +516,18 @@ namespace MarC
 			);
 		}
 
-		hostMemCell(fpMem, false).as_ADDR = regFP.as_ADDR; // Store the old frame pointer
+		hostMemCell(fpMem).as_ADDR = regFP.as_ADDR; // Store the old frame pointer
 		fpMem.addr += 8; // Frame pointer points to first byte after frame pointer backup
 		regFP.as_ADDR = fpMem; // Initialize the new frame pointer
 
-		hostMemCell(retMem, false).as_ADDR = regCP.as_ADDR; // Store the return address
+		hostMemCell(retMem).as_ADDR = regCP.as_ADDR; // Store the return address
 
 		regCP.as_ADDR = funcAddr; // Jump to function address
 	}
 	void Interpreter::exec_insReturn(BC_OpCodeEx ocx)
 	{
 		virt_popFrame();
-		auto& regCP = getRegister(BC_MEM_REG_CODE_POINTER);
-		virt_popStack(regCP, BC_DatatypeSize(BC_DT_U_64));
+		virt_popStack(getRegister(BC_MEM_REG_CODE_POINTER), BC_DatatypeSize(BC_DT_U_64));
 	}
 	void Interpreter::exec_insExit(BC_OpCodeEx ocx)
 	{
@@ -541,7 +551,7 @@ namespace MarC
 		if (m_mem.dynamicStack->size() < regSP.as_ADDR.addr + nBytes)
 			m_mem.dynamicStack->resize(m_mem.dynamicStack->size() * 2);
 		
-		auto dest = hostAddress(regSP.as_ADDR, false);
+		auto dest = hostAddress(regSP.as_ADDR);
 
 		memcpy(dest, &mc, nBytes);
 
@@ -550,9 +560,7 @@ namespace MarC
 
 	void Interpreter::virt_popStack(uint64_t nBytes)
 	{
-		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
-
-		regSP.as_ADDR.addr -= nBytes;
+		getRegister(BC_MEM_REG_STACK_POINTER).as_ADDR.addr -= nBytes;
 	}
 
 	void Interpreter::virt_popStack(BC_MemCell& mc, uint64_t nBytes)
@@ -561,7 +569,7 @@ namespace MarC
 
 		regSP.as_ADDR.addr -= nBytes;
 
-		auto src = hostAddress(regSP.as_ADDR, false);
+		auto src = hostAddress(regSP.as_ADDR);
 
 		memcpy(&mc, src, nBytes);
 	}
@@ -606,11 +614,7 @@ namespace MarC
 
 	bool Interpreter::reachedEndOfCode() const
 	{
-		auto& cp = getRegister(BC_MEM_REG_CODE_POINTER);
-		auto addr = cp.as_ADDR.addr;
-		auto& code = *m_pExeInfo->codeMemory;
-
-		return addr >= code.size();
+		return getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR.addr >= m_pExeInfo->codeMemory.size();
 	}
 
 	const InterpreterError& Interpreter::lastError() const

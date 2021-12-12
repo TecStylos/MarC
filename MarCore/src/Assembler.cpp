@@ -12,8 +12,6 @@ namespace MarC
 	{
 		m_pModInfo = ModuleInfo::create();
 		m_pModInfo->exeInfo->name = modPack->name;
-		m_pModInfo->exeInfo->codeMemory = Memory::create();
-		m_pModInfo->exeInfo->staticStack = Memory::create();
 	}
 
 	ModuleInfoRef Assembler::getModuleInfo()
@@ -364,7 +362,7 @@ namespace MarC
 			MARC_ASSEMBLER_THROW(AsmErrCode::DatatypeMismatch, BC_DatatypeToString(tc.datatype));
 
 		tc.cell.as_ADDR = currStaticStackAddr();
-		m_pModInfo->exeInfo->staticStack->push(currToken().value.c_str(), currToken().value.size() + 1);
+		m_pModInfo->exeInfo->staticStack.push(currToken().value.c_str(), currToken().value.size() + 1);
 	}
 
 	void Assembler::generateTypeCellFloat(TypeCell& tc, bool getsDereferenced)
@@ -603,7 +601,7 @@ namespace MarC
 
 		BC_MemCell mc;
 		mc.as_ADDR = currStaticStackAddr();
-		m_pModInfo->exeInfo->staticStack->resize(m_pModInfo->exeInfo->staticStack->size() + tc.cell.as_U_64);
+		m_pModInfo->exeInfo->staticStack.resize(m_pModInfo->exeInfo->staticStack.size() + tc.cell.as_U_64);
 
 		addSymbol({ name, SymbolUsage::Address, mc });
 	}
@@ -1145,17 +1143,17 @@ namespace MarC
 
 	void Assembler::pushCode(const void* data, uint64_t size)
 	{
-		m_pModInfo->exeInfo->codeMemory->push(data, size);
+		m_pModInfo->exeInfo->codeMemory.push(data, size);
 	}
 
 	void Assembler::writeCode(const void* data, uint64_t size, uint64_t offset)
 	{
-		m_pModInfo->exeInfo->codeMemory->write(data, size, offset);
+		m_pModInfo->exeInfo->codeMemory.write(data, size, offset);
 	}
 
 	uint64_t Assembler::currCodeOffset() const
 	{
-		return m_pModInfo->exeInfo->codeMemory->size();
+		return m_pModInfo->exeInfo->codeMemory.size();
 	}
 
 	BC_MemAddress Assembler::currCodeAddr() const
@@ -1165,7 +1163,7 @@ namespace MarC
 
 	uint64_t Assembler::currStaticStackOffset() const
 	{
-		return m_pModInfo->exeInfo->staticStack->size();
+		return m_pModInfo->exeInfo->staticStack.size();
 	}
 
 	BC_MemAddress Assembler::currStaticStackAddr() const

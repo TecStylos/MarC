@@ -30,9 +30,12 @@ namespace MarC
 		void grantPerm(const std::string& name);
 		void grantPerms(const std::set<std::string>& names);
 	public:
-		void* hostAddress(BC_MemAddress clientAddr, bool deref = false);
-		template <typename T> T& hostObject(BC_MemAddress clientAddr, bool deref = false);
-		BC_MemCell& hostMemCell(BC_MemAddress clientAddr, bool deref = false);
+		void* hostAddress(BC_MemAddress clientAddr);
+		void* hostAddress(BC_MemAddress clientAddr, bool deref);
+		template <typename T> T& hostObject(BC_MemAddress clientAddr);
+		template <typename T> T& hostObject(BC_MemAddress clientAddr, bool deref);
+		BC_MemCell& hostMemCell(BC_MemAddress clientAddr);
+		BC_MemCell& hostMemCell(BC_MemAddress clientAddr, bool deref);
 	public:
 		BC_MemCell& getRegister(BC_MemRegister reg);
 		const BC_MemCell& getRegister(BC_MemRegister reg) const;
@@ -102,6 +105,11 @@ namespace MarC
 		InterpreterError m_lastErr;
 		uint64_t m_nInsExecuted = 0;
 	};
+
+	template <typename T> T& Interpreter::hostObject(BC_MemAddress clientAddr)
+	{
+		return *(T*)hostAddress(clientAddr);
+	}
 
 	template <typename T> T& Interpreter::hostObject(BC_MemAddress clientAddr, bool deref)
 	{
