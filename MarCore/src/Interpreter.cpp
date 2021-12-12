@@ -321,23 +321,22 @@ namespace MarC
 	}
 	void Interpreter::exec_insPop(BC_OpCodeEx ocx)
 	{
-		BC_MemCell mc;
-		virt_popStack(mc, BC_DatatypeSize(ocx.datatype));
+		virt_popStack(BC_DatatypeSize(ocx.datatype));
 	}
 	void Interpreter::exec_insPushNBytes(BC_OpCodeEx ocx)
 	{
-		uint16_t nBytes = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[0]).as_U_16;
-		virt_pushStack(nBytes);
+		virt_pushStack(readMemCellAndMove(BC_DT_U_64, ocx.derefArg[0]).as_U_64);
 	}
 	void Interpreter::exec_insPopNBytes(BC_OpCodeEx ocx)
 	{
-		uint16_t nBytes = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[0]).as_U_16;
-		virt_popStack(nBytes);
+		virt_popStack(readMemCellAndMove(BC_DT_U_64, ocx.derefArg[0]).as_U_64);
 	}
 	void Interpreter::exec_insPushCopy(BC_OpCodeEx ocx)
 	{
-		auto& mc = readMemCellAndMove(ocx.datatype, ocx.derefArg[0]);
-		virt_pushStack(mc, BC_DatatypeSize(ocx.datatype));
+		virt_pushStack(
+			readMemCellAndMove(ocx.datatype, ocx.derefArg[0]),
+			BC_DatatypeSize(ocx.datatype)
+		);
 	}
 	void Interpreter::exec_insPopCopy(BC_OpCodeEx ocx)
 	{

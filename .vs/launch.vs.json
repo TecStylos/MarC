@@ -15,7 +15,7 @@
         "--dbginfo",
         "--forcerefresh",
         "--interpret",
-        "examples/fibonacci.mca"
+        "examples/branching.mca"
       ]
     }
   ]
