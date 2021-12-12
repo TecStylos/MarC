@@ -120,8 +120,8 @@ namespace MarC
 		{
 			struct
 			{
-				uint64_t addr : 60;
-				uint64_t base : 4;
+				uint64_t addr : 56;
+				uint64_t base : 8;
 			};
 			uint64_t _raw;
 		};
