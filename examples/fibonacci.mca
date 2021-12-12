@@ -14,6 +14,6 @@
     return
 #end
 
-#alias : N : 10
+#alias : N : 34
 
 call.i64 : FIBONACCI : $ec : i64.N
