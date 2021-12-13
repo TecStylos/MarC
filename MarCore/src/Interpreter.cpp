@@ -269,11 +269,9 @@ namespace MarC
 
 	void Interpreter::exec_insMove(BC_OpCodeEx ocx)
 	{
-		memcpy(
-			hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]),
-			&readMemCellAndMove(ocx.datatype, ocx.derefArg[1]),
-			BC_DatatypeSize(ocx.datatype)
-		);
+		void* dest = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		const void* src = &readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
+		memcpy(dest, src, BC_DatatypeSize(ocx.datatype));
 	}
 	void Interpreter::exec_insAdd(BC_OpCodeEx ocx)
 	{
@@ -301,19 +299,15 @@ namespace MarC
 	}
 	void Interpreter::exec_insDereference(BC_OpCodeEx ocx)
 	{
-		memcpy(
-			hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]),
-			hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[1]),
-			BC_DatatypeSize(ocx.datatype)
-		);
+		void* dest = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		const void* src = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[1]);
+		memcpy(dest, src, BC_DatatypeSize(ocx.datatype));
 	}
 	void Interpreter::exec_insConvert(BC_OpCodeEx ocx)
 	{
-		ConvertInPlace(
-			hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]),
-			ocx.datatype,
-			readDataAndMove<BC_Datatype>()
-		);
+		auto& mc = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		auto dt = readDataAndMove<BC_Datatype>();
+		ConvertInPlace(mc, ocx.datatype, dt);
 	}
 	void Interpreter::exec_insPush(BC_OpCodeEx ocx)
 	{
