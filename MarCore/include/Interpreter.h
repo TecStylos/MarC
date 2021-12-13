@@ -5,6 +5,7 @@
 #include "unused.h"
 #include "InterpreterMemory.h"
 #include "ExecutableInfo.h"
+#include "ConvertInPlace.h"
 
 #include "ExternalFunction.h"
 #include "errors/InterpreterError.h"
@@ -221,9 +222,30 @@ namespace MarC
 		UNUSED(ocx);
 		virt_popFrame();
 	}
+	inline void Interpreter::exec_insDereference(BC_OpCodeEx ocx)
+	{
+		void* dest = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		const void* src = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[1]);
+		memcpy(dest, src, BC_DatatypeSize(ocx.datatype));
+	}
+	inline void Interpreter::exec_insConvert(BC_OpCodeEx ocx)
+	{
+		auto& mc = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		auto dt = readDataAndMove<BC_Datatype>();
+		ConvertInPlace(mc, ocx.datatype, dt);
+	}
 	inline void Interpreter::exec_insJump(BC_OpCodeEx ocx)
 	{
 		getRegister(BC_MEM_REG_CODE_POINTER) = readMemCellAndMove(BC_DT_ADDR, ocx.derefArg[0]);
+	}
+	inline void Interpreter::exec_insReturn(BC_OpCodeEx ocx)
+	{
+		UNUSED(ocx);
+		virt_popFrame();
+		virt_popStack(
+			getRegister(BC_MEM_REG_CODE_POINTER),
+			BC_DatatypeSize(BC_DT_ADDR)
+		);
 	}
 
 	inline void Interpreter::virt_pushStack(uint64_t nBytes)
@@ -254,6 +276,22 @@ namespace MarC
 		memcpy(dest, &mc, nBytes);
 
 		regSP.as_ADDR.addr += nBytes;
+	}
+
+	inline void Interpreter::virt_popStack(uint64_t nBytes)
+	{
+		getRegister(BC_MEM_REG_STACK_POINTER).as_ADDR.addr -= nBytes;
+	}
+
+	inline void Interpreter::virt_popStack(BC_MemCell& mc, uint64_t nBytes)
+	{
+		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
+
+		regSP.as_ADDR.addr -= nBytes;
+
+		auto src = hostAddress(regSP.as_ADDR);
+
+		memcpy(&mc, src, nBytes);
 	}
 
 	inline void Interpreter::virt_pushFrame()

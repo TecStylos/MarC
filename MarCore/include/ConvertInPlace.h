@@ -4,7 +4,7 @@
 
 namespace MarC
 {
-	void ConvertInPlace(BC_MemCell& mc, BC_Datatype dtOld, BC_Datatype dtNew)
+	inline void ConvertInPlace(BC_MemCell& mc, BC_Datatype dtOld, BC_Datatype dtNew)
 	{
 		#pragma warning(disable: 4244)
 		#define COMB_DT(left, right) (((uint32_t)left << 16) | (uint32_t)right)

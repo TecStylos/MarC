@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <unordered_map>
-#include "ConvertInPlace.h"
 
 #include "SearchAlgorithms.h"
 #include "ExtensionLocator.h"
@@ -246,18 +245,6 @@ namespace MarC
 		auto& src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
 		MARC_INTERPRETER_BINARY_OP(dest, /=, src, ocx.datatype);
 	}
-	void Interpreter::exec_insDereference(BC_OpCodeEx ocx)
-	{
-		void* dest = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
-		const void* src = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[1]);
-		memcpy(dest, src, BC_DatatypeSize(ocx.datatype));
-	}
-	void Interpreter::exec_insConvert(BC_OpCodeEx ocx)
-	{
-		auto& mc = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
-		auto dt = readDataAndMove<BC_Datatype>();
-		ConvertInPlace(mc, ocx.datatype, dt);
-	}
 	void Interpreter::exec_insJumpEqual(BC_OpCodeEx ocx)
 	{
 		auto& destAddr = readMemCellAndMove(BC_DT_ADDR, ocx.derefArg[0]);
@@ -268,8 +255,7 @@ namespace MarC
 
 		MARC_INTERPRETER_BINARY_OP_BOOLEAN_RESULT(result, leftOperand, == , rightOperand, ocx.datatype);
 
-		if (result)
-			getRegister(BC_MEM_REG_CODE_POINTER) = destAddr;
+		getRegister(BC_MEM_REG_CODE_POINTER) = result ? destAddr : getRegister(BC_MEM_REG_CODE_POINTER);
 	}
 	void Interpreter::exec_insJumpNotEqual(BC_OpCodeEx ocx)
 	{
@@ -281,8 +267,7 @@ namespace MarC
 
 		MARC_INTERPRETER_BINARY_OP_BOOLEAN_RESULT(result, leftOperand, != , rightOperand, ocx.datatype);
 
-		if (result)
-			getRegister(BC_MEM_REG_CODE_POINTER) = destAddr;
+		getRegister(BC_MEM_REG_CODE_POINTER) = result ? destAddr : getRegister(BC_MEM_REG_CODE_POINTER);
 	}
 	void Interpreter::exec_insJumpLessThan(BC_OpCodeEx ocx)
 	{
@@ -294,8 +279,7 @@ namespace MarC
 
 		MARC_INTERPRETER_BINARY_OP_BOOLEAN_RESULT(result, leftOperand, < , rightOperand, ocx.datatype);
 
-		if (result)
-			getRegister(BC_MEM_REG_CODE_POINTER) = destAddr;
+		getRegister(BC_MEM_REG_CODE_POINTER) = result ? destAddr : getRegister(BC_MEM_REG_CODE_POINTER);
 	}
 	void Interpreter::exec_insJumpGreaterThan(BC_OpCodeEx ocx)
 	{
@@ -307,8 +291,7 @@ namespace MarC
 
 		MARC_INTERPRETER_BINARY_OP_BOOLEAN_RESULT(result, leftOperand, > , rightOperand, ocx.datatype);
 
-		if (result)
-			getRegister(BC_MEM_REG_CODE_POINTER) = destAddr;
+		getRegister(BC_MEM_REG_CODE_POINTER) = result ? destAddr : getRegister(BC_MEM_REG_CODE_POINTER);
 	}
 	void Interpreter::exec_insJumpLessEqual(BC_OpCodeEx ocx)
 	{
@@ -320,8 +303,7 @@ namespace MarC
 
 		MARC_INTERPRETER_BINARY_OP_BOOLEAN_RESULT(result, leftOperand, <= , rightOperand, ocx.datatype);
 
-		if (result)
-			getRegister(BC_MEM_REG_CODE_POINTER) = destAddr;
+		getRegister(BC_MEM_REG_CODE_POINTER) = result ? destAddr : getRegister(BC_MEM_REG_CODE_POINTER);
 	}
 	void Interpreter::exec_insJumpGreaterEqual(BC_OpCodeEx ocx)
 	{
@@ -333,8 +315,7 @@ namespace MarC
 
 		MARC_INTERPRETER_BINARY_OP_BOOLEAN_RESULT(result, leftOperand, >= , rightOperand, ocx.datatype);
 
-		if (result)
-			getRegister(BC_MEM_REG_CODE_POINTER) = destAddr;
+		getRegister(BC_MEM_REG_CODE_POINTER) = result ? destAddr : getRegister(BC_MEM_REG_CODE_POINTER);
 	}
 	void Interpreter::exec_insAllocate(BC_OpCodeEx ocx)
 	{
@@ -418,35 +399,10 @@ namespace MarC
 
 		regCP.as_ADDR = funcAddr; // Jump to function address
 	}
-	void Interpreter::exec_insReturn(BC_OpCodeEx ocx)
-	{
-		UNUSED(ocx);
-		virt_popFrame();
-		virt_popStack(
-			getRegister(BC_MEM_REG_CODE_POINTER),
-			BC_DatatypeSize(BC_DT_ADDR)
-		);
-	}
 	void Interpreter::exec_insExit(BC_OpCodeEx ocx)
 	{
 		UNUSED(ocx);
 		throw InterpreterError(IntErrCode::AbortViaExit, "The program has been aborted with a call to exit!");
-	}
-
-	void Interpreter::virt_popStack(uint64_t nBytes)
-	{
-		getRegister(BC_MEM_REG_STACK_POINTER).as_ADDR.addr -= nBytes;
-	}
-
-	void Interpreter::virt_popStack(BC_MemCell& mc, uint64_t nBytes)
-	{
-		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
-
-		regSP.as_ADDR.addr -= nBytes;
-
-		auto src = hostAddress(regSP.as_ADDR);
-
-		memcpy(&mc, src, nBytes);
 	}
 
 	ExternalFunctionPtr Interpreter::getExternalFunction(BC_MemAddress funcAddr)
