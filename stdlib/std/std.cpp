@@ -2,6 +2,7 @@
 
 #include "../../MarCore/include/ExternalFunction.h"
 #include "../../MarCore/include/Interpreter.h"
+#include "../../MarCore/include/unused.h"
 
 #include <iostream>
 #include <thread>
@@ -29,6 +30,8 @@ public:
 	PLUS_FEATURE_GET_NAME(">>stdext>>printt");
 	virtual void call(MarC::Interpreter& interpreter, MarC::ExFuncData& efd) override
 	{
+		UNUSED(interpreter);
+		
 		if (efd.nParams != 1)
 			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected 1 parameter! Got " + std::to_string(efd.nParams) + "!");
 		switch (efd.param[0].datatype)
@@ -56,6 +59,7 @@ public:
 
 		char* str = &interpreter.hostObject<char>(efd.param[0].cell.as_ADDR);
 		int ret = scanf("%s", str);
+		UNUSED(ret);
 	}
 };
 
@@ -66,10 +70,14 @@ public:
 	PLUS_FEATURE_GET_NAME(">>stdext>>scant");
 	virtual void call(MarC::Interpreter& interpreter, MarC::ExFuncData& efd) override
 	{
+		UNUSED(interpreter);
+
 		if (efd.nParams != 0)
 			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected 0 parameters! Got " + std::to_string(efd.nParams) + "!");
 		switch (efd.retVal.datatype)
 		{
+		case MarC::BC_DT_NONE:     break;
+		case MarC::BC_DT_UNKNOWN:  break;
 		case MarC::BC_DT_U_8:  std::cin >> efd.retVal.cell.as_U_8;  break;
 		case MarC::BC_DT_U_16: std::cin >> efd.retVal.cell.as_U_16; break;
 		case MarC::BC_DT_U_32: std::cin >> efd.retVal.cell.as_U_32; break;
@@ -78,9 +86,10 @@ public:
 		case MarC::BC_DT_I_16: std::cin >> efd.retVal.cell.as_I_16; break;
 		case MarC::BC_DT_I_32: std::cin >> efd.retVal.cell.as_I_32; break;
 		case MarC::BC_DT_I_64: std::cin >> efd.retVal.cell.as_I_64; break;
-		case MarC::BC_DT_F_32: std::cin >> efd.retVal.cell.as_F_32;  break;
-		case MarC::BC_DT_F_64: std::cin >> efd.retVal.cell.as_F_64;  break;
+		case MarC::BC_DT_F_32: std::cin >> efd.retVal.cell.as_F_32; break;
+		case MarC::BC_DT_F_64: std::cin >> efd.retVal.cell.as_F_64; break;
 		case MarC::BC_DT_ADDR: std::cin >> efd.retVal.cell.as_U_64; break;
+		case MarC::BC_DT_DATATYPE: break;
 		}
 	}
 };
@@ -92,6 +101,7 @@ public:
 	PLUS_FEATURE_GET_NAME(">>stdext>>sleepms");
 	virtual void call(MarC::Interpreter& interpreter, MarC::ExFuncData& efd) override
 	{
+		UNUSED(interpreter);
 		if (efd.nParams != 1)
 			throw MarC::InterpreterError(MarC::IntErrCode::WrongExtCallParamCount, "Expected 1 parameter! Got " + std::to_string(efd.nParams) + "!");
 		if (efd.param[0].datatype != MarC::BC_DT_U_64)

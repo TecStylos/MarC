@@ -131,6 +131,8 @@ namespace MarC
 
 #define MARC_INTERPRETER_BINARY_OP(__left, __operator, __right, __datatype) \
 switch (__datatype) { \
+case MarC::BC_DT_NONE: break; \
+case MarC::BC_DT_UNKNOWN: break; \
 case MarC::BC_DT_I_8:  __left.as_I_8 __operator  __right.as_I_8;  break; \
 case MarC::BC_DT_I_16: __left.as_I_16 __operator __right.as_I_16; break; \
 case MarC::BC_DT_I_32: __left.as_I_32 __operator __right.as_I_32; break; \
@@ -145,10 +147,13 @@ case MarC::BC_DT_F_32: __left.as_F_32 __operator __right.as_F_32; break; \
 case MarC::BC_DT_F_64: __left.as_F_64 __operator __right.as_F_64; break; \
 \
 case MarC::BC_DT_ADDR: __left.as_ADDR __operator __right.as_ADDR; break; \
+case MarC::BC_DT_DATATYPE: break; \
 }
 
 #define MARC_INTERPRETER_BINARY_OP_BOOLEAN_RESULT(__result, __left, __operator, __right, __datatype) \
 switch (__datatype) { \
+case MarC::BC_DT_NONE: break; \
+case MarC::BC_DT_UNKNOWN: break; \
 case MarC::BC_DT_I_8:  __result = __left.as_I_8 __operator  __right.as_I_8;  break; \
 case MarC::BC_DT_I_16: __result = __left.as_I_16 __operator __right.as_I_16; break; \
 case MarC::BC_DT_I_32: __result = __left.as_I_32 __operator __right.as_I_32; break; \
@@ -163,4 +168,5 @@ case MarC::BC_DT_F_32: __result = __left.as_F_32 __operator __right.as_F_32; bre
 case MarC::BC_DT_F_64: __result = __left.as_F_64 __operator __right.as_F_64; break; \
 \
 case MarC::BC_DT_ADDR: __result = __left.as_ADDR __operator __right.as_ADDR; break; \
+case MarC::BC_DT_DATATYPE: break; \
 }

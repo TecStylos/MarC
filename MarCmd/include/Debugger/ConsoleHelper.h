@@ -11,6 +11,7 @@
 #include <sys/ioctl.h>
 #endif
 
+#include <cstring>
 #include <ostream>
 
 namespace MarCmd
@@ -46,7 +47,8 @@ namespace MarCmd
 		inline char getChar()
 		{
 			char buf = 0;
-			struct termios old = { 0 };
+			struct termios old;
+			memset(&old, 0, sizeof(struct termios));
 			fflush(stdout);
 			if (tcgetattr(0, &old) < 0)
 				perror("tcgetattr()");
@@ -66,7 +68,8 @@ namespace MarCmd
 		}
 		inline bool charWaiting()
 		{
-			struct termios term = { 0 };
+			struct termios term;
+			memset(&term, 0, sizeof(struct termios));
 			tcgetattr(0, &term);
 			termios term2 = term;
 			term2.c_lflag &= ~ICANON;

@@ -35,12 +35,14 @@ namespace MarC
 
 			switch (arg.argType)
 			{
+			case InsArgType::None:
+				break;
 			case InsArgType::Datatype:
 				insStr.append(BC_DatatypeToString(arg.value.cell.as_Datatype));
 				break;
 			case InsArgType::TypedValue:
 				insStr.append(BC_DatatypeToString(arg.value.datatype) + ".");
-				// __fallthrough
+				[[fallthrough]];
 			case InsArgType::Value:
 				if (arg.getsDereferenced)
 				{
@@ -50,6 +52,8 @@ namespace MarC
 				{
 					switch (arg.value.datatype)
 					{
+					case BC_DT_NONE: insStr.append("<NONE>"); break;
+					case BC_DT_UNKNOWN: insStr.append("<UNKNOWN>"); break;
 					case BC_DT_I_8:  insStr.append(std::to_string(arg.value.cell.as_I_8));  break;
 					case BC_DT_I_16: insStr.append(std::to_string(arg.value.cell.as_I_16)); break;
 					case BC_DT_I_32: insStr.append(std::to_string(arg.value.cell.as_I_32)); break;
@@ -61,6 +65,7 @@ namespace MarC
 					case BC_DT_F_32: insStr.append(std::to_string(arg.value.cell.as_F_32)); break;
 					case BC_DT_F_64: insStr.append(std::to_string(arg.value.cell.as_F_64)); break;
 					case BC_DT_ADDR:
+					{
 						auto it = getSymbolForAddress(arg.value.cell.as_ADDR, symbols);
 						if (it != symbols.end())
 							insStr.append(it->name);
@@ -68,9 +73,11 @@ namespace MarC
 							insStr.append(BC_MemAddressToString(arg.value.cell.as_ADDR));
 						break;
 					}
+					case BC_DT_DATATYPE: insStr.append(BC_DatatypeToString(arg.value.cell.as_Datatype)); break;
+					}
 					break;
 				}
-				// __fallthrough
+				[[fallthrough]];
 			case InsArgType::Address:
 				auto it = getSymbolForAddress(arg.value.cell.as_ADDR, symbols);
 				if (it != symbols.end())

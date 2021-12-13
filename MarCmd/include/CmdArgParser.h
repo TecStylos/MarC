@@ -13,7 +13,7 @@ namespace MarCmd
 		const char* getNext() { return m_argv[++m_currArg]; }
 	private:
 		int m_argc;
-		int m_currArg;
 		const char** m_argv;
+		int m_currArg;
 	};
 }

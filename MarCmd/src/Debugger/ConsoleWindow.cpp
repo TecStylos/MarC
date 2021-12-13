@@ -4,6 +4,7 @@
 #include <cstring>
 
 #include "Debugger/ConsoleHelper.h"
+#include "unused.h"
 
 namespace MarCmd
 {
@@ -42,11 +43,16 @@ namespace MarCmd
 
 		WindowRef Window::getSubWndRef(const std::string& name)
 		{
+			UNUSED(name);
+
 			return nullptr;
 		}
 
 		bool Window::replaceSubWnd(const std::string& name, WindowRef newWnd)
 		{
+			UNUSED(name);
+			UNUSED(newWnd);
+
 			return false;
 		}
 
@@ -538,7 +544,8 @@ namespace MarCmd
 
 		WndAbsDimPos SplitWindow::calcAbsDimPos(uint64_t width, uint64_t height, WindowRatioType wrt, uint64_t ratio)
 		{
-			WndAbsDimPos wadp = { 0 };
+			WndAbsDimPos wadp;
+			memset(&wadp, 0, sizeof(WndAbsDimPos));
 
 			switch (wrt)
 			{

@@ -153,6 +153,8 @@ int main(int argc, const char** argv, const char** env)
 	{
 		switch (settings.mode)
 		{
+		case Mode::None: // Cannot be Mode::None, see previous if branch
+			break;
 		case Mode::Help:
 			std::cout << MarCmd::HelpText << std::endl;
 			exitCode = 0;

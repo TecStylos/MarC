@@ -8,6 +8,7 @@
 #include "SearchAlgorithms.h"
 #include "ExtensionLocator.h"
 #include "ExternalFunction.h"
+#include "unused.h"
 
 namespace MarC
 {
@@ -341,10 +342,12 @@ namespace MarC
 	}
 	void Interpreter::exec_insPushFrame(BC_OpCodeEx ocx)
 	{
+		UNUSED(ocx);
 		virt_pushFrame();
 	}
 	void Interpreter::exec_insPopFrame(BC_OpCodeEx ocx)
 	{
+		UNUSED(ocx);
 		virt_popFrame();
 	}
 	void Interpreter::exec_insJump(BC_OpCodeEx ocx)
@@ -513,6 +516,7 @@ namespace MarC
 	}
 	void Interpreter::exec_insReturn(BC_OpCodeEx ocx)
 	{
+		UNUSED(ocx);
 		virt_popFrame();
 		virt_popStack(
 			getRegister(BC_MEM_REG_CODE_POINTER),
@@ -521,6 +525,7 @@ namespace MarC
 	}
 	void Interpreter::exec_insExit(BC_OpCodeEx ocx)
 	{
+		UNUSED(ocx);
 		throw InterpreterError(IntErrCode::AbortViaExit, "The program has been aborted with a call to exit!");
 	}
 

@@ -5,7 +5,7 @@
 namespace MarC
 {
 	Disassembler::InstructionParser::InstructionParser(const void* pInstruction)
-		: m_pIns(pInstruction), m_pInsOrig(pInstruction)
+		: m_pInsOrig(pInstruction), m_pIns(pInstruction)
 	{}
 
 	uint64_t Disassembler::InstructionParser::insSize() const
@@ -44,6 +44,7 @@ namespace MarC
 
 		switch (arg.type)
 		{
+		case InsArgType::None: break;
 		case InsArgType::Address:
 		case InsArgType::Value:
 		case InsArgType::TypedValue:
@@ -62,6 +63,7 @@ namespace MarC
 
 		switch (arg.type)
 		{
+		case InsArgType::None: break;
 		case InsArgType::Address: daa.value.datatype = BC_DT_ADDR; break;
 		case InsArgType::TypedValue: daa.value.datatype = arg.datatype; break;
 		case InsArgType::Value: daa.value.datatype = daii.ocx.datatype; break;
@@ -70,6 +72,8 @@ namespace MarC
 
 		switch (daa.getsDereferenced ? BC_DT_ADDR : daa.value.datatype)
 		{
+		case BC_DT_NONE: break;
+		case BC_DT_UNKNOWN: break;
 		case BC_DT_I_8:  daa.value.cell.as_I_8 =  ip.read<int8_t>(); break;
 		case BC_DT_I_16: daa.value.cell.as_I_16 = ip.read<int16_t>(); break;
 		case BC_DT_I_32: daa.value.cell.as_I_32 = ip.read<int32_t>(); break;
@@ -95,6 +99,8 @@ namespace MarC
 			return disassembleSpecCall(daii, ip);
 		case BC_OC_CALL_EXTERN:
 			return disassembleSpecCallExtern(daii, ip);
+		default:
+			break;
 		}
 	}
 

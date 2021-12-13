@@ -128,7 +128,6 @@ namespace MarCmd
 
 	void DisasmWindow::refresh()
 	{
-		uint64_t nInsExecuted = m_sdd->interpreter->nInsExecuted();
 		MarC::BC_MemAddress exeAddr = m_sdd->interpreter->getRegister(MarC::BC_MEM_REG_CODE_POINTER).as_ADDR;
 
 		auto wndDisasmTitle = this->getSubWnd<Console::TextWindow>("Title");
@@ -351,8 +350,6 @@ namespace MarCmd
 				if (updateIsSafe)
 				{
 					{
-						MarC::BC_MemAddress cp = m_sharedDebugData->interpreter->getRegister(MarC::BC_MEM_REG_CODE_POINTER).as_ADDR;
-
 						m_wndDisasm->refresh();
 
 						{

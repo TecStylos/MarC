@@ -105,8 +105,8 @@ namespace MarC
 		uint64_t currStaticStackOffset() const;
 		BC_MemAddress currStaticStackAddr() const;
 	private:
-		AsmTokenListRef m_pCurrTokenList;
 		ModulePackRef m_pModPack;
+		AsmTokenListRef m_pCurrTokenList;
 		AssemblerError m_lastErr;
 		ModuleInfoRef m_pModInfo;
 		std::vector<ScopeDesc> m_scopeList;

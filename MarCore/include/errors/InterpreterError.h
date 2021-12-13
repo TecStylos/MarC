@@ -79,6 +79,14 @@ namespace MarC
 			case Code::AbortViaExit:
 			case Code::AbortViaEndOfCode:
 				return true;
+			case Code::PlainContext:
+			case Code::OpCodeUnknown:
+			case Code::OpCodeNotImplemented:
+			case Code::ExtensionLoadFailure:
+			case Code::WrongExtCallParamCount:
+			case Code::ExternalFunctionNotFound:
+			case Code::PermissionDenied:
+				return false;
 			}
 			return false;
 		}

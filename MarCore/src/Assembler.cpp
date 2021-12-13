@@ -4,6 +4,7 @@
 #include "VirtualAsmTokenList.h"
 #include "SearchAlgorithms.h"
 #include "errors/MacroExpansionError.h"
+#include "unused.h"
 
 namespace MarC
 {
@@ -146,6 +147,8 @@ namespace MarC
 			return assembleSpecCall(ocx);
 		case BC_OC_CALL_EXTERN:
 			return assembleSpecCallExtern(ocx);
+		default:
+			break;
 		}
 
 		MARC_ASSEMBLER_THROW(AsmErrCode::NotSpecialized, BC_OpCodeToString(ocx.opCode));
@@ -245,6 +248,7 @@ namespace MarC
 		TypeCell tc;
 		switch (arg.type)
 		{
+		case InsArgType::None: break;
 		case InsArgType::Address: tc.datatype = BC_DT_ADDR; break;
 		case InsArgType::TypedValue: tc.datatype = arg.datatype; break;
 		case InsArgType::Value: tc.datatype = ocx.datatype; break;
@@ -393,6 +397,8 @@ namespace MarC
 
 			switch (tc.datatype)
 			{
+			case BC_DT_NONE: break;
+			case BC_DT_UNKNOWN: break;
 			case BC_DT_I_8:
 			case BC_DT_U_8:
 				tc.cell.as_I_8 *= -1; break;
@@ -405,12 +411,18 @@ namespace MarC
 			case BC_DT_I_64:
 			case BC_DT_U_64:
 				tc.cell.as_I_64 *= -1; break;
+			case BC_DT_F_32: break;
+			case BC_DT_F_64: break;
+			case BC_DT_ADDR: break;
+			case BC_DT_DATATYPE: break;
 			}
 		}
 	}
 
 	void Assembler::assembleArgDatatype(BC_OpCodeEx& ocx, const InsArgument& arg)
 	{
+		UNUSED(ocx);
+		UNUSED(arg);
 		auto dt = BC_DatatypeFromString(nextToken().value);
 		if (dt == BC_DT_UNKNOWN)
 			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Unable to convert token '" + currToken().value + "' to datatype!");
@@ -1040,7 +1052,7 @@ namespace MarC
 				}
 			}
 
-			if (paramIndex == -1)
+			if (paramIndex == (uint64_t)-1)
 			{
 				pTokenList->push_back(token);
 			}

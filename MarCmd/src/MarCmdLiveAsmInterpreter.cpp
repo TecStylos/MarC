@@ -59,7 +59,6 @@ namespace MarCmd
 
 			try
 			{
-				bool verbose = m_settings.flags.hasFlag(CmdFlags::Verbose);
 				if (!m_pLinker->link())
 					throw m_pLinker->lastError();
 			}
@@ -127,17 +126,17 @@ namespace MarCmd
 		{
 		case RecoverBegin::Interpreter:
 			std::cout << "CANNOT RECOVER FROM INTERPRETER ERRORS! IT IS RECOMMENDED RESTARTING THE PROGRAM." << std::endl;
-			//__fallthrough
+			[[fallthrough]];
 		case RecoverBegin::Linker:
 			std::cout << "CANNOT RECOVER FROM LINKER ERRORS! IT IS RECOMMENDED RESTARTING THE PROGRAM." << std::endl;
 			m_pAssembler->recover();
-			//__fallthrough
+			[[fallthrough]];
 		case RecoverBegin::Assembler:
 			m_pTokenizer->recover();
-			//__fallthrough
+			[[fallthrough]];
 		case RecoverBegin::Tokenizer:
 			m_codeStr.resize(m_backupCodeStrSize);
-			//__fallthrough
+			[[fallthrough]];
 		case RecoverBegin::None:
 			break;
 		}

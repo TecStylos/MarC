@@ -16,8 +16,8 @@ namespace MarC
 	struct InsArgument
 	{
 		InsArgType type;
-		uint64_t index;
 		BC_Datatype datatype;
+		uint64_t index;
 	public:
 		InsArgument(InsArgType type, BC_Datatype datatype = BC_DT_NONE, uint64_t index = -1)
 			: type(type), datatype(datatype), index(index)
@@ -35,8 +35,8 @@ namespace MarC
 	{
 		BC_OpCode opCode;
 		InsDt insDt;
-		bool needsCustomImplementation;
 		std::vector<InsArgument> args;
+		bool needsCustomImplementation;
 	public:
 		InstructionLayout(BC_OpCode opCode, InsDt insDt, std::initializer_list<InsArgument> args, bool needsCustomImplementation = false)
 			: opCode(opCode), insDt(insDt), args(args), needsCustomImplementation(needsCustomImplementation)

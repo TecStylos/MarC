@@ -25,7 +25,7 @@ namespace MarC
 	}
 
 	BC_MemAddress::BC_MemAddress(BC_MemBase base, uint64_t addr)
-		: base(base), addr(addr)
+		: addr(addr), base(base)
 	{
 	}
 
@@ -279,17 +279,19 @@ namespace MarC
 	{
 		switch (dt)
 		{
-		case MarC::BC_DT_I_8:  return std::to_string((int)mc.as_I_8);
-		case MarC::BC_DT_I_16: return std::to_string(mc.as_I_16);
-		case MarC::BC_DT_I_32: return std::to_string(mc.as_I_32);
-		case MarC::BC_DT_I_64: return std::to_string(mc.as_I_64);
-		case MarC::BC_DT_U_8:  return std::to_string((unsigned int)mc.as_U_8);
-		case MarC::BC_DT_U_16: return std::to_string(mc.as_U_16);
-		case MarC::BC_DT_U_32: return std::to_string(mc.as_U_32);
-		case MarC::BC_DT_U_64: return std::to_string(mc.as_U_64);
-		case MarC::BC_DT_F_32: return std::to_string(mc.as_F_32);
-		case MarC::BC_DT_F_64: return std::to_string(mc.as_F_64);
-		case MarC::BC_DT_ADDR: return BC_MemAddressToString(mc.as_ADDR);
+		case MarC::BC_DT_NONE:     return "<none>";
+		case MarC::BC_DT_UNKNOWN:  return "<unknown>";
+		case MarC::BC_DT_I_8:      return std::to_string((int)mc.as_I_8);
+		case MarC::BC_DT_I_16:     return std::to_string(mc.as_I_16);
+		case MarC::BC_DT_I_32:     return std::to_string(mc.as_I_32);
+		case MarC::BC_DT_I_64:     return std::to_string(mc.as_I_64);
+		case MarC::BC_DT_U_8:      return std::to_string((unsigned int)mc.as_U_8);
+		case MarC::BC_DT_U_16:     return std::to_string(mc.as_U_16);
+		case MarC::BC_DT_U_32:     return std::to_string(mc.as_U_32);
+		case MarC::BC_DT_U_64:     return std::to_string(mc.as_U_64);
+		case MarC::BC_DT_F_32:     return std::to_string(mc.as_F_32);
+		case MarC::BC_DT_F_64:     return std::to_string(mc.as_F_64);
+		case MarC::BC_DT_ADDR:     return BC_MemAddressToString(mc.as_ADDR);
 		case MarC::BC_DT_DATATYPE: return BC_DatatypeToString(mc.as_Datatype);
 		}
 		return "???";
@@ -343,6 +345,9 @@ namespace MarC
 	{
 		switch (dt)
 		{
+		case BC_DT_NONE:
+		case BC_DT_UNKNOWN:
+			break;
 		case BC_DT_I_8:
 		case BC_DT_U_8:
 		case BC_DT_DATATYPE:
