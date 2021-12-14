@@ -12,9 +12,7 @@
                 "--closeonexit",
                 "--grantall",
                 "--dbginfo",
-                "--forcerefresh",
-                "--debug",
-                "examples/GameOfLife.mca"
+                "examples/fibonacci.mca"
               ]
         }
     ]

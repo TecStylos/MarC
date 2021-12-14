@@ -78,24 +78,24 @@ namespace MarC
 		BC_MEM_BASE_NONE = 0,
 		BC_MEM_BASE_STATIC_STACK,
 		BC_MEM_BASE_DYNAMIC_STACK,
-		BC_MEM_BASE_DYN_FRAME_ADD,
-		BC_MEM_BASE_DYN_FRAME_SUB,
+		BC_MEM_BASE_DYNAMIC_FRAME,
 		BC_MEM_BASE_CODE_MEMORY,
 		BC_MEM_BASE_REGISTER,
 		BC_MEM_BASE_EXTERN,
+		_BC_MEM_BASE_NUM,
 	};
 	enum BC_MemRegister : uint8_t
 	{
-		BC_MEM_REG_NONE,
-		BC_MEM_REG_UNKNOWN,
-		BC_MEM_REG_CODE_POINTER,
-		BC_MEM_REG_STACK_POINTER,
-		BC_MEM_REG_FRAME_POINTER,
-		BC_MEM_REG_LOOP_COUNTER,
-		BC_MEM_REG_ACCUMULATOR,
-		BC_MEM_REG_TEMPORARY_DATA,
-		BC_MEM_REG_EXIT_CODE,
-		BC_MEM_REG_NUM_OF_REGS,
+		BC_MEM_REG_NONE = 0 * sizeof(uint64_t),
+		BC_MEM_REG_UNKNOWN = 1 * sizeof(uint64_t),
+		BC_MEM_REG_CODE_POINTER = 2 * sizeof(uint64_t),
+		BC_MEM_REG_STACK_POINTER = 3 * sizeof(uint64_t),
+		BC_MEM_REG_FRAME_POINTER = 4 * sizeof(uint64_t),
+		BC_MEM_REG_LOOP_COUNTER = 5 * sizeof(uint64_t),
+		BC_MEM_REG_ACCUMULATOR = 6 * sizeof(uint64_t),
+		BC_MEM_REG_TEMPORARY_DATA = 7 * sizeof(uint64_t),
+		BC_MEM_REG_EXIT_CODE = 8 * sizeof(uint64_t),
+		_BC_MEM_REG_NUM = 9,
 	};
 
 	#pragma pack(push, 1)
@@ -120,14 +120,14 @@ namespace MarC
 		{
 			struct
 			{
-				uint64_t addr : 56;
-				uint64_t base : 8;
+				int64_t addr : 56;
+				int64_t base : 8;
 			};
 			uint64_t _raw;
 		};
 	public:
 		BC_MemAddress() = default;
-		BC_MemAddress(BC_MemBase base, uint64_t addr);
+		BC_MemAddress(BC_MemBase base, int64_t addr);
 		bool operator<(const BC_MemAddress& other) const;
 		bool operator>(const BC_MemAddress& other) const;
 		bool operator<=(const BC_MemAddress& other) const;

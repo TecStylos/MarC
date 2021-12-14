@@ -309,21 +309,18 @@ namespace MarC
 		{
 			generateTypeCellDTSize(tc);
 
-			auto base = BC_MEM_BASE_DYN_FRAME_ADD; // TODO: Add support for BC_MEM_BASE_DYN_FRAME_SUB
+			auto base = BC_MEM_BASE_DYNAMIC_FRAME; // TODO: Add support for BC_MEM_BASE_DYN_FRAME_SUB
 
-			tc.cell.as_ADDR = BC_MemAddress(base, tc.cell.as_U_64);
+			tc.cell.as_ADDR = BC_MemAddress(base, tc.cell.as_I_64);
 
 			return;
 		}
 
 		if (currToken().type == AsmToken::Type::Integer)
 		{
-			uint64_t offset = std::stoull(positiveString(currToken().value));
+			int64_t offset = std::stoll(currToken().value);
 
-			bool isNegative = isNegativeString(currToken().value);
-			auto base = isNegative ? BC_MEM_BASE_DYN_FRAME_SUB : BC_MEM_BASE_DYN_FRAME_ADD;
-
-			tc.cell.as_ADDR = BC_MemAddress(base, offset);
+			tc.cell.as_ADDR = BC_MemAddress(BC_MEM_BASE_DYNAMIC_FRAME, offset);
 
 			return;
 		}
@@ -783,7 +780,7 @@ namespace MarC
 			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Usage of the deref operator is not allowed in the static directive!");
 
 		BC_MemCell mc;
-		mc.as_ADDR.base = BC_MEM_BASE_DYN_FRAME_ADD;
+		mc.as_ADDR.base = BC_MEM_BASE_DYNAMIC_FRAME;
 		mc.as_ADDR.addr = m_scopeList.back().paramSize + m_scopeList.back().localSize;
 
 		addSymbol({ name, SymbolUsage::Address, mc });

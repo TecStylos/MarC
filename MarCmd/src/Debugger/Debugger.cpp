@@ -355,7 +355,7 @@ namespace MarCmd
 						{
 							auto wndMemoryView = (*m_sharedDebugData->wndBase)->getSubWnd<Console::TextWindow>(DbgWndName_MemoryView);
 							int line = 0;
-							for (auto reg = MarC::BC_MEM_REG_CODE_POINTER; reg < MarC::BC_MEM_REG_NUM_OF_REGS; reg = (MarC::BC_MemRegister)(reg + 1))
+							for (auto reg = MarC::BC_MEM_REG_CODE_POINTER; reg < MarC::_BC_MEM_REG_NUM; reg = (MarC::BC_MemRegister)(reg + 1))
 							{
 								auto mc = m_sharedDebugData->interpreter->getRegister(reg);
 								auto dt = m_sharedDebugData->regDatatypes[reg];

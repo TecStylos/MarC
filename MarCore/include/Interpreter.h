@@ -7,6 +7,7 @@
 #include "ExecutableInfo.h"
 #include "ConvertInPlace.h"
 
+#include "SearchAlgorithms.h"
 #include "ExternalFunction.h"
 #include "errors/InterpreterError.h"
 
@@ -34,6 +35,7 @@ namespace MarC
 		void grantPerm(const std::string& name);
 		void grantPerms(const std::set<std::string>& names);
 	public:
+		void* getExternalAddress(BC_MemAddress exAddr);
 		void* hostAddress(BC_MemAddress clientAddr);
 		void* hostAddress(BC_MemAddress clientAddr, bool deref);
 		template <typename T> T& hostObject(BC_MemAddress clientAddr);
@@ -132,6 +134,19 @@ namespace MarC
 		return val;
 	}
 
+	inline void* Interpreter::getExternalAddress(BC_MemAddress exAddr)
+	{
+		auto& pair = findGreatestSmaller(exAddr, m_mem.dynMemMap);
+		return (char*)pair.second + (exAddr.addr - pair.first.addr);
+	}
+
+	inline void* Interpreter::hostAddress(BC_MemAddress clientAddr)
+	{
+		return (clientAddr.base == BC_MEM_BASE_EXTERN) ?
+			getExternalAddress(clientAddr) :
+			(char*)m_mem.baseTable[clientAddr.base] + clientAddr.addr;
+	}
+
 	inline void* Interpreter::hostAddress(BC_MemAddress clientAddr, bool deref)
 	{
 		return deref ?
@@ -151,12 +166,12 @@ namespace MarC
 
 	inline BC_MemCell& Interpreter::getRegister(BC_MemRegister reg)
 	{
-		return m_mem.registers[reg];
+		return *(BC_MemCell*)((char*)&m_mem.registers + reg);
 	}
 
 	inline const BC_MemCell& Interpreter::getRegister(BC_MemRegister reg) const
 	{
-		return m_mem.registers[reg];
+		return *(const BC_MemCell*)((const char*)&m_mem.registers + reg);
 	}
 
 	inline MarC::ExecutableInfoRef Interpreter::getExeInfo() const
@@ -255,7 +270,8 @@ namespace MarC
 		if (m_mem.dynamicStack.size() < regSP.as_ADDR.addr + nBytes)
 		{
 			m_mem.dynamicStack.resize(m_mem.dynamicStack.size() * 2);
-			m_mem.dynamicStackBase = m_mem.dynamicStack.getBaseAddress();
+			m_mem.baseTable[BC_MEM_BASE_DYNAMIC_STACK] = m_mem.dynamicStack.getBaseAddress();
+			m_mem.baseTable[BC_MEM_BASE_DYNAMIC_FRAME] = (char*)m_mem.baseTable[BC_MEM_BASE_DYNAMIC_STACK] + getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR.addr;
 		}
 
 		regSP.as_ADDR.addr += nBytes;
@@ -268,7 +284,8 @@ namespace MarC
 		if (m_mem.dynamicStack.size() < regSP.as_ADDR.addr + nBytes)
 		{
 			m_mem.dynamicStack.resize(m_mem.dynamicStack.size() * 2);
-			m_mem.dynamicStackBase = m_mem.dynamicStack.getBaseAddress();
+			m_mem.baseTable[BC_MEM_BASE_DYNAMIC_STACK] = m_mem.dynamicStack.getBaseAddress();
+			m_mem.baseTable[BC_MEM_BASE_DYNAMIC_FRAME] = (char*)m_mem.baseTable[BC_MEM_BASE_DYNAMIC_STACK] + getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR.addr;
 		}
 		
 		auto dest = hostAddress(regSP.as_ADDR);
@@ -303,6 +320,7 @@ namespace MarC
 			BC_DatatypeSize(BC_DT_ADDR)
 		);
 		regFP.as_ADDR = regSP.as_ADDR;
+		m_mem.baseTable[BC_MEM_BASE_DYNAMIC_FRAME] = (char*)m_mem.baseTable[BC_MEM_BASE_DYNAMIC_STACK] + regFP.as_ADDR.addr;
 	}
 
 	inline void Interpreter::virt_popFrame()
@@ -314,6 +332,7 @@ namespace MarC
 			regFP,
 			BC_DatatypeSize(BC_DT_ADDR)
 		);
+		m_mem.baseTable[BC_MEM_BASE_DYNAMIC_FRAME] = (char*)m_mem.baseTable[BC_MEM_BASE_DYNAMIC_STACK] + regFP.as_ADDR.addr;
 	}
 
 	inline bool Interpreter::reachedEndOfCode() const

@@ -24,7 +24,7 @@ namespace MarCmd
 
 		std::atomic_bool stopExecution = false;
 		std::atomic_bool threadClosed = false;
-		MarC::BC_Datatype regDatatypes[MarC::BC_MEM_REG_NUM_OF_REGS] = { MarC::BC_DT_UNKNOWN };
+		MarC::BC_Datatype regDatatypes[MarC::_BC_MEM_REG_NUM] = { MarC::BC_DT_UNKNOWN };
 	};
 	typedef std::shared_ptr<SharedDebugData> SharedDebugDataRef;
 
@@ -51,7 +51,7 @@ namespace MarCmd
 	private:
 		struct ModDisasmInfo
 		{
-			std::vector<uint64_t> instructionOffsets;
+			std::vector<int64_t> instructionOffsets;
 			struct InsInfo
 			{
 				std::string str;

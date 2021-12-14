@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <unordered_map>
 
-#include "SearchAlgorithms.h"
 #include "ExtensionLocator.h"
 #include "ExternalFunction.h"
 
@@ -96,42 +95,21 @@ namespace MarC
 			grantPerm(perm);
 	}
 
-	void* Interpreter::hostAddress(BC_MemAddress clientAddr)
-	{
-		switch (clientAddr.base)
-		{
-		case BC_MEM_BASE_NONE:
-			return nullptr;
-		case BC_MEM_BASE_STATIC_STACK:
-			return (char*)m_pExeInfo->staticStack.getBaseAddress() + clientAddr.addr;
-		case BC_MEM_BASE_DYNAMIC_STACK:
-			return (char*)m_mem.dynamicStackBase + clientAddr.addr;
-		case BC_MEM_BASE_DYN_FRAME_ADD:
-			return (char*)m_mem.dynamicStackBase + getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR.addr + clientAddr.addr;
-		case BC_MEM_BASE_DYN_FRAME_SUB:
-			return (char*)m_mem.dynamicStackBase + getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR.addr - clientAddr.addr;
-		case BC_MEM_BASE_CODE_MEMORY:
-			return (char*)m_mem.codeMemBase + clientAddr.addr;
-		case BC_MEM_BASE_REGISTER:
-			return &getRegister((BC_MemRegister)clientAddr.addr);
-		case BC_MEM_BASE_EXTERN:
-		{
-			auto& pair = findGreatestSmaller(clientAddr, m_mem.dynMemMap);
-			return (char*)pair.second + (clientAddr.addr - pair.first.addr);
-		}
-		}
-		return nullptr;
-	}
-
 	void Interpreter::initMemory(uint64_t dynStackSize)
 	{
 		m_mem.dynamicStack.resize(dynStackSize);
-		m_mem.dynamicStackBase = m_mem.dynamicStack.getBaseAddress();
-		m_mem.codeMemBase = m_pExeInfo->codeMemory.getBaseAddress();
+
+		m_mem.baseTable[BC_MEM_BASE_NONE] = nullptr;
+		m_mem.baseTable[BC_MEM_BASE_STATIC_STACK] = m_pExeInfo->staticStack.getBaseAddress();
+		m_mem.baseTable[BC_MEM_BASE_DYNAMIC_STACK] = m_mem.dynamicStack.getBaseAddress();
+		m_mem.baseTable[BC_MEM_BASE_DYNAMIC_FRAME] = (char*)m_mem.baseTable[BC_MEM_BASE_DYNAMIC_STACK] + getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR.addr;
+		m_mem.baseTable[BC_MEM_BASE_CODE_MEMORY] = m_pExeInfo->codeMemory.getBaseAddress();
+		m_mem.baseTable[BC_MEM_BASE_REGISTER] = &m_mem.registers;
+		m_mem.baseTable[BC_MEM_BASE_EXTERN] = nullptr;
 
 		getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR = BC_MemAddress(BC_MEM_BASE_CODE_MEMORY, 0);
 		getRegister(BC_MEM_REG_STACK_POINTER).as_ADDR = BC_MemAddress(BC_MEM_BASE_DYNAMIC_STACK, 0);
-		getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR = BC_MemAddress(BC_MEM_BASE_DYNAMIC_STACK, 0);
+		getRegister(BC_MEM_REG_FRAME_POINTER).as_ADDR = BC_MemAddress(BC_MEM_BASE_DYNAMIC_FRAME, 0);
 		getRegister(BC_MEM_REG_LOOP_COUNTER).as_U_64 = 0;
 		getRegister(BC_MEM_REG_ACCUMULATOR).as_U_64 = 0;
 		getRegister(BC_MEM_REG_TEMPORARY_DATA).as_U_64 = 0;
@@ -394,6 +372,7 @@ namespace MarC
 		hostMemCell(fpMem).as_ADDR = regFP.as_ADDR; // Store the old frame pointer
 		fpMem.addr += 8; // Frame pointer points to first byte after frame pointer backup
 		regFP.as_ADDR = fpMem; // Initialize the new frame pointer
+		m_mem.baseTable[BC_MEM_BASE_DYNAMIC_FRAME] = (char*)m_mem.baseTable[BC_MEM_BASE_DYNAMIC_STACK] + regFP.as_ADDR.addr;
 
 		hostMemCell(retMem).as_ADDR = regCP.as_ADDR; // Store the return address
 

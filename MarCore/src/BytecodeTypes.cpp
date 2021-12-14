@@ -24,7 +24,7 @@ namespace MarC
 		data &= ~(1 << index);
 	}
 
-	BC_MemAddress::BC_MemAddress(BC_MemBase base, uint64_t addr)
+	BC_MemAddress::BC_MemAddress(BC_MemBase base, int64_t addr)
 		: addr(addr), base(base)
 	{
 	}
@@ -311,12 +311,8 @@ namespace MarC
 			str.append("D; A: ");
 			str.append(std::to_string(addr.addr));
 			break;
-		case BC_MEM_BASE_DYN_FRAME_ADD:
-			str.append("~+");
-			str.append(std::to_string(addr.addr));
-			break;
-		case BC_MEM_BASE_DYN_FRAME_SUB:
-			str.append("~-");
+		case BC_MEM_BASE_DYNAMIC_FRAME:
+			str.append("~");
 			str.append(std::to_string(addr.addr));
 			break;
 		case BC_MEM_BASE_CODE_MEMORY:
