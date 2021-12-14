@@ -9,7 +9,6 @@
         add.i64 : RET : @$ac
         return
     endif
-    #local : TEST : ^i64
 
     mov.i64 : RET : @N
     return

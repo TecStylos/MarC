@@ -6,6 +6,14 @@ if [ "${CONFIG}" = "" ]; then
     echo "No Configuration selected. Using 'Release'."
     BIN_DIR="bin/Release"
 else
+    if [ "${CONFIG}" != "Debug" ]; then
+        if [ "${CONFIG}" != "Release" ]; then
+            if [ "${CONFIG}" != "RelWithDebInfo" ]; then
+                echo "Invalid Configuration selected!"
+                exit
+            fi
+        fi
+    fi
     BIN_DIR="bin/${CONFIG}"
 fi
 

@@ -224,6 +224,8 @@ namespace MarC
 		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
 		switch(ocx.datatype)
 		{
+		case BC_DT_NONE: break;
+		case BC_DT_UNKNOWN: break;
 		case BC_DT_I_8:  ++dest.as_I_8;  break;
 		case BC_DT_I_16: ++dest.as_I_16; break;
 		case BC_DT_I_32: ++dest.as_I_32; break;
@@ -232,7 +234,10 @@ namespace MarC
 		case BC_DT_U_16: ++dest.as_U_16; break;
 		case BC_DT_U_32: ++dest.as_U_32; break;
 		case BC_DT_U_64: ++dest.as_U_64; break;
+		case BC_DT_F_32: break;
+		case BC_DT_F_64: break;
 		case BC_DT_ADDR: ++dest.as_ADDR._raw; break;
+		case BC_DT_DATATYPE: break;
 		}
 	}
 	void Interpreter::exec_insDecrement(BC_OpCodeEx ocx)
@@ -240,6 +245,8 @@ namespace MarC
 		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
 		switch(ocx.datatype)
 		{
+		case BC_DT_NONE: break;
+		case BC_DT_UNKNOWN: break;
 		case BC_DT_I_8:  --dest.as_I_8;  break;
 		case BC_DT_I_16: --dest.as_I_16; break;
 		case BC_DT_I_32: --dest.as_I_32; break;
@@ -248,7 +255,10 @@ namespace MarC
 		case BC_DT_U_16: --dest.as_U_16; break;
 		case BC_DT_U_32: --dest.as_U_32; break;
 		case BC_DT_U_64: --dest.as_U_64; break;
+		case BC_DT_F_32: break;
+		case BC_DT_F_64: break;
 		case BC_DT_ADDR: --dest.as_ADDR._raw; break;
+		case BC_DT_DATATYPE: break;
 		}
 	}
 	void Interpreter::exec_insJumpEqual(BC_OpCodeEx ocx)
