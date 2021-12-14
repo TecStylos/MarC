@@ -137,6 +137,11 @@ namespace MarC
 						currToken.value = "#";
 						currAction = CurrAction::EndToken;
 						break;
+					case '!':
+						currToken.type = AsmToken::Type::Spec_NoLocal;
+						currToken.value = "!";
+						currAction = CurrAction::EndToken;
+						break;
 					case '\\':
 						currToken.type = AsmToken::Type::Op_Ignore_Directive;
 						currToken.value = "\\";

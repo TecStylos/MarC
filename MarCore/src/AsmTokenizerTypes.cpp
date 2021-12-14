@@ -17,10 +17,13 @@ namespace MarC
 			{ AsmToken::Type::Op_DT_Size,     "Op_DT_Size" },
 			{ AsmToken::Type::Op_Register,    "Op_Register" },
 			{ AsmToken::Type::Op_Directive,   "Op_Directive" },
+			{ AsmToken::Type::Op_Ignore_Directive, "Op_Ignore_Directive" },
+			{ AsmToken::Type::Spec_NoLocal,   "Spec_NoLocal" },
 			{ AsmToken::Type::Name,           "Name" },
 			{ AsmToken::Type::Float,          "Float" },
 			{ AsmToken::Type::Integer,        "Integer" },
 			{ AsmToken::Type::String,         "String" },
+			{ AsmToken::Type::Pragma_Insertion, "Pragma_Insertion" },
 			{ AsmToken::Type::Comment,        "Comment" },
 		};
 

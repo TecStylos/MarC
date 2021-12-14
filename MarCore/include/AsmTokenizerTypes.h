@@ -23,6 +23,7 @@ namespace MarC
 			Op_Register,
 			Op_Directive,
 			Op_Ignore_Directive,
+			Spec_NoLocal,
 			Name,
 			Float,
 			Integer,

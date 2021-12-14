@@ -2,7 +2,7 @@
 #reqmod : "std-control"
 
 #scope : std
-	#func : copyString : addr.DEST : addr.SRC
+	#func : !copyString : addr.DEST : addr.SRC
 		do
 			drf.u8 : $td : @SRC
 			mov.u8 : @DEST : @$td

@@ -22,10 +22,7 @@ namespace MarC
 	bool Interpreter::interpret(uint64_t nInstructions)
 	{
 		resetError();
-
-		if (!nInstructions)
-			return true;
-
+		
 		try
 		{
 			while (nInstructions--)

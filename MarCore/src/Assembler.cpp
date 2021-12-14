@@ -690,15 +690,29 @@ namespace MarC
 
 		std::string funcName;
 		{
-			if (nextToken().type != AsmToken::Type::Name)
+			bool noLocal = false;
+			if (nextToken().type == AsmToken::Type::Spec_NoLocal)
+			{
+				noLocal = true;
+				nextToken();
+			}
+
+			if (currToken().type != AsmToken::Type::Name)
 				MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::Name, currToken());
 
 			funcName = currToken().value;
 
 			assembleStatement("jmp : " + funcName + ">>SCOPE_END");
 
-			addFuncScope(funcName);
-			assembleStatement("pushn : SCOPE_FUNC_LOCAL_SIZE");
+			if (noLocal)
+			{
+				addScope(funcName);
+			}
+			else
+			{
+				addFuncScope(funcName);
+				assembleStatement("pushn : SCOPE_FUNC_LOCAL_SIZE");
+			}
 		}
 
 		if (hasDatatype)
@@ -758,7 +772,7 @@ namespace MarC
 		if (m_scopeList.empty())
 			MARC_ASSEMBLER_THROW(AsmErrCode::InvalidScope, "The 'local' directive cannot be used in global scope!");
 		if (!m_scopeList.back().isFuncScope)
-			MARC_ASSEMBLER_THROW(AsmErrCode::InvalidScope, "The 'local' directive cannot be used in plain scopes!");
+			MARC_ASSEMBLER_THROW(AsmErrCode::InvalidScope, "The 'local' directive cannot be used in plain scopes or functions with the 'nolocal' specifier!");
 
 		removeNecessaryColon();
 

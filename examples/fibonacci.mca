@@ -1,6 +1,6 @@
 #reqmod : "std"
 
-#func.i64 : FIBONACCI : RET : i64.N
+#func.i64 : !FIBONACCI : RET : i64.N
     if_gt.i64 : @N : 1
         dec.i64 : N
         call.i64 : >>FIBONACCI : RET : i64.@N
@@ -9,6 +9,7 @@
         add.i64 : RET : @$ac
         return
     endif
+    #local : TEST : ^i64
 
     mov.i64 : RET : @N
     return
