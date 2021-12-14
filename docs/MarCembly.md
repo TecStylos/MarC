@@ -40,34 +40,36 @@ Usage | Explanation
 (Arguments with * are optional)
 OpCode | Datatype | Arguments | Explanation
 -------|----------|---------- | -----------
-mov | Required | [dest] : [val] | Copy `val` to `dest`
-add | Required | [dest] : [val] | Add [val] to value at [dest]
-sub | Required | [dest] : [val] | Subtract `val` from value at `dest`
-mul | Required | [dest] : [val] | Multiply value at `dest` with `val`
-div | Required | [dest] : [val] | Divide value at `dest` by `val`
-drf | Required | [dest] : [addr] | Dereference `addr` and store it at `dest`
-conv | Required | [addr] : [dt] | Convert value at `addr` from `ocdt` datatype to `dt`
-push | Required | - | Push uninitialized memory of size `^ocdt` onto the dynamic stack
-pop | Required | - | Pop value of size `^ocdt` from the dynamic stack
-pushn | None | [size] | Push `size` bytes onto the stack
-popn | None | [size] | Pop `size` bytes from the stack
-pushc | Required | [val] | Push `val` onto the dynamic stack
-popc | Required | [addr] | Pop value from the dynamic stack and store it at `addr`
-pushf | None | - | Push a new frame onto the dynamic stack
-popf | None | - | Pop the current frame from the dynamic stack
-jmp | None | [addr] | Jump to `addr`
-jeq | Required | [addr] : [val1] : [val2] | Jump to `addr` if `val1` _==_ `val2`
-jne | Required | [addr] : [val1] : [val2] | Jump to `addr` if `val1` _!=_ `val2`
-jlt | Required | [addr] : [val1] : [val2] | Jump to `addr` if `val1` _<_ `val2`
-jgt | Required | [addr] : [val1] : [val2] | Jump to `addr` if `val1` _>_ `val2`
-jle | Required | [addr] : [val1] : [val2] | Jump to `addr` if `val1` _<=_ `val2`
-jge | Required | [addr] : [val1] : [val2] | Jump to `addr` if `val1` _>=_ `val2`
-alloc | None | [addr] : [size] | Allocate `size` bytes and store the address in `addr`
-free | None | [addr] | Free memory allocated with alloc
-calx | Optional | [funxAddr] *[ : retAddr] *[ : typedArgs] | Call an external function
-call | Optional | [funcAddr] *[ : retAddr] *[ : typedArgs] | Call an internal function
-return | None | - | Return from the current function call
-exit | None | - | Stop the execution and return the exit code @$ec (dt == i64)
+mov | Required | [dest] : [val] | Copy `val` to `dest`.
+add | Required | [dest] : [val] | Add `val` to value at `dest`.
+sub | Required | [dest] : [val] | Subtract `val` from value at `dest`.
+mul | Required | [dest] : [val] | Multiply value at `dest` with `val`.
+div | Required | [dest] : [val] | Divide value at `dest` by `val`.
+inc | Required | [dest] | Increment the value stored at `dest`.
+dec | Required | [dest] | Decrement the value stored at `dest`.
+drf | Required | [dest] : [addr] | Dereference `addr` and store it at `dest`.
+conv | Required | [addr] : [dt] | Convert value at `addr` from `ocdt` datatype to `dt`.
+push | Required | - | Push uninitialized memory of size `^ocdt` onto the dynamic stack.
+pop | Required | - | Pop value of size `^ocdt` from the dynamic stack.
+pushn | None | [size] | Push `size` bytes onto the stack.
+popn | None | [size] | Pop `size` bytes from the stack.
+pushc | Required | [val] | Push `val` onto the dynamic stack.
+popc | Required | [addr] | Pop value from the dynamic stack and store it at `addr`.
+pushf | None | - | Push a new frame onto the dynamic stack.
+popf | None | - | Pop the current frame from the dynamic stack.
+jmp | None | [addr] | Jump to `addr`.
+jeq | Required | [addr] : [val1] : [val2] | Jump to `addr` if `val1` _==_ `val2`.
+jne | Required | [addr] : [val1] : [val2] | Jump to `addr` if `val1` _!=_ `val2`.
+jlt | Required | [addr] : [val1] : [val2] | Jump to `addr` if `val1` _<_ `val2`.
+jgt | Required | [addr] : [val1] : [val2] | Jump to `addr` if `val1` _>_ `val2`.
+jle | Required | [addr] : [val1] : [val2] | Jump to `addr` if `val1` _<=_ `val2`.
+jge | Required | [addr] : [val1] : [val2] | Jump to `addr` if `val1` _>=_ `val2`.
+alloc | None | [addr] : [size] | Allocate `size` bytes and store the address in `addr`.
+free | None | [addr] | Free memory allocated with alloc.
+calx | Optional | [funxAddr] *[ : retAddr] *[ : typedArgs] | Call an external function.
+call | Optional | [funcAddr] *[ : retAddr] *[ : typedArgs] | Call an internal function.
+return | None | - | Return from the current function call.
+exit | None | - | Stop the execution and return the exit code @$ec (dt == i64).
 ***
 
 ## Directives:
@@ -76,14 +78,14 @@ Name | Datatype | Arguments | Explanation
 -----|----------|-----------|------------
 label | None | [name] | Store the current code address in [name].
 alias | None |  [name] : [literal] | Give a literal an alias (No stack allocation). (Literals can be other aliases, labels, names for static allocations, scopes, (extern) function names, local variables, ...)
-static | None | [name] : [size] | Reserve n bytes on the static stack and store the address in [name].
+static | None | [name] : [size] | Reserve n bytes on the static stack and create an alias with name `name` holding the address.
 reqmod | None | [string] | Request/Require a module.
 extension | None | [string] | Request an extension. (Required for external functions)
 manperm | None | [funcName] | Request a mandatory permission for an external function.
 optperm | None | [funcName] | Request an optional permission for an external function.
 scope | None | [name] | Begin a new scope.
 end | None | - | End a scope/macro.
-func | Optional | [funcName] *[ : retName] *[ : typedArgs] | Define an internal function.
+func | Optional | [funcName] *[ : retName] *[ : typedArgs] | Define an internal function. Place '`!`' in front of `funcName` to mark it as a function without additional local variables.
 funx | None | [funcName] | Tell the linker there's an external function with the specified name in an extension having the same name as the module.
 local | None | [name] : [size] | Reserve local (frame relative) memory (frame offset automatically determined).
 macro | Optional | [macroName] *[ : macroArgs] | Define a macro.
