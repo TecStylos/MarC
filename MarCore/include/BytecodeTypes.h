@@ -129,7 +129,7 @@ namespace MarC
 		};
 	public:
 		BC_MemAddress() = default;
-		BC_MemAddress(BC_MemBase base, int64_t addr);
+		BC_MemAddress(BC_MemBase base, int64_t addr) : addr(addr), base(base) {}
 		bool operator<(const BC_MemAddress& other) const { return _raw < other._raw; }
 		bool operator>(const BC_MemAddress& other) const { return _raw > other._raw; }
 		bool operator<=(const BC_MemAddress& other) const { return _raw <= other._raw; }
@@ -140,6 +140,8 @@ namespace MarC
 		BC_MemAddress& operator-=(const BC_MemAddress& other) { _raw -= other._raw; return *this; }
 		BC_MemAddress& operator*=(const BC_MemAddress& other) { _raw *= other._raw; return *this; }
 		BC_MemAddress& operator/=(const BC_MemAddress& other) { _raw /= other._raw; return *this; }
+
+		BC_MemAddress& operator=(const BC_MemAddress& other) { _raw = other._raw; return *this; }
 	};
 
 	struct BC_MemCell
@@ -162,6 +164,7 @@ namespace MarC
 	public:
 		BC_MemCell() { as_U_64 = 0; };
 		BC_MemCell(BC_MemAddress val) : as_ADDR(val) {}
+		BC_MemCell& operator=(const BC_MemCell& other) { as_U_64 = other.as_U_64; return *this; }
 	};
 	MARC_SERIALIZER_ENABLE_FIXED(BC_MemCell);
 

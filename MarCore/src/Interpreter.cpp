@@ -380,41 +380,6 @@ namespace MarC
 		if (retDest)
 			memcpy(retDest, &efd.retVal.cell, BC_DatatypeSize(efd.retVal.datatype));
 	}
-	void Interpreter::exec_insCall(BC_OpCodeEx ocx)
-	{
-		BC_MemAddress fpMem;
-		BC_MemAddress retMem;
-		auto& regSP = getRegister(BC_MEM_REG_STACK_POINTER);
-		auto& regFP = getRegister(BC_MEM_REG_FRAME_POINTER);
-		auto& regCP = getRegister(BC_MEM_REG_CODE_POINTER);
-
-		BC_MemAddress funcAddr = readMemCellAndMove(BC_DT_ADDR, ocx.derefArg.get(0)).as_ADDR;
-		auto& fcd = readDataAndMove<BC_FuncCallData>();
-		
-		virt_pushStack(BC_DatatypeSize(ocx.datatype)); // Reserve memory for return value
-		retMem = regSP.as_ADDR; // Copy address of memory for return address
-		virt_pushStack(BC_DatatypeSize(BC_DT_ADDR)); // Reserve memory for return address
-		fpMem = regSP.as_ADDR; // Copy address of memory for frame pointer
-		virt_pushStack(BC_DatatypeSize(BC_DT_ADDR)); // Reserve memory for frame pointer
-
-		for (uint8_t i = 0; i < fcd.nArgs; ++i)
-		{
-			auto dt = fcd.argType.get(i);
-			virt_pushStack(
-				readMemCellAndMove(dt, ocx.derefArg.get(i + 1)),
-				BC_DatatypeSize(dt)
-			);
-		}
-
-		hostMemCell(fpMem).as_ADDR = regFP.as_ADDR; // Store the old frame pointer
-		fpMem.addr += 8; // Frame pointer points to first byte after frame pointer backup
-		regFP.as_ADDR = fpMem; // Initialize the new frame pointer
-		m_mem.baseTable[BC_MEM_BASE_DYNAMIC_FRAME] = (char*)m_mem.baseTable[BC_MEM_BASE_DYNAMIC_STACK] + regFP.as_ADDR.addr;
-
-		hostMemCell(retMem).as_ADDR = regCP.as_ADDR; // Store the return address
-
-		regCP.as_ADDR = funcAddr; // Jump to function address
-	}
 	void Interpreter::exec_insExit(BC_OpCodeEx ocx)
 	{
 		UNUSED(ocx);

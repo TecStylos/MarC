@@ -4,10 +4,6 @@
 
 namespace MarC
 {
-	BC_MemAddress::BC_MemAddress(BC_MemBase base, int64_t addr)
-		: addr(addr), base(base)
-	{}
-
 	BC_OpCode BC_OpCodeFromString(const std::string& ocStr)
 	{
 		static const std::map<std::string, BC_OpCode> ocMap = {
