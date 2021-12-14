@@ -55,13 +55,14 @@ namespace MarC
 		template <typename T> T& readDataAndMove(uint64_t shift);
 		BC_MemCell& readMemCellAndMove(BC_Datatype dt, bool deref);
 	private:
-		void execNext();
 		void exec_insUndefined(BC_OpCodeEx ocx);
 		void exec_insMove(BC_OpCodeEx ocx);
 		void exec_insAdd(BC_OpCodeEx ocx);
 		void exec_insSubtract(BC_OpCodeEx ocx);
 		void exec_insMultiply(BC_OpCodeEx ocx);
 		void exec_insDivide(BC_OpCodeEx ocx);
+		void exec_insIncrement(BC_OpCodeEx ocx);
+		void exec_insDecrement(BC_OpCodeEx ocx);
 		void exec_insDereference(BC_OpCodeEx ocx);
 		void exec_insConvert(BC_OpCodeEx ocx);
 		void exec_insPush(BC_OpCodeEx ocx);

@@ -37,6 +37,8 @@ namespace MarC
 		BC_OC_SUBTRACT,
 		BC_OC_MULTIPLY,
 		BC_OC_DIVIDE,
+		BC_OC_INCREMENT,
+		BC_OC_DECREMENT,
 
 		BC_OC_DEREFERENCE,
 
@@ -107,10 +109,10 @@ namespace MarC
 		struct ArgDerefs
 		{
 			uint8_t data = 0;
-			bool operator[](uint64_t index) const { return get(index); }
-			bool get(uint64_t index) const { return (data >> index) & 1; }
-			void set(uint64_t index) { data |= (1 << index); }
-			void clear(uint64_t index) { data &= ~(1 << index); }
+			bool operator[](uint8_t index) const { return get(index); }
+			bool get(uint8_t index) const { return (data >> index) & 1; }
+			void set(uint8_t index) { data |= (1 << index); }
+			void clear(uint8_t index) { data &= ~(1 << index); }
 		} derefArg;
 	};
 

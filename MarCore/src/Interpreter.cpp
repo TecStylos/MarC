@@ -30,7 +30,58 @@ namespace MarC
 		{
 			while (nInstructions--)
 			{
-				execNext();
+				if (reachedEndOfCode())
+					throw InterpreterError(IntErrCode::AbortViaEndOfCode, "Reached end of executable code!");
+
+				const auto& ocx = readDataAndMove<BC_OpCodeEx>();
+
+				switch (ocx.opCode)
+				{
+				case BC_OC_NONE:  Interpreter::exec_insUndefined(ocx); break;
+				case BC_OC_UNKNOWN: Interpreter::exec_insUndefined(ocx); break;
+
+				case BC_OC_MOVE: Interpreter::exec_insMove(ocx); break;
+				case BC_OC_ADD: Interpreter::exec_insAdd(ocx); break;
+				case BC_OC_SUBTRACT: Interpreter::exec_insSubtract(ocx); break;
+				case BC_OC_MULTIPLY: Interpreter::exec_insMultiply(ocx); break;
+				case BC_OC_DIVIDE: Interpreter::exec_insDivide(ocx); break;
+				case BC_OC_INCREMENT: Interpreter::exec_insIncrement(ocx); break;
+				case BC_OC_DECREMENT: Interpreter::exec_insDecrement(ocx); break;
+
+				case BC_OC_DEREFERENCE: Interpreter::exec_insDereference(ocx); break;
+
+				case BC_OC_CONVERT: Interpreter::exec_insConvert(ocx); break;
+
+				case BC_OC_PUSH: Interpreter::exec_insPush(ocx); break;
+				case BC_OC_POP: Interpreter::exec_insPop(ocx); break;
+				case BC_OC_PUSH_N_BYTES: Interpreter::exec_insPushNBytes(ocx); break;
+				case BC_OC_POP_N_BYTES: Interpreter::exec_insPopNBytes(ocx); break;
+				case BC_OC_PUSH_COPY: Interpreter::exec_insPushCopy(ocx); break;
+				case BC_OC_POP_COPY: Interpreter::exec_insPopCopy(ocx); break;
+
+				case BC_OC_PUSH_FRAME: Interpreter::exec_insPushFrame(ocx); break;
+				case BC_OC_POP_FRAME: Interpreter::exec_insPopFrame(ocx); break;
+
+				case BC_OC_JUMP: Interpreter::exec_insJump(ocx); break;
+				case BC_OC_JUMP_EQUAL: Interpreter::exec_insJumpEqual(ocx); break;
+				case BC_OC_JUMP_NOT_EQUAL: Interpreter::exec_insJumpNotEqual(ocx); break;
+				case BC_OC_JUMP_LESS_THAN: Interpreter::exec_insJumpLessThan(ocx); break;
+				case BC_OC_JUMP_GREATER_THAN: Interpreter::exec_insJumpGreaterThan(ocx); break;
+				case BC_OC_JUMP_LESS_EQUAL: Interpreter::exec_insJumpLessEqual(ocx); break;
+				case BC_OC_JUMP_GREATER_EQUAL: Interpreter::exec_insJumpGreaterEqual(ocx); break;
+
+				case BC_OC_ALLOCATE: Interpreter::exec_insAllocate(ocx); break;
+				case BC_OC_FREE: Interpreter::exec_insFree(ocx); break;
+
+				case BC_OC_CALL_EXTERN: Interpreter::exec_insCallExtern(ocx); break;
+
+				case BC_OC_CALL: Interpreter::exec_insCall(ocx); break;
+				case BC_OC_RETURN: Interpreter::exec_insReturn(ocx); break;
+
+				case BC_OC_EXIT: Interpreter::exec_insExit(ocx); break;
+				default:
+					exec_insUndefined(ocx);
+				}
 				++m_nInsExecuted;
 			}
 		}
@@ -142,60 +193,6 @@ namespace MarC
 		}
 	}
 
-	void Interpreter::execNext()
-	{
-		if (reachedEndOfCode())
-			throw InterpreterError(IntErrCode::AbortViaEndOfCode, "Reached end of executable code!");
-
-		const auto& ocx = readDataAndMove<BC_OpCodeEx>();
-
-		switch (ocx.opCode)
-		{
-		case BC_OC_NONE:  Interpreter::exec_insUndefined(ocx); break;
-		case BC_OC_UNKNOWN: Interpreter::exec_insUndefined(ocx); break;
-
-		case BC_OC_MOVE: Interpreter::exec_insMove(ocx); break;
-		case BC_OC_ADD: Interpreter::exec_insAdd(ocx); break;
-		case BC_OC_SUBTRACT: Interpreter::exec_insSubtract(ocx); break;
-		case BC_OC_MULTIPLY: Interpreter::exec_insMultiply(ocx); break;
-		case BC_OC_DIVIDE: Interpreter::exec_insDivide(ocx); break;
-
-		case BC_OC_DEREFERENCE: Interpreter::exec_insDereference(ocx); break;
-
-		case BC_OC_CONVERT: Interpreter::exec_insConvert(ocx); break;
-
-		case BC_OC_PUSH: Interpreter::exec_insPush(ocx); break;
-		case BC_OC_POP: Interpreter::exec_insPop(ocx); break;
-		case BC_OC_PUSH_N_BYTES: Interpreter::exec_insPushNBytes(ocx); break;
-		case BC_OC_POP_N_BYTES: Interpreter::exec_insPopNBytes(ocx); break;
-		case BC_OC_PUSH_COPY: Interpreter::exec_insPushCopy(ocx); break;
-		case BC_OC_POP_COPY: Interpreter::exec_insPopCopy(ocx); break;
-
-		case BC_OC_PUSH_FRAME: Interpreter::exec_insPushFrame(ocx); break;
-		case BC_OC_POP_FRAME: Interpreter::exec_insPopFrame(ocx); break;
-
-		case BC_OC_JUMP: Interpreter::exec_insJump(ocx); break;
-		case BC_OC_JUMP_EQUAL: Interpreter::exec_insJumpEqual(ocx); break;
-		case BC_OC_JUMP_NOT_EQUAL: Interpreter::exec_insJumpNotEqual(ocx); break;
-		case BC_OC_JUMP_LESS_THAN: Interpreter::exec_insJumpLessThan(ocx); break;
-		case BC_OC_JUMP_GREATER_THAN: Interpreter::exec_insJumpGreaterThan(ocx); break;
-		case BC_OC_JUMP_LESS_EQUAL: Interpreter::exec_insJumpLessEqual(ocx); break;
-		case BC_OC_JUMP_GREATER_EQUAL: Interpreter::exec_insJumpGreaterEqual(ocx); break;
-
-		case BC_OC_ALLOCATE: Interpreter::exec_insAllocate(ocx); break;
-		case BC_OC_FREE: Interpreter::exec_insFree(ocx); break;
-
-		case BC_OC_CALL_EXTERN: Interpreter::exec_insCallExtern(ocx); break;
-
-		case BC_OC_CALL: Interpreter::exec_insCall(ocx); break;
-		case BC_OC_RETURN: Interpreter::exec_insReturn(ocx); break;
-
-		case BC_OC_EXIT: Interpreter::exec_insExit(ocx); break;
-		default:
-			exec_insUndefined(ocx);
-		}
-	}
-
 	void Interpreter::exec_insUndefined(BC_OpCodeEx ocx)
 	{
 		throw InterpreterError(IntErrCode::OpCodeUnknown, std::to_string(ocx.opCode));
@@ -224,6 +221,38 @@ namespace MarC
 		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
 		auto& src = readMemCellAndMove(ocx.datatype, ocx.derefArg[1]);
 		MARC_INTERPRETER_BINARY_OP(dest, /=, src, ocx.datatype);
+	}
+	void Interpreter::exec_insIncrement(BC_OpCodeEx ocx)
+	{
+		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		switch(ocx.datatype)
+		{
+		case BC_DT_I_8:  ++dest.as_I_8;  break;
+		case BC_DT_I_16: ++dest.as_I_16; break;
+		case BC_DT_I_32: ++dest.as_I_32; break;
+		case BC_DT_I_64: ++dest.as_I_64; break;
+		case BC_DT_U_8:  ++dest.as_U_8;  break;
+		case BC_DT_U_16: ++dest.as_U_16; break;
+		case BC_DT_U_32: ++dest.as_U_32; break;
+		case BC_DT_U_64: ++dest.as_U_64; break;
+		case BC_DT_ADDR: ++dest.as_ADDR._raw; break;
+		}
+	}
+	void Interpreter::exec_insDecrement(BC_OpCodeEx ocx)
+	{
+		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		switch(ocx.datatype)
+		{
+		case BC_DT_I_8:  --dest.as_I_8;  break;
+		case BC_DT_I_16: --dest.as_I_16; break;
+		case BC_DT_I_32: --dest.as_I_32; break;
+		case BC_DT_I_64: --dest.as_I_64; break;
+		case BC_DT_U_8:  --dest.as_U_8;  break;
+		case BC_DT_U_16: --dest.as_U_16; break;
+		case BC_DT_U_32: --dest.as_U_32; break;
+		case BC_DT_U_64: --dest.as_U_64; break;
+		case BC_DT_ADDR: --dest.as_ADDR._raw; break;
+		}
 	}
 	void Interpreter::exec_insJumpEqual(BC_OpCodeEx ocx)
 	{
@@ -363,10 +392,9 @@ namespace MarC
 
 		for (uint8_t i = 0; i < fcd.nArgs; ++i)
 		{
-			bool deref = ocx.derefArg.get(1 + (uint64_t)i);
 			auto dt = fcd.argType.get(i);
 			virt_pushStack(
-				readMemCellAndMove(dt, deref),
+				readMemCellAndMove(dt, ocx.derefArg.get(i + 1)),
 				BC_DatatypeSize(dt)
 			);
 		}

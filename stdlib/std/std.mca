@@ -1,5 +1,4 @@
 #reqmod : "std-ext"
-#reqmod : "std-ins"
 #reqmod : "std-control"
 
 #scope : std

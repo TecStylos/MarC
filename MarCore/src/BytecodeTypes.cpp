@@ -19,13 +19,15 @@ namespace MarC
 			{ "sub",     BC_OC_SUBTRACT },
 			{ "mul",     BC_OC_MULTIPLY },
 			{ "div",     BC_OC_DIVIDE },
+			{ "inc",     BC_OC_INCREMENT },
+			{ "dec",     BC_OC_DECREMENT },
 
 			{ "drf",     BC_OC_DEREFERENCE },
 
 			{ "conv",    BC_OC_CONVERT },
 
 			{ "push",    BC_OC_PUSH },
-			{ "pushn",    BC_OC_PUSH_N_BYTES },
+			{ "pushn",   BC_OC_PUSH_N_BYTES },
 			{ "popn",    BC_OC_POP_N_BYTES },
 			{ "pop",     BC_OC_POP },
 			{ "pushc",   BC_OC_PUSH_COPY },
@@ -69,6 +71,8 @@ namespace MarC
 			{ BC_OC_SUBTRACT, "sub" },
 			{ BC_OC_MULTIPLY, "mul" },
 			{ BC_OC_DIVIDE, "div" },
+			{ BC_OC_INCREMENT, "inc" },
+			{ BC_OC_DECREMENT, "dec" },
 
 			{ BC_OC_DEREFERENCE, "drf" },
 

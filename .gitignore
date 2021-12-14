@@ -4,3 +4,5 @@ bin/
 
 *.mce
 *.mcd
+
+callgrind.out.*
