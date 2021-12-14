@@ -248,13 +248,13 @@ namespace MarCmd
 			m_vecWndDisasm[0] = DisasmWindow::create("Disassembly", m_sharedDebugData, 0);
 		m_wndDisasm = m_vecWndDisasm[0];
 
-		m_sharedDebugData->regDatatypes[MarC::BC_MEM_REG_CODE_POINTER] = MarC::BC_DT_ADDR;
-		m_sharedDebugData->regDatatypes[MarC::BC_MEM_REG_STACK_POINTER] = MarC::BC_DT_ADDR;
-		m_sharedDebugData->regDatatypes[MarC::BC_MEM_REG_FRAME_POINTER] = MarC::BC_DT_ADDR;
-		m_sharedDebugData->regDatatypes[MarC::BC_MEM_REG_LOOP_COUNTER] = MarC::BC_DT_UNKNOWN;
-		m_sharedDebugData->regDatatypes[MarC::BC_MEM_REG_ACCUMULATOR] = MarC::BC_DT_I_64;
-		m_sharedDebugData->regDatatypes[MarC::BC_MEM_REG_TEMPORARY_DATA] = MarC::BC_DT_UNKNOWN;
-		m_sharedDebugData->regDatatypes[MarC::BC_MEM_REG_EXIT_CODE] = MarC::BC_DT_I_64;
+		m_sharedDebugData->regDatatypes[MarC::BC_MEM_REG_CODE_POINTER / sizeof(uint64_t)] = MarC::BC_DT_ADDR;
+		m_sharedDebugData->regDatatypes[MarC::BC_MEM_REG_STACK_POINTER / sizeof(uint64_t)] = MarC::BC_DT_ADDR;
+		m_sharedDebugData->regDatatypes[MarC::BC_MEM_REG_FRAME_POINTER / sizeof(uint64_t)] = MarC::BC_DT_ADDR;
+		m_sharedDebugData->regDatatypes[MarC::BC_MEM_REG_LOOP_COUNTER / sizeof(uint64_t)] = MarC::BC_DT_UNKNOWN;
+		m_sharedDebugData->regDatatypes[MarC::BC_MEM_REG_ACCUMULATOR / sizeof(uint64_t)] = MarC::BC_DT_I_64;
+		m_sharedDebugData->regDatatypes[MarC::BC_MEM_REG_TEMPORARY_DATA / sizeof(uint64_t)] = MarC::BC_DT_UNKNOWN;
+		m_sharedDebugData->regDatatypes[MarC::BC_MEM_REG_EXIT_CODE / sizeof(uint64_t)] = MarC::BC_DT_I_64;
 
 		m_sharedDebugData->wndBase = createDebugWindow(1, 1);
 		(*m_sharedDebugData->wndBase)->getSubWnd<Console::SplitWindow>(DbgWndName_LeftHalf)->setTop(m_wndDisasm);

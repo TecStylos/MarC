@@ -6,7 +6,9 @@ namespace MarC
 {
 	inline void ConvertInPlace(BC_MemCell& mc, BC_Datatype dtOld, BC_Datatype dtNew)
 	{
-		#pragma warning(disable: 4244)
+		#ifdef MARC_PLATFORM_WINDOWS
+			#pragma warning(disable: 4244)
+		#endif
 		#define COMB_DT(left, right) (((uint32_t)left << 16) | (uint32_t)right)
 		switch (COMB_DT(dtOld, dtNew))
 		{
@@ -121,6 +123,8 @@ namespace MarC
 		case COMB_DT(BC_DT_F_64, BC_DT_F_64): mc.as_F_64 = mc.as_F_64; break;
 		}
 		#undef COMB_DT
-		#pragma warning(default: 4244)
+		#ifdef MARC_PLATFORM_WINDOWS
+			#pragma warning(default: 4244)
+		#endif
 	}
 }

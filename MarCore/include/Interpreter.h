@@ -337,7 +337,7 @@ namespace MarC
 
 	inline bool Interpreter::reachedEndOfCode() const
 	{
-		return getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR.addr >= m_pExeInfo->codeMemory.size();
+		return getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR.addr >= (int64_t)m_pExeInfo->codeMemory.size();
 	}
 }
 
