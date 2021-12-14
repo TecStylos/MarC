@@ -107,10 +107,10 @@ namespace MarC
 		struct ArgDerefs
 		{
 			uint8_t data = 0;
-			bool operator[](uint64_t index) const;
-			bool get(uint64_t index) const;
-			void set(uint64_t index);
-			void clear(uint64_t index);
+			bool operator[](uint64_t index) const { return get(index); }
+			bool get(uint64_t index) const { return (data >> index) & 1; }
+			void set(uint64_t index) { data |= (1 << index); }
+			void clear(uint64_t index) { data &= ~(1 << index); }
 		} derefArg;
 	};
 
@@ -128,16 +128,16 @@ namespace MarC
 	public:
 		BC_MemAddress() = default;
 		BC_MemAddress(BC_MemBase base, int64_t addr);
-		bool operator<(const BC_MemAddress& other) const;
-		bool operator>(const BC_MemAddress& other) const;
-		bool operator<=(const BC_MemAddress& other) const;
-		bool operator>=(const BC_MemAddress& other) const;
-		bool operator==(const BC_MemAddress& other) const;
-		bool operator!=(const BC_MemAddress& other) const;
-		BC_MemAddress& operator+=(const BC_MemAddress& other);
-		BC_MemAddress& operator-=(const BC_MemAddress& other);
-		BC_MemAddress& operator*=(const BC_MemAddress& other);
-		BC_MemAddress& operator/=(const BC_MemAddress& other);
+		bool operator<(const BC_MemAddress& other) const { return _raw < other._raw; }
+		bool operator>(const BC_MemAddress& other) const { return _raw > other._raw; }
+		bool operator<=(const BC_MemAddress& other) const { return _raw <= other._raw; }
+		bool operator>=(const BC_MemAddress& other) const { return _raw >= other._raw; }
+		bool operator==(const BC_MemAddress& other) const { return _raw == other._raw; }
+		bool operator!=(const BC_MemAddress& other) const { return _raw != other._raw; }
+		BC_MemAddress& operator+=(const BC_MemAddress& other) { _raw += other._raw; return *this; }
+		BC_MemAddress& operator-=(const BC_MemAddress& other) { _raw -= other._raw; return *this; }
+		BC_MemAddress& operator*=(const BC_MemAddress& other) { _raw *= other._raw; return *this; }
+		BC_MemAddress& operator/=(const BC_MemAddress& other) { _raw /= other._raw; return *this; }
 	};
 
 	struct BC_MemCell
@@ -169,8 +169,8 @@ namespace MarC
 		struct ArgTypes
 		{
 			uint32_t data = 0;
-			BC_Datatype get(uint8_t nthArg) const;
-			void set(uint8_t nthArg, BC_Datatype dt);
+			BC_Datatype get(uint8_t nthArg) const { return (BC_Datatype)((data >> (4 * nthArg)) & (uint32_t)15); }
+			void set(uint8_t nthArg, BC_Datatype dt) { data &= ~((uint32_t)15 << (4 * nthArg)); data |= ((uint32_t)dt << (4 * nthArg)); }
 		} argType;
 	};
 
@@ -189,5 +189,15 @@ namespace MarC
 
 	std::string BC_MemAddressToString(BC_MemAddress addr);
 
-	uint64_t BC_DatatypeSize(BC_Datatype dt);
+	inline uint64_t BC_DatatypeSize(BC_Datatype dt)
+	{
+		static constexpr uint64_t sizeTable[] = {
+			0, 0, // NONE, UNKNOWN
+			1, 2, 4, 8, // I8, I16, I32, I64
+			1, 2, 4, 8, // U8, U16, U32, U64
+			4, 8, // F32, F64
+			1, 8 // DATATYPE, ADDR
+		};
+		return sizeTable[dt];
+	}
 }

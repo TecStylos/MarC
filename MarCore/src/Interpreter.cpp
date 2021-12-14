@@ -99,6 +99,8 @@ namespace MarC
 	{
 		m_mem.dynamicStack.resize(dynStackSize);
 
+		m_mem.codeMemSize = m_pExeInfo->codeMemory.size();
+
 		m_mem.baseTable[BC_MEM_BASE_NONE] = nullptr;
 		m_mem.baseTable[BC_MEM_BASE_STATIC_STACK] = m_pExeInfo->staticStack.getBaseAddress();
 		m_mem.baseTable[BC_MEM_BASE_DYNAMIC_STACK] = m_mem.dynamicStack.getBaseAddress();

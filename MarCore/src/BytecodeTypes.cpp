@@ -4,93 +4,9 @@
 
 namespace MarC
 {
-	bool BC_OpCodeEx::ArgDerefs::operator[](uint64_t index) const
-	{
-		return get(index);
-	}
-
-	bool BC_OpCodeEx::ArgDerefs::get(uint64_t index) const
-	{
-		return (data >> index) & 1;
-	}
-
-	void BC_OpCodeEx::ArgDerefs::set(uint64_t index)
-	{
-		data |= (1 << index);
-	}
-
-	void BC_OpCodeEx::ArgDerefs::clear(uint64_t index)
-	{
-		data &= ~(1 << index);
-	}
-
 	BC_MemAddress::BC_MemAddress(BC_MemBase base, int64_t addr)
 		: addr(addr), base(base)
-	{
-	}
-
-	bool BC_MemAddress::operator<(const BC_MemAddress& other) const
-	{
-		return _raw < other._raw;
-	}
-	bool BC_MemAddress::operator>(const BC_MemAddress& other) const
-	{
-		return _raw > other._raw;
-	}
-	bool BC_MemAddress::operator<=(const BC_MemAddress& other) const
-	{
-		return _raw <= other._raw;
-	}
-	bool BC_MemAddress::operator>=(const BC_MemAddress& other) const
-	{
-		return _raw >= other._raw;
-	}
-	bool BC_MemAddress::operator==(const BC_MemAddress& other) const
-	{
-		return _raw == other._raw;
-	}
-	bool BC_MemAddress::operator!=(const BC_MemAddress& other) const
-	{
-		return _raw != other._raw;
-	}
-	BC_MemAddress& BC_MemAddress::operator+=(const BC_MemAddress& other)
-	{
-		_raw += other._raw;
-		return *this;
-	}
-	BC_MemAddress& BC_MemAddress::operator-=(const BC_MemAddress& other)
-	{
-		_raw -= other._raw;
-		return *this;
-	}
-	BC_MemAddress& BC_MemAddress::operator*=(const BC_MemAddress& other)
-	{
-		_raw *= other._raw;
-		return *this;
-	}
-	BC_MemAddress& BC_MemAddress::operator/=(const BC_MemAddress& other)
-	{
-		_raw /= other._raw;
-		return *this;
-	}
-  
-	BC_Datatype BC_FuncCallData::ArgTypes::get(uint8_t nthArg) const
-	{
-		uint8_t shift = 4 * nthArg;
-		uint32_t val = data >> shift;
-		uint32_t mask = (uint32_t)15;
-		val &= mask;
-		return (BC_Datatype)val;
-	}
-
-	void BC_FuncCallData::ArgTypes::set(uint8_t nthArg, BC_Datatype dt)
-	{
-		uint8_t shift = 4 * nthArg;
-		uint32_t val = (uint32_t)dt << shift;
-		uint32_t clrMask = ~((uint32_t)15 << shift);
-		data &= clrMask;
-		data |= val;
-	}
+	{}
 
 	BC_OpCode BC_OpCodeFromString(const std::string& ocStr)
 	{
@@ -335,33 +251,5 @@ namespace MarC
 		if (!str.empty() && str[0] == '[')
 			str.append("]");
 		return str;
-	}
-
-	uint64_t BC_DatatypeSize(BC_Datatype dt)
-	{
-		switch (dt)
-		{
-		case BC_DT_NONE:
-		case BC_DT_UNKNOWN:
-			break;
-		case BC_DT_I_8:
-		case BC_DT_U_8:
-		case BC_DT_DATATYPE:
-			return 1;
-		case BC_DT_I_16:
-		case BC_DT_U_16:
-			return 2;
-		case BC_DT_I_32:
-		case BC_DT_U_32:
-		case BC_DT_F_32:
-			return 4;
-		case BC_DT_I_64:
-		case BC_DT_U_64:
-		case BC_DT_F_64:
-		case BC_DT_ADDR:
-			return 8;
-		}
-
-		return 0;
 	}
 }

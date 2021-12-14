@@ -74,21 +74,6 @@ namespace MarC
 		m_resizable = state;
 	}
 
-	void* Memory::getBaseAddress()
-	{
-		return m_data.data();
-	}
-
-	const void* Memory::getBaseAddress() const
-	{
-		return m_data.data();
-	}
-
-	uint64_t Memory::size() const
-	{
-		return m_data.size();
-	}
-
 	MemoryRef Memory::create()
 	{
 		return std::make_shared<Memory>();

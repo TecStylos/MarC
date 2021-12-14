@@ -79,4 +79,19 @@ namespace MarC
 		mem.resize(memSize);
 		iStream.read((char*)mem.getBaseAddress(), mem.size());
 	}
+
+	inline void* Memory::getBaseAddress()
+	{
+		return m_data.data();
+	}
+
+	inline const void* Memory::getBaseAddress() const
+	{
+		return m_data.data();
+	}
+
+	inline uint64_t Memory::size() const
+	{
+		return m_data.size();
+	}
 }
