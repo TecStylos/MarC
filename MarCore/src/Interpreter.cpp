@@ -392,7 +392,7 @@ namespace MarC
 	void Interpreter::exec_insExit(BC_OpCodeEx ocx)
 	{
 		UNUSED(ocx);
-		throw InterpreterError(IntErrCode::AbortViaExit, "The program has been aborted with a call to exit!");
+		throw InterpreterError(IntErrCode::AbortViaExit, "EXIT");
 	}
 
 	ExternalFunctionPtr Interpreter::getExternalFunction(BC_MemAddress funcAddr)

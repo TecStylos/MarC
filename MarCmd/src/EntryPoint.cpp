@@ -4,6 +4,7 @@
 
 #include "CmdArgParser.h"
 
+#include "MarCmdFlags.h"
 #include "MarCmdHelp.h"
 #include "MarCmdBuilder.h"
 #include "MarCmdDisassembler.h"
@@ -144,6 +145,7 @@ int main(int argc, const char** argv, const char** env)
 			return -1;
 		}
 
+		settings.flags.setFlag(MarCmd::CmdFlags::NoExitInfo);
 		settings.mode = Mode::Interpret;
 	}
 

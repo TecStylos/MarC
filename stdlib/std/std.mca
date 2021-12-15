@@ -12,3 +12,8 @@
 		return
 	#end / func copyString
 #end / scope std
+
+#macro : println : string
+	prints : string
+	prints : "\n"
+#end

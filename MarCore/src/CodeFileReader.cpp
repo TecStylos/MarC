@@ -33,7 +33,7 @@ namespace MarC
 		if (!result.empty())
 			result.pop_back();
 
-		if (f.fail())
+		if (f.fail() && !f.eof())
 			throw MarCoreError("FileIOError", "An error occured while reading the input file!");
 
 		return result;
