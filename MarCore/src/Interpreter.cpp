@@ -264,8 +264,8 @@ namespace MarC
 		case BC_DT_U_16: --dest.as_U_16; break;
 		case BC_DT_U_32: --dest.as_U_32; break;
 		case BC_DT_U_64: --dest.as_U_64; break;
-		case BC_DT_F_32: dest.as_F_32 -= 1.0f;
-		case BC_DT_F_64: dest.as_F_64 -= 1.0;
+		case BC_DT_F_32: dest.as_F_32 -= 1.0f; break;
+		case BC_DT_F_64: dest.as_F_64 -= 1.0; break;
 		case BC_DT_ADDR: --dest.as_ADDR._raw; break;
 		case BC_DT_DATATYPE: break;
 		}
