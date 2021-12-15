@@ -30,54 +30,54 @@ namespace MarC
 			while (nInstructions--)
 			{
 				if (reachedEndOfCode())
-					throw InterpreterError(IntErrCode::AbortViaEndOfCode, "Reached end of executable code!");
+					throw InterpreterError(IntErrCode::AbortViaEndOfCode, "EOC");
 
 				const auto& ocx = readDataAndMove<BC_OpCodeEx>();
 
 				switch (ocx.opCode)
 				{
-				case BC_OC_NONE:  Interpreter::exec_insUndefined(ocx); break;
-				case BC_OC_UNKNOWN: Interpreter::exec_insUndefined(ocx); break;
+				case BC_OC_NONE:  exec_insUndefined(ocx); break;
+				case BC_OC_UNKNOWN: exec_insUndefined(ocx); break;
 
-				case BC_OC_MOVE: Interpreter::exec_insMove(ocx); break;
-				case BC_OC_ADD: Interpreter::exec_insAdd(ocx); break;
-				case BC_OC_SUBTRACT: Interpreter::exec_insSubtract(ocx); break;
-				case BC_OC_MULTIPLY: Interpreter::exec_insMultiply(ocx); break;
-				case BC_OC_DIVIDE: Interpreter::exec_insDivide(ocx); break;
-				case BC_OC_INCREMENT: Interpreter::exec_insIncrement(ocx); break;
-				case BC_OC_DECREMENT: Interpreter::exec_insDecrement(ocx); break;
+				case BC_OC_MOVE: exec_insMove(ocx); break;
+				case BC_OC_ADD: exec_insAdd(ocx); break;
+				case BC_OC_SUBTRACT: exec_insSubtract(ocx); break;
+				case BC_OC_MULTIPLY: exec_insMultiply(ocx); break;
+				case BC_OC_DIVIDE: exec_insDivide(ocx); break;
+				case BC_OC_INCREMENT: exec_insIncrement(ocx); break;
+				case BC_OC_DECREMENT: exec_insDecrement(ocx); break;
 
-				case BC_OC_DEREFERENCE: Interpreter::exec_insDereference(ocx); break;
+				case BC_OC_DEREFERENCE: exec_insDereference(ocx); break;
 
-				case BC_OC_CONVERT: Interpreter::exec_insConvert(ocx); break;
+				case BC_OC_CONVERT: exec_insConvert(ocx); break;
 
-				case BC_OC_PUSH: Interpreter::exec_insPush(ocx); break;
-				case BC_OC_POP: Interpreter::exec_insPop(ocx); break;
-				case BC_OC_PUSH_N_BYTES: Interpreter::exec_insPushNBytes(ocx); break;
-				case BC_OC_POP_N_BYTES: Interpreter::exec_insPopNBytes(ocx); break;
-				case BC_OC_PUSH_COPY: Interpreter::exec_insPushCopy(ocx); break;
-				case BC_OC_POP_COPY: Interpreter::exec_insPopCopy(ocx); break;
+				case BC_OC_PUSH: exec_insPush(ocx); break;
+				case BC_OC_POP: exec_insPop(ocx); break;
+				case BC_OC_PUSH_N_BYTES: exec_insPushNBytes(ocx); break;
+				case BC_OC_POP_N_BYTES: exec_insPopNBytes(ocx); break;
+				case BC_OC_PUSH_COPY: exec_insPushCopy(ocx); break;
+				case BC_OC_POP_COPY: exec_insPopCopy(ocx); break;
 
-				case BC_OC_PUSH_FRAME: Interpreter::exec_insPushFrame(ocx); break;
-				case BC_OC_POP_FRAME: Interpreter::exec_insPopFrame(ocx); break;
+				case BC_OC_PUSH_FRAME: exec_insPushFrame(ocx); break;
+				case BC_OC_POP_FRAME: exec_insPopFrame(ocx); break;
 
-				case BC_OC_JUMP: Interpreter::exec_insJump(ocx); break;
-				case BC_OC_JUMP_EQUAL: Interpreter::exec_insJumpEqual(ocx); break;
-				case BC_OC_JUMP_NOT_EQUAL: Interpreter::exec_insJumpNotEqual(ocx); break;
-				case BC_OC_JUMP_LESS_THAN: Interpreter::exec_insJumpLessThan(ocx); break;
-				case BC_OC_JUMP_GREATER_THAN: Interpreter::exec_insJumpGreaterThan(ocx); break;
-				case BC_OC_JUMP_LESS_EQUAL: Interpreter::exec_insJumpLessEqual(ocx); break;
-				case BC_OC_JUMP_GREATER_EQUAL: Interpreter::exec_insJumpGreaterEqual(ocx); break;
+				case BC_OC_JUMP: exec_insJump(ocx); break;
+				case BC_OC_JUMP_EQUAL: exec_insJumpEqual(ocx); break;
+				case BC_OC_JUMP_NOT_EQUAL: exec_insJumpNotEqual(ocx); break;
+				case BC_OC_JUMP_LESS_THAN: exec_insJumpLessThan(ocx); break;
+				case BC_OC_JUMP_GREATER_THAN: exec_insJumpGreaterThan(ocx); break;
+				case BC_OC_JUMP_LESS_EQUAL: exec_insJumpLessEqual(ocx); break;
+				case BC_OC_JUMP_GREATER_EQUAL: exec_insJumpGreaterEqual(ocx); break;
 
-				case BC_OC_ALLOCATE: Interpreter::exec_insAllocate(ocx); break;
-				case BC_OC_FREE: Interpreter::exec_insFree(ocx); break;
+				case BC_OC_ALLOCATE: exec_insAllocate(ocx); break;
+				case BC_OC_FREE: exec_insFree(ocx); break;
 
-				case BC_OC_CALL_EXTERN: Interpreter::exec_insCallExtern(ocx); break;
+				case BC_OC_CALL_EXTERN: exec_insCallExtern(ocx); break;
 
-				case BC_OC_CALL: Interpreter::exec_insCall(ocx); break;
-				case BC_OC_RETURN: Interpreter::exec_insReturn(ocx); break;
+				case BC_OC_CALL: exec_insCall(ocx); break;
+				case BC_OC_RETURN: exec_insReturn(ocx); break;
 
-				case BC_OC_EXIT: Interpreter::exec_insExit(ocx); break;
+				case BC_OC_EXIT: exec_insExit(ocx); break;
 				default:
 					exec_insUndefined(ocx);
 				}
@@ -243,8 +243,8 @@ namespace MarC
 		case BC_DT_U_16: ++dest.as_U_16; break;
 		case BC_DT_U_32: ++dest.as_U_32; break;
 		case BC_DT_U_64: ++dest.as_U_64; break;
-		case BC_DT_F_32: break;
-		case BC_DT_F_64: break;
+		case BC_DT_F_32: dest.as_F_32 += 1.0f; break;
+		case BC_DT_F_64: dest.as_F_64 += 1.0; break;
 		case BC_DT_ADDR: ++dest.as_ADDR._raw; break;
 		case BC_DT_DATATYPE: break;
 		}
@@ -264,8 +264,8 @@ namespace MarC
 		case BC_DT_U_16: --dest.as_U_16; break;
 		case BC_DT_U_32: --dest.as_U_32; break;
 		case BC_DT_U_64: --dest.as_U_64; break;
-		case BC_DT_F_32: break;
-		case BC_DT_F_64: break;
+		case BC_DT_F_32: dest.as_F_32 -= 1.0f;
+		case BC_DT_F_64: dest.as_F_64 -= 1.0;
 		case BC_DT_ADDR: --dest.as_ADDR._raw; break;
 		case BC_DT_DATATYPE: break;
 		}

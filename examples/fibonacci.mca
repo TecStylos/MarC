@@ -1,17 +1,17 @@
 #reqmod : "std"
 
 #func.i64 : !FIBONACCI : RET : i64.N
-    if_gt.i64 : @N : 1
-        dec.i64 : N
-        call.i64 : >>FIBONACCI : RET : i64.@N
-        dec.i64 : N
-        call.i64 : >>FIBONACCI : $ac : i64.@N
-        add.i64 : RET : @$ac
-        return
-    endif
+	if_gt.i64 : @N : 1
+		dec.i64 : N
+		call.i64 : >>FIBONACCI : RET : i64.@N
+		dec.i64 : N
+		call.i64 : >>FIBONACCI : $ac : i64.@N
+		add.i64 : RET : @$ac
+		return
+	endif
 
-    mov.i64 : RET : @N
-    return
+	mov.i64 : RET : @N
+	return
 #end
 
 #alias : N : 34 / 34 || 28

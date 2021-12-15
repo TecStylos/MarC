@@ -6,3 +6,5 @@ bin/
 *.mcd
 
 callgrind.out.*
+
+.cache/

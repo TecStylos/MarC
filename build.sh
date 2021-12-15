@@ -1,6 +1,10 @@
 #!/bin/bash
 
-read -p "Configuration: " CONFIG
+if [ $# -eq 0 ]; then
+    read -p "Configuration: " CONFIG
+else
+    CONFIG="$1"
+fi
 
 if [ "${CONFIG}" = "" ]; then
     echo "No Configuration selected. Using 'Release'."
@@ -25,10 +29,10 @@ cd ${BIN_DIR}
 
 if [ "${CONFIG}" = "" ]; then
     echo "Running CMake without a build type..."
-    cmake ../..
+    cmake ../.. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 else
     echo "Running CMake with build type '${CONFIG}'"
-    cmake ../.. -DCMAKE_BUILD_TYPE=${CONFIG}
+    cmake ../.. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=${CONFIG}
 fi
 
 echo "Running make..."
