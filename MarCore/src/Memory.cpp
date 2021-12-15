@@ -6,7 +6,9 @@ namespace MarC
 {
 	Memory::Memory()
 		: m_resizable(true)
-	{}
+	{
+		m_data.reserve(1);
+	}
 
 	Memory::Memory(uint64_t initSize, bool resizable)
 		: Memory()

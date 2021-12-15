@@ -22,7 +22,7 @@ namespace MarC
 
 		auto& layout = InstructionLayoutFromOpCode(daii.ocx.opCode);
 
-		if (layout.needsCustomImplementation)
+		if (layout.flags.hasFlag(InsFlag::CustomImplementation))
 		{
 			disassembleSpecializedInstruction(daii, ip);
 		}

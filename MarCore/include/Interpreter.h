@@ -50,6 +50,7 @@ namespace MarC
 		uint64_t nInsExecuted() const;
 	private:
 		void initMemory(uint64_t dynStackSize);
+		void recalcExeMem();
 		void loadMissingExtensions();
 		template <typename T> T& readDataAndMove();
 		template <typename T> T& readDataAndMove(uint64_t shift);
@@ -344,7 +345,7 @@ namespace MarC
 
 		auto src = hostAddress(regSP.as_ADDR);
 
-		memcpy(&mc, src, nBytes);
+		memcpy((void*)&mc, src, nBytes);
 	}
 
 	inline void Interpreter::virt_pushFrame()

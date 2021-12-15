@@ -3,6 +3,8 @@
 #include <set>
 #include <string>
 
+#include <MarCore.h>
+
 #include "MarCmdMode.h"
 #include "MarCmdFlags.h"
 
@@ -17,7 +19,7 @@ namespace MarCmd
 
 	struct Settings
 	{
-		Flags<MarCmd::CmdFlags> flags;
+		MarC::Flags<MarCmd::CmdFlags> flags;
 		Mode mode = Mode::None;
 		std::string inFile = "";
 		std::string outFile = "";

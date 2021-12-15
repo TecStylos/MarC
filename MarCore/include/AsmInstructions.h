@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AssemblerTypes.h"
+#include "Flags.h"
 
 namespace MarC
 {
@@ -31,20 +32,24 @@ namespace MarC
 		Required,
 	};
 
+	enum class InsFlag
+	{
+		CustomImplementation,
+	};
+	typedef Flags<InsFlag> InsFlags;
+
 	struct InstructionLayout
 	{
 		BC_OpCode opCode;
 		InsDt insDt;
 		std::vector<InsArgument> args;
-		bool needsCustomImplementation;
+		Flags<InsFlag> flags;
 	public:
-		InstructionLayout(BC_OpCode opCode, InsDt insDt, std::initializer_list<InsArgument> args, bool needsCustomImplementation = false)
-			: opCode(opCode), insDt(insDt), args(args), needsCustomImplementation(needsCustomImplementation)
+		InstructionLayout(BC_OpCode opCode, InsDt insDt, std::initializer_list<InsArgument> args, Flags<InsFlag> flags = {})
+			: opCode(opCode), insDt(insDt), args(args), flags(flags)
 		{
 			for (uint64_t i = 0; i < this->args.size(); ++i)
-			{
 				this->args[i].index = i;
-			}
 		}
 	};
 
@@ -82,9 +87,9 @@ namespace MarC
 		{ BC_OC_ALLOCATE, InsDt::None, { { InsArgType::Address }, { InsArgType::TypedValue, BC_DT_U_64 } } },
 		{ BC_OC_FREE, InsDt::None, { { InsArgType::Address } } },
 
-		{ BC_OC_CALL_EXTERN, InsDt::Optional, {}, true },
+		{ BC_OC_CALL_EXTERN, InsDt::Optional, {}, InsFlags() << InsFlag::CustomImplementation },
 
-		{ BC_OC_CALL, InsDt::Optional, {}, true },
+		{ BC_OC_CALL, InsDt::Optional, {}, InsFlags() << InsFlag::CustomImplementation },
 		{ BC_OC_RETURN, InsDt::None, {} },
 
 		{ BC_OC_EXIT, InsDt::None, {} },

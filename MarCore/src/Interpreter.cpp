@@ -22,6 +22,8 @@ namespace MarC
 	bool Interpreter::interpret(uint64_t nInstructions)
 	{
 		resetError();
+
+		recalcExeMem();
 		
 		try
 		{
@@ -164,6 +166,13 @@ namespace MarC
 		getRegister(BC_MEM_REG_ACCUMULATOR).as_U_64 = 0;
 		getRegister(BC_MEM_REG_TEMPORARY_DATA).as_U_64 = 0;
 		getRegister(BC_MEM_REG_EXIT_CODE).as_U_64 = 0;
+	}
+
+	void Interpreter::recalcExeMem()
+	{
+		m_mem.codeMemSize = m_pExeInfo->codeMemory.size();
+		m_mem.baseTable[BC_MEM_BASE_CODE_MEMORY] = m_pExeInfo->codeMemory.getBaseAddress();
+		m_mem.baseTable[BC_MEM_BASE_STATIC_STACK] = m_pExeInfo->staticStack.getBaseAddress();
 	}
 
 	void Interpreter::loadMissingExtensions()

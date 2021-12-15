@@ -72,6 +72,7 @@ namespace MarC
 		BC_MemCell value;
 	public:
 		Symbol() = default;
+		Symbol(const Symbol& other) = default;
 		Symbol(const std::string& name) : Symbol() { this->name = name; }
 		Symbol(const std::string& name, SymbolUsage usage, BC_MemCell value) : name(name), usage(usage), value(value) {}
 	public:

@@ -125,7 +125,7 @@ namespace MarC
 
 		DelayedPush<BC_OpCodeEx> ocxDelayed(*this, ocx);
 
-		if (layout.needsCustomImplementation)
+		if (layout.flags.hasFlag(InsFlag::CustomImplementation))
 		{
 			assembleSpecializedInstruction(ocx);
 			return;

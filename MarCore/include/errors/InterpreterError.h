@@ -44,10 +44,10 @@ namespace MarC
 				message = "The opCode '" + context + "' has not been implemented yet!";
 				break;
 			case Code::AbortViaExit:
-				message = "The execution has been aborted through the 'exit' instruction!";
+				message = "An 'exit' instruction was executed!";
 				break;
 			case Code::AbortViaEndOfCode:
-				message = "The execution has been aborted because the interpreter reached the end of code!";
+				message = "The interpreter reached the end of code!";
 				break;
 			case Code::ExtensionLoadFailure:
 				message = context;
