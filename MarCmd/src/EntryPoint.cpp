@@ -149,6 +149,9 @@ int main(int argc, const char** argv, const char** env)
 		settings.mode = Mode::Interpret;
 	}
 
+	if (settings.flags.hasFlag(MarCmd::CmdFlags::Verbose))
+		settings.flags.clrFlag(MarCmd::CmdFlags::NoExitInfo);
+
 	int exitCode = 0;
 
 	try
