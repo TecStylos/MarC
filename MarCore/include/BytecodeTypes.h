@@ -129,6 +129,7 @@ namespace MarC
 		};
 	public:
 		BC_MemAddress() = default;
+		BC_MemAddress(uint64_t raw) : _raw(raw) {}
 		BC_MemAddress(BC_MemBase base, int64_t addr) : addr(addr), base(base) {}
 		bool operator<(const BC_MemAddress& other) const { return _raw < other._raw; }
 		bool operator>(const BC_MemAddress& other) const { return _raw > other._raw; }
@@ -140,6 +141,10 @@ namespace MarC
 		BC_MemAddress& operator-=(const BC_MemAddress& other) { _raw -= other._raw; return *this; }
 		BC_MemAddress& operator*=(const BC_MemAddress& other) { _raw *= other._raw; return *this; }
 		BC_MemAddress& operator/=(const BC_MemAddress& other) { _raw /= other._raw; return *this; }
+		BC_MemAddress operator+(const BC_MemAddress& other) { return _raw + other._raw; }
+		BC_MemAddress operator-(const BC_MemAddress& other) { return _raw - other._raw; }
+		BC_MemAddress operator*(const BC_MemAddress& other) { return _raw * other._raw; }
+		BC_MemAddress operator/(const BC_MemAddress& other) { return _raw / other._raw; }
 	};
 
 	struct BC_MemCell

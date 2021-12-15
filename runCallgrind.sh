@@ -1,3 +1,3 @@
 #!/bin/bash
 
-valgrind --tool=callgrind ./bin/RelWithDebInfo/MarCmd/MarCmd --verbose --closeonexit examples/fibonacci.mca
+valgrind --tool=callgrind --dump-instr=yes --collect-jumps=yes ./bin/RelWithDebInfo/MarCmd/MarCmd --verbose --closeonexit examples/fibonacci.mca

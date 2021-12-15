@@ -13,7 +13,6 @@
 
 namespace MarC
 {
-
 	typedef std::shared_ptr<class Interpreter> InterpreterRef;
 	class Interpreter
 	{
@@ -114,26 +113,24 @@ namespace MarC
 		uint64_t m_nInsExecuted = 0;
 	};
 
-	template <typename T> T& Interpreter::hostObject(BC_MemAddress clientAddr)
+	template <typename T> inline T& Interpreter::hostObject(BC_MemAddress clientAddr)
 	{
 		return *(T*)hostAddress(clientAddr);
 	}
 
-	template <typename T> T& Interpreter::hostObject(BC_MemAddress clientAddr, bool deref)
+	template <typename T> inline T& Interpreter::hostObject(BC_MemAddress clientAddr, bool deref)
 	{
 		return *(T*)hostAddress(clientAddr, deref);
 	}
 
-	template <typename T> T& Interpreter::readDataAndMove()
+	template <typename T> inline T& Interpreter::readDataAndMove()
 	{
 		return readDataAndMove<T>(sizeof(T));
 	}
 
-	template <typename T> T& Interpreter::readDataAndMove(uint64_t shift)
+	template <typename T> inline T& Interpreter::readDataAndMove(uint64_t shift)
 	{
-		auto& val = *(T*)hostAddress(getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR, false);
-		getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR.addr += shift;
-		return val;
+		return*(T*)hostAddress((getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR += shift) - shift, false);
 	}
 
 	inline void* Interpreter::getExternalAddress(BC_MemAddress exAddr)
