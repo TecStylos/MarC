@@ -1,0 +1,48 @@
+#func : FUNC_NO_RET_NO_PARAM
+    add.i64 : $ec : 1
+    return
+#end
+
+#func.i64 : FUNC_RET_NO_PARAM : RET
+    add.i64 : $ec : 2
+    mov.i64 : RET : @$ec
+    return
+#end
+
+#func.i64 : FUNC_RET_PARAM : RET : i64.PARAM
+    add.i64 : $ec : @PARAM
+    mov.i64 : RET : @PARAM
+    return
+#end
+
+#func : FUNC_NO_RET_PARAM : i64.PARAM
+    add.i64 : $ec : @PARAM
+    return
+#end
+
+#func : FUNC_LOCAL
+    #local : LOC : ^i64
+    mov.i64 : LOC : 3
+    add.i64 : $ec : @LOC
+    return
+#end
+
+#func : !FUNC_NO_LOCAL
+    add.i64 : $ec : 4
+    return
+#end
+
+
+call : FUNC_NO_RET_NO_PARAM
+
+call.i64 : FUNC_RET_NO_PARAM : $ac
+add.i64 : $ec : @$ac
+
+call.i64 : FUNC_RET_PARAM : $ac : i64.5
+add.i64 : $ec : @$ac
+
+call : FUNC_NO_RET_PARAM : i64.6
+
+call : FUNC_LOCAL
+
+call : FUNC_NO_LOCAL

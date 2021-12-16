@@ -1,0 +1,21 @@
+:i argc 0
+:b stdin 0
+
+:i returncode 0
+:b stdout 275
+After skip
+[C; A: 370] -> Jump
+[C; A: 480] -> No jump
+[C; A: 590] -> Jump
+[C; A: 700] -> No jump
+[C; A: 810] -> Jump
+[C; A: 920] -> No jump
+[C; A: 1030] -> Jump
+[C; A: 1140] -> No jump
+[C; A: 1250] -> Jump
+[C; A: 1360] -> No jump
+[C; A: 1470] -> Jump
+[C; A: 1580] -> No jump
+
+:b stderr 0
+

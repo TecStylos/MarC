@@ -1,0 +1,14 @@
+#reqmod : "std"
+#manperm : >>stdext>>prints
+#manperm : >>stdext>>printt
+
+alloc : $ac : 128
+alloc : $ec : 128
+
+printt.addr : @$ac
+prints : "\n"
+printt.addr : @$ec
+prints : "\n"
+
+free : @$ac
+free : @$ec

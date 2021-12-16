@@ -1,0 +1,91 @@
+#reqmod : "std"
+#manperm : >>stdext>>prints
+#manperm : >>stdext>>printt
+
+jmp : LABEL_SKIP
+println : "Not skipped"
+
+#label : SUBROUTINE
+println : " -> Jump"
+jmp : @$ac
+
+#label : LABEL_SKIP
+println : "After skip"
+
+
+mov.addr : $ac : LABEL_JEQ_TRUE
+printt.addr : @$ac
+jeq.i32 : SUBROUTINE : 1 : 1
+println : " -> No jump"
+#label : LABEL_JEQ_TRUE
+
+mov.addr : $ac : LABEL_JEQ_FALSE
+printt.addr : @$ac
+jeq.i32 : SUBROUTINE : 0 : 1
+println : " -> No jump"
+#label : LABEL_JEQ_FALSE
+
+
+mov.addr : $ac : LABEL_JNE_TRUE
+printt.addr : @$ac
+jne.i32 : SUBROUTINE : 0 : 1
+println : " -> No jump"
+#label : LABEL_JNE_TRUE
+
+mov.addr : $ac : LABEL_JNE_FALSE
+printt.addr : @$ac
+jne.i32 : SUBROUTINE : 1 : 1
+println : " -> No jump"
+#label : LABEL_JNE_FALSE
+
+
+mov.addr : $ac : LABEL_JLT_TRUE
+printt.addr : @$ac
+jlt.i32 : SUBROUTINE : 0 : 1
+println : " -> No jump"
+#label : LABEL_JLT_TRUE
+
+mov.addr : $ac : LABEL_JLT_FALSE
+printt.addr : @$ac
+jlt.i32 : SUBROUTINE : 1 : 1
+println : " -> No jump"
+#label : LABEL_JLT_FALSE
+
+
+mov.addr : $ac : LABEL_JGT_TRUE
+printt.addr : @$ac
+jgt.i32 : SUBROUTINE : 1 : 0
+println : " -> No jump"
+#label : LABEL_JGT_TRUE
+
+mov.addr : $ac : LABEL_JGT_FALSE
+printt.addr : @$ac
+jgt.i32 : SUBROUTINE : 1 : 1
+println : " -> No jump"
+#label : LABEL_JGT_FALSE
+
+
+mov.addr : $ac : LABEL_JLE_TRUE
+printt.addr : @$ac
+jle.i32 : SUBROUTINE : 1 : 1
+println : " -> No jump"
+#label : LABEL_JLE_TRUE
+
+mov.addr : $ac : LABEL_JLE_FALSE
+printt.addr : @$ac
+jle.i32 : SUBROUTINE : 1 : 0
+println : " -> No jump"
+#label : LABEL_JLE_FALSE
+
+
+mov.addr : $ac : LABEL_JGE_TRUE
+printt.addr : @$ac
+jge.i32 : SUBROUTINE : 1 : 1
+println : " -> No jump"
+#label : LABEL_JGE_TRUE
+
+mov.addr : $ac : LABEL_JGE_FALSE
+printt.addr : @$ac
+jge.i32 : SUBROUTINE : 0 : 1
+println : " -> No jump"
+#label : LABEL_JGE_FALSE

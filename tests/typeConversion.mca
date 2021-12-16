@@ -1,0 +1,19 @@
+#reqmod : "std"
+#manperm : >>stdext>>prints
+#manperm : >>stdext>>printt
+
+mov.f32 : $ac : 65.7
+printt.f32 : @$ac
+prints : "\n"
+
+conv.f32 : $ac : f64
+printt.f64 : @$ac
+prints : "\n"
+
+conv.f64 : $ac : i32
+printt.i32 : @$ac
+prints : "\n"
+
+conv.i32 : $ac : i8
+printt.i8 : @$ac
+prints : "\n"

@@ -1,0 +1,36 @@
+#reqmod : "std"
+#manperm : >>stdext>>prints
+#manperm : >>stdext>>printt
+
+push.i64
+printt.addr : @$sp
+prints : "\n"
+pop.i64
+printt.addr : @$sp
+prints : "\n"
+
+pushn : 128
+printt.addr : @$sp
+prints : "\n"
+popn : 128
+printt.addr : @$sp
+prints : "\n"
+
+pushc.i64 : 123
+printt.addr : @$sp
+prints : "\n"
+popc.i64 : $ac
+printt.addr : @$sp
+prints : "\n"
+
+printt.i64 : @$ac
+prints : "\n"
+
+pushf
+printt.addr : @$sp
+prints : "\n"
+printt.u64 : @~-8
+prints : "\n"
+popf
+printt.addr : @$sp
+prints : "\n"

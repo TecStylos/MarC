@@ -1,0 +1,31 @@
+#reqmod : "std"
+#manperm : >>stdext>>prints
+#manperm : >>stdext>>printt
+
+mov.i64 : $ac : 123
+printt.i64 : @$ac
+prints : "\n"
+
+add.i64 : $ac : 234
+printt.i64 : @$ac
+prints : "\n"
+
+sub.i64 : $ac : 67
+printt.i64 : @$ac
+prints : "\n"
+
+mul.i64 : $ac : 2
+printt.i64 : @$ac
+prints : "\n"
+
+div.i64 : $ac : 4
+printt.i64 : @$ac
+prints : "\n"
+
+inc.i64 : $ac
+printt.i64 : @$ac
+prints : "\n"
+
+dec.i64 : $ac
+printt.i64 : @$ac
+prints : "\n"

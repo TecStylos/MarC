@@ -1,0 +1,4 @@
+#reqmod : "std"
+#manperm : >>stdext>>prints
+
+calx : >>stdext>>prints : addr."Hello world!\n"

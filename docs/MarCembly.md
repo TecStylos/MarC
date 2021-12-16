@@ -13,6 +13,7 @@ u32 | uint32_t
 u64 | uint64_t
 f32 | float (32 bit)
 f64 | double (64 bit)
+addr | void* (Per byte arithmetics)
 ***
 
 ## Registers [addr]:
@@ -51,8 +52,8 @@ drf | Required | [dest] : [addr] | Dereference `addr` and store it at `dest`.
 conv | Required | [addr] : [dt] | Convert value at `addr` from `ocdt` datatype to `dt`.
 push | Required | - | Push uninitialized memory of size `^ocdt` onto the dynamic stack.
 pop | Required | - | Pop value of size `^ocdt` from the dynamic stack.
-pushn | None | [size] | Push `size` bytes onto the stack.
-popn | None | [size] | Pop `size` bytes from the stack.
+pushn | None | [size] | Push `size` bytes onto the dynamic stack.
+popn | None | [size] | Pop `size` bytes from the dynamic stack.
 pushc | Required | [val] | Push `val` onto the dynamic stack.
 popc | Required | [addr] | Pop value from the dynamic stack and store it at `addr`.
 pushf | None | - | Push a new frame onto the dynamic stack.
@@ -65,7 +66,7 @@ jgt | Required | [addr] : [val1] : [val2] | Jump to `addr` if `val1` _>_ `val2`.
 jle | Required | [addr] : [val1] : [val2] | Jump to `addr` if `val1` _<=_ `val2`.
 jge | Required | [addr] : [val1] : [val2] | Jump to `addr` if `val1` _>=_ `val2`.
 alloc | None | [addr] : [size] | Allocate `size` bytes and store the address in `addr`.
-free | None | [addr] | Free memory allocated with alloc.
+free | None | [extAddr] | Free memory allocated with alloc.
 calx | Optional | [funxAddr] *[ : retAddr] *[ : typedArgs] | Call an external function.
 call | Optional | [funcAddr] *[ : retAddr] *[ : typedArgs] | Call an internal function.
 return | None | - | Return from the current function call.

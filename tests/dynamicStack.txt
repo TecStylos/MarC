@@ -1,0 +1,18 @@
+:i argc 0
+:b stdin 0
+
+:i returncode 0
+:b stdout 105
+[D; A: 8]
+[D; A: 0]
+[D; A: 128]
+[D; A: 0]
+[D; A: 8]
+[D; A: 0]
+123
+[D; A: 8]
+216172782113783808
+[D; A: 0]
+
+:b stderr 0
+

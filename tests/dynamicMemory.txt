@@ -1,0 +1,10 @@
+:i argc 0
+:b stdin 0
+
+:i returncode 128
+:b stdout 22
+[E; A: 0]
+[E; A: 128]
+
+:b stderr 0
+

@@ -1,0 +1,29 @@
+#reqmod : "std"
+#manperm : >>stdext>>prints
+#manperm : >>stdext>>printt
+
+printt.i64 : ^i8
+prints : "\n"
+printt.i64 : ^i16
+prints : "\n"
+printt.i64 : ^i32
+prints : "\n"
+printt.i64 : ^i64
+prints : "\n"
+
+printt.i64 : ^u8
+prints : "\n"
+printt.i64 : ^u16
+prints : "\n"
+printt.i64 : ^u32
+prints : "\n"
+printt.i64 : ^u64
+prints : "\n"
+
+printt.i64 : ^f32
+prints : "\n"
+printt.i64 : ^f64
+prints : "\n"
+
+printt.i64 : ^addr
+prints : "\n"

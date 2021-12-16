@@ -113,7 +113,7 @@ def run_test_for_file(file_path: str, stats: RunStats = RunStats()):
     error = False
 
     if tc is not None:
-        sim = cmd_run_echoed(["./mcd.sh", "Release", file_path, *tc.argv], input=tc.stdin, capture_output=True)
+        sim = cmd_run_echoed(["./mcd.sh", "Release", "--grantall", "--closeonexit", file_path, *tc.argv], input=tc.stdin, capture_output=True)
         if sim.returncode != tc.returncode or sim.stdout != tc.stdout or sim.stderr != tc.stderr:
             print("[ERROR] Unexpected output")
             print("  Expected:")
@@ -141,7 +141,7 @@ def run_test_for_folder(folder: str):
         if entry.is_file() and entry.path.endswith(".mca"):
             run_test_for_file(entry.path, stats)
     print()
-    print("#Tests failed: %d, Ignored: %d" % (stats.int_failed, stats.ignored))
+    print("Failed: %d, Ignored: %d" % (stats.int_failed, stats.ignored))
     if stats.int_failed != 0:
         print("Failed files:")
         print()
@@ -167,7 +167,7 @@ def update_output_for_file(file_path: str):
     tc_path = file_path[:-len(".mca")] + ".txt"
     tc = load_test_case(tc_path) or DEFAULT_TEST_CASE
 
-    output = cmd_run_echoed(["./mcd.sh", "Release", file_path, *tc.argv], input=tc.stdin, capture_output=True)
+    output = cmd_run_echoed(["./mcd.sh", "Release", "--grantall", "--closeonexit", file_path, *tc.argv], input=tc.stdin, capture_output=True)
     print("[INFO] Saving output to %s" % tc_path)
     save_test_case(tc_path,
                    tc.argv, tc.stdin,
