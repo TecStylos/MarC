@@ -17,3 +17,27 @@
 	prints : string
 	prints : "\n"
 #end
+
+#macro.dt : __arrRead : array : index : dest
+	mov.addr : $td : index
+	mul.addr : $td : ^dt
+	add.addr : $td : array
+	drf.dt : dest : @$td
+#end
+#macro.dt : arrRead : array : index : dest
+	pushc.dt : @$td
+	__arrRead.dt : array : index : dest
+	popc.dt : $td
+#end
+
+#macro.dt : __arrWrite : array : index : src
+	mov.addr : $td : index
+	mul.addr : $td : ^dt
+	add.addr : $td : array
+	mov.dt : @$td : src
+#end
+#macro.dt : arrWrite : array : index : src
+	pushc.dt : @$td
+	__arrWrite.dt : array : index : src
+	popc.dt : $td
+#end

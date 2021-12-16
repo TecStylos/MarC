@@ -1,0 +1,18 @@
+#reqmod : "std"
+#manperm : >>stdext>>prints
+#manperm : >>stdext>>printt
+
+#static : ARRAY : 64 / ^i64 * 8
+
+mov.i64 : $ac : 0
+fwhile_lt.i64 : @$ac : 8
+    arrWrite.i64 : ARRAY : @$ac : @$ac
+    inc.i64 : $ac
+endfwhile
+
+fwhile_gt.i64 : @$ac : 0
+    dec.i64 : $ac
+    arrRead.i64 : ARRAY : @$ac : $ec
+    printt.i64 : @$ec
+    prints : "\n"
+endfwhile
