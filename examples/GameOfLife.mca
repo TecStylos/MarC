@@ -57,7 +57,7 @@
     return
 #end
 
-#func : CLEAR
+#func : !CLEAR
     mov.u64 : $ac : >>HEIGHT
     inc.u64 : $ac
     prints : "\r"
@@ -68,13 +68,12 @@
     return
 #end
 
-#func : RENDER : addr.BASE
-    prints : @BASE
-    prints : "\n"
+#func : !RENDER : addr.BASE
+    println : @BASE
     return
 #end
 
-#func.u64 : XY_TO_INDEX : RET : u64.X : u64.Y
+#func.u64 : !XY_TO_INDEX : RET : u64.X : u64.Y
     mov.u64 : RET : >>WIDTH
     inc.u64 : RET
     mul.u64 : RET : @Y
@@ -82,25 +81,25 @@
     return
 #end
 
-#func.addr : XY_TO_ADDR : RET : addr.BASE : u64.X : u64.Y
+#func.addr : !XY_TO_ADDR : RET : addr.BASE : u64.X : u64.Y
     call.u64 : >>XY_TO_INDEX : RET : u64.@X : u64.@Y
     add.addr : RET : @BASE
     return
 #end
 
-#func : SET_ALIVE : addr.BASE : u64.X : u64.Y
+#func : !SET_ALIVE : addr.BASE : u64.X : u64.Y
     call.addr : >>XY_TO_ADDR : $ac : addr.@BASE : u64.@X : u64.@Y
     mov.i8 : @$ac : '#'
     return
 #end
 
-#func : SET_DEAD : addr.BASE : u64.X : u64.Y
+#func : !SET_DEAD : addr.BASE : u64.X : u64.Y
     call.addr : >>XY_TO_ADDR : $ac : addr.@BASE : u64.@X : u64.@Y
     mov.i8 : @$ac : ' '
     return
 #end
 
-#func.i8 : IS_ALIVE : RET : addr.BASE : u64.X : u64.Y
+#func.i8 : !IS_ALIVE : RET : addr.BASE : u64.X : u64.Y
     call.addr : >>XY_TO_ADDR : $ac : addr.@BASE : u64.@X : u64.@Y
     drf.i8 : $ac : @$ac
 
@@ -112,7 +111,7 @@
     return
 #end
 
-#func.i8 : NEIGHBOR_ALIVE_COUNT : RET : addr.BASE : u64.X : u64.Y
+#func.i8 : !NEIGHBOR_ALIVE_COUNT : RET : addr.BASE : u64.X : u64.Y
     mov.i8 : RET : 0
 
     dec.u64 : Y
@@ -212,7 +211,7 @@
     return
 #end
 
-#func : MAIN
+#func : !MAIN
     call : >>INIT : addr.>>GRID1
     call : >>INIT : addr.>>GRID2
 

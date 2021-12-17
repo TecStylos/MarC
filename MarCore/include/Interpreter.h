@@ -135,8 +135,8 @@ namespace MarC
 
 	inline void* Interpreter::getExternalAddress(BC_MemAddress exAddr)
 	{
-		auto& pair = findGreatestSmaller(exAddr, m_mem.dynMemMap);
-		return (char*)pair.second + (exAddr.addr - pair.first.addr);
+		auto&[addr, base] = findGreatestSmaller(exAddr, m_mem.dynMemMap);
+		return (char*)base + (exAddr.addr - addr.addr);
 	}
 
 	inline void* Interpreter::hostAddress(BC_MemAddress clientAddr)

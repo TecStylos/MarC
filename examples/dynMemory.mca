@@ -1,17 +1,21 @@
 #reqmod : "std"
 #manperm : >>stdext>>prints
+#manperm : >>stdext>>printt
 
         / Memory init
-#alias : BUFFSIZE : 14
-#alias : src : "Hello world!\n"
+#static : BUFFSIZE : ^u64
+#alias : src : "Hello World!"
+call.u64 : >>std>>strLen : BUFFSIZE : addr.src
+inc.u64 : BUFFSIZE
+
 #static : dst : ^addr
-alloc : dst : BUFFSIZE
+alloc : dst : @BUFFSIZE
 
 call : >>std>>copyString : addr.@dst : addr.src
 
 prints : "src: "
-prints : src
+println : src
 prints : "dst: "
-prints : @dst
+println : @dst
 
 free : @dst

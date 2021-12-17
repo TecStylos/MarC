@@ -1,11 +1,10 @@
 #reqmod : "std"
 
 #func.i64 : FIBONACCI : A : i64.N
+	#local : B : ^i64
+	#local : TEMP : ^i64
+	mov.i64 : B : 1
 	mov.i64 : A : 0
-	pushc.i64 : 1
-	#alias : B : ~^i64
-	push.i64
-	#alias : TEMP : ~16
 
 	do
 		mov.i64 : TEMP : @B

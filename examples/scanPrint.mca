@@ -11,24 +11,24 @@ prints : "What's your name?: "
 scans : USER_NAME
 prints : "Hello "
 prints : USER_NAME
-prints : "!\n"
+println : "!"
 
 prints : "How old are you?: "
 scant.i16 : USER_AGE
 prints : "Wow, you're already "
 printt.i16 : @USER_AGE
-prints : " years old!\n"
+println : " years old!"
 prints : "I'm 17 years old. That means you're "
 mov.i16 : $ac : @USER_AGE
 sub.i16 : $ac : 17
 
 if_gt.i16 : @$ac : 0
     printt.i16 : @$ac
-    prints : " years older than me!\n"
+    println : " years older than me!"
 elif_lt.i16 : @$ac : 0
     mul.i16 : $ac : -1
     printt.i16 : @$ac
-    prints : " years younger than me!\n"
+    println : " years younger than me!"
 else
-    prints : "the same age as I am!\n"
+    println : "the same age as I am!"
 endif

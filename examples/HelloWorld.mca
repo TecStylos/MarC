@@ -5,7 +5,6 @@
 mov.i64 : $ac : 10
 do
     prints : "Hello world! "
-    printt.i64 : @$ac
-    prints : "\n"
+    printtln.i64 : @$ac
     dec.i64 : $ac
 do_while.i64 : @$ac

@@ -9,18 +9,18 @@ scant.i64 : var
 
 switch.i64 : @var
     case : 1
-        prints : "One\n"
+        println : "One\n"
         fallthrough
     case : 2
-        prints : "Two\n"
+        println : "Two\n"
     case : 3
-        prints : "Three\n"
+        println : "Three\n"
         fallthrough
     case : 4
-        prints : "Four\n"
+        println : "Four\n"
         fallthrough
     case : 5
-        prints : "Five\n"
+        println : "Five\n"
     default
-        prints : "Default\n"
+        println : "Default\n"
 endswitch

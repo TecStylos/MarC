@@ -3,19 +3,49 @@
 
 #scope : std
 	#func : !copyString : addr.DEST : addr.SRC
-		do
-			drf.u8 : $td : @SRC
-			mov.u8 : @DEST : @$td
+		pushc.u64 : @$td
+
+		drf.u8 : $td : @SRC
+		mov.u8 : @DEST : @$td
+		fwhile.u8 : @$td
 			inc.addr : DEST
 			inc.addr : SRC
-		do_while.u8 : @$td
+			drf.u8 : $td : @SRC
+			mov.u8 : @DEST : @$td
+		endfwhile
+
+		popc.u64 : $td
 		return
 	#end / func copyString
+
+	#func.u64 : !strLen : LEN : addr.STRING
+		pushc.u64 : @$td
+
+		mov.addr : LEN : @STRING
+		drf.u8 : $td : @LEN
+		fwhile.u8 : @$td
+			inc.addr : LEN
+			drf.u8 : $td : @LEN
+		endfwhile
+		sub.addr : LEN : @STRING
+
+		popc.u64 : $td
+		return
+	#end / func strLen
 #end / scope std
 
-#macro : println : string
+#macro.dt : printtln : value
+	printt.dt : value
+	prints : "\n"
+#end
+
+#macro : printsln : string
 	prints : string
 	prints : "\n"
+#end
+
+#macro : println : string
+	printsln : string
 #end
 
 #macro.dt : __arrRead : array : index : dest
@@ -25,9 +55,9 @@
 	drf.dt : dest : @$td
 #end
 #macro.dt : arrRead : array : index : dest
-	pushc.dt : @$td
+	pushc.u64 : @$td
 	__arrRead.dt : array : index : dest
-	popc.dt : $td
+	popc.u64 : $td
 #end
 
 #macro.dt : __arrWrite : array : index : src
@@ -37,7 +67,7 @@
 	mov.dt : @$td : src
 #end
 #macro.dt : arrWrite : array : index : src
-	pushc.dt : @$td
+	pushc.u64 : @$td
 	__arrWrite.dt : array : index : src
-	popc.dt : $td
+	popc.u64 : $td
 #end

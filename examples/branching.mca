@@ -17,24 +17,24 @@ prints : "Var B: "
 scant.i64 : var_b
 
 if.i64 : @compare
-    prints : "Compare != 0\n"
+    println : "Compare != 0"
     if.i64 : @var_a
         if.i64 : @var_b
-            prints : "A != 0 && B != 0\n"
+            println : "A != 0 && B != 0"
         else
-            prints : "A != 0 && B == 0\n"
+            println : "A != 0 && B == 0"
         endif
     else
         if.i64 : @var_b
-            prints : "A == 0 && B != 0\n"
+            println : "A == 0 && B != 0"
         else
-            prints : "A == 0 && B == 0\n"
+            println : "A == 0 && B == 0"
         endif
     endif
 elif.i64 : STATIC_VAR
-    prints : "Compare == 0 && STATIC_VAR != 0\n"
+    println : "Compare == 0 && STATIC_VAR != 0"
 else
-    prints : "Compare == 0 && STATIC_VAR == 0\n"
+    println : "Compare == 0 && STATIC_VAR == 0"
 endif
 
 #static : sum : ^i64
@@ -58,4 +58,4 @@ do_while.i64 : @sum_count
 
 prints : "Sum: "
 printt.i64 : @sum
-prints : "\n"
+println : ""
