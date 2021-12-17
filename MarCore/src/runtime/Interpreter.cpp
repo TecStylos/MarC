@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <unordered_map>
 
-#include "ExtensionLocator.h"
+#include "fileio/ExtensionLocator.h"
 #include "runtime/ExternalFunction.h"
 
 namespace MarC

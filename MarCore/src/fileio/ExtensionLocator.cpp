@@ -1,4 +1,4 @@
-#include "ExtensionLocator.h"
+#include "fileio/ExtensionLocator.h"
 
 #include <cstring>
 #include "PluS/Defines.h"

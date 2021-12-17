@@ -1,8 +1,8 @@
-#include "ModuleLoader.h"
+#include "fileio/ModuleLoader.h"
 
-#include "ModuleLocator.h"
+#include "fileio/ModuleLocator.h"
 #include "AsmTokenizer.h"
-#include "CodeFileReader.h"
+#include "fileio/CodeFileReader.h"
 
 namespace MarC
 {

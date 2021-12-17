@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <memory>
 
-#include "Serializer.h"
+#include "fileio/Serializer.h"
 
 namespace MarC
 {

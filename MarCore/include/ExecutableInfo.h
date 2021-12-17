@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "types/AssemblerTypes.h"
-#include "Serializer.h"
+#include "fileio/Serializer.h"
 
 namespace MarC
 {
