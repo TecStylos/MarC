@@ -77,43 +77,21 @@ namespace MarCmd
 					wndRight->setTop(wndMemory);
 				}
 				{
-					auto wndModuleCallstack = Console::SplitWindow::create(DbgWndName_ModuleCallstackSplit);
-					wndModuleCallstack->setRatio(Console::WRT::RelativeLeft, 50);
+					// Callstack (bottom)
+					auto wndCallStack = Console::SplitWindow::create(DbgWndName_CallstackSplit);
+					wndCallStack->setRatio(Console::WRT::AbsoluteTop, 1);
 					{
-						// Module Browser
-						auto wndModule = Console::SplitWindow::create(DbgWndName_ModuleSplit);
-						wndModule->setRatio(Console::WRT::AbsoluteTop, 1);
-						{
-							auto wndModuleTitle = Console::TextWindow::create(DbgWndName_ModuleTitle);
-							wndModuleTitle->addTextFormat(Console::TextFormat::ColorFG(150, 150, 150));
-							wndModuleTitle->addTextFormat(Console::TFC::F_Negative);
-							wndModuleTitle->wrapping(false);
-							wndModule->setTop(wndModuleTitle);
-						}
-						{
-							auto wndCallStackView = Console::TextWindow::create(DbgWndName_ModuleView);
-							wndModule->setBottom(wndCallStackView);
-						}
-						wndModuleCallstack->setLeft(wndModule);
+						auto wndCallStackTitle = Console::TextWindow::create(DbgWndName_CallstackTitle);
+						wndCallStackTitle->addTextFormat(Console::TextFormat::ColorFG(150, 150, 150));
+						wndCallStackTitle->addTextFormat(Console::TFC::F_Negative);
+						wndCallStackTitle->wrapping(false);
+						wndCallStack->setTop(wndCallStackTitle);
 					}
 					{
-						// Callstack (bottom)
-						auto wndCallStack = Console::SplitWindow::create(DbgWndName_CallstackSplit);
-						wndCallStack->setRatio(Console::WRT::AbsoluteTop, 1);
-						{
-							auto wndCallStackTitle = Console::TextWindow::create(DbgWndName_CallstackTitle);
-							wndCallStackTitle->addTextFormat(Console::TextFormat::ColorFG(150, 150, 150));
-							wndCallStackTitle->addTextFormat(Console::TFC::F_Negative);
-							wndCallStackTitle->wrapping(false);
-							wndCallStack->setTop(wndCallStackTitle);
-						}
-						{
-							auto wndCallStackView = Console::TextWindow::create(DbgWndName_CallstackView);
-							wndCallStack->setBottom(wndCallStackView);
-						}
-						wndModuleCallstack->setRight(wndCallStack);
+						auto wndCallStackView = Console::TextWindow::create(DbgWndName_CallstackView);
+						wndCallStack->setBottom(wndCallStackView);
 					}
-					wndRight->setBottom(wndModuleCallstack);
+					wndRight->setBottom(wndCallStack);
 				}
 				wndFullRight->setRight(wndRight);
 			}

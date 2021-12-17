@@ -5,6 +5,7 @@
 
 #include "PermissionGrantPrompt.h"
 #include "AutoExecutableLoader.h"
+#include "errors/MarCoreError.h"
 
 namespace MarCmd
 {
@@ -70,12 +71,6 @@ namespace MarCmd
 	{
 		switch (key)
 		{
-		case 'm':
-		{
-			auto parent = m_wndParent.lock();
-			//parent->replaceSubWnd("Disassembly", m_sdd->wndModuleBrowser);
-			break;
-		}
 		case 'u': // Scroll up
 			--m_scrollOffset;
 			m_sdd->refreshRequested = true;
@@ -137,7 +132,7 @@ namespace MarCmd
 
 		wndDisasmTitle->replace("Disassembly: " + m_sdd->interpreter->getExeInfo()->name, 1, 0);
 
-		int64_t exeLine = addrToLine(exeAddr);
+		int64_t exeLine = m_modDisasmInfo.addrToLine(exeAddr);
 		if (m_nInsExecuted != m_sdd->interpreter->nInsExecuted())
 		{
 			m_scrollOffset = 0;
@@ -167,7 +162,7 @@ namespace MarCmd
 
 	bool DisasmWindow::toggleBreakpoint(MarC::BC_MemAddress breakpoint)
 	{
-		int64_t line = addrToLine(breakpoint);
+		int64_t line = m_modDisasmInfo.addrToLine(breakpoint);
 
 		if (hasBreakpoint(breakpoint))
 		{
@@ -181,39 +176,14 @@ namespace MarCmd
 		return true;
 	}
 
-	int64_t DisasmWindow::addrToLine(MarC::BC_MemAddress addr) const
+	const DisasmWindow::ModDisasmInfo& DisasmWindow::getDisasmInfo() const
 	{
-		return MarC::searchBinary(addr.addr, m_modDisasmInfo.instructionOffsets);
+		return m_modDisasmInfo;
 	}
 
 	DisasmWindowRef DisasmWindow::create(const std::string& name, SharedDebugDataRef sdd, uint64_t modIndex)
 	{
 		auto temp = std::shared_ptr<DisasmWindow>(new DisasmWindow(name, sdd, modIndex));
-		temp->setSelfRef(temp);
-		return temp;
-	}
-
-	ModuleBrowserWindow::ModuleBrowserWindow(const std::string& name, SharedDebugDataRef sdd)
-		: SplitWindow(name)
-	{
-		// TODO: Setup the window
-		m_sdd = sdd;
-	}
-
-	void ModuleBrowserWindow::handleKeyPress(char key)
-	{
-		// TODO: Proper key press handling
-		Window::handleKeyPress(key);
-	}
-
-	void ModuleBrowserWindow::refresh()
-	{
-		// TODO: Refresh the marker to the currently opened window
-	}
-
-	ModuleBrowserWindowRef ModuleBrowserWindow::create(const std::string& name, SharedDebugDataRef sdd)
-	{
-		auto temp = std::shared_ptr<ModuleBrowserWindow>(new ModuleBrowserWindow(name, sdd));
 		temp->setSelfRef(temp);
 		return temp;
 	}
@@ -444,6 +414,9 @@ namespace MarCmd
 					}
 					--sdd->exeCount;
 					lock.unlock();
+
+					// Get information about the instruction to execute next
+					const auto& insInfo = m_wndDisasm->getDisasmInfo().ins[m_wndDisasm->getDisasmInfo().addrToLine(regCP.as_ADDR)].data;
 
 					m_sharedDebugData->interpreter->interpret(1);
 
