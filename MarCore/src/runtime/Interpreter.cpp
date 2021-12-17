@@ -1,10 +1,10 @@
-#include "Interpreter.h"
+#include "runtime/Interpreter.h"
 
 #include <algorithm>
 #include <unordered_map>
 
 #include "ExtensionLocator.h"
-#include "ExternalFunction.h"
+#include "runtime/ExternalFunction.h"
 
 namespace MarC
 {

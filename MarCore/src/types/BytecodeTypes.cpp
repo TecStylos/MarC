@@ -1,4 +1,4 @@
-#include "BytecodeTypes.h"
+#include "types/BytecodeTypes.h"
 
 #include <map>
 

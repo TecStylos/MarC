@@ -9,26 +9,26 @@ add_library(
 	MarCore STATIC
 	"src/MarCore.cpp"
 	"src/Memory.cpp"
-	"src/Interpreter.cpp"
 	"src/Linker.cpp"
 	"src/ModuleInfo.cpp"
-	"src/BytecodeTypes.cpp"
-	"src/AssemblerTypes.cpp"
 	"src/Assembler.cpp"
 	"src/AsmTokenizer.cpp"
 	"src/AsmInstructions.cpp"
 	"src/ModuleLocator.cpp"
 	"src/VirtualAsmTokenList.cpp"
-	"src/AsmTokenizerTypes.cpp"
 	"src/ExtensionLocator.cpp"
 	"src/ExecutableInfo.cpp"
 	"src/Disassembler.cpp"
-	"src/DisAsmTypes.cpp"
 	"src/ModuleLoader.cpp"
 	"src/CodeFileReader.cpp"
 	"src/ModulePack.cpp"
 	"src/ExecutableLoader.cpp"
- "include/errors/AsmTokenizerError.h" "include/errors/InterpreterError.h" "include/errors/MacroExpansionError.h" "include/Macro.h" "include/errors/LinkerError.h")
+	"src/types/DisAsmTypes.cpp"
+	"src/types/AsmTokenizerTypes.cpp"
+	"src/types/BytecodeTypes.cpp"
+	"src/types/AssemblerTypes.cpp"
+	"src/runtime/Interpreter.cpp"
+)
 
 target_include_directories(
 	MarCore PUBLIC

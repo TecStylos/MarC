@@ -3,7 +3,7 @@
 #include <set>
 #include <iostream>
 
-#include "AssemblerTypes.h"
+#include "types/AssemblerTypes.h"
 #include "Serializer.h"
 
 namespace MarC

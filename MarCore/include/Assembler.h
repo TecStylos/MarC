@@ -5,7 +5,7 @@
 #include "ModuleInfo.h"
 #include "ModulePack.h"
 #include "AsmInstructions.h"
-#include "AsmTokenizerTypes.h"
+#include "types/AsmTokenizerTypes.h"
 #include "errors/AssemblerError.h"
 
 namespace MarC

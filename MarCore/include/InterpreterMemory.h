@@ -3,7 +3,7 @@
 #include <map>
 
 #include "Memory.h"
-#include "BytecodeTypes.h"
+#include "types/BytecodeTypes.h"
 
 namespace MarC
 {

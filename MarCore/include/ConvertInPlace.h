@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BytecodeTypes.h"
+#include "types/BytecodeTypes.h"
 
 namespace MarC
 {

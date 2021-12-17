@@ -1,7 +1,7 @@
 #include <PluS.h>
 
-#include "../../MarCore/include/ExternalFunction.h"
-#include "../../MarCore/include/Interpreter.h"
+#include "../../MarCore/include/runtime/ExternalFunction.h"
+#include "../../MarCore/include/runtime/Interpreter.h"
 #include "../../MarCore/include/unused.h"
 
 #include <iostream>

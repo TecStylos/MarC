@@ -6,6 +6,14 @@ else
     CONFIG="$1"
 fi
 
+if [ "${CONFIG}" = "all" ]; then
+    echo "Running build script for Configurations 'Release', 'Debug' & 'RelWithDebInfo'..."
+    ./build.sh Release &
+    ./build.sh Debug &
+    ./build.sh RelWithDebInfo &
+    exit
+fi
+
 if [ "${CONFIG}" = "" ]; then
     echo "No Configuration selected. Using 'Release'."
     BIN_DIR="bin/Release"

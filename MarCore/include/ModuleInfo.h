@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ExecutableInfo.h"
-#include "Macro.h"
+#include "types/Macro.h"
 
 namespace MarC
 {

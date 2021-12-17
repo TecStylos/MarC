@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "AsmTokenizerTypes.h"
+#include "types/AsmTokenizerTypes.h"
 #include "errors/AsmTokenizerError.h"
 
 namespace MarC

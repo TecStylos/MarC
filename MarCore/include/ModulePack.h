@@ -5,7 +5,7 @@
 #include <string>
 #include <memory>
 
-#include "AsmTokenizerTypes.h"
+#include "types/AsmTokenizerTypes.h"
 
 namespace MarC
 {

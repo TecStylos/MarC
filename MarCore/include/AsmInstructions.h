@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AssemblerTypes.h"
+#include "types/AssemblerTypes.h"
 #include "Flags.h"
 
 namespace MarC

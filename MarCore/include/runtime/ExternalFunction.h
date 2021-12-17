@@ -2,15 +2,16 @@
 
 #include <PluS.h>
 
-#include "AssemblerTypes.h"
+#include "types/AssemblerTypes.h"
 
 namespace MarC
 {
 	struct ExFuncData
 	{
+		static constexpr uint64_t EXFUNC_MAX_PARAMS = 8;
 		TypeCell retVal;
 		uint8_t nParams = 0;
-		TypeCell param[8];
+		TypeCell param[EXFUNC_MAX_PARAMS];
 	};
 
 	class ExternalFunction : public PluS::Feature
