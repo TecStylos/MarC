@@ -47,8 +47,6 @@ namespace MarC
 				case BC_OC_INCREMENT: exec_insIncrement(ocx); break;
 				case BC_OC_DECREMENT: exec_insDecrement(ocx); break;
 
-				case BC_OC_DEREFERENCE: exec_insDereference(ocx); break;
-
 				case BC_OC_CONVERT: exec_insConvert(ocx); break;
 
 				case BC_OC_PUSH: exec_insPush(ocx); break;

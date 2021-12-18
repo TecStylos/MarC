@@ -64,7 +64,6 @@ namespace MarC
 		void exec_insDivide(BC_OpCodeEx ocx);
 		void exec_insIncrement(BC_OpCodeEx ocx);
 		void exec_insDecrement(BC_OpCodeEx ocx);
-		void exec_insDereference(BC_OpCodeEx ocx);
 		void exec_insConvert(BC_OpCodeEx ocx);
 		void exec_insPush(BC_OpCodeEx ocx);
 		void exec_insPop(BC_OpCodeEx ocx);
@@ -239,12 +238,6 @@ namespace MarC
 	{
 		UNUSED(ocx);
 		virt_popFrame();
-	}
-	inline void Interpreter::exec_insDereference(BC_OpCodeEx ocx)
-	{
-		void* dest = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
-		const void* src = hostAddress(readDataAndMove<BC_MemAddress>(), ocx.derefArg[1]);
-		memcpy(dest, src, BC_DatatypeSize(ocx.datatype));
 	}
 	inline void Interpreter::exec_insConvert(BC_OpCodeEx ocx)
 	{

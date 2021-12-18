@@ -62,8 +62,6 @@ namespace MarC
 		{ BC_OC_INCREMENT, InsDt::Required, { { InsArgType::Value } } },
 		{ BC_OC_DECREMENT, InsDt::Required, { { InsArgType::Value } } },
 
-		{ BC_OC_DEREFERENCE, InsDt::Required, { { InsArgType::Address }, { InsArgType::Address } } },
-
 		{ BC_OC_CONVERT, InsDt::Required, { { InsArgType::Address }, { InsArgType::Datatype } } },
 
 		{ BC_OC_PUSH, InsDt::Required, {} },

@@ -1,4 +1,4 @@
 mov.addr : $ac : $td
 mov.i64 : $td : 123
 
-drf.i64 : $ec : @$ac
+mov.i64 : $ec : @@$ac

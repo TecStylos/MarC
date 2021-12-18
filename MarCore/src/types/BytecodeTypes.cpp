@@ -18,8 +18,6 @@ namespace MarC
 			{ "inc",     BC_OC_INCREMENT },
 			{ "dec",     BC_OC_DECREMENT },
 
-			{ "drf",     BC_OC_DEREFERENCE },
-
 			{ "conv",    BC_OC_CONVERT },
 
 			{ "push",    BC_OC_PUSH },
@@ -69,8 +67,6 @@ namespace MarC
 			{ BC_OC_DIVIDE, "div" },
 			{ BC_OC_INCREMENT, "inc" },
 			{ BC_OC_DECREMENT, "dec" },
-
-			{ BC_OC_DEREFERENCE, "drf" },
 
 			{ BC_OC_CONVERT, "conv" },
 
