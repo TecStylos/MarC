@@ -56,6 +56,8 @@ namespace MarCmd
 		DisasmWindow(DisasmWindow&&) = delete;
 		DisasmWindow(const DisasmWindow&) = delete;
 	public:
+		virtual ~DisasmWindow() = default;
+	public:
 		virtual void handleKeyPress(char key) override;
 	public:
 		std::vector<struct ModDisasmInfo> getInfo() const;
