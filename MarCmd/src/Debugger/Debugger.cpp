@@ -428,42 +428,55 @@ namespace MarCmd
 
 	void Debugger::updateMemoryView()
 	{
+		std::string currCallstackName;
+		if (!m_sharedDebugData->callstack.empty())
+		{
+			auto it = MarC::getSymbolForAddress(
+				m_sharedDebugData->callstack.back(),
+				m_sharedDebugData->interpreter->getExeInfo()->symbols
+			);
+			if (it != m_sharedDebugData->interpreter->getExeInfo()->symbols.end())
+				currCallstackName = it->name;
+		}
+
 		auto wndMemoryView = (*m_sharedDebugData->wndBase)->getSubWnd<Console::TextWindow>(DbgWndName_MemoryView);
-		int line = 0;
-		for (auto reg = MarC::BC_MEM_REG_CODE_POINTER; reg < MarC::_BC_MEM_REG_NUM; reg = (MarC::BC_MemRegister)(reg + 1))
+		wndMemoryView->clearText();
+		
+		for (auto reg = MarC::BC_MEM_REG_CODE_POINTER; reg < MarC::_BC_MEM_REG_NUM * sizeof(uint64_t); reg = (MarC::BC_MemRegister)(reg + sizeof(uint64_t)))
 		{
 			auto mc = m_sharedDebugData->interpreter->getRegister(reg);
-			auto dt = m_sharedDebugData->regDatatypes[reg];
+			auto dt = m_sharedDebugData->regDatatypes[reg / sizeof(uint64_t)];
 			std::string name = "$" + MarC::BC_RegisterToString(reg);
 			name.resize(m_maxPrintSymLen + 1, ' ');
 			std::string dtStr = MarC::BC_DatatypeToString(dt);
 			dtStr.resize(10, ' ');
 			std::string valStr = MarC::BC_MemCellToString(mc, dt);
 
-			std::string lineStr = name + dtStr + valStr;
-			wndMemoryView->replace(lineStr, 1, line);
-			++line;
+			std::string lineStr = " " + name + dtStr + valStr;
+			wndMemoryView->append(lineStr + "\n");
 		}
 
 		for (auto& sym : m_sharedDebugData->exeInfo->symbols)
 		{
-			if (sym.usage == MarC::SymbolUsage::Address &&
-				sym.value.as_ADDR.base != MarC::BC_MEM_BASE_CODE_MEMORY &&
-				sym.value.as_ADDR.base != MarC::BC_MEM_BASE_REGISTER
-				)
-			{
-				MarC::BC_MemCell mc = m_sharedDebugData->interpreter->hostMemCell(sym.value.as_ADDR, false);
-				auto dt = MarC::BC_DT_I_64; // TODO: Get actual datatype
-				std::string name = sym.name;
-				name.resize(m_maxPrintSymLen + 1, ' ');
-				std::string dtStr = MarC::BC_DatatypeToString(dt);
-				dtStr.resize(10, ' ');
-				std::string valStr = MarC::BC_MemCellToString(mc, dt);
+			if (sym.name.find(currCallstackName) != 0)
+				continue;
+			if (sym.usage != MarC::SymbolUsage::Address)
+				continue;
+			if (sym.value.as_ADDR.base == MarC::BC_MEM_BASE_CODE_MEMORY)
+				continue;
+			if (sym.value.as_ADDR.base == MarC::BC_MEM_BASE_REGISTER)
+				continue;
 
-				std::string lineStr = name + dtStr + valStr;
-				wndMemoryView->replace(lineStr, 1, line);
-				++line;
-			}
+			MarC::BC_MemCell mc = m_sharedDebugData->interpreter->hostMemCell(sym.value.as_ADDR, false);
+			auto dt = MarC::BC_DT_I_64; // TODO: Get actual datatype
+			std::string name = sym.name;
+			name.resize(m_maxPrintSymLen + 1, ' ');
+			std::string dtStr = MarC::BC_DatatypeToString(dt);
+			dtStr.resize(10, ' ');
+			std::string valStr = MarC::BC_MemCellToString(mc, dt);
+
+			std::string lineStr = " " + name + dtStr + valStr;
+			wndMemoryView->append(lineStr + "\n");
 		}
 	}
 
