@@ -479,8 +479,12 @@ namespace MarCmd
 			m_wndCallstack->clearText();
 
 			uint64_t csSize = m_sharedDebugData->callstack.size();
+			uint64_t lineNrWidth = std::to_string(csSize).size();
 
-			m_wndCallstack->append((csSize ? "   " : "-> ") + std::string("[0   ] <global>\n"));
+			std::string globNr = "0";
+			globNr.resize(lineNrWidth, ' ');
+
+			m_wndCallstack->append((csSize ? "   [" : "-> [") + globNr + "] <global>\n");
 
 			for (uint64_t i = 0; i < csSize; ++i)
 			{
@@ -489,7 +493,7 @@ namespace MarCmd
 				auto it = MarC::getSymbolForAddress(addr, m_sharedDebugData->interpreter->getExeInfo()->symbols);
 				const char* pfix = (i + 1 == csSize) ? "-> [" : "   [";
 				std::string lineNr = std::to_string(i + 1);
-				lineNr.resize(4, ' ');
+				lineNr.resize(lineNrWidth, ' ');
 				if (it != m_sharedDebugData->interpreter->getExeInfo()->symbols.end())
 					m_wndCallstack->append(pfix + lineNr + "] " + it->name + "\n");
 				else
