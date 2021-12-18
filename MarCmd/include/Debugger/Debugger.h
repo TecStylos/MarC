@@ -23,6 +23,10 @@ namespace MarCmd
 		std::mutex mtxExeCount;
 		std::condition_variable conExeCount;
 
+		std::mutex mtxCallstack;
+		uint64_t callstackModifyCount = 0;
+		std::vector<MarC::BC_MemAddress> callstack;
+
 		std::atomic_bool stopExecution = false;
 		std::atomic_bool threadClosed = false;
 		MarC::BC_Datatype regDatatypes[MarC::_BC_MEM_REG_NUM] = { MarC::BC_DT_UNKNOWN };
@@ -86,7 +90,13 @@ namespace MarCmd
 	private:
 		void exeThreadFunc();
 	private:
+		void updateDisasm();
+		void updateMemoryView();
+		void updateCallstack();
+	private:
 		Settings m_settings;
+		Console::TextWindow* m_wndCallstack;
+		uint64_t m_callStackLastModCount = 0;
 		DisasmWindowRef m_wndDisasm;
 		std::vector<DisasmWindowRef> m_vecWndDisasm;
 	private:

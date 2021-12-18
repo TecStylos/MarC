@@ -12,6 +12,7 @@
                 "--closeonexit",
                 "--grantall",
                 "--dbginfo",
+                "--debug",
                 "examples/fibonacci.mca"
               ]
         }

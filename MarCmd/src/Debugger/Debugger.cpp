@@ -1,11 +1,14 @@
 #include "Debugger/Debugger.h"
 
 #include <iostream>
+#include <mutex>
 #include <thread>
 
 #include "PermissionGrantPrompt.h"
 #include "AutoExecutableLoader.h"
 #include "errors/MarCoreError.h"
+#include "types/BytecodeTypes.h"
+#include "types/DisAsmTypes.h"
 
 namespace MarCmd
 {
@@ -230,6 +233,8 @@ namespace MarCmd
 		(*m_sharedDebugData->wndBase)->getSubWnd<Console::SplitWindow>(DbgWndName_LeftHalf)->setTop(m_wndDisasm);
 		m_sharedDebugData->wndBase->setFocus("Disassembly");
 
+		m_wndCallstack = (*m_sharedDebugData->wndBase)->getSubWnd<Console::TextWindow>(DbgWndName_CallstackView);
+
 		Console::subTextWndInsert(**m_sharedDebugData->wndBase, DbgWndName_InputView, ">> ", 1, 0);
 		Console::subTextWndInsert(**m_sharedDebugData->wndBase, DbgWndName_ConsoleTitle, "Console:", 1, 0);
 		Console::subTextWndInsert(**m_sharedDebugData->wndBase, DbgWndName_MemoryTitle, "Memory:", 1, 0);
@@ -319,49 +324,10 @@ namespace MarCmd
 
 				if (updateIsSafe)
 				{
-					{
-						m_wndDisasm->refresh();
+					updateDisasm();
+					updateMemoryView();
+					updateCallstack();
 
-						{
-							auto wndMemoryView = (*m_sharedDebugData->wndBase)->getSubWnd<Console::TextWindow>(DbgWndName_MemoryView);
-							int line = 0;
-							for (auto reg = MarC::BC_MEM_REG_CODE_POINTER; reg < MarC::_BC_MEM_REG_NUM; reg = (MarC::BC_MemRegister)(reg + 1))
-							{
-								auto mc = m_sharedDebugData->interpreter->getRegister(reg);
-								auto dt = m_sharedDebugData->regDatatypes[reg];
-								std::string name = "$" + MarC::BC_RegisterToString(reg);
-								name.resize(m_maxPrintSymLen + 1, ' ');
-								std::string dtStr = MarC::BC_DatatypeToString(dt);
-								dtStr.resize(10, ' ');
-								std::string valStr = MarC::BC_MemCellToString(mc, dt);
-
-								std::string lineStr = name + dtStr + valStr;
-								wndMemoryView->replace(lineStr, 1, line);
-								++line;
-							}
-
-							for (auto& sym : m_sharedDebugData->exeInfo->symbols)
-							{
-								if (sym.usage == MarC::SymbolUsage::Address &&
-									sym.value.as_ADDR.base != MarC::BC_MEM_BASE_CODE_MEMORY &&
-									sym.value.as_ADDR.base != MarC::BC_MEM_BASE_REGISTER
-									)
-								{
-									MarC::BC_MemCell mc = m_sharedDebugData->interpreter->hostMemCell(sym.value.as_ADDR, false);
-									auto dt = MarC::BC_DT_I_64; // TODO: Get actual datatype
-									std::string name = sym.name;
-									name.resize(m_maxPrintSymLen + 1, ' ');
-									std::string dtStr = MarC::BC_DatatypeToString(dt);
-									dtStr.resize(10, ' ');
-									std::string valStr = MarC::BC_MemCellToString(mc, dt);
-
-									std::string lineStr = name + dtStr + valStr;
-									wndMemoryView->replace(lineStr, 1, line);
-									++line;
-								}
-							}
-						}
-					}
 					m_sharedDebugData->mtxExeCount.unlock();
 				}
 
@@ -416,9 +382,32 @@ namespace MarCmd
 					lock.unlock();
 
 					// Get information about the next instruction to execute
-					//const auto& insInfo = m_wndDisasm->getDisasmInfo().ins[m_wndDisasm->getDisasmInfo().addrToLine(regCP.as_ADDR)].data;
+					const auto& insInfo = m_wndDisasm->getDisasmInfo().ins[m_wndDisasm->getDisasmInfo().addrToLine(regCP.as_ADDR)].data;
 
 					m_sharedDebugData->interpreter->interpret(1);
+
+					switch(insInfo.ocx.opCode)
+					{
+					case MarC::BC_OC_CALL:
+					{
+						std::lock_guard lock(m_sharedDebugData->mtxCallstack);
+						++m_sharedDebugData->callstackModifyCount;
+						MarC::BC_MemAddress funcAddr = insInfo.args[0].value.cell.as_ADDR;
+						for (MarC::DerefCount i = 0; i < insInfo.args[0].derefCount; ++i)
+							funcAddr = m_sharedDebugData->interpreter->hostMemCell(funcAddr).as_ADDR;
+						m_sharedDebugData->callstack.push_back(funcAddr);
+						break;
+					}
+					case MarC::BC_OC_RETURN:
+					{
+						std::lock_guard lock(m_sharedDebugData->mtxCallstack);
+						++m_sharedDebugData->callstackModifyCount;
+						m_sharedDebugData->callstack.pop_back();
+						break;
+					}
+					default:
+						;
+					}
 
 					lock.lock();
 
@@ -430,5 +419,80 @@ namespace MarCmd
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 		sdd->threadClosed = true;
+	}
+
+	void Debugger::updateDisasm()
+	{
+		m_wndDisasm->refresh();
+	}
+
+	void Debugger::updateMemoryView()
+	{
+		auto wndMemoryView = (*m_sharedDebugData->wndBase)->getSubWnd<Console::TextWindow>(DbgWndName_MemoryView);
+		int line = 0;
+		for (auto reg = MarC::BC_MEM_REG_CODE_POINTER; reg < MarC::_BC_MEM_REG_NUM; reg = (MarC::BC_MemRegister)(reg + 1))
+		{
+			auto mc = m_sharedDebugData->interpreter->getRegister(reg);
+			auto dt = m_sharedDebugData->regDatatypes[reg];
+			std::string name = "$" + MarC::BC_RegisterToString(reg);
+			name.resize(m_maxPrintSymLen + 1, ' ');
+			std::string dtStr = MarC::BC_DatatypeToString(dt);
+			dtStr.resize(10, ' ');
+			std::string valStr = MarC::BC_MemCellToString(mc, dt);
+
+			std::string lineStr = name + dtStr + valStr;
+			wndMemoryView->replace(lineStr, 1, line);
+			++line;
+		}
+
+		for (auto& sym : m_sharedDebugData->exeInfo->symbols)
+		{
+			if (sym.usage == MarC::SymbolUsage::Address &&
+				sym.value.as_ADDR.base != MarC::BC_MEM_BASE_CODE_MEMORY &&
+				sym.value.as_ADDR.base != MarC::BC_MEM_BASE_REGISTER
+				)
+			{
+				MarC::BC_MemCell mc = m_sharedDebugData->interpreter->hostMemCell(sym.value.as_ADDR, false);
+				auto dt = MarC::BC_DT_I_64; // TODO: Get actual datatype
+				std::string name = sym.name;
+				name.resize(m_maxPrintSymLen + 1, ' ');
+				std::string dtStr = MarC::BC_DatatypeToString(dt);
+				dtStr.resize(10, ' ');
+				std::string valStr = MarC::BC_MemCellToString(mc, dt);
+
+				std::string lineStr = name + dtStr + valStr;
+				wndMemoryView->replace(lineStr, 1, line);
+				++line;
+			}
+		}
+	}
+
+	void Debugger::updateCallstack()
+	{
+		std::lock_guard lock(m_sharedDebugData->mtxCallstack);
+
+		if (m_callStackLastModCount != m_sharedDebugData->callstackModifyCount)
+		{
+			m_callStackLastModCount = m_sharedDebugData->callstackModifyCount;
+
+			m_wndCallstack->clearText();
+
+			uint64_t csSize = m_sharedDebugData->callstack.size();
+			for (uint64_t i = 0; i < csSize; ++i)
+			{
+				MarC::BC_MemAddress addr = m_sharedDebugData->callstack[i];
+
+				auto it = MarC::getSymbolForAddress(addr, m_sharedDebugData->interpreter->getExeInfo()->symbols);
+				const char* pfix = (i + 1 == csSize) ? "-> [" : "   [";
+				std::string lineNr = std::to_string(i);
+				lineNr.resize(4, ' ');
+				if (it != m_sharedDebugData->interpreter->getExeInfo()->symbols.end())
+					m_wndCallstack->append(pfix + lineNr + "] " + it->name + "\n");
+				else
+				 	m_wndCallstack->append(pfix + lineNr + "] " + MarC::BC_MemAddressToString(addr) + "\n");
+			}
+
+			m_wndCallstack->setScroll(csSize < m_wndCallstack->getHeight() ? 0 : csSize - m_wndCallstack->getHeight());
+		}
 	}
 }

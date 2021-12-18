@@ -21,5 +21,7 @@ namespace MarC
 		std::vector<char> rawData;
 	};
 
+	std::set<Symbol>::const_iterator getSymbolForAddress(BC_MemAddress addr, const std::set<Symbol>& symbols);
+
 	std::string DisAsmInsInfoToString(const DisAsmInsInfo& daii, const std::set<Symbol>& symbols);
 }
