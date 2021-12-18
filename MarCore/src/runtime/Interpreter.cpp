@@ -186,7 +186,7 @@ namespace MarC
 		for (auto& result : results)
 		{
 			if (result.second.empty())
-				throw InterpreterError(IntErrCode::ExtensionLoadFailure, "Extension '" + result.first + "' could not be found!");
+				continue;
 			if (result.second.size() > 1)
 				throw InterpreterError(IntErrCode::ExtensionLoadFailure, "Multiple extensions with name '" + result.first + "' found!");
 
