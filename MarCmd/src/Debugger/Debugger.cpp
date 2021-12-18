@@ -471,28 +471,43 @@ namespace MarCmd
 	{
 		std::lock_guard lock(m_sharedDebugData->mtxCallstack);
 
-		if (m_callStackLastModCount != m_sharedDebugData->callstackModifyCount)
+		bool needsScrollUpdate = false;
+		if (m_callstackLastModCount != m_sharedDebugData->callstackModifyCount)
 		{
-			m_callStackLastModCount = m_sharedDebugData->callstackModifyCount;
+			m_callstackLastModCount = m_sharedDebugData->callstackModifyCount;
 
 			m_wndCallstack->clearText();
 
 			uint64_t csSize = m_sharedDebugData->callstack.size();
+
+			m_wndCallstack->append((csSize ? "   " : "-> ") + std::string("[0   ] <global>\n"));
+
 			for (uint64_t i = 0; i < csSize; ++i)
 			{
 				MarC::BC_MemAddress addr = m_sharedDebugData->callstack[i];
 
 				auto it = MarC::getSymbolForAddress(addr, m_sharedDebugData->interpreter->getExeInfo()->symbols);
 				const char* pfix = (i + 1 == csSize) ? "-> [" : "   [";
-				std::string lineNr = std::to_string(i);
+				std::string lineNr = std::to_string(i + 1);
 				lineNr.resize(4, ' ');
 				if (it != m_sharedDebugData->interpreter->getExeInfo()->symbols.end())
 					m_wndCallstack->append(pfix + lineNr + "] " + it->name + "\n");
 				else
 				 	m_wndCallstack->append(pfix + lineNr + "] " + MarC::BC_MemAddressToString(addr) + "\n");
 			}
+			needsScrollUpdate = true;
+		}
 
-			m_wndCallstack->setScroll(csSize < m_wndCallstack->getHeight() ? 0 : csSize - m_wndCallstack->getHeight());
+		if (m_callstackLastHeight != m_wndCallstack->getHeight() || needsScrollUpdate)
+		{
+			m_callstackLastHeight = m_wndCallstack->getHeight();
+			int64_t csSize = m_sharedDebugData->callstack.size();
+
+			int64_t scroll = 0;
+			if (csSize >= m_callstackLastHeight)
+				scroll = csSize - m_callstackLastHeight + 1;
+
+			m_wndCallstack->setScroll(scroll);
 		}
 	}
 }

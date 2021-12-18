@@ -24,7 +24,7 @@ namespace MarCmd
 		std::condition_variable conExeCount;
 
 		std::mutex mtxCallstack;
-		uint64_t callstackModifyCount = 0;
+		uint64_t callstackModifyCount = 1;
 		std::vector<MarC::BC_MemAddress> callstack;
 
 		std::atomic_bool stopExecution = false;
@@ -96,7 +96,8 @@ namespace MarCmd
 	private:
 		Settings m_settings;
 		Console::TextWindow* m_wndCallstack;
-		uint64_t m_callStackLastModCount = 0;
+		uint64_t m_callstackLastModCount = 0;
+		int64_t m_callstackLastHeight = 0;
 		DisasmWindowRef m_wndDisasm;
 		std::vector<DisasmWindowRef> m_vecWndDisasm;
 	private:
