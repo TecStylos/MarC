@@ -9,7 +9,7 @@ namespace MarC
 {
 	struct DisAsmArg
 	{
-		bool getsDereferenced = false;
+		DerefCount derefCount = 0;
 		TypeCell value;
 		InsArgType argType;
 	};

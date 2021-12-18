@@ -36,14 +36,14 @@ namespace MarC
 	private:
 		void assembleArgument(BC_OpCodeEx& ocx, const InsArgument& arg);
 		void assembleArgValue(BC_OpCodeEx& ocx, const InsArgument& arg);
-		void generateTypeCell(TypeCell& tc, bool& getsDereferenced);
+		void generateTypeCell(TypeCell& tc, DerefCount& dc);
 		void generateTypeCellRegister(TypeCell& tc);
 		void generateTypeCellFPRelative(TypeCell& tc);
 		void generateTypeCellDTSize(TypeCell& tc);
 		void generateTypeCellName(TypeCell& tc);
 		void generateTypeCellString(TypeCell& tc);
-		void generateTypeCellFloat(TypeCell& tc, bool getsDereferenced);
-		void generateTypeCellInteger(TypeCell& tc, bool getsDereferenced);
+		void generateTypeCellFloat(TypeCell& tc, DerefCount dc);
+		void generateTypeCellInteger(TypeCell& tc, DerefCount dc);
 		void assembleArgDatatype(BC_OpCodeEx& ocx, const InsArgument& arg);
 	private:
 		void assembleDirective();

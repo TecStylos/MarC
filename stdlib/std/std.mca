@@ -3,33 +3,21 @@
 
 #scope : std
 	#func : !copyString : addr.DEST : addr.SRC
-		pushc.u64 : @$td
-
-		drf.u8 : $td : @SRC
-		mov.u8 : @DEST : @$td
-		fwhile.u8 : @$td
+		mov.u8 : @DEST : @@SRC
+		fwhile.u8 : @@SRC
 			inc.addr : DEST
 			inc.addr : SRC
-			drf.u8 : $td : @SRC
-			mov.u8 : @DEST : @$td
+			mov.u8 : @DEST : @@SRC
 		endfwhile
-
-		popc.u64 : $td
 		return
 	#end / func copyString
 
 	#func.u64 : !strLen : LEN : addr.STRING
-		pushc.u64 : @$td
-
 		mov.addr : LEN : @STRING
-		drf.u8 : $td : @LEN
-		fwhile.u8 : @$td
+		fwhile.u8 : @@LEN
 			inc.addr : LEN
-			drf.u8 : $td : @LEN
 		endfwhile
 		sub.addr : LEN : @STRING
-
-		popc.u64 : $td
 		return
 	#end / func strLen
 #end / scope std
@@ -52,7 +40,7 @@
 	mov.addr : $td : index
 	mul.addr : $td : ^dt
 	add.addr : $td : array
-	drf.dt : dest : @$td
+	mov.dt : dest : @@$td
 #end
 #macro.dt : arrRead : array : index : dest
 	pushc.u64 : @$td

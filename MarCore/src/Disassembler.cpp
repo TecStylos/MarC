@@ -59,7 +59,7 @@ namespace MarC
 	{
 		DisAsmArg daa;
 		daa.argType = arg.type;
-		daa.getsDereferenced = daii.ocx.derefArg.get(arg.index);
+		daa.derefCount = daii.ocx.derefArg.get(arg.index);
 
 		switch (arg.type)
 		{
@@ -70,7 +70,7 @@ namespace MarC
 		case InsArgType::Datatype: daa.value.datatype = BC_DT_DATATYPE; break;
 		}
 
-		switch (daa.getsDereferenced ? BC_DT_ADDR : daa.value.datatype)
+		switch (daa.derefCount ? BC_DT_ADDR : daa.value.datatype)
 		{
 		case BC_DT_NONE: break;
 		case BC_DT_UNKNOWN: break;

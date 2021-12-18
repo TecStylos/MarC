@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MarCoreError.h"
+#include "types/BytecodeTypes.h"
 
 namespace MarC
 {
@@ -24,6 +25,7 @@ namespace MarC
 			InvalidPragmaIndex,
 			PragmaListEmpty,
 			PragmaListNotEmpty,
+			DerefExhausted,
 		};
 	public:
 		AssemblerError()
@@ -89,6 +91,9 @@ namespace MarC
 				break;
 			case Code::PragmaListNotEmpty:
 				message = "The pragma list is not empty after assembling the given code!";
+				break;
+			case Code::DerefExhausted:
+				message = "The maximum number of dereferences per argument (" + std::to_string(MAX_DEREF_COUNT) + ") has already been reached!";
 				break;
 			default:
 				message = "Unknown error code! Context: " + context;

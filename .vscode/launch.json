@@ -12,7 +12,6 @@
                 "--closeonexit",
                 "--grantall",
                 "--dbginfo",
-                "--liveasm",
                 "examples/fibonacci.mca"
               ]
         }

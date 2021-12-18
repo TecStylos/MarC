@@ -2,6 +2,7 @@
 
 #include <cstring>
 
+#include "types/BytecodeTypes.h"
 #include "unused.h"
 #include "InterpreterMemory.h"
 #include "ExecutableInfo.h"
@@ -36,11 +37,11 @@ namespace MarC
 	public:
 		void* getExternalAddress(BC_MemAddress exAddr);
 		void* hostAddress(BC_MemAddress clientAddr);
-		void* hostAddress(BC_MemAddress clientAddr, bool deref);
+		void* hostAddress(BC_MemAddress clientAddr, DerefCount dc);
 		template <typename T> T& hostObject(BC_MemAddress clientAddr);
-		template <typename T> T& hostObject(BC_MemAddress clientAddr, bool deref);
+		template <typename T> T& hostObject(BC_MemAddress clientAddr, DerefCount dc);
 		BC_MemCell& hostMemCell(BC_MemAddress clientAddr);
-		BC_MemCell& hostMemCell(BC_MemAddress clientAddr, bool deref);
+		BC_MemCell& hostMemCell(BC_MemAddress clientAddr, DerefCount dc);
 	public:
 		BC_MemCell& getRegister(BC_MemRegister reg);
 		const BC_MemCell& getRegister(BC_MemRegister reg) const;
@@ -53,7 +54,7 @@ namespace MarC
 		void loadMissingExtensions();
 		template <typename T> T& readDataAndMove();
 		template <typename T> T& readDataAndMove(uint64_t shift);
-		BC_MemCell& readMemCellAndMove(BC_Datatype dt, bool deref);
+		BC_MemCell& readMemCellAndMove(BC_Datatype dt, DerefCount dc);
 	private:
 		void exec_insUndefined(BC_OpCodeEx ocx);
 		void exec_insMove(BC_OpCodeEx ocx);
@@ -118,9 +119,9 @@ namespace MarC
 		return *(T*)hostAddress(clientAddr);
 	}
 
-	template <typename T> inline T& Interpreter::hostObject(BC_MemAddress clientAddr, bool deref)
+	template <typename T> inline T& Interpreter::hostObject(BC_MemAddress clientAddr, DerefCount dc)
 	{
-		return *(T*)hostAddress(clientAddr, deref);
+		return *(T*)hostAddress(clientAddr, dc);
 	}
 
 	template <typename T> inline T& Interpreter::readDataAndMove()
@@ -130,7 +131,7 @@ namespace MarC
 
 	template <typename T> inline T& Interpreter::readDataAndMove(uint64_t shift)
 	{
-		return*(T*)hostAddress((getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR += shift) - shift, false);
+		return*(T*)hostAddress((getRegister(BC_MEM_REG_CODE_POINTER).as_ADDR += shift) - shift);
 	}
 
 	inline void* Interpreter::getExternalAddress(BC_MemAddress exAddr)
@@ -146,11 +147,11 @@ namespace MarC
 			(char*)m_mem.baseTable[clientAddr.base] + clientAddr.addr;
 	}
 
-	inline void* Interpreter::hostAddress(BC_MemAddress clientAddr, bool deref)
+	inline void* Interpreter::hostAddress(BC_MemAddress clientAddr, DerefCount dc)
 	{
-		return deref ?
-			hostAddress(*(BC_MemAddress*)hostAddress(clientAddr)) :
-			hostAddress(clientAddr);
+		while (dc-- > 0)
+			clientAddr = *(BC_MemAddress*)hostAddress(clientAddr);
+		return hostAddress(clientAddr);
 	}
 
 	inline BC_MemCell& Interpreter::hostMemCell(BC_MemAddress clientAddr)
@@ -158,9 +159,9 @@ namespace MarC
 		return hostObject<BC_MemCell>(clientAddr);
 	}
 
-	inline BC_MemCell& Interpreter::hostMemCell(BC_MemAddress clientAddr, bool deref)
+	inline BC_MemCell& Interpreter::hostMemCell(BC_MemAddress clientAddr, DerefCount dc)
 	{
-		return hostObject<BC_MemCell>(clientAddr, deref);
+		return hostObject<BC_MemCell>(clientAddr, dc);
 	}
 
 	inline BC_MemCell& Interpreter::getRegister(BC_MemRegister reg)
@@ -183,11 +184,14 @@ namespace MarC
 		return m_nInsExecuted;
 	}
 
-	inline BC_MemCell& Interpreter::readMemCellAndMove(BC_Datatype dt, bool deref)
+	inline BC_MemCell& Interpreter::readMemCellAndMove(BC_Datatype dt, DerefCount dc)
 	{
-		return deref
-			? hostMemCell(readDataAndMove<BC_MemAddress>())
-			: readDataAndMove<BC_MemCell>(BC_DatatypeSize(dt));
+		void* pmc = &readDataAndMove<BC_MemCell>(BC_DatatypeSize(dc ? BC_DT_ADDR : dt));
+
+		while (dc-- > 0)
+			pmc = &hostMemCell(*(BC_MemAddress*)pmc);
+
+		return *(BC_MemCell*)pmc;
 	}
 
 	inline void Interpreter::exec_insMove(BC_OpCodeEx ocx)

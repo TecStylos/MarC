@@ -2,20 +2,20 @@
 :b stdin 0
 
 :i returncode 0
-:b stdout 277
+:b stdout 276
 After skip
-[C; A: 613] -> Jump
-[C; A: 723] -> No jump
-[C; A: 833] -> Jump
-[C; A: 943] -> No jump
-[C; A: 1053] -> Jump
-[C; A: 1163] -> No jump
-[C; A: 1273] -> Jump
-[C; A: 1383] -> No jump
-[C; A: 1493] -> Jump
-[C; A: 1603] -> No jump
-[C; A: 1713] -> Jump
-[C; A: 1823] -> No jump
+[C; A: 521] -> Jump
+[C; A: 636] -> No jump
+[C; A: 751] -> Jump
+[C; A: 866] -> No jump
+[C; A: 981] -> Jump
+[C; A: 1096] -> No jump
+[C; A: 1211] -> Jump
+[C; A: 1326] -> No jump
+[C; A: 1441] -> Jump
+[C; A: 1556] -> No jump
+[C; A: 1671] -> Jump
+[C; A: 1786] -> No jump
 
 :b stderr 0
 

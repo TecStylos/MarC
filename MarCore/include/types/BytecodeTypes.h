@@ -102,17 +102,20 @@ namespace MarC
 
 	#pragma pack(push, 1)
 
+	typedef uint16_t DerefCount;
+	static constexpr DerefCount MAX_DEREF_COUNT = 3;
+
 	struct BC_OpCodeEx
 	{
 		BC_OpCode opCode = BC_OC_NONE;
 		BC_Datatype datatype = BC_DT_NONE;
 		struct ArgDerefs
 		{
-			uint8_t data = 0;
-			bool operator[](uint8_t index) const { return get(index); }
-			bool get(uint8_t index) const { return (data >> index) & 1; }
-			void set(uint8_t index) { data |= (1 << index); }
-			void clear(uint8_t index) { data &= ~(1 << index); }
+			DerefCount data = 0;
+			DerefCount operator[](uint8_t index) const { return get(index); }
+			DerefCount get(uint8_t index) const { return (data >> (index*2)) & 3; }
+			void set(uint8_t index, DerefCount dc) { clear(index); data |= (dc << (index*2)); }
+			void clear(uint8_t index) { data &= ~(3 << (index*2)); }
 		} derefArg;
 	};
 

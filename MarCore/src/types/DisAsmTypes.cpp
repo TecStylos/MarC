@@ -44,9 +44,10 @@ namespace MarC
 				insStr.append(BC_DatatypeToString(arg.value.datatype) + ".");
 				[[fallthrough]];
 			case InsArgType::Value:
-				if (arg.getsDereferenced)
+				if (arg.derefCount)
 				{
-					insStr.append("@");
+					for (DerefCount dc = 0; dc < arg.derefCount; ++dc)
+						insStr.append("@");
 				}
 				else
 				{

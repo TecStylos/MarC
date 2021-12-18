@@ -3,6 +3,7 @@
 #include "AsmTokenizer.h"
 #include "VirtualAsmTokenList.h"
 #include "SearchAlgorithms.h"
+#include "errors/AssemblerError.h"
 #include "errors/MacroExpansionError.h"
 #include "unused.h"
 
@@ -255,22 +256,23 @@ namespace MarC
 		case InsArgType::Datatype: tc.datatype = BC_DT_DATATYPE; break;
 		}
 
-		bool getsDereferenced;
-		generateTypeCell(tc, getsDereferenced);
+		DerefCount dc;
+		generateTypeCell(tc, dc);
 
-		if (getsDereferenced)
-			ocx.derefArg.set(arg.index);
+		ocx.derefArg.set(arg.index, dc);
 
 		pushCode(&tc.cell, BC_DatatypeSize(tc.datatype));
 	}
 
-	void Assembler::generateTypeCell(TypeCell& tc, bool& getsDereferenced)
+	void Assembler::generateTypeCell(TypeCell& tc, DerefCount& dc)
 	{
-		getsDereferenced = false;
-		if (currToken().type == AsmToken::Type::Op_Deref)
+		dc = false;
+		while (currToken().type == AsmToken::Type::Op_Deref)
 		{
+			if (dc == MAX_DEREF_COUNT)
+				MARC_ASSEMBLER_THROW_NO_CONTEXT(AsmErrCode::DerefExhausted);
 			tc.datatype = BC_DT_ADDR;
-			getsDereferenced = true;
+			++dc;
 			nextToken();
 		}
 
@@ -287,9 +289,9 @@ namespace MarC
 		case AsmToken::Type::String:
 			generateTypeCellString(tc); break;
 		case AsmToken::Type::Float:
-			generateTypeCellFloat(tc, getsDereferenced); break;
+			generateTypeCellFloat(tc, dc); break;
 		case AsmToken::Type::Integer:
-			generateTypeCellInteger(tc, getsDereferenced); break;
+			generateTypeCellInteger(tc, dc); break;
 		default:
 			MARC_ASSEMBLER_THROW_UNEXPECTED_TOKEN(AsmToken::Type::None, currToken());
 		}
@@ -366,9 +368,9 @@ namespace MarC
 		m_pModInfo->exeInfo->staticStack.push(currToken().value.c_str(), currToken().value.size() + 1);
 	}
 
-	void Assembler::generateTypeCellFloat(TypeCell& tc, bool getsDereferenced)
+	void Assembler::generateTypeCellFloat(TypeCell& tc, DerefCount dc)
 	{
-		if (getsDereferenced)
+		if (dc)
 			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Cannot dereference argument of type 'float'!");
 		switch (tc.datatype)
 		{
@@ -381,15 +383,15 @@ namespace MarC
 		}
 	}
 
-	void Assembler::generateTypeCellInteger(TypeCell& tc, bool getsDereferenced)
+	void Assembler::generateTypeCellInteger(TypeCell& tc, DerefCount dc)
 	{
-		if (!getsDereferenced && (tc.datatype == BC_DT_F_32 || tc.datatype == BC_DT_F_64))
+		if (!dc && (tc.datatype == BC_DT_F_32 || tc.datatype == BC_DT_F_64))
 			MARC_ASSEMBLER_THROW(AsmErrCode::DatatypeMismatch, BC_DatatypeToString(tc.datatype));
 
 		tc.cell.as_U_64 = std::stoull(positiveString(currToken().value));
 		if (isNegativeString(currToken().value))
 		{
-			if (getsDereferenced)
+			if (dc)
 				MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Cannot dereference literal with negative value!");
 
 			switch (tc.datatype)
@@ -575,10 +577,10 @@ namespace MarC
 			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Unexpected token'" + currToken().value + "' for alias value!");
 		}
 
-		bool getsDereferenced;
-		generateTypeCell(tc, getsDereferenced);
+		DerefCount dc;
+		generateTypeCell(tc, dc);
 
-		if (getsDereferenced)
+		if (dc)
 			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Usage of the deref operator is not allowed in the alias directive!");
 
 		symbol.value = tc.cell;
@@ -602,10 +604,10 @@ namespace MarC
 
 		nextToken();
 
-		bool getsDereferenced;
-		generateTypeCell(tc, getsDereferenced);
+		DerefCount dc;
+		generateTypeCell(tc, dc);
 
-		if (getsDereferenced)
+		if (dc)
 			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Usage of the deref operator is not allowed in the static directive!");
 
 		BC_MemCell mc;
@@ -787,10 +789,10 @@ namespace MarC
 		removeNecessaryColon();
 		nextToken();
 
-		bool getsDereferenced;
-		generateTypeCell(tc, getsDereferenced);
+		DerefCount dc;
+		generateTypeCell(tc, dc);
 
-		if (getsDereferenced)
+		if (dc)
 			MARC_ASSEMBLER_THROW(AsmErrCode::PlainContext, "Usage of the deref operator is not allowed in the static directive!");
 
 		BC_MemCell mc;

@@ -415,8 +415,8 @@ namespace MarCmd
 					--sdd->exeCount;
 					lock.unlock();
 
-					// Get information about the instruction to execute next
-					const auto& insInfo = m_wndDisasm->getDisasmInfo().ins[m_wndDisasm->getDisasmInfo().addrToLine(regCP.as_ADDR)].data;
+					// Get information about the next instruction to execute
+					//const auto& insInfo = m_wndDisasm->getDisasmInfo().ins[m_wndDisasm->getDisasmInfo().addrToLine(regCP.as_ADDR)].data;
 
 					m_sharedDebugData->interpreter->interpret(1);
 
