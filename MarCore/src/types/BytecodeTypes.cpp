@@ -17,6 +17,7 @@ namespace MarC
 			{ "div",     BC_OC_DIVIDE },
 			{ "inc",     BC_OC_INCREMENT },
 			{ "dec",     BC_OC_DECREMENT },
+			{ "sab",     BC_OC_SET_ADDRESS_BASE },
 
 			{ "conv",    BC_OC_CONVERT },
 
@@ -67,6 +68,7 @@ namespace MarC
 			{ BC_OC_DIVIDE, "div" },
 			{ BC_OC_INCREMENT, "inc" },
 			{ BC_OC_DECREMENT, "dec" },
+			{ BC_OC_SET_ADDRESS_BASE, "sab" },
 
 			{ BC_OC_CONVERT, "conv" },
 

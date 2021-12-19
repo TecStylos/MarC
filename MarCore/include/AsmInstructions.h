@@ -2,6 +2,7 @@
 
 #include "types/AssemblerTypes.h"
 #include "Flags.h"
+#include "types/BytecodeTypes.h"
 
 namespace MarC
 {
@@ -61,6 +62,7 @@ namespace MarC
 		{ BC_OC_DIVIDE, InsDt::Required, { { InsArgType::Address }, { InsArgType::Value } } },
 		{ BC_OC_INCREMENT, InsDt::Required, { { InsArgType::Value } } },
 		{ BC_OC_DECREMENT, InsDt::Required, { { InsArgType::Value } } },
+		{ BC_OC_SET_ADDRESS_BASE, InsDt::None, { { InsArgType::Address }, { InsArgType::Address } } },
 
 		{ BC_OC_CONVERT, InsDt::Required, { { InsArgType::Address }, { InsArgType::Datatype } } },
 

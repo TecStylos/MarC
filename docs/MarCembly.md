@@ -48,6 +48,7 @@ mul | Required | [dest] : [val] | Multiply value at `dest` with `val`.
 div | Required | [dest] : [val] | Divide value at `dest` by `val`.
 inc | Required | [dest] | Increment the value stored at `dest`.
 dec | Required | [dest] | Decrement the value stored at `dest`.
+sab | None | [dest] : [addr] | Write the base of `addr` to `dest`.
 conv | Required | [addr] : [dt] | Convert value at `addr` from `ocdt` datatype to `dt`.
 push | Required | - | Push uninitialized memory of size `^ocdt` onto the dynamic stack.
 pop | Required | - | Pop value of size `^ocdt` from the dynamic stack.

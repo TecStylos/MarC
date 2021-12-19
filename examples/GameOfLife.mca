@@ -83,6 +83,7 @@
 
 #func.addr : !XY_TO_ADDR : RET : addr.BASE : u64.X : u64.Y
     call.u64 : >>XY_TO_INDEX : RET : u64.@X : u64.@Y
+    sab : RET : @BASE
     add.addr : RET : @BASE
     return
 #end

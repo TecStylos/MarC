@@ -64,6 +64,7 @@ namespace MarC
 		void exec_insDivide(BC_OpCodeEx ocx);
 		void exec_insIncrement(BC_OpCodeEx ocx);
 		void exec_insDecrement(BC_OpCodeEx ocx);
+		void exec_insSetAddressBase(BC_OpCodeEx ocx);
 		void exec_insConvert(BC_OpCodeEx ocx);
 		void exec_insPush(BC_OpCodeEx ocx);
 		void exec_insPop(BC_OpCodeEx ocx);
@@ -389,7 +390,7 @@ case MarC::BC_DT_U_64: __left.as_U_64 __operator __right.as_U_64; break; \
 case MarC::BC_DT_F_32: __left.as_F_32 __operator __right.as_F_32; break; \
 case MarC::BC_DT_F_64: __left.as_F_64 __operator __right.as_F_64; break; \
 \
-case MarC::BC_DT_ADDR: __left.as_ADDR __operator __right.as_ADDR; break; \
+case MarC::BC_DT_ADDR: __left.as_ADDR.addr __operator __right.as_ADDR.addr; break; \
 case MarC::BC_DT_DATATYPE: break; \
 }
 

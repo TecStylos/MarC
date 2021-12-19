@@ -5,6 +5,7 @@
 
 #include "fileio/ExtensionLocator.h"
 #include "runtime/ExternalFunction.h"
+#include "types/BytecodeTypes.h"
 
 namespace MarC
 {
@@ -46,6 +47,7 @@ namespace MarC
 				case BC_OC_DIVIDE: exec_insDivide(ocx); break;
 				case BC_OC_INCREMENT: exec_insIncrement(ocx); break;
 				case BC_OC_DECREMENT: exec_insDecrement(ocx); break;
+				case BC_OC_SET_ADDRESS_BASE: exec_insSetAddressBase(ocx); break;
 
 				case BC_OC_CONVERT: exec_insConvert(ocx); break;
 
@@ -267,6 +269,12 @@ namespace MarC
 		case BC_DT_ADDR: --dest.as_ADDR._raw; break;
 		case BC_DT_DATATYPE: break;
 		}
+	}
+	void Interpreter::exec_insSetAddressBase(BC_OpCodeEx ocx)
+	{
+		auto& dest = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
+		auto& addr = readMemCellAndMove(BC_DT_ADDR, ocx.derefArg[1]);
+		dest.as_ADDR.base = addr.as_ADDR.base;
 	}
 	void Interpreter::exec_insJumpEqual(BC_OpCodeEx ocx)
 	{
