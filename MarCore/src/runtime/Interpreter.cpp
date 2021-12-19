@@ -245,7 +245,7 @@ namespace MarC
 		case BC_DT_U_64: ++dest.as_U_64; break;
 		case BC_DT_F_32: dest.as_F_32 += 1.0f; break;
 		case BC_DT_F_64: dest.as_F_64 += 1.0; break;
-		case BC_DT_ADDR: ++dest.as_ADDR._raw; break;
+		case BC_DT_ADDR: ++dest.as_ADDR.addr; break;
 		case BC_DT_DATATYPE: break;
 		}
 	}
@@ -266,7 +266,7 @@ namespace MarC
 		case BC_DT_U_64: --dest.as_U_64; break;
 		case BC_DT_F_32: dest.as_F_32 -= 1.0f; break;
 		case BC_DT_F_64: dest.as_F_64 -= 1.0; break;
-		case BC_DT_ADDR: --dest.as_ADDR._raw; break;
+		case BC_DT_ADDR: --dest.as_ADDR.addr; break;
 		case BC_DT_DATATYPE: break;
 		}
 	}
@@ -351,10 +351,12 @@ namespace MarC
 	void Interpreter::exec_insAllocate(BC_OpCodeEx ocx)
 	{
 		auto& addr = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]).as_ADDR;
-		uint64_t size = readMemCellAndMove(BC_DT_ADDR, ocx.derefArg[1]).as_U_64;
-		addr.base = BC_MEM_BASE_EXTERN;
-		addr.addr = m_mem.nextDynAddr;
+		addr = BC_MemAddress(BC_MEM_BASE_NONE, 0);
+		uint64_t size = readMemCellAndMove(BC_DT_U_64, ocx.derefArg[1]).as_U_64;
 		void* ptr = malloc(size);
+		if (!ptr)
+			return;
+		addr = BC_MemAddress(BC_MEM_BASE_EXTERN, m_mem.nextDynAddr);
 		m_mem.dynMemMap.insert({ addr, ptr });
 		m_mem.nextDynAddr += size;
 	}

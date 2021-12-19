@@ -458,6 +458,7 @@ namespace MarCmd
 
 		for (auto& sym : m_sharedDebugData->exeInfo->symbols)
 		{
+			// Only view symbols from the current scope
 			if (sym.name.find(currCallstackName) != 0)
 				continue;
 			if (sym.usage != MarC::SymbolUsage::Address)
