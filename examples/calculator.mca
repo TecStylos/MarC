@@ -1,0 +1,41 @@
+#reqmod : "std"
+#manperm : >>stdext>>prints
+#manperm : >>stdext>>printt
+#manperm : >>stdext>>scant
+
+#static : A : ^i64
+#static : B : ^i64
+#static : op : ^i8
+#static : result : ^i64
+
+println : "Format: AxB (No spaces) [A/B: Integers, x: Operator (+-*/)]"
+prints : " >> "
+scant.i64 : A
+scant.i8 : op
+scant.i64 : B
+
+mov.i64 : result : @A
+
+switch.i8 : @op
+    case : '+'
+        add.i64 : result : @B
+    case : '-'
+        sub.i64 : result : @B
+    case : '*'
+        mul.i64 : result : @B
+    case : '/'
+        div.i64 : result : @B
+    default
+        println : "Invalid input!"
+        mov.i64 : $ec : -1
+        exit
+endswitch
+
+
+printt.i64 : @A
+prints : " "
+printt.i8 : @op
+prints : " "
+printt.i64 : @B
+prints : " = "
+printtln.i64 : @result
