@@ -60,8 +60,8 @@ namespace MarC
 		{ BC_OC_SUBTRACT, InsDt::Required, { { InsArgType::Address }, { InsArgType::Value } } },
 		{ BC_OC_MULTIPLY, InsDt::Required, { { InsArgType::Address }, { InsArgType::Value } } },
 		{ BC_OC_DIVIDE, InsDt::Required, { { InsArgType::Address }, { InsArgType::Value } } },
-		{ BC_OC_INCREMENT, InsDt::Required, { { InsArgType::Value } } },
-		{ BC_OC_DECREMENT, InsDt::Required, { { InsArgType::Value } } },
+		{ BC_OC_INCREMENT, InsDt::Required, { { InsArgType::Address } } },
+		{ BC_OC_DECREMENT, InsDt::Required, { { InsArgType::Address } } },
 		{ BC_OC_SET_ADDRESS_BASE, InsDt::None, { { InsArgType::Address }, { InsArgType::Address } } },
 
 		{ BC_OC_CONVERT, InsDt::Required, { { InsArgType::Address }, { InsArgType::Datatype } } },

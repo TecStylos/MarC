@@ -244,7 +244,7 @@ namespace MarC
 	{
 		auto& mc = hostMemCell(readDataAndMove<BC_MemAddress>(), ocx.derefArg[0]);
 		auto dt = readDataAndMove<BC_Datatype>();
-		ConvertInPlace(mc, ocx.datatype, dt);
+		ConvertInPlace(mc, dt, ocx.datatype);
 	}
 	inline void Interpreter::exec_insJump(BC_OpCodeEx ocx)
 	{

@@ -6,14 +6,14 @@ mov.f32 : $ac : 65.7
 printt.f32 : @$ac
 prints : "\n"
 
-conv.f32 : $ac : f64
+conv.f64 : $ac : f32
 printt.f64 : @$ac
 prints : "\n"
 
-conv.f64 : $ac : i32
+conv.i32 : $ac : f64
 printt.i32 : @$ac
 prints : "\n"
 
-conv.i32 : $ac : i8
+conv.i8 : $ac : i32
 printt.i8 : @$ac
 prints : "\n"
