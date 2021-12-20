@@ -386,6 +386,30 @@ namespace MarCmd
 
 					m_sharedDebugData->interpreter->interpret(1);
 
+					// Update symbol datatype;
+					if (false)
+					{
+						const auto& addrArgIndices = std::vector<uint64_t>();
+						std::string currScopeName;
+						if (!m_sharedDebugData->callstack.empty())
+						{
+							auto it = MarC::getSymbolForAddress(m_sharedDebugData->callstack.back(), m_sharedDebugData->interpreter->getExeInfo()->symbols);
+							if (it != m_sharedDebugData->interpreter->getExeInfo()->symbols.end())
+								currScopeName = it->name;
+						}
+						for (uint64_t index : addrArgIndices)
+						{
+							auto& arg = insInfo.args[index];
+							if (arg.value.datatype == MarC::BC_DT_ADDR)
+							{
+								auto it = MarC::getSymbolForAddress(arg.value.cell.as_ADDR, m_sharedDebugData->interpreter->getExeInfo()->symbols, currScopeName);
+								if (it == m_sharedDebugData->interpreter->getExeInfo()->symbols.end())
+									continue;
+								m_sharedDebugData->symbolTypes[it->name] = arg.value.datatype;
+							}
+						}
+					}
+
 					switch(insInfo.ocx.opCode)
 					{
 					case MarC::BC_OC_CALL:

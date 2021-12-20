@@ -26,7 +26,7 @@ namespace MarCmd
 		std::mutex mtxCallstack;
 		uint64_t callstackModifyCount = 1;
 		std::vector<MarC::BC_MemAddress> callstack;
-		std::map<std::string, MarC::BC_Datatype> m_symbolTypes;
+		std::map<std::string, MarC::BC_Datatype> symbolTypes;
 
 		std::atomic_bool stopExecution = false;
 		std::atomic_bool threadClosed = false;

@@ -2,13 +2,15 @@
 
 namespace MarC
 {
-	std::set<Symbol>::const_iterator getSymbolForAddress(BC_MemAddress addr, const std::set<Symbol>& symbols)
+	std::set<Symbol>::const_iterator getSymbolForAddress(BC_MemAddress addr, const std::set<Symbol>& symbols, const std::string& scopeName)
 	{
 		auto it = symbols.begin();
 		while (it != symbols.end())
 		{
 			if (it->usage == SymbolUsage::Address &&
-				it->value.as_ADDR == addr)
+				it->value.as_ADDR == addr &&
+				it->name.find(scopeName) == 0
+				)
 				break;
 
 			++it;
