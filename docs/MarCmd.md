@@ -49,7 +49,7 @@
 
 ## MarCembly Live Interpreter
 ### Multiline input
-The MarCembly Live Interpreter accepts multiline input. Enter a blank line to toogle the multiline input mode.
+The MarCembly Live Interpreter accepts multiline input. Enter a blank line to toggle the input mode.
 ***
 
 ## Debugger
