@@ -16,18 +16,17 @@ fi
 
 if [ "${CONFIG}" = "" ]; then
     echo "No Configuration selected. Using 'Release'."
-    BIN_DIR="bin/Release"
-else
-    if [ "${CONFIG}" != "Debug" ]; then
-        if [ "${CONFIG}" != "Release" ]; then
-            if [ "${CONFIG}" != "RelWithDebInfo" ]; then
-                echo "Invalid Configuration selected!"
-                exit
-            fi
-        fi
-    fi
-    BIN_DIR="bin/${CONFIG}"
+    CONFIG="Release"
 fi
+
+validConfigs="Release Debug RelWithDebInfo"
+
+if [[ ! " ${validConfigs} " =~ " ${CONFIG} " ]]; then
+    echo "Invalid Configuration selected!"
+    exit
+fi
+
+BIN_DIR="bin/${CONFIG}"
 
 echo "Creating directory '${BIN_DIR}'..."
 mkdir -p ${BIN_DIR}
