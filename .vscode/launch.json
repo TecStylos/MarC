@@ -12,8 +12,7 @@
                 "--closeonexit",
                 "--grantall",
                 "--dbginfo",
-                "--debug",
-                "examples/fibonacci.mca"
+                "examples/dynMemory.mca"
               ]
         }
     ]

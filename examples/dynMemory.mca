@@ -5,7 +5,7 @@
         / Memory init
 #static : BUFFSIZE : ^u64
 #alias : src : "Hello World!"
-call.u64 : >>std>>strLen : BUFFSIZE : addr.src
+call.addr : >>std>>strLen : BUFFSIZE : addr.src
 inc.u64 : BUFFSIZE
 
 #static : dst : ^addr

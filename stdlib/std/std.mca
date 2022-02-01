@@ -12,12 +12,12 @@
 		return
 	#end / func copyString
 
-	#func.u64 : !strLen : LEN : addr.STRING
+	#func.addr : !strLen : LEN : addr.STRING
 		mov.addr : LEN : @STRING
 		fwhile.u8 : @@LEN
 			inc.addr : LEN
 		endfwhile
-		sub.addr : LEN : @STRING
+		sub.u64 : LEN : @STRING
 		return
 	#end / func strLen
 #end / scope std
