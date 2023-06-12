@@ -1,5 +1,6 @@
 #include "PermissionGrantPrompt.h"
 
+#include <cstdint>
 #include <iostream>
 
 namespace MarCmd

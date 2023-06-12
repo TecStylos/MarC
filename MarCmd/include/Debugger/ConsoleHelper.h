@@ -11,6 +11,7 @@
 #include <sys/ioctl.h>
 #endif
 
+#include <cstdint>
 #include <cstring>
 #include <ostream>
 
